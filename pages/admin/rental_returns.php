@@ -1,0 +1,458 @@
+<?php
+/**
+ * Admin – Inventarverwaltung: Ausstehende Anfragen & Aktive Ausleihen
+ *
+ * Zugriff nur für Vorstandsmitglieder (board_finance, board_internal, board_external).
+ */
+
+require_once __DIR__ . '/../../src/Auth.php';
+require_once __DIR__ . '/../../src/Database.php';
+require_once __DIR__ . '/../../includes/models/Inventory.php';
+require_once __DIR__ . '/../../includes/helpers.php';
+
+if (!Auth::check() || (!Auth::isBoard() && !Auth::hasRole(['alumni_auditor', 'alumni_board']))) {
+    header('Location: ../auth/login.php');
+    exit;
+}
+
+// Read-only mode for alumni_auditor and alumni_board: they may view but not take actions
+$readOnly = !Auth::isBoard();
+
+// ── Helper: enrich rows with user name/email ──────────────────────────────────
+function enrichWithUsers(array $rows): array {
+    if (empty($rows)) {
+        return $rows;
+    }
+    $userIds = array_unique(array_column($rows, 'user_id'));
+    $users   = [];
+    try {
+        $userDb       = Database::getUserDB();
+        $placeholders = implode(',', array_fill(0, count($userIds), '?'));
+        $stmt         = $userDb->prepare(
+            "SELECT id, email, first_name, last_name FROM users WHERE id IN ({$placeholders})"
+        );
+        $stmt->execute($userIds);
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $users[(int)$row['id']] = $row;
+        }
+    } catch (Exception $e) {
+        error_log('rental_returns: user lookup failed: ' . $e->getMessage());
+    }
+    foreach ($rows as &$row) {
+        $u = $users[(int)$row['user_id']] ?? null;
+        if ($u) {
+            $name              = trim(($u['first_name'] ?? '') . ' ' . ($u['last_name'] ?? ''));
+            $row['user_name']  = $name !== '' ? $name : ($u['email'] ?? null);
+            $row['user_email'] = $u['email'] ?? null;
+        } else {
+            $row['user_name']  = null;
+            $row['user_email'] = null;
+        }
+    }
+    unset($row);
+    return $rows;
+}
+
+// ── Helper: build item-name map from EasyVerein ───────────────────────────────
+function buildItemNameMap(): array {
+    $map = [];
+    try {
+        $items = Inventory::getAll();
+        foreach ($items as $item) {
+            $eid = (string)($item['easyverein_id'] ?? $item['id'] ?? '');
+            if ($eid !== '') {
+                $map[$eid] = $item['name'] ?? '';
+            }
+        }
+    } catch (Exception $e) {
+        error_log('rental_returns: EasyVerein item lookup failed: ' . $e->getMessage());
+    }
+    return $map;
+}
+
+// ── Fetch data ────────────────────────────────────────────────────────────────
+$pendingRequests = [];
+$activeLoans     = [];
+$dbError         = '';
+
+try {
+    $db   = Database::getContentDB();
+    $stmt = $db->query(
+        "SELECT id, inventory_object_id, user_id, start_date, end_date, quantity, created_at
+           FROM inventory_requests WHERE status = 'pending' ORDER BY created_at ASC"
+    );
+    $pendingRequests = enrichWithUsers($stmt->fetchAll(PDO::FETCH_ASSOC));
+
+    $stmt2 = $db->query(
+        "SELECT id, inventory_object_id, user_id, start_date, end_date, quantity, created_at
+           FROM inventory_requests WHERE status = 'approved' ORDER BY start_date ASC"
+    );
+    $activeLoans = enrichWithUsers($stmt2->fetchAll(PDO::FETCH_ASSOC));
+} catch (Exception $e) {
+    $dbError = 'Datenbankfehler: ' . $e->getMessage();
+    error_log('rental_returns: ' . $e->getMessage());
+}
+
+$itemNames = buildItemNameMap();
+
+// ── Condition labels ──────────────────────────────────────────────────────────
+$conditionLabels = [
+    'einwandfrei'              => 'Einwandfrei',
+    'leichte_gebrauchsspuren'  => 'Leichte Gebrauchsspuren',
+    'beschaedigt'              => 'Beschädigt',
+    'defekt_verlust'           => 'Defekt/Verlust',
+];
+
+$title = 'Inventarverwaltung - IBC Intranet';
+ob_start();
+?>
+
+<div class="mb-8">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">
+                <i class="fas fa-boxes text-blue-600 mr-2"></i>
+                Inventarverwaltung
+            </h1>
+            <p class="text-gray-600">Ausstehende Anfragen und aktive Ausleihen</p>
+        </div>
+        <div class="mt-4 md:mt-0">
+            <a href="../inventory/index.php" class="inline-flex items-center px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition font-medium">
+                <i class="fas fa-arrow-left mr-2"></i>
+                Zum Inventar
+            </a>
+        </div>
+    </div>
+</div>
+
+<?php if ($dbError !== ''): ?>
+<div class="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+    <i class="fas fa-exclamation-circle mr-2"></i><?php echo htmlspecialchars($dbError); ?>
+</div>
+<?php endif; ?>
+
+<!-- Alert placeholder for AJAX feedback -->
+<div id="ajax-alert" class="mb-6 hidden"></div>
+
+<!-- ── Tab navigation ────────────────────────────────────────────────────── -->
+<ul class="nav nav-tabs mb-6" id="inventoryTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending" type="button" role="tab" aria-controls="pending" aria-selected="true">
+            <i class="fas fa-clock text-yellow-600 mr-1"></i>
+            Ausstehende Anfragen
+            <span class="badge bg-warning text-white ms-1"><?php echo count($pendingRequests); ?></span>
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="active-tab" data-bs-toggle="tab" data-bs-target="#active" type="button" role="tab" aria-controls="active" aria-selected="false">
+            <i class="fas fa-sign-out-alt text-green-600 mr-1"></i>
+            Aktive Ausleihen &amp; Rücknahme
+            <span class="badge bg-success ms-1"><?php echo count($activeLoans); ?></span>
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content" id="inventoryTabContent">
+
+    <!-- ── Section 1: Ausstehende Anfragen ────────────────────────────────── -->
+    <div class="tab-pane fade show active" id="pending" role="tabpanel" aria-labelledby="pending-tab">
+        <div class="card p-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">
+                <i class="fas fa-clock text-yellow-600 mr-2"></i>
+                Ausstehende Anfragen (<?php echo count($pendingRequests); ?>)
+            </h2>
+
+            <?php if (empty($pendingRequests)): ?>
+            <div class="text-center py-12">
+                <i class="fas fa-check-circle text-6xl text-green-300 mb-4"></i>
+                <p class="text-gray-500 text-lg">Keine ausstehenden Anfragen</p>
+            </div>
+            <?php else: ?>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Artikel</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Menge</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mitglied</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Zeitraum</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Eingereicht</th>
+                            <?php if (!$readOnly): ?><th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aktionen</th><?php endif; ?>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200" id="pending-tbody">
+                        <?php foreach ($pendingRequests as $req): ?>
+                        <tr id="pending-row-<?php echo (int)$req['id']; ?>" class="hover:bg-yellow-50">
+                            <td class="px-4 py-3 text-sm font-semibold text-gray-800">
+                                <?php
+                                $itemName = $itemNames[(string)$req['inventory_object_id']] ?? '';
+                                echo $itemName !== ''
+                                    ? htmlspecialchars($itemName)
+                                    : '<span class="text-gray-400">#' . htmlspecialchars($req['inventory_object_id']) . '</span>';
+                                ?>
+                            </td>
+                            <td class="px-4 py-3 text-sm text-gray-700"><?php echo (int)$req['quantity']; ?></td>
+                            <td class="px-4 py-3 text-sm text-gray-700">
+                                <i class="fas fa-user text-gray-400 mr-1"></i>
+                                <?php echo htmlspecialchars($req['user_name'] ?? $req['user_email'] ?? 'Unbekannt'); ?>
+                                <?php if (!empty($req['user_email']) && $req['user_name'] !== $req['user_email']): ?>
+                                    <span class="block text-xs text-gray-400"><?php echo htmlspecialchars($req['user_email']); ?></span>
+                                <?php endif; ?>
+                            </td>
+                            <td class="px-4 py-3 text-sm text-gray-600">
+                                <?php echo htmlspecialchars(date('d.m.Y', strtotime($req['start_date']))); ?>
+                                &ndash;
+                                <?php echo htmlspecialchars(date('d.m.Y', strtotime($req['end_date']))); ?>
+                            </td>
+                            <td class="px-4 py-3 text-sm text-gray-600">
+                                <?php echo htmlspecialchars(date('d.m.Y H:i', strtotime($req['created_at']))); ?>
+                            </td>
+                            <?php if (!$readOnly): ?>
+                            <td class="px-4 py-3 text-sm">
+                                <div class="flex items-center gap-2">
+                                    <button
+                                        onclick="handleRequestAction(<?php echo (int)$req['id']; ?>, 'approve')"
+                                        class="btn btn-sm d-inline-flex align-items-center gap-1"
+                                        style="background-color: #198754 !important; border-color: #198754 !important; color: #ffffff !important;">
+                                        <i class="fas fa-check mr-1"></i>Genehmigen
+                                    </button>
+                                    <button
+                                        onclick="handleRequestAction(<?php echo (int)$req['id']; ?>, 'reject')"
+                                        class="btn btn-sm d-inline-flex align-items-center gap-1"
+                                        style="background-color: #dc3545 !important; border-color: #dc3545 !important; color: #ffffff !important;">
+                                        <i class="fas fa-times mr-1"></i>Ablehnen
+                                    </button>
+                                </div>
+                            </td>
+                            <?php endif; ?>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+            <?php endif; ?>
+        </div>
+    </div>
+
+    <!-- ── Section 2: Aktive Ausleihen ────────────────────────────────────── -->
+    <div class="tab-pane fade" id="active" role="tabpanel" aria-labelledby="active-tab">
+        <div class="card p-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">
+                <i class="fas fa-sign-out-alt text-green-600 mr-2"></i>
+                Aktive Ausleihen (<?php echo count($activeLoans); ?>)
+            </h2>
+
+            <?php if (empty($activeLoans)): ?>
+            <div class="text-center py-12">
+                <i class="fas fa-inbox text-6xl text-gray-300 mb-4"></i>
+                <p class="text-gray-500 text-lg">Keine aktiven Ausleihen</p>
+            </div>
+            <?php else: ?>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Artikel</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Menge</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ausgeliehen von</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Zeitraum</th>
+                            <?php if (!$readOnly): ?><th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aktion</th><?php endif; ?>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200" id="active-tbody">
+                        <?php foreach ($activeLoans as $loan): ?>
+                        <tr id="active-row-<?php echo (int)$loan['id']; ?>" class="hover:bg-green-50">
+                            <td class="px-4 py-3 text-sm font-semibold text-gray-800">
+                                <?php
+                                $itemName = $itemNames[(string)$loan['inventory_object_id']] ?? '';
+                                echo $itemName !== ''
+                                    ? htmlspecialchars($itemName)
+                                    : '<span class="text-gray-400">#' . htmlspecialchars($loan['inventory_object_id']) . '</span>';
+                                ?>
+                            </td>
+                            <td class="px-4 py-3 text-sm text-gray-700"><?php echo (int)$loan['quantity']; ?></td>
+                            <td class="px-4 py-3 text-sm text-gray-700">
+                                <i class="fas fa-user text-gray-400 mr-1"></i>
+                                <?php echo htmlspecialchars($loan['user_name'] ?? $loan['user_email'] ?? 'Unbekannt'); ?>
+                                <?php if (!empty($loan['user_email']) && $loan['user_name'] !== $loan['user_email']): ?>
+                                    <span class="block text-xs text-gray-400"><?php echo htmlspecialchars($loan['user_email']); ?></span>
+                                <?php endif; ?>
+                            </td>
+                            <td class="px-4 py-3 text-sm text-gray-600">
+                                <?php echo htmlspecialchars(date('d.m.Y', strtotime($loan['start_date']))); ?>
+                                &ndash;
+                                <?php echo htmlspecialchars(date('d.m.Y', strtotime($loan['end_date']))); ?>
+                            </td>
+                            <?php if (!$readOnly): ?>
+                            <td class="px-4 py-3 text-sm">
+                                <button
+                                    onclick="openReturnModal(<?php echo (int)$loan['id']; ?>)"
+                                    class="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium text-sm">
+                                    <i class="fas fa-undo-alt mr-1"></i>Rückgabe verifizieren
+                                </button>
+                            </td>
+                            <?php endif; ?>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+            <?php endif; ?>
+        </div>
+    </div>
+
+</div><!-- /tab-content -->
+
+<!-- ── Return Verification Modal ──────────────────────────────────────────── -->
+<div class="modal fade" id="returnModal" tabindex="-1" aria-labelledby="returnModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="returnModalLabel">
+                    <i class="fas fa-undo-alt text-blue-600 mr-2"></i>
+                    Rückgabe verifizieren
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-4">
+                    <label for="return-condition" class="block text-sm font-medium text-gray-700 mb-1">
+                        Zustand <span class="text-red-500">*</span>
+                    </label>
+                    <select id="return-condition" class="form-select w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <option value="einwandfrei">Einwandfrei</option>
+                        <option value="leichte_gebrauchsspuren">Leichte Gebrauchsspuren</option>
+                        <option value="beschädigt">Beschädigt</option>
+                        <option value="defekt_verlust">Defekt/Verlust</option>
+                    </select>
+                </div>
+                <div class="mb-2">
+                    <label for="return-notes" class="block text-sm font-medium text-gray-700 mb-1">
+                        Bemerkungen (optional)
+                    </label>
+                    <textarea id="return-notes" rows="3"
+                        class="form-control w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        placeholder="Optionale Anmerkungen zur Rückgabe …"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Abbrechen</button>
+                <button type="button" id="verify-return-btn" class="btn btn-primary" onclick="submitReturnVerification()">
+                    <i class="fas fa-check mr-1"></i>Verifizieren
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    'use strict';
+
+    let currentRequestId = null;
+
+    // ── Show Bootstrap alert ──────────────────────────────────────────────────
+    function showAlert(message, type) {
+        const alertEl = document.getElementById('ajax-alert');
+        const icon    = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+        alertEl.className = 'mb-6 p-4 rounded-lg border ' +
+            (type === 'success'
+                ? 'bg-green-100 border-green-400 text-green-700'
+                : 'bg-red-100 border-red-400 text-red-700');
+        alertEl.innerHTML = '<i class="fas ' + icon + ' mr-2"></i>' + message;
+        alertEl.classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        setTimeout(function () { alertEl.classList.add('hidden'); }, 5000);
+    }
+
+    // ── AJAX helper ───────────────────────────────────────────────────────────
+    function postAction(payload, onSuccess, onError) {
+        fetch('<?php echo htmlspecialchars(url('/api/rental_request_action.php'), ENT_QUOTES); ?>', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+        })
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+            if (data.success) {
+                showAlert(data.message, 'success');
+                if (typeof onSuccess === 'function') onSuccess();
+            } else {
+                showAlert(data.message || 'Fehler bei der Aktion', 'error');
+                if (typeof onError === 'function') onError();
+            }
+        })
+        .catch(function () {
+            showAlert('Netzwerkfehler. Bitte Seite neu laden.', 'error');
+            if (typeof onError === 'function') onError();
+        });
+    }
+
+    // ── Approve / Reject ──────────────────────────────────────────────────────
+    window.handleRequestAction = function (requestId, action) {
+        const label = action === 'approve' ? 'genehmigen' : 'ablehnen';
+        if (!confirm('Anfrage wirklich ' + label + '?')) return;
+
+        postAction({ action: action, request_id: requestId }, function () {
+            const row = document.getElementById('pending-row-' + requestId);
+            if (row) {
+                row.style.transition = 'opacity 0.4s';
+                row.style.opacity    = '0';
+                setTimeout(function () { row.remove(); updateBadge('pending'); }, 400);
+            }
+        });
+    };
+
+    // ── Open return modal ─────────────────────────────────────────────────────
+    window.openReturnModal = function (loanId) {
+        currentRequestId = loanId;
+        document.getElementById('return-condition').value = 'einwandfrei';
+        document.getElementById('return-notes').value     = '';
+        var modal = new bootstrap.Modal(document.getElementById('returnModal'));
+        modal.show();
+    };
+
+    // ── Submit return verification ────────────────────────────────────────────
+    window.submitReturnVerification = function () {
+        if (!currentRequestId) return;
+
+        const condition = document.getElementById('return-condition').value;
+        const notes     = document.getElementById('return-notes').value.trim();
+        const btn       = document.getElementById('verify-return-btn');
+
+        btn.disabled    = true;
+        btn.innerHTML   = '<i class="fas fa-spinner fa-spin mr-1"></i>Speichern …';
+
+        postAction({ action: 'verify_return', request_id: currentRequestId, condition: condition, notes: notes }, function () {
+            bootstrap.Modal.getInstance(document.getElementById('returnModal')).hide();
+            const row = document.getElementById('active-row-' + currentRequestId);
+            if (row) {
+                row.style.transition = 'opacity 0.4s';
+                row.style.opacity    = '0';
+                setTimeout(function () { row.remove(); updateBadge('active'); }, 400);
+            }
+            currentRequestId = null;
+            btn.disabled  = false;
+            btn.innerHTML = '<i class="fas fa-check mr-1"></i>Verifizieren';
+        }, function () {
+            btn.disabled  = false;
+            btn.innerHTML = '<i class="fas fa-check mr-1"></i>Verifizieren';
+        });
+    };
+
+    // ── Update badge counts ───────────────────────────────────────────────────
+    function updateBadge(section) {
+        const tbody  = document.getElementById(section + '-tbody');
+        const tab    = document.getElementById(section + '-tab');
+        if (!tbody || !tab) return;
+        const count  = tbody.querySelectorAll('tr').length;
+        const badge  = tab.querySelector('.badge');
+        if (badge) badge.textContent = count;
+    }
+}());
+</script>
+
+<?php
+$content = ob_get_clean();
+include __DIR__ . '/../../includes/templates/main_layout.php';
+

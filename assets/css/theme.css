@@ -1,0 +1,4879 @@
+/* IBC Corporate Identity Design System */
+
+:root {
+    /* Light Mode Variables - Source of Truth */
+    --bg-body: #f8f9fa; /* Light Gray - softened */
+    --bg-card: #ffffff; /* White */
+    --bg-input: #ffffff; /* White for input fields */
+    --text-main: #111827; /* Almost Black - Important for readability */
+    --text-muted: #4b5563; /* Dark Gray */
+    --border-color: #e5e7eb;
+    
+    /* Light Mode Enhanced Gradients */
+    --gradient-card-light: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+    --gradient-hero-light: linear-gradient(135deg, #ffffff 0%, #f3f4f6 50%, #e5e7eb 100%);
+    --gradient-subtle: linear-gradient(180deg, rgba(249, 250, 251, 0) 0%, rgba(249, 250, 251, 0.4) 100%);
+    --gradient-select: linear-gradient(to bottom, #ffffff 0%, #f9fafb 100%);
+    --gradient-select-hover: linear-gradient(to bottom, #ffffff 0%, #f0f7ff 100%);
+    
+    /* Legacy compatibility variables */
+    --bg-main: #f8f9fa; /* Alias for --bg-body */
+    --bg-color: #f8f9fa; /* Light Gray */
+    --text-color: #111827; /* Dark Grey/Black */
+    --card-bg: #ffffff; /* White */
+    
+    /* Primary IBC Colors */
+    --ibc-green: #00a651;
+    --ibc-green-light: #33b872;
+    --ibc-green-dark: #008741;
+    --ibc-green-hover: #009948;
+    
+    --ibc-blue: #0066b3;
+    --ibc-blue-light: #3385c4;
+    --ibc-blue-dark: #004f8c;
+    --ibc-blue-darker: #003d6b;
+    --ibc-blue-hover: #005a9e;
+    
+    /* Sidebar Backgrounds */
+    --sidebar-bg-light: #00457D;
+    --sidebar-bg-dark: #121212;
+    
+    --ibc-accent: #ff6b35;
+    --ibc-accent-light: #ff8b5d;
+    --ibc-accent-dark: #e55220;
+    
+    --ibc-green-mid: #00c464;
+    
+    /* Neutral Colors */
+    --ibc-gray-50: #f9fafb;
+    --ibc-gray-100: #f3f4f6;
+    --ibc-gray-200: #e5e7eb;
+    --ibc-gray-300: #d1d5db;
+    --ibc-gray-400: #9ca3af;
+    --ibc-gray-500: #6b7280;
+    --ibc-gray-600: #4b5563;
+    --ibc-gray-700: #374151;
+    --ibc-gray-800: #1f2937;
+    --ibc-gray-900: #111827;
+    
+    /* Semantic Colors */
+    --ibc-success: #10b981;
+    --ibc-warning: #f59e0b;
+    --ibc-error: #ef4444;
+    --ibc-info: #3b82f6;
+    
+    /* Typography */
+    --ibc-font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    
+    /* Shadows */
+    --shadow-glow-green: 0 0 20px rgba(0, 166, 81, 0.4), 0 4px 12px rgba(0, 166, 81, 0.3);
+    --shadow-premium: 0 20px 40px rgba(0, 0, 0, 0.15), 0 10px 20px rgba(0, 0, 0, 0.1);
+    --shadow-soft: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.06);
+    
+    /* Border Radius */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 24px;
+
+    /* Transitions */
+    --transition-fast: 150ms ease;
+    --transition-normal: 250ms ease;
+    --transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Card Shadows - Enhanced for Light Mode */
+    --shadow-card: 0 1px 3px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.07);
+    --shadow-card-hover: 0 4px 12px rgba(0,0,0,0.09), 0 20px 40px rgba(0,0,0,0.11);
+    --shadow-elevated: 0 8px 30px rgba(0,0,0,0.12);
+    --shadow-glow-blue: 0 0 20px rgba(0, 102, 179, 0.20), 0 4px 12px rgba(0, 102, 179, 0.14);
+    --shadow-inner-glow: inset 0 2px 8px rgba(255, 255, 255, 0.8);
+
+    /* Spacing & Layout */
+    --mobile-header-offset: 5rem;
+    
+    /* SVG Icons for Select Dropdowns - Enhanced with better colors */
+    --select-arrow-light: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%230066b3' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    --select-arrow-dark: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%233385c4' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+}
+
+/* Dark Mode Variables - Source of Truth */
+.dark-mode {
+    --bg-body: #0a0f1e; /* Ultra Deep Dark - Enhanced from slate-900 */
+    --bg-card: #1a1f2e; /* Rich Dark Slate - Warmer tone */
+    --bg-card-elevated: #242938; /* Elevated cards for layering */
+    --bg-input: #0f1419; /* Ultra dark for input fields - maximum contrast */
+    --text-main: #f8fafc; /* Ultra White - Maximum readability */
+    --text-muted: #94a3b8; /* Slate-400 - Better muted text */
+    --border-color: #334155; /* Slate-700 - More visible borders */
+    --border-light: #475569; /* Slate-600 - Lighter borders for emphasis */
+    
+    /* Legacy compatibility variables */
+    --bg-main: #0a0f1e; /* Alias for --bg-body in dark mode */
+    --bg-color: #0a0f1e;
+    --text-color: #f8fafc;
+    --card-bg: #1a1f2e;
+    --bg-primary: #0a0f1e;
+    --bg-secondary: #1a1f2e;
+    --bg-tertiary: #334155;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    
+    /* Enhanced Dark Mode Shadows for depth perception */
+    --shadow-premium: 0 25px 50px rgba(0, 0, 0, 0.6), 0 12px 24px rgba(0, 0, 0, 0.4);
+    --shadow-soft: 0 4px 12px rgba(0, 0, 0, 0.4), 0 2px 6px rgba(0, 0, 0, 0.3);
+    --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.4);
+    --shadow-card-hover: 0 8px 16px rgba(0, 0, 0, 0.4), 0 16px 48px rgba(0, 0, 0, 0.5);
+    --shadow-elevated: 0 12px 36px rgba(0, 0, 0, 0.5);
+    
+    /* Dark mode specific gradients */
+    --gradient-hero-dark: linear-gradient(135deg, #1e3a5f 0%, #0f2847 50%, #0a1f3d 100%);
+    --gradient-card-dark: linear-gradient(145deg, #1a1f2e 0%, #141822 100%);
+    --gradient-subtle: linear-gradient(180deg, rgba(10, 15, 30, 0) 0%, rgba(10, 15, 30, 0.4) 100%);
+    --gradient-select: linear-gradient(to bottom, #0f1419 0%, #141822 100%);
+    --gradient-select-hover: linear-gradient(to bottom, #141822 0%, #1a1f2e 100%);
+    
+    /* Dark mode specific shadows */
+    --shadow-glow-blue: 0 0 20px rgba(51, 133, 196, 0.25), 0 4px 12px rgba(51, 133, 196, 0.15);
+    --shadow-glow-green: 0 0 20px rgba(0, 166, 81, 0.3), 0 4px 12px rgba(0, 166, 81, 0.2);
+    --shadow-inner-glow: inset 0 2px 8px rgba(26, 31, 46, 0.8);
+}
+
+/* Force Overrides - The 'Hammer' to overwrite Tailwind defaults */
+body {
+    background-color: var(--bg-body);
+    color: var(--text-main);
+    font-family: var(--ibc-font-family);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-text-size-adjust: 100%;
+    -moz-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    transition: background-color var(--transition-slow), color var(--transition-slow);
+}
+
+.card,
+.bg-white {
+    background-color: var(--bg-card) !important;
+    color: var(--text-main) !important;
+}
+
+/* Fix Input Fields in Dark Mode - Perfect Contrast */
+.dark-mode input,
+.dark-mode select,
+.dark-mode textarea {
+    background-color: var(--bg-input) !important; /* Ultra dark for maximum contrast */
+    color: var(--text-main) !important; /* Ultra white text */
+    border: 1.5px solid var(--border-light) !important; /* Stronger border */
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+    transition: all 0.3s ease !important;
+}
+
+.dark-mode input:focus,
+.dark-mode select:focus,
+.dark-mode textarea:focus {
+    border-color: var(--ibc-blue-light) !important;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3), 0 0 0 3px rgba(51, 133, 196, 0.2) !important;
+    outline: none !important;
+}
+
+.dark-mode input::placeholder,
+.dark-mode textarea::placeholder {
+    color: var(--text-muted) !important; /* Consistent with light mode */
+    opacity: 1;
+}
+
+.dark-mode input:disabled,
+.dark-mode select:disabled,
+.dark-mode textarea:disabled {
+    background-color: #1e293b !important;
+    color: #475569 !important;
+    cursor: not-allowed;
+    opacity: 0.6;
+    border-color: #334155 !important;
+}
+
+/* Sidebar - Permanent IBC Corporate Blue for Light Mode */
+.sidebar {
+    background: var(--sidebar-bg-light) !important;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+}
+
+/* Sidebar Text - Always White on Blue Background */
+.sidebar a,
+.sidebar span,
+.sidebar i,
+.sidebar label {
+    color: #ffffff !important;
+}
+
+/* Light Mode: Force sidebar links to be white with high specificity */
+body:not(.dark-mode) .sidebar a,
+body:not(.dark-mode) .sidebar span,
+body:not(.dark-mode) .sidebar i,
+body:not(.dark-mode) .sidebar label,
+body:not(.dark-mode) .sidebar h1,
+body:not(.dark-mode) .sidebar h2,
+body:not(.dark-mode) .sidebar h3,
+body:not(.dark-mode) .sidebar h4,
+body:not(.dark-mode) .sidebar h5,
+body:not(.dark-mode) .sidebar h6,
+body:not(.dark-mode) .sidebar p,
+body:not(.dark-mode) .sidebar li,
+body:not(.dark-mode) .sidebar div {
+    color: #ffffff !important;
+}
+
+/* Light Mode: Sidebar muted text should be visible on blue background */
+body:not(.dark-mode) .sidebar .text-gray-400 {
+    color: rgba(255,255,255,0.7) !important;
+}
+
+.sidebar a:hover {
+    color: #ffffff !important;
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    border-radius: 8px !important;
+    transition: all 0.2s ease;
+}
+
+/* Light Mode: Force sidebar hover to be white */
+body:not(.dark-mode) .sidebar a:hover {
+    color: #ffffff !important;
+    background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Sidebar Active State - Transparent overlay with blue left indicator */
+.sidebar a.active,
+.sidebar a[class*="bg-white/20"] {
+    background-color: rgba(255, 255, 255, 0.12) !important;
+    border-right: none !important;
+    border-left: 4px solid var(--ibc-blue-light) !important;
+    border-radius: 8px !important;
+    color: #ffffff !important;
+}
+
+/* Sidebar Scrollbar - Slim and Rounded (sidebar is always Corporate Blue) */
+.sidebar::-webkit-scrollbar,
+.sidebar-scroll::-webkit-scrollbar {
+    width: 4px;
+}
+
+.sidebar::-webkit-scrollbar-track,
+.sidebar-scroll::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 99px;
+}
+
+.sidebar::-webkit-scrollbar-thumb,
+.sidebar-scroll::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.25);
+    border-radius: 99px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover,
+.sidebar-scroll::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.45);
+}
+
+.sidebar,
+.sidebar-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.25) rgba(255, 255, 255, 0.05);
+}
+
+/* Dark Mode: Enhanced Sidebar Styling */
+body.dark-mode .sidebar {
+    background-color: var(--sidebar-bg-dark) !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.3) rgba(255, 255, 255, 0.05);
+}
+
+body.dark-mode .sidebar a:hover {
+    background-color: rgba(255, 255, 255, 0.08) !important;
+    backdrop-filter: blur(4px);
+    border-radius: 8px !important;
+}
+
+body.dark-mode .sidebar a.active,
+body.dark-mode .sidebar a[class*="bg-white/20"] {
+    background-color: rgba(255, 255, 255, 0.12) !important;
+    border-right: none !important;
+    border-left: 4px solid var(--ibc-blue-light) !important;
+    border-radius: 8px !important;
+    color: #ffffff !important;
+}
+
+/* Dark Mode: Sidebar Scrollbar - Slim and Rounded */
+body.dark-mode .sidebar::-webkit-scrollbar,
+body.dark-mode .sidebar-scroll::-webkit-scrollbar {
+    width: 4px;
+}
+
+body.dark-mode .sidebar::-webkit-scrollbar-track,
+body.dark-mode .sidebar-scroll::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 99px;
+}
+
+body.dark-mode .sidebar::-webkit-scrollbar-thumb,
+body.dark-mode .sidebar-scroll::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 99px;
+}
+
+body.dark-mode .sidebar::-webkit-scrollbar-thumb:hover,
+body.dark-mode .sidebar-scroll::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+body.dark-mode .sidebar,
+body.dark-mode .sidebar-scroll {
+    scrollbar-color: rgba(255, 255, 255, 0.3) rgba(255, 255, 255, 0.05);
+}
+
+/* Sidebar Footer - Transparent, glass-effect buttons */
+.sidebar-footer {
+    background: transparent;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* Sidebar Footer Buttons - Glass Effect with subtle outline */
+.sidebar-footer a,
+.sidebar-footer button {
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.625rem;
+    padding: 0.5rem 1rem !important;
+    margin-bottom: 0.375rem;
+    transition: all 0.2s ease;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+}
+
+/* Sidebar Footer Icons - Fixed width for alignment */
+.sidebar-footer a i,
+.sidebar-footer button i {
+    width: 1.25rem;
+    display: inline-block;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+/* Sidebar Footer Profile & Settings hover */
+.sidebar-footer a:not(.sidebar-logout):hover {
+    background: rgba(255, 255, 255, 0.18) !important;
+    border-color: rgba(255, 255, 255, 0.35) !important;
+}
+
+/* Sidebar Footer Profile & Settings - IBC blue icon accent on hover */
+.sidebar-footer a:not(.sidebar-logout):hover i {
+    color: var(--ibc-blue-light) !important;
+}
+
+/* Sidebar Logout - Subtle red outline by default, strong red accent on hover */
+.sidebar .sidebar-logout {
+    border-color: rgba(239, 68, 68, 0.3) !important;
+}
+.sidebar .sidebar-logout:hover {
+    background: rgba(239, 68, 68, 0.2) !important;
+    border-color: rgba(239, 68, 68, 0.55) !important;
+    color: #fca5a5 !important;
+}
+.sidebar .sidebar-logout:hover i {
+    color: #fca5a5 !important;
+}
+
+/* Lightmode: Higher contrast - frosted white buttons with dark blue text */
+body:not(.dark-mode) .sidebar-footer a,
+body:not(.dark-mode) .sidebar-footer button {
+    background: rgba(255, 255, 255, 0.22) !important;
+    border-color: rgba(255, 255, 255, 0.5) !important;
+    color: #ffffff !important;
+}
+body:not(.dark-mode) .sidebar-footer a span,
+body:not(.dark-mode) .sidebar-footer a i,
+body:not(.dark-mode) .sidebar-footer button span,
+body:not(.dark-mode) .sidebar-footer button i {
+    color: #ffffff !important;
+}
+body:not(.dark-mode) .sidebar-footer a:not(.sidebar-logout):hover,
+body:not(.dark-mode) .sidebar-footer button:hover {
+    background: rgba(255, 255, 255, 0.38) !important;
+}
+body:not(.dark-mode) .sidebar .sidebar-logout {
+    border-color: rgba(239, 68, 68, 0.45) !important;
+}
+body:not(.dark-mode) .sidebar .sidebar-logout:hover {
+    background: rgba(239, 68, 68, 0.25) !important;
+    border-color: rgba(239, 68, 68, 0.65) !important;
+    color: #fca5a5 !important;
+}
+
+/* Sidebar Submenu Styles */
+.menu-item-with-submenu .submenu {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+}
+
+.menu-item-with-submenu.expanded .submenu {
+    max-height: 200px;
+    transition: max-height 0.3s ease-in;
+}
+
+.menu-item-with-submenu.expanded .submenu-chevron {
+    transform: rotate(180deg);
+}
+
+/* Submenu item indentation */
+.submenu-item {
+    padding-left: 2.5rem !important;
+}
+
+body.dark-mode main {
+    background-color: var(--bg-body);
+}
+
+body.dark-mode .card {
+    background: var(--gradient-card-dark) !important;
+    color: var(--text-main) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 2px 6px rgba(0, 0, 0, 0.3) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+body.dark-mode .card:hover {
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5), 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+    transform: translateY(-5px);
+    border-color: rgba(51, 133, 196, 0.3) !important;
+}
+
+/* Table Styles - Light Mode */
+table {
+    background-color: var(--bg-card);
+    color: var(--text-main) !important;
+}
+
+th {
+    background-color: var(--ibc-gray-100);
+    color: var(--text-main);
+    font-weight: 600;
+}
+
+td {
+    color: var(--text-main);
+    border-color: var(--ibc-gray-200);
+}
+
+/* Table Styles - Dark Mode */
+body.dark-mode table {
+    background-color: var(--bg-card);
+    color: var(--text-main) !important;
+}
+
+body.dark-mode th {
+    background-color: #374151 !important; /* Slightly gray to differentiate from table content */
+    color: #ffffff !important;
+    border-color: #4b5563 !important;
+    font-weight: 600;
+}
+
+body.dark-mode td {
+    border-color: var(--border-color);
+    color: #f3f4f6 !important;
+    border-bottom-color: #374151 !important;
+}
+
+/* Input Styles - Light Mode */
+input,
+select,
+textarea {
+    background-color: var(--bg-input); /* Use CSS variable */
+    color: var(--text-main);
+    border-color: #d1d5db; /* gray-300 */
+    transition: border-color 0.2s ease, background-color 0.2s ease;
+    box-sizing: border-box; /* Ensure padding doesn't cause overflow */
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: var(--text-muted); /* Better contrast - #4b5563 in light, #94a3b8 in dark */
+}
+
+input:disabled,
+select:disabled,
+textarea:disabled {
+    background-color: var(--ibc-gray-100);
+    color: var(--ibc-gray-500);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* ===== ENHANCED DROPDOWN STYLING ===== */
+/* Beautiful, modern select/dropdown styling for all modules */
+
+select {
+    /* Base Appearance */
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    
+    /* Enhanced Padding and Sizing */
+    padding: 0.875rem 2.75rem 0.875rem 1.125rem;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    
+    /* Modern Border and Radius */
+    border: 2px solid var(--ibc-gray-200);
+    border-radius: var(--radius-md);
+    
+    /* Beautiful Gradient Background */
+    background: var(--gradient-select);
+    
+    /* Custom Arrow Icon */
+    background-image: var(--select-arrow-light);
+    background-position: right 0.875rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5rem 1.5rem;
+    
+    /* Smooth Transitions */
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Cursor */
+    cursor: pointer;
+    
+    /* Typography */
+    font-weight: 500;
+    color: var(--text-main);
+    
+    /* Layered Shadows for Depth */
+    box-shadow: 
+        0 1px 2px rgba(0, 0, 0, 0.06),
+        0 1px 3px rgba(0, 0, 0, 0.04),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+/* Hover State - Gradient + Lift Animation + Enhanced Shadow */
+select:hover:not(:disabled) {
+    border-color: var(--ibc-blue);
+    background: var(--gradient-select-hover);
+    box-shadow: 
+        0 2px 4px rgba(0, 102, 179, 0.08),
+        0 4px 8px rgba(0, 102, 179, 0.06),
+        inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    transform: translateY(-1px);
+}
+
+/* Focus State with Enhanced Ring Effect */
+select:focus {
+    outline: none;
+    border-color: var(--ibc-blue);
+    background: #ffffff;
+    box-shadow: 
+        0 0 0 4px rgba(0, 102, 179, 0.12),
+        0 2px 8px rgba(0, 102, 179, 0.15),
+        inset 0 1px 2px rgba(0, 102, 179, 0.05);
+    transform: translateY(-1px);
+}
+
+/* Active/Pressed State - More Tactile Feedback */
+select:active:not(:disabled) {
+    transform: translateY(0) scale(0.998);
+    border-color: var(--ibc-blue-dark);
+    box-shadow: 
+        0 1px 2px rgba(0, 102, 179, 0.15),
+        inset 0 2px 4px rgba(0, 102, 179, 0.08);
+}
+
+/* Disabled State Enhancement */
+select:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+    background: linear-gradient(to bottom, #f5f5f5 0%, #e5e5e5 100%);
+    border-color: #d1d5db;
+    color: #9ca3af;
+    box-shadow: none;
+    filter: grayscale(0.8);
+}
+
+/* Dark Mode Select Styling - Enhanced with Gradient + Arrow */
+.dark-mode select {
+    background: var(--gradient-select) !important;
+    border-color: var(--border-light) !important;
+    color: var(--text-main) !important;
+    /* Arrow icon - explicitly set with !important to ensure visibility across all states */
+    background-image: var(--select-arrow-dark) !important;
+    background-position: right 0.875rem center !important;
+    background-repeat: no-repeat !important;
+    background-size: 1.5rem 1.5rem !important;
+    box-shadow: 
+        inset 0 1px 3px rgba(0, 0, 0, 0.3), 
+        0 1px 2px rgba(0, 0, 0, 0.2),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.dark-mode select:hover:not(:disabled) {
+    border-color: var(--ibc-blue-light) !important;
+    /* Must explicitly set both gradient and arrow to override base background */
+    background: var(--gradient-select-hover) !important;
+    background-image: var(--select-arrow-dark) !important;
+    background-position: right 0.875rem center !important;
+    background-repeat: no-repeat !important;
+    background-size: 1.5rem 1.5rem !important;
+    box-shadow: 
+        inset 0 1px 3px rgba(0, 0, 0, 0.3), 
+        0 2px 8px rgba(51, 133, 196, 0.2),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+    transform: translateY(-1px);
+}
+
+.dark-mode select:focus {
+    border-color: var(--ibc-blue-light) !important;
+    /* Must explicitly set both gradient and arrow to override base background */
+    background: var(--bg-input) !important;
+    background-image: var(--select-arrow-dark) !important;
+    background-position: right 0.875rem center !important;
+    background-repeat: no-repeat !important;
+    background-size: 1.5rem 1.5rem !important;
+    box-shadow: 
+        inset 0 1px 3px rgba(0, 0, 0, 0.3), 
+        0 0 0 4px rgba(51, 133, 196, 0.25),
+        0 2px 12px rgba(51, 133, 196, 0.2) !important;
+    transform: translateY(-1px);
+}
+
+.dark-mode select:active:not(:disabled) {
+    border-color: var(--ibc-blue) !important;
+    transform: translateY(0) scale(0.998);
+    box-shadow: 
+        inset 0 2px 4px rgba(0, 0, 0, 0.4),
+        inset 0 1px 2px rgba(51, 133, 196, 0.15);
+}
+
+/* Select Options Styling - Enhanced */
+select option {
+    padding: 0.625rem 1rem;
+    background-color: var(--bg-card);
+    color: var(--text-main);
+    font-weight: 500;
+    line-height: 1.5;
+}
+
+.dark-mode select option {
+    background-color: var(--bg-card) !important;
+    color: var(--text-main) !important;
+}
+
+/* Multi-select Styling - Enhanced */
+select[multiple] {
+    padding: 0.625rem;
+    background-image: none;
+    background: linear-gradient(to bottom, #ffffff 0%, #f9fafb 100%);
+}
+
+select[multiple] option {
+    padding: 0.625rem 0.875rem;
+    border-radius: 0.5rem;
+    margin: 0.25rem 0;
+    transition: all 0.2s ease;
+}
+
+select[multiple] option:hover {
+    background: rgba(0, 102, 179, 0.08);
+    transform: translateX(2px);
+}
+
+select[multiple] option:checked {
+    background: linear-gradient(135deg, var(--ibc-blue-light) 0%, var(--ibc-blue) 100%);
+    color: white;
+    font-weight: 600;
+    box-shadow: 0 2px 4px rgba(0, 102, 179, 0.2);
+}
+
+/* Dark Mode Multi-select */
+.dark-mode select[multiple] option:checked {
+    /* Explicit gradient override for checked state in dark mode */
+    background: linear-gradient(135deg, var(--ibc-blue-light) 0%, var(--ibc-blue) 100%) !important;
+    color: white !important;
+}
+
+/* Enhanced styling for select with icon wrapper */
+.select-wrapper {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+}
+
+.select-wrapper select {
+    width: 100%;
+}
+
+.select-wrapper::before {
+    content: '';
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Icon-enhanced select (when select has a left icon via padding) */
+select.pl-11 {
+    padding-left: 2.75rem;
+}
+
+/* ===== END ENHANCED DROPDOWN STYLING ===== */
+
+/* Light Mode - Explicit Text Colors */
+body:not(.dark-mode) {
+    color: #1f2937 !important;
+}
+
+body:not(.dark-mode) .card {
+    color: #1f2937 !important;
+}
+
+body:not(.dark-mode) h1,
+body:not(.dark-mode) h2,
+body:not(.dark-mode) h3,
+body:not(.dark-mode) h4,
+body:not(.dark-mode) h5,
+body:not(.dark-mode) h6 {
+    color: #1f2937 !important;
+}
+
+body:not(.dark-mode) p {
+    color: #374151;
+}
+
+body:not(.dark-mode) label {
+    color: #374151 !important;
+}
+
+body.dark-mode .glass-card {
+    background: rgba(31, 41, 55, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode a:not(.btn-primary) {
+    color: #ffffff !important; /* White text instead of blue for better consistency */
+}
+
+/* Light Mode Links - Keep visible on white backgrounds, use appropriate color */
+body:not(.dark-mode) a:not(.btn-primary):not(.no-underline):not(.sidebar a) {
+    color: var(--text-main) !important; /* Dark text for visibility on white backgrounds */
+    position: relative;
+    text-decoration: none;
+    transition: color var(--transition-normal);
+}
+
+/* Sidebar links in light mode must be white */
+body:not(.dark-mode) .sidebar a:not(.no-underline) {
+    color: #ffffff !important;
+    position: relative;
+    text-decoration: none;
+    transition: color var(--transition-normal);
+}
+
+/* Light Mode: Animated underline on hover */
+body:not(.dark-mode) a:not(.btn-primary):not(.no-underline) {
+    display: inline-block;
+}
+
+body:not(.dark-mode) a:not(.btn-primary):not(.no-underline):not(.sidebar a)::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--ibc-green), var(--ibc-green-light)); /* Green gradient instead of blue-green */
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body:not(.dark-mode) a:not(.btn-primary):not(.no-underline):hover::after {
+    width: 100%;
+}
+
+/* Disable underline animation for sidebar links */
+body:not(.dark-mode) .sidebar a::after {
+    content: none !important;
+}
+
+/* Ensure sidebar links don't get position relative from general link rules */
+body:not(.dark-mode) .sidebar a {
+    position: static !important;
+    display: flex !important;
+}
+
+body:not(.dark-mode) a:not(.btn-primary):not(.no-underline):not(.sidebar a):hover {
+    color: var(--text-main) !important; /* Keep dark on hover for visibility */
+}
+
+body:not(.dark-mode) .sidebar a:not(.no-underline):hover {
+    color: #ffffff !important; /* Keep white on hover in sidebar */
+}
+
+body.dark-mode .text-gray-600 {
+    color: #d1d5db !important;
+}
+
+body.dark-mode .text-gray-700 {
+    color: #e5e7eb !important;
+}
+
+body.dark-mode .text-gray-800 {
+    color: #ffffff !important;
+}
+
+body.dark-mode .text-gray-900 {
+    color: #f9fafb !important;
+}
+
+body.dark-mode .text-gray-500 {
+    color: #9ca3af !important;
+}
+
+body:not(.dark-mode) .text-gray-800 {
+    color: #1f2937 !important; /* Dark text for light mode */
+}
+
+body:not(.dark-mode) .text-gray-700 {
+    color: #374151 !important; /* Slightly lighter but still readable */
+}
+
+body:not(.dark-mode) .text-gray-600 {
+    color: #4b5563 !important; /* Good contrast for body text */
+}
+
+body:not(.dark-mode) .text-gray-500 {
+    color: #6b7280 !important; /* Muted but readable */
+}
+
+body.dark-mode .bg-white {
+    background-color: var(--bg-card) !important;
+}
+
+body.dark-mode .bg-gray-50 {
+    background-color: var(--bg-body) !important;
+}
+
+body.dark-mode .bg-gray-100 {
+    background-color: #374151 !important;
+}
+
+body.dark-mode .bg-gray-200 {
+    background-color: #475569 !important;
+}
+
+body.dark-mode .border-gray-200 {
+    border-color: var(--border-color) !important;
+}
+
+body.dark-mode .border-gray-300 {
+    border-color: #4b5563 !important;
+}
+
+/* Dark mode improvements for specific elements */
+body.dark-mode h1, 
+body.dark-mode h2, 
+body.dark-mode h3, 
+body.dark-mode h4, 
+body.dark-mode h5, 
+body.dark-mode h6 {
+    color: #f3f4f6 !important;
+}
+
+body.dark-mode p {
+    color: #d1d5db;
+}
+
+body.dark-mode label {
+    color: #e5e7eb !important;
+}
+
+body.dark-mode .shadow {
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.5), 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+}
+
+/* Dark Mode: Colored Backgrounds Adaptation */
+body.dark-mode .bg-purple-50 {
+    background-color: rgba(147, 51, 234, 0.15) !important; /* purple with 15% opacity */
+}
+
+body.dark-mode .bg-blue-50 {
+    background-color: rgba(59, 130, 246, 0.15) !important; /* blue with 15% opacity */
+}
+
+body.dark-mode .bg-green-50 {
+    background-color: rgba(34, 197, 94, 0.15) !important; /* green with 15% opacity */
+}
+
+body.dark-mode .bg-orange-50 {
+    background-color: rgba(249, 115, 22, 0.15) !important; /* orange with 15% opacity */
+}
+
+body.dark-mode .bg-red-50 {
+    background-color: rgba(239, 68, 68, 0.15) !important; /* red with 15% opacity */
+}
+
+body.dark-mode .bg-yellow-50 {
+    background-color: rgba(234, 179, 8, 0.15) !important; /* yellow with 15% opacity */
+}
+
+body.dark-mode .bg-teal-50 {
+    background-color: rgba(20, 184, 166, 0.15) !important; /* teal with 15% opacity */
+}
+
+body.dark-mode .bg-pink-50 {
+    background-color: rgba(236, 72, 153, 0.15) !important; /* pink with 15% opacity */
+}
+
+body.dark-mode .bg-indigo-50 {
+    background-color: rgba(99, 102, 241, 0.15) !important; /* indigo with 15% opacity */
+}
+
+/* Dark Mode: Colored Backgrounds (100 level) */
+body.dark-mode .bg-purple-100 {
+    background-color: rgba(147, 51, 234, 0.25) !important; /* purple with 25% opacity */
+}
+
+body.dark-mode .bg-blue-100 {
+    background-color: rgba(59, 130, 246, 0.25) !important; /* blue with 25% opacity */
+}
+
+body.dark-mode .bg-green-100 {
+    background-color: rgba(34, 197, 94, 0.25) !important; /* green with 25% opacity */
+}
+
+body.dark-mode .bg-orange-100 {
+    background-color: rgba(249, 115, 22, 0.25) !important; /* orange with 25% opacity */
+}
+
+body.dark-mode .bg-red-100 {
+    background-color: rgba(239, 68, 68, 0.25) !important; /* red with 25% opacity */
+}
+
+body.dark-mode .bg-yellow-100 {
+    background-color: rgba(234, 179, 8, 0.25) !important; /* yellow with 25% opacity */
+}
+
+body.dark-mode .bg-teal-100 {
+    background-color: rgba(20, 184, 166, 0.25) !important; /* teal with 25% opacity */
+}
+
+/* Dark Mode: Colored Border Adaptation */
+body.dark-mode .border-purple-100,
+body.dark-mode .border-purple-200 {
+    border-color: rgba(147, 51, 234, 0.4) !important; /* purple with opacity */
+}
+
+body.dark-mode .border-purple-300,
+body.dark-mode .border-purple-400 {
+    border-color: rgba(147, 51, 234, 0.6) !important;
+}
+
+body.dark-mode .border-blue-100,
+body.dark-mode .border-blue-200 {
+    border-color: rgba(59, 130, 246, 0.4) !important; /* blue with opacity */
+}
+
+body.dark-mode .border-blue-300,
+body.dark-mode .border-blue-400 {
+    border-color: rgba(59, 130, 246, 0.6) !important;
+}
+
+body.dark-mode .border-green-100,
+body.dark-mode .border-green-200 {
+    border-color: rgba(34, 197, 94, 0.4) !important; /* green with opacity */
+}
+
+body.dark-mode .border-green-300,
+body.dark-mode .border-green-400 {
+    border-color: rgba(34, 197, 94, 0.6) !important;
+}
+
+body.dark-mode .border-orange-100,
+body.dark-mode .border-orange-200 {
+    border-color: rgba(249, 115, 22, 0.4) !important; /* orange with opacity */
+}
+
+body.dark-mode .border-orange-300,
+body.dark-mode .border-orange-400 {
+    border-color: rgba(249, 115, 22, 0.6) !important;
+}
+
+body.dark-mode .border-red-100,
+body.dark-mode .border-red-200 {
+    border-color: rgba(239, 68, 68, 0.4) !important; /* red with opacity */
+}
+
+body.dark-mode .border-red-300,
+body.dark-mode .border-red-400 {
+    border-color: rgba(239, 68, 68, 0.6) !important;
+}
+
+body.dark-mode .border-yellow-100,
+body.dark-mode .border-yellow-200 {
+    border-color: rgba(234, 179, 8, 0.4) !important; /* yellow with opacity */
+}
+
+body.dark-mode .border-teal-100,
+body.dark-mode .border-teal-200 {
+    border-color: rgba(20, 184, 166, 0.4) !important; /* teal with opacity */
+}
+
+/* Dark Mode: Colored Text on Colored Backgrounds */
+body.dark-mode .text-purple-600,
+body.dark-mode .text-purple-700,
+body.dark-mode .text-purple-800 {
+    color: #e9d5ff !important; /* purple-200 - light purple for dark backgrounds */
+}
+
+body.dark-mode .text-blue-100,
+body.dark-mode .text-blue-200,
+body.dark-mode .text-blue-300,
+body.dark-mode .text-blue-600,
+body.dark-mode .text-blue-700,
+body.dark-mode .text-blue-800,
+body.dark-mode .text-blue-900 {
+    color: #ffffff !important; /* White instead of blue for dark mode */
+}
+
+body.dark-mode .text-green-600,
+body.dark-mode .text-green-700,
+body.dark-mode .text-green-800 {
+    color: #bbf7d0 !important; /* green-200 - light green for dark backgrounds */
+}
+
+body.dark-mode .text-orange-600,
+body.dark-mode .text-orange-700,
+body.dark-mode .text-orange-800 {
+    color: #fed7aa !important; /* orange-200 - light orange for dark backgrounds */
+}
+
+body.dark-mode .text-red-600,
+body.dark-mode .text-red-700,
+body.dark-mode .text-red-800 {
+    color: #fecaca !important; /* red-200 - light red for dark backgrounds */
+}
+
+body.dark-mode .text-yellow-600,
+body.dark-mode .text-yellow-700,
+body.dark-mode .text-yellow-800 {
+    color: #fef08a !important; /* yellow-200 - light yellow for dark backgrounds */
+}
+
+body.dark-mode .text-teal-600,
+body.dark-mode .text-teal-700,
+body.dark-mode .text-teal-800 {
+    color: #99f6e4 !important; /* teal-200 - light teal for dark backgrounds */
+}
+
+/* Dark Mode: Lighter Colored Text Variants (400/500) */
+body.dark-mode .text-purple-400,
+body.dark-mode .text-purple-500 {
+    color: #e9d5ff !important; /* purple-200 - light purple for dark backgrounds */
+}
+
+body.dark-mode .text-blue-400,
+body.dark-mode .text-blue-500 {
+    color: #ffffff !important; /* White instead of blue for dark mode */
+}
+
+body.dark-mode .text-green-400,
+body.dark-mode .text-green-500 {
+    color: #bbf7d0 !important; /* green-200 - light green for dark backgrounds */
+}
+
+body.dark-mode .text-orange-400,
+body.dark-mode .text-orange-500 {
+    color: #fed7aa !important; /* orange-200 - light orange for dark backgrounds */
+}
+
+body.dark-mode .text-red-400,
+body.dark-mode .text-red-500 {
+    color: #fecaca !important; /* red-200 - light red for dark backgrounds */
+}
+
+body.dark-mode .text-yellow-400,
+body.dark-mode .text-yellow-500 {
+    color: #fef08a !important; /* yellow-200 - light yellow for dark backgrounds */
+}
+
+body.dark-mode .text-teal-400,
+body.dark-mode .text-teal-500 {
+    color: #99f6e4 !important; /* teal-200 - light teal for dark backgrounds */
+}
+
+body.dark-mode .text-pink-400,
+body.dark-mode .text-pink-500,
+body.dark-mode .text-pink-600,
+body.dark-mode .text-pink-700 {
+    color: #fbcfe8 !important; /* pink-200 - light pink for dark backgrounds */
+}
+
+body.dark-mode .text-indigo-400,
+body.dark-mode .text-indigo-500,
+body.dark-mode .text-indigo-600,
+body.dark-mode .text-indigo-700 {
+    color: #c7d2fe !important; /* indigo-200 - light indigo for dark backgrounds */
+}
+
+/* Dark Mode: Gradients Adaptation */
+body.dark-mode .bg-gradient-to-br.from-white,
+body.dark-mode .bg-gradient-to-r.from-white {
+    --tw-gradient-from: var(--bg-card) !important;
+}
+
+body.dark-mode .to-purple-50 {
+    --tw-gradient-to: rgba(147, 51, 234, 0.15) !important;
+}
+
+body.dark-mode .to-blue-50 {
+    --tw-gradient-to: rgba(59, 130, 246, 0.15) !important;
+}
+
+body.dark-mode .to-green-50 {
+    --tw-gradient-to: rgba(34, 197, 94, 0.15) !important;
+}
+
+body.dark-mode .to-orange-50 {
+    --tw-gradient-to: rgba(249, 115, 22, 0.15) !important;
+}
+
+body.dark-mode .to-teal-50 {
+    --tw-gradient-to: rgba(20, 184, 166, 0.15) !important;
+}
+
+/* Dashboard: Handle Tailwind gradient opacity variants (e.g. to-orange-50/50) */
+body.dark-mode .to-orange-50\/50 {
+    --tw-gradient-to: rgba(249, 115, 22, 0.08) !important;
+}
+
+body.dark-mode .to-orange-50\/30 {
+    --tw-gradient-to: rgba(249, 115, 22, 0.05) !important;
+}
+
+body.dark-mode .to-blue-50\/50 {
+    --tw-gradient-to: rgba(59, 130, 246, 0.08) !important;
+}
+
+body.dark-mode .to-green-50\/60 {
+    --tw-gradient-to: rgba(34, 197, 94, 0.10) !important;
+}
+
+body.dark-mode .from-purple-50 {
+    --tw-gradient-from: rgba(147, 51, 234, 0.15) !important;
+}
+
+body.dark-mode .from-blue-50 {
+    --tw-gradient-from: rgba(59, 130, 246, 0.15) !important;
+}
+
+body.dark-mode .from-green-50 {
+    --tw-gradient-from: rgba(34, 197, 94, 0.15) !important;
+}
+
+body.dark-mode .from-orange-50 {
+    --tw-gradient-from: rgba(249, 115, 22, 0.15) !important;
+}
+
+body.dark-mode .from-teal-50 {
+    --tw-gradient-from: rgba(20, 184, 166, 0.15) !important;
+}
+
+
+/* Shadow Utility Classes */
+.shadow-glow-green {
+    box-shadow: var(--shadow-glow-green);
+}
+
+.shadow-premium {
+    box-shadow: var(--shadow-premium);
+}
+
+.shadow-soft {
+    box-shadow: var(--shadow-soft);
+}
+
+/* Transition Utility Classes */
+.ease-premium {
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 300ms;
+}
+
+/* Glassmorphism Effect */
+.glass-card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 
+        0 8px 32px 0 rgba(0, 0, 0, 0.37),
+        inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+}
+
+/* IBC Color Utilities */
+.bg-ibc-green {
+    background-color: var(--ibc-green);
+}
+
+.bg-ibc-green-hover:hover {
+    background-color: var(--ibc-green-hover);
+}
+
+.bg-ibc-blue {
+    background-color: var(--ibc-blue);
+}
+
+.bg-ibc-blue-dark {
+    background-color: var(--ibc-blue-dark);
+}
+
+.text-ibc-blue {
+    color: #ffffff !important; /* White instead of IBC blue */
+}
+
+.text-ibc-green {
+    color: var(--ibc-green);
+}
+
+.border-ibc-blue {
+    border-color: var(--ibc-blue);
+}
+
+.hover\:shadow-glow-green:hover {
+    box-shadow: var(--shadow-glow-green);
+}
+
+.focus\:ring-ibc-blue:focus {
+    --tw-ring-color: var(--ibc-blue);
+    --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+    --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+    box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
+}
+
+/* Flatpickr Calendar Overrides - IBC Corporate Identity */
+.flatpickr-calendar {
+    border-radius: 12px;
+    box-shadow: var(--shadow-premium);
+    border: 1px solid var(--ibc-gray-200);
+    font-family: var(--ibc-font-family);
+}
+
+/* Flatpickr Header - IBC Blue */
+.flatpickr-months {
+    background: var(--ibc-blue);
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+}
+
+.flatpickr-current-month {
+    color: white;
+}
+
+.flatpickr-month {
+    color: white;
+    fill: white;
+}
+
+.flatpickr-prev-month,
+.flatpickr-next-month {
+    color: white;
+    fill: white;
+}
+
+.flatpickr-prev-month:hover,
+.flatpickr-next-month:hover {
+    color: var(--ibc-gray-200);
+}
+
+.flatpickr-prev-month:hover svg,
+.flatpickr-next-month:hover svg {
+    fill: var(--ibc-gray-200);
+}
+
+/* Flatpickr Days */
+.flatpickr-weekdays {
+    background: var(--ibc-blue-light);
+    color: white;
+}
+
+.flatpickr-weekday {
+    color: white;
+    font-weight: 600;
+}
+
+/* Flatpickr Selected Day - IBC Green */
+.flatpickr-day.selected,
+.flatpickr-day.startRange,
+.flatpickr-day.endRange,
+.flatpickr-day.selected.inRange,
+.flatpickr-day.startRange.inRange,
+.flatpickr-day.endRange.inRange,
+.flatpickr-day.selected:focus,
+.flatpickr-day.startRange:focus,
+.flatpickr-day.endRange:focus,
+.flatpickr-day.selected:hover,
+.flatpickr-day.startRange:hover,
+.flatpickr-day.endRange:hover,
+.flatpickr-day.selected.prevMonthDay,
+.flatpickr-day.selected.nextMonthDay {
+    background: var(--ibc-green);
+    border-color: var(--ibc-green);
+    color: white;
+}
+
+.flatpickr-day.selected.startRange + .endRange:not(:nth-child(7n+1)),
+.flatpickr-day.startRange.startRange + .endRange:not(:nth-child(7n+1)),
+.flatpickr-day.endRange.startRange + .endRange:not(:nth-child(7n+1)) {
+    box-shadow: -10px 0 0 var(--ibc-green);
+}
+
+/* Flatpickr Hover State */
+.flatpickr-day:hover,
+.flatpickr-day.prevMonthDay:hover,
+.flatpickr-day.nextMonthDay:hover {
+    background: var(--ibc-green-light);
+    border-color: var(--ibc-green-light);
+    color: white;
+}
+
+.flatpickr-day.today {
+    border-color: var(--ibc-blue);
+    font-weight: 600;
+}
+
+.flatpickr-day.today:hover,
+.flatpickr-day.today:focus {
+    border-color: var(--ibc-blue);
+    background: var(--ibc-blue-light);
+    color: white;
+}
+
+/* Flatpickr Time Picker */
+.flatpickr-time {
+    border-top: 1px solid var(--ibc-gray-200);
+}
+
+.flatpickr-time input:hover,
+.flatpickr-time input:focus {
+    background: var(--ibc-gray-50);
+    border-color: var(--ibc-green);
+}
+
+.flatpickr-time .flatpickr-am-pm:hover,
+.flatpickr-time .flatpickr-am-pm:focus {
+    background: var(--ibc-green-light);
+    color: white;
+}
+
+/* Flatpickr Disabled Days */
+.flatpickr-day.disabled,
+.flatpickr-day.disabled:hover {
+    color: var(--ibc-gray-300);
+}
+
+/* Flatpickr In Range */
+.flatpickr-day.inRange,
+.flatpickr-day.prevMonthDay.inRange,
+.flatpickr-day.nextMonthDay.inRange,
+.flatpickr-day.today.inRange,
+.flatpickr-day.prevMonthDay.today.inRange,
+.flatpickr-day.nextMonthDay.today.inRange,
+.flatpickr-day:hover.inRange,
+.flatpickr-day:focus.inRange {
+    background: rgba(0, 166, 81, 0.1);
+    border-color: transparent;
+    box-shadow: -5px 0 0 rgba(0, 166, 81, 0.1), 5px 0 0 rgba(0, 166, 81, 0.1);
+}
+
+/* Flatpickr Dark Mode Support */
+body.dark-mode .flatpickr-calendar {
+    background: var(--bg-card);
+    border-color: var(--border-color);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+body.dark-mode .flatpickr-months {
+    background: var(--ibc-blue-dark);
+}
+
+body.dark-mode .flatpickr-weekdays {
+    background: var(--ibc-blue-dark);
+}
+
+body.dark-mode .flatpickr-days,
+body.dark-mode .flatpickr-day {
+    background: var(--bg-card);
+    color: var(--text-main);
+    border-color: var(--border-color);
+}
+
+body.dark-mode .flatpickr-day:hover:not(.selected):not(.startRange):not(.endRange) {
+    background: var(--ibc-green-dark);
+    border-color: var(--ibc-green-dark);
+    color: white;
+}
+
+body.dark-mode .flatpickr-day.today {
+    border-color: var(--ibc-blue-light);
+}
+
+body.dark-mode .flatpickr-day.disabled,
+body.dark-mode .flatpickr-day.disabled:hover {
+    color: var(--ibc-gray-600);
+}
+
+body.dark-mode .flatpickr-time {
+    border-top-color: var(--border-color);
+}
+
+body.dark-mode .flatpickr-time input {
+    background: var(--bg-body);
+    color: var(--text-main);
+}
+
+body.dark-mode .flatpickr-time input:hover,
+body.dark-mode .flatpickr-time input:focus {
+    background: var(--bg-card);
+    border-color: var(--ibc-green);
+}
+
+/* LIGHT MODE: Force dark text for better readability */
+/* Exclude sidebar elements to keep them white on blue background */
+body:not(.dark-mode) h1:not(.sidebar *),
+body:not(.dark-mode) h2:not(.sidebar *),
+body:not(.dark-mode) h3:not(.sidebar *),
+body:not(.dark-mode) p:not(.sidebar *),
+body:not(.dark-mode) li:not(.sidebar *),
+body:not(.dark-mode) span:not(.badge):not(.btn-primary):not(.text-white):not(.sidebar *),
+body:not(.dark-mode) label:not(.sidebar *),
+body:not(.dark-mode) input:not(.sidebar *),
+body:not(.dark-mode) select:not(.sidebar *),
+body:not(.dark-mode) textarea:not(.sidebar *),
+body:not(.dark-mode) td:not(.sidebar *) {
+    color: #0f172a !important; /* slate-900 - Almost black for max readability */
+}
+
+/* Sidebar Exception: Keep text light in the blue sidebar */
+/* Sidebar Icons - Inherit text color */
+.sidebar i,
+.sidebar i.fas {
+    color: inherit !important;
+}
+
+/* Light Mode: Replace blue text with readable dark text */
+body:not(.dark-mode) .text-blue-100,
+body:not(.dark-mode) .text-blue-200,
+body:not(.dark-mode) .text-blue-300,
+body:not(.dark-mode) .text-blue-400,
+body:not(.dark-mode) .text-blue-500,
+body:not(.dark-mode) .text-blue-600,
+body:not(.dark-mode) .text-blue-700,
+body:not(.dark-mode) .text-blue-800,
+body:not(.dark-mode) .text-blue-900 {
+    color: var(--text-main) !important; /* Dark text instead of blue for light mode */
+}
+
+body:not(.dark-mode) .text-ibc-blue {
+    color: var(--text-main) !important; /* Dark text instead of blue for light mode */
+}
+
+/* Light Mode: Kartenhintergrund sicherstellen */
+body:not(.dark-mode) .card {
+    background-color: #ffffff !important;
+    border: 1px solid #e9ecef !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.07) !important;
+}
+
+/* Dark Mode: Alles erzwingen hell zu sein */
+body.dark-mode h1,
+body.dark-mode h2,
+body.dark-mode h3,
+body.dark-mode p,
+body.dark-mode li,
+body.dark-mode span:not(.badge):not(.text-black),
+body.dark-mode label,
+body.dark-mode td {
+    color: #f1f5f9 !important; /* slate-100 - Almost white for dark mode */
+}
+
+/* Dark Mode Inputs fixen */
+body.dark-mode input,
+body.dark-mode select,
+body.dark-mode textarea {
+    background-color: #0c1222 !important; /* Darker than card background for contrast */
+    color: #ffffff !important;
+    border-color: #334155 !important; /* slate-700 */
+}
+
+/* Dark Mode Links (außer Buttons und Sidebar) */
+body.dark-mode a:not(.btn):not(.btn-primary):not(.nav-link) {
+    color: #ffffff !important; /* White instead of blue for links */
+    text-decoration: none !important;
+}
+
+/* Sidebar links override - keep white, flex-aligned, no underline */
+body.dark-mode .sidebar a {
+    color: #ffffff !important;
+    display: flex !important;
+    text-decoration: none !important;
+}
+
+/* Dark Mode: Button and Interactive Element Support */
+body.dark-mode .hover\:bg-purple-50:hover {
+    background-color: rgba(147, 51, 234, 0.15) !important;
+}
+
+body.dark-mode .hover\:bg-blue-50:hover {
+    background-color: rgba(59, 130, 246, 0.15) !important;
+}
+
+body.dark-mode .hover\:bg-green-50:hover {
+    background-color: rgba(34, 197, 94, 0.15) !important;
+}
+
+body.dark-mode .hover\:bg-red-50:hover {
+    background-color: rgba(239, 68, 68, 0.15) !important;
+}
+
+body.dark-mode .hover\:bg-gray-50:hover {
+    background-color: #374151 !important;
+}
+
+body.dark-mode .hover\:bg-gray-100:hover {
+    background-color: #4b5563 !important;
+}
+
+/* Dark Mode: Focus and Ring Colors */
+body.dark-mode .focus\:ring-purple-500:focus {
+    --tw-ring-color: rgba(168, 85, 247, 0.5) !important;
+}
+
+body.dark-mode .focus\:ring-blue-500:focus {
+    --tw-ring-color: rgba(59, 130, 246, 0.5) !important;
+}
+
+body.dark-mode .focus\:ring-green-500:focus {
+    --tw-ring-color: rgba(34, 197, 94, 0.5) !important;
+}
+
+/* Dark Mode: Border on Focus */
+body.dark-mode .focus\:border-purple-500:focus {
+    border-color: #a855f7 !important;
+}
+
+body.dark-mode .focus\:border-blue-500:focus {
+    border-color: #3b82f6 !important;
+}
+
+body.dark-mode .focus\:border-green-500:focus {
+    border-color: #22c55e !important;
+}
+
+/* Dark Mode: Hover Border Colors */
+body.dark-mode .hover\:border-purple-500:hover {
+    border-color: #a855f7 !important;
+}
+
+body.dark-mode .hover\:border-blue-500:hover {
+    border-color: #3b82f6 !important;
+}
+
+body.dark-mode .hover\:border-green-500:hover {
+    border-color: #22c55e !important;
+}
+
+/* Dark Mode: Hover Text Colors */
+body.dark-mode .hover\:text-blue-700:hover {
+    color: #ffffff !important; /* White instead of blue for hover in dark mode */
+}
+
+body.dark-mode .hover\:text-green-700:hover {
+    color: #86efac !important; /* lighter green for hover in dark mode */
+}
+
+body.dark-mode .hover\:text-purple-700:hover {
+    color: #d8b4fe !important; /* lighter purple for hover in dark mode */
+}
+
+body.dark-mode .hover\:text-red-700:hover {
+    color: #fca5a5 !important; /* lighter red for hover in dark mode */
+}
+
+/* Dark Mode: Badge and Tag Colors */
+body.dark-mode .bg-purple-100.text-purple-800 {
+    background-color: rgba(147, 51, 234, 0.25) !important;
+    color: #e9d5ff !important;
+}
+
+body.dark-mode .bg-blue-100.text-blue-800 {
+    background-color: rgba(59, 130, 246, 0.25) !important;
+    color: #ffffff !important; /* White instead of blue */
+}
+
+body.dark-mode .bg-green-100.text-green-800 {
+    background-color: rgba(34, 197, 94, 0.25) !important;
+    color: #bbf7d0 !important;
+}
+
+body.dark-mode .bg-orange-100.text-orange-800 {
+    background-color: rgba(249, 115, 22, 0.25) !important;
+    color: #fed7aa !important;
+}
+
+body.dark-mode .bg-red-100.text-red-800 {
+    background-color: rgba(239, 68, 68, 0.25) !important;
+    color: #fecaca !important;
+}
+
+body.dark-mode .bg-yellow-100.text-yellow-800 {
+    background-color: rgba(234, 179, 8, 0.25) !important;
+    color: #fef08a !important;
+}
+
+body.dark-mode .bg-teal-100.text-teal-800 {
+    background-color: rgba(20, 184, 166, 0.25) !important;
+    color: #99f6e4 !important;
+}
+
+body.dark-mode .bg-pink-100.text-pink-800 {
+    background-color: rgba(236, 72, 153, 0.25) !important;
+    color: #fbcfe8 !important;
+}
+
+body.dark-mode .bg-indigo-100.text-indigo-800 {
+    background-color: rgba(99, 102, 241, 0.25) !important;
+    color: #c7d2fe !important;
+}
+
+/* Dark Mode: Alert and Notification Boxes */
+body.dark-mode .bg-red-50.text-red-800,
+body.dark-mode .bg-red-50.border-red-400 {
+    background-color: rgba(239, 68, 68, 0.15) !important;
+    color: #fca5a5 !important;
+}
+
+body.dark-mode .bg-red-100.text-red-700 {
+    background-color: rgba(239, 68, 68, 0.2) !important;
+    color: #fca5a5 !important;
+}
+
+body.dark-mode .bg-green-50.text-green-700,
+body.dark-mode .bg-green-100.text-green-700 {
+    background-color: rgba(34, 197, 94, 0.15) !important;
+    color: #86efac !important;
+}
+
+body.dark-mode .bg-green-50.text-green-800 {
+    background-color: rgba(34, 197, 94, 0.15) !important;
+    color: #bbf7d0 !important;
+}
+
+body.dark-mode .bg-blue-100.text-blue-700 {
+    background-color: rgba(59, 130, 246, 0.15) !important;
+    color: #ffffff !important; /* White instead of blue */
+}
+
+body.dark-mode .bg-blue-50.text-blue-700,
+body.dark-mode .bg-blue-50.text-blue-800 {
+    background-color: rgba(59, 130, 246, 0.15) !important;
+    color: #ffffff !important; /* White instead of blue */
+}
+
+body.dark-mode .bg-yellow-50.text-yellow-700,
+body.dark-mode .bg-yellow-50.text-yellow-800 {
+    background-color: rgba(234, 179, 8, 0.15) !important;
+    color: #fef08a !important;
+}
+
+body.dark-mode .bg-orange-50.text-orange-700,
+body.dark-mode .bg-orange-50.text-orange-800 {
+    background-color: rgba(249, 115, 22, 0.15) !important;
+    color: #fed7aa !important;
+}
+
+body.dark-mode .bg-purple-50.text-purple-700,
+body.dark-mode .bg-purple-50.text-purple-800 {
+    background-color: rgba(147, 51, 234, 0.15) !important;
+    color: #e9d5ff !important;
+}
+
+body.dark-mode .bg-teal-50.text-teal-700,
+body.dark-mode .bg-teal-50.text-teal-800 {
+    background-color: rgba(20, 184, 166, 0.15) !important;
+    color: #99f6e4 !important;
+}
+
+body.dark-mode .bg-pink-50.text-pink-700,
+body.dark-mode .bg-pink-50.text-pink-800 {
+    background-color: rgba(236, 72, 153, 0.15) !important;
+    color: #fbcfe8 !important;
+}
+
+/* Dark Mode: Disabled States */
+body.dark-mode .bg-gray-300 {
+    background-color: #4b5563 !important;
+}
+
+body.dark-mode .bg-gray-400 {
+    background-color: #6b7280 !important;
+}
+
+body.dark-mode .bg-gray-500 {
+    background-color: #6b7280 !important;
+}
+
+body.dark-mode .bg-gray-600 {
+    background-color: #4b5563 !important;
+}
+
+body.dark-mode .bg-gray-700 {
+    background-color: #374151 !important;
+}
+
+body.dark-mode .bg-gray-800 {
+    background-color: #1f2937 !important;
+}
+
+body.dark-mode .hover\:bg-gray-400:hover {
+    background-color: #6b7280 !important;
+}
+
+/* Dark Mode: Table Hover States */
+body.dark-mode tr:hover {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Dark Mode: Ensure text readability in all scenarios */
+body.dark-mode .text-gray-900,
+body.dark-mode .text-black {
+    color: #f3f4f6 !important;
+}
+
+/* Dark Mode: Modal Overlays */
+body.dark-mode .bg-black.bg-opacity-50 {
+    background-color: rgba(0, 0, 0, 0.75) !important;
+}
+
+body.dark-mode .bg-gray-900 {
+    background-color: #0f172a !important;
+}
+
+/* Dark Mode: Divide Utilities (borders between items) */
+body.dark-mode .divide-gray-200 > * + * {
+    border-color: var(--border-color) !important;
+}
+
+body.dark-mode .divide-gray-300 > * + * {
+    border-color: #4b5563 !important;
+}
+
+/* Dark Mode: Ring Utilities (focus rings) */
+body.dark-mode .ring-gray-300 {
+    --tw-ring-color: #4b5563 !important;
+}
+
+/* Dark Mode: Placeholder Colors */
+body.dark-mode ::placeholder {
+    color: #6b7280 !important;
+}
+
+body.dark-mode input::placeholder,
+body.dark-mode textarea::placeholder,
+body.dark-mode select::placeholder {
+    color: #6b7280 !important;
+}
+
+/* Dark Mode: SVG and Icon Colors */
+body.dark-mode svg {
+    color: inherit;
+}
+
+/* Dark Mode: Ensure proper contrast for all heading levels */
+body.dark-mode h1,
+body.dark-mode h2,
+body.dark-mode h3,
+body.dark-mode h4,
+body.dark-mode h5,
+body.dark-mode h6,
+body.dark-mode .h1,
+body.dark-mode .h2,
+body.dark-mode .h3,
+body.dark-mode .h4,
+body.dark-mode .h5,
+body.dark-mode .h6 {
+    color: #f3f4f6 !important;
+}
+
+/* Dark Mode: Strong emphasis text */
+body.dark-mode strong,
+body.dark-mode b {
+    color: #f9fafb;
+}
+
+/* Dark Mode: Code and Pre elements */
+body.dark-mode code {
+    background-color: #1f2937;
+    color: #e5e7eb;
+}
+
+body.dark-mode pre {
+    background-color: #1f2937;
+    color: #e5e7eb;
+    border-color: #374151;
+}
+
+/* Dark Mode: Scrollbar Styling */
+body.dark-mode ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+body.dark-mode ::-webkit-scrollbar-track {
+    background: #1e293b;
+}
+
+body.dark-mode ::-webkit-scrollbar-thumb {
+    background: #475569;
+    border-radius: 4px;
+}
+
+body.dark-mode ::-webkit-scrollbar-thumb:hover {
+    background: #64748b;
+}
+
+/* Dark Mode: Selection Colors */
+body.dark-mode ::selection {
+    background-color: rgba(59, 130, 246, 0.3);
+    color: #f3f4f6;
+}
+
+body.dark-mode ::-moz-selection {
+    background-color: rgba(59, 130, 246, 0.3);
+    color: #f3f4f6;
+}
+
+/* Dark Mode: HR Elements */
+body.dark-mode hr {
+    border-color: var(--border-color);
+}
+
+/* Dark Mode: Blockquote */
+body.dark-mode blockquote {
+    color: #d1d5db;
+    border-left-color: #4b5563;
+}
+
+/* Dark Mode: List markers */
+body.dark-mode ul,
+body.dark-mode ol {
+    color: #d1d5db;
+}
+
+/* Dark Mode: Form Labels and Legends */
+body.dark-mode legend,
+body.dark-mode fieldset {
+    color: #e5e7eb;
+    border-color: var(--border-color);
+}
+
+/* Dark Mode: Ensure all form controls have proper contrast */
+body.dark-mode input[type="checkbox"],
+body.dark-mode input[type="radio"] {
+    border-color: #4b5563;
+}
+
+body.dark-mode input[type="checkbox"]:checked,
+body.dark-mode input[type="radio"]:checked {
+    background-color: var(--ibc-green);
+    border-color: var(--ibc-green);
+}
+
+/* Dark Mode: Select dropdowns arrow */
+body.dark-mode select {
+    background-image: var(--select-arrow-dark);
+}
+
+/* Light Mode: Select dropdowns arrow */
+select {
+    background-image: var(--select-arrow-light);
+}
+
+/* Dark Mode: Ensure proper contrast for small text */
+body.dark-mode .text-xs,
+body.dark-mode .text-sm {
+    color: #d1d5db;
+}
+
+/* Dark Mode: Inline Style Color Adjustments for Category Badges and Dynamic Colors */
+/* Use this class on elements with inline background colors to make them dark-mode friendly */
+body.dark-mode .inline-color-badge {
+    filter: brightness(1.2) saturate(0.9);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Dark Mode: Improve button visibility */
+body.dark-mode button {
+    border-color: var(--border-color);
+}
+
+body.dark-mode button:not(.btn-primary):not(.btn-secondary) {
+    background-color: var(--bg-card);
+    color: #ffffff !important; /* Ensure all buttons have white text in dark mode */
+}
+
+body.dark-mode button:hover:not(.btn-primary):not(.btn-secondary) {
+    background-color: #374151;
+}
+
+/* Dark Mode: Improve icon visibility */
+body.dark-mode .fa,
+body.dark-mode .fas,
+body.dark-mode .far,
+body.dark-mode .fab {
+    opacity: 0.95;
+}
+
+/* Dark Mode: Ensure colored icons remain visible - removed blue, replaced with white */
+body.dark-mode i.text-blue-600 {
+    color: #ffffff !important; /* White instead of blue for icons */
+}
+
+body.dark-mode i.text-green-600,
+body.dark-mode i.text-purple-600,
+body.dark-mode i.text-orange-600,
+body.dark-mode i.text-red-600,
+body.dark-mode i.text-yellow-600 {
+    filter: brightness(1.3);
+}
+
+/* Dark Mode: Improve card borders */
+body.dark-mode .card {
+    border: 1px solid var(--border-color);
+}
+
+/* Dark Mode: Better status badge visibility */
+body.dark-mode .badge,
+body.dark-mode [class*="badge"] {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Dark Mode: Improve link contrast in cards */
+body.dark-mode .card a:not(.btn) {
+    color: #ffffff !important; /* White instead of blue */
+}
+
+body.dark-mode .card a:not(.btn):hover {
+    color: #f3f4f6 !important; /* Light gray on hover for subtle effect */
+}
+
+/* Dark Mode: Better table row separators */
+body.dark-mode tbody tr {
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* Dark Mode: Improved focus states for accessibility */
+body.dark-mode input:focus,
+body.dark-mode select:focus,
+body.dark-mode textarea:focus,
+body.dark-mode button:focus,
+body.dark-mode a:focus {
+    outline-color: rgba(59, 130, 246, 0.5);
+}
+
+/* Dark Mode: Better visibility for muted text */
+body.dark-mode .text-muted,
+body.dark-mode [class*="text-muted"] {
+    color: #9ca3af;
+}
+
+/* Dark Mode: Ensure form validation colors are visible */
+body.dark-mode .border-red-500 {
+    border-color: #ef4444 !important;
+}
+
+body.dark-mode .border-green-500 {
+    border-color: #22c55e !important;
+}
+
+body.dark-mode .text-red-500 {
+    color: #fca5a5 !important;
+}
+
+body.dark-mode .text-green-500 {
+    color: #86efac !important;
+}
+
+/* ========================================
+   ENHANCED DESIGN SYSTEM 2026
+   ======================================== */
+
+/* Premium Card Styles */
+.card {
+    background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    transition: all var(--transition-slow);
+    position: relative;
+    overflow: hidden;
+}
+
+.card::before {
+    /* Animated gradient top border - reveals on hover */
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--ibc-green), var(--ibc-blue));
+    opacity: 0;
+    transition: opacity var(--transition-normal);
+}
+
+/* Light Mode: Subtle inner glow effect for depth perception */
+body:not(.dark-mode) .card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: var(--radius-lg);
+    background: radial-gradient(circle at top left, rgba(0, 166, 81, 0.03) 0%, transparent 50%);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity var(--transition-slow);
+}
+
+.card:hover {
+    box-shadow: var(--shadow-card-hover);
+    transform: translateY(-5px);
+    border-color: rgba(0, 102, 179, 0.12);
+}
+
+.card:hover::before {
+    opacity: 1;
+}
+
+body:not(.dark-mode) .card:hover::after {
+    opacity: 1;
+}
+
+/* Sidebar Navigation Links - Modern Style */
+.sidebar nav a {
+    border-radius: 8px;
+    margin: 2px 12px;
+    padding: 10px 20px !important;
+    font-size: 0.9rem;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    line-height: 1.65;
+    transition: all 0.3s ease;
+    position: relative;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    text-align: left !important;
+    overflow: hidden;
+}
+
+.sidebar nav a:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+    backdrop-filter: blur(4px);
+    border-radius: 8px !important;
+    transform: translateX(4px);
+}
+
+.sidebar nav a.active,
+.sidebar nav a[class*="bg-white/20"] {
+    background: rgba(255, 255, 255, 0.12) !important;
+    border-right: none !important;
+    border-left: 4px solid var(--ibc-blue-light) !important;
+    border-radius: 8px !important;
+    color: #ffffff !important;
+}
+
+.sidebar nav a i,
+.sidebar nav a svg {
+    width: 25px;
+    text-align: center;
+    font-size: 1.1rem;
+    opacity: 0.85;
+    margin-right: 12px;
+    flex-shrink: 0;
+    transition: opacity var(--transition-fast);
+}
+
+.sidebar nav a:hover i {
+    opacity: 1;
+}
+
+/* Global: remove text-decoration from sidebar links and sidebar buttons */
+.sidebar a,
+.sidebar button {
+    text-decoration: none !important;
+}
+
+/* Remove text-decoration from anchor-styled buttons globally */
+a.btn,
+a.btn-primary,
+a.btn-secondary {
+    text-decoration: none !important;
+}
+
+/* Sidebar nav-link: rounded corners, hover effect, and smooth transition */
+.sidebar .nav-link {
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    font-weight: 400;
+    text-align: left;
+}
+
+.sidebar .nav-link:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+    backdrop-filter: blur(4px);
+}
+
+.sidebar .nav-link i,
+.sidebar .nav-link svg {
+    width: 25px;
+    text-align: center;
+    font-size: 1.1rem;
+    opacity: 0.85;
+    margin-right: 12px;
+    flex-shrink: 0;
+    transition: opacity var(--transition-fast);
+}
+
+
+/* Sidebar section labels: left-aligned */
+.sidebar p {
+    text-align: left !important;
+}
+
+/* Sidebar profile section: left-aligned in both light and dark mode */
+.sidebar .mt-auto {
+    text-align: left !important;
+}
+.sidebar .mt-auto p,
+.sidebar .mt-auto a,
+.sidebar .mt-auto button {
+    text-align: left !important;
+}
+
+/* Premium Button System */
+.btn-primary {
+    background: linear-gradient(135deg, var(--ibc-blue-light) 0%, var(--ibc-blue) 50%, var(--ibc-blue-dark) 100%);
+    background-size: 200% 200%;
+    animation: gradientShift 6s ease infinite;
+    color: #ffffff !important;
+    padding: 0.75rem 2rem;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    box-shadow: 0 4px 15px rgba(0, 102, 179, 0.35);
+    transition: all var(--transition-normal);
+    border: none;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Light Mode: Button ripple effect on click */
+body:not(.dark-mode) .btn-primary::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+/* Note: Fixed 300px works for most buttons; scales better than percentage for ripple effect */
+body:not(.dark-mode) .btn-primary:active::after {
+    width: 300px;
+    height: 300px;
+    transition: width 0s, height 0s;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 102, 179, 0.45);
+    background-size: 200% 200%;
+    filter: brightness(1.05);
+}
+
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Premium Login Button - Deep Purple to Blue Gradient */
+.btn-login-premium {
+    /* Typography */
+    font-weight: bold;
+    color: #ffffff !important;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    
+    /* Background - Modern gradient from deep purple to blue */
+    background: linear-gradient(135deg, #6B46C1 0%, #4C1D95 25%, #1E3A8A 75%, #1E40AF 100%);
+    background-size: 200% 200%;
+    background-position: 0% 50%;
+    
+    /* Layout */
+    padding: 0.75rem 2rem;
+    border-radius: var(--radius-md);
+    border: none;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    
+    /* Transitions - Smooth animations */
+    transition: transform 0.3s ease-in-out, 
+                background-position 0.3s ease-in-out, 
+                box-shadow 0.3s ease-in-out;
+    
+    /* Initial shadow */
+    box-shadow: 0 4px 15px rgba(107, 70, 193, 0.3);
+}
+
+/* Hover and Focus States - Scale up and add glow effect */
+.btn-login-premium:hover,
+.btn-login-premium:focus {
+    transform: scale(1.02);
+    background-position: 100% 50%;
+    
+    /* Glow effect on hover and focus */
+    box-shadow: 
+        0 0 20px rgba(107, 70, 193, 0.6),
+        0 0 40px rgba(30, 58, 138, 0.4),
+        0 8px 25px rgba(107, 70, 193, 0.4);
+}
+
+/* Focus state - Add outline for accessibility */
+.btn-login-premium:focus {
+    outline: 2px solid rgba(107, 70, 193, 0.5);
+    outline-offset: 2px;
+}
+
+/* Active (Click) State - Press down effect */
+.btn-login-premium:active {
+    transform: scale(0.98);
+    box-shadow: 
+        0 2px 8px rgba(107, 70, 193, 0.4),
+        inset 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: transform 0.1s ease-in-out, 
+                box-shadow 0.1s ease-in-out;
+}
+
+/* Microsoft Login Button - Official Branding */
+.microsoft-btn {
+    background-color: #2F2F2F !important;
+    color: white !important;
+    border: 1.5px solid rgba(255, 255, 255, 0.08) !important;
+    transition: all 0.3s ease !important;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 
+        0 4px 12px rgba(0, 0, 0, 0.4),
+        0 8px 24px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+}
+
+.microsoft-btn:hover {
+    background-color: #1a1a1a !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 
+        0 6px 16px rgba(0, 0, 0, 0.45),
+        0 12px 32px rgba(0, 0, 0, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+}
+
+.microsoft-btn:active {
+    transform: translateY(0) !important;
+    box-shadow: 
+        0 2px 8px rgba(0, 0, 0, 0.4),
+        0 4px 16px rgba(0, 0, 0, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+}
+
+/* Override any global button/anchor styles that might conflict */
+a.microsoft-btn {
+    text-decoration: none !important;
+}
+
+/* Ripple effect for login button */
+.ripple {
+    position: absolute;
+    border-radius: 50%;
+    transform: scale(0);
+    animation: ripple 0.6s linear;
+    background: rgba(255, 255, 255, 0.7);
+}
+
+@keyframes ripple {
+    from {
+        transform: scale(0);
+        opacity: 1;
+    }
+    to {
+        transform: scale(4);
+        opacity: 0;
+    }
+}
+
+/* ============================================
+   LOGIN PAGE LAYOUT STYLES
+   ============================================ */
+
+/* Login Page Wrapper - Full viewport with dark gradient background */
+.login-page-wrapper {
+    min-height: 100vh;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: 
+        linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)),
+        url('../img/login-bg.webp'),
+        linear-gradient(135deg, #0a1628 0%, #1a3a2e 25%, #0f1f1a 50%, #0a0f1e 100%);
+    background-size: cover, cover, 400% 400%;
+    background-position: center, center, 0% 50%;
+    background-repeat: no-repeat, no-repeat, no-repeat;
+    animation: gradientShiftLogin 20s ease infinite;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Animated gradient background for login page */
+@keyframes gradientShiftLogin {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* Optional: Add subtle particles or mesh effect */
+.login-page-wrapper::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        radial-gradient(circle at 20% 30%, rgba(108, 183, 62, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(108, 183, 62, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(100, 100, 100, 0.03) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+/* Login Container - Centered with fixed width */
+.login-container {
+    max-width: 450px;
+    margin: 0 auto;
+    padding: 3rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    z-index: 10;
+}
+
+/* Login Footer - High contrast and centered */
+.login-footer {
+    text-align: center;
+    margin-top: 2rem;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.9);
+    /* Color is set inline in login.php for proper contrast on dark background */
+}
+
+/* Logo Container - Centered with floating animation */
+.logo-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+/* Logo styles */
+.logo-wrapper {
+    width: 200px;
+    height: auto;
+    filter: drop-shadow(0 4px 12px rgba(255, 255, 255, 0.1));
+}
+
+.ibc-logo {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Apply floating animation only when user has no motion preference */
+@media (prefers-reduced-motion: no-preference) {
+    .logo-container {
+        animation: float 3s ease-in-out infinite;
+    }
+}
+
+/* Floating animation for logo */
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+/* Welcome Text - Centered with styled heading and subtitle */
+.welcome-text {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.welcome-text h1,
+.welcome-text .welcome-title {
+    font-weight: 700;
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    color: rgba(255, 255, 255, 0.95);
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.welcome-text p,
+.welcome-text .welcome-subtitle {
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 1rem;
+    margin: 0;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 640px) {
+    .login-container {
+        padding: 2rem 1.5rem;
+    }
+    
+    .welcome-text h1,
+    .welcome-text .welcome-title {
+        font-size: 1.75rem;
+    }
+}
+
+/* ============================================
+   END LOGIN PAGE LAYOUT STYLES
+   ============================================ */
+
+/* Enhanced Form Inputs */
+input:not([type="checkbox"]):not([type="radio"]),
+select,
+textarea {
+    border-radius: var(--radius-md) !important;
+    padding: 0.75rem 1rem;
+    border: 2px solid var(--ibc-gray-200);
+    transition: all var(--transition-normal);
+    font-size: 0.95rem;
+    background: var(--bg-card);
+}
+
+/* Light Mode: Input focus with enhanced glow */
+body:not(.dark-mode) input:not([type="checkbox"]):not([type="radio"]):focus,
+body:not(.dark-mode) select:focus,
+body:not(.dark-mode) textarea:focus {
+    border-color: var(--ibc-blue);
+    box-shadow: 0 0 0 4px rgba(0, 102, 179, 0.1), 0 4px 12px rgba(0, 102, 179, 0.08);
+    outline: none;
+    transform: translateY(-1px);
+}
+
+input:not([type="checkbox"]):not([type="radio"]):focus,
+select:focus,
+textarea:focus {
+    border-color: var(--ibc-blue);
+    box-shadow: 0 0 0 4px rgba(0, 102, 179, 0.1);
+    outline: none;
+}
+
+/* Section Headers */
+h1 {
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    line-height: 1.2;
+}
+
+h2 {
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.3;
+}
+
+h3 {
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+
+/* Animated Page Entrance */
+main > .animated-entrance,
+main > .card {
+    animation: fadeSlideUp 0.5s ease-out;
+}
+
+@keyframes fadeSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Light Mode: Pulsing status indicators */
+@keyframes pulse-glow {
+    0%, 100% {
+        opacity: 1;
+        box-shadow: 0 0 8px currentColor;
+    }
+    50% {
+        opacity: 0.6;
+        box-shadow: 0 0 16px currentColor;
+    }
+}
+
+body:not(.dark-mode) .status-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    animation: pulse-glow 2s ease-in-out infinite;
+}
+
+body:not(.dark-mode) .status-indicator.status-success {
+    background-color: var(--ibc-success);
+    color: var(--ibc-success);
+}
+
+body:not(.dark-mode) .status-indicator.status-warning {
+    background-color: var(--ibc-warning);
+    color: var(--ibc-warning);
+}
+
+body:not(.dark-mode) .status-indicator.status-error {
+    background-color: var(--ibc-error);
+    color: var(--ibc-error);
+}
+
+body:not(.dark-mode) .status-indicator.status-info {
+    background-color: var(--ibc-info);
+    color: var(--ibc-info);
+}
+
+/* Dark Mode: Status indicators with glow effect */
+.dark-mode .status-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.dark-mode .status-indicator.status-success {
+    background-color: var(--ibc-success);
+    color: var(--ibc-success);
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+}
+
+.dark-mode .status-indicator.status-warning {
+    background-color: var(--ibc-warning);
+    color: var(--ibc-warning);
+    box-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
+}
+
+.dark-mode .status-indicator.status-error {
+    background-color: var(--ibc-error);
+    color: var(--ibc-error);
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.6);
+}
+
+.dark-mode .status-indicator.status-info {
+    background-color: var(--ibc-info);
+    color: var(--ibc-info);
+    box-shadow: 0 0 8px rgba(59, 130, 246, 0.6);
+}
+
+/* Staggered list animations - supports up to 8 items (both light and dark mode) */
+/* Note: For lists with more items, consider using JavaScript-based approach */
+.staggered-list > * {
+    animation: fadeSlideUp 0.5s ease-out backwards;
+}
+
+.staggered-list > *:nth-child(1) { animation-delay: 0.05s; }
+.staggered-list > *:nth-child(2) { animation-delay: 0.1s; }
+.staggered-list > *:nth-child(3) { animation-delay: 0.15s; }
+.staggered-list > *:nth-child(4) { animation-delay: 0.2s; }
+.staggered-list > *:nth-child(5) { animation-delay: 0.25s; }
+.staggered-list > *:nth-child(6) { animation-delay: 0.3s; }
+.staggered-list > *:nth-child(7) { animation-delay: 0.35s; }
+.staggered-list > *:nth-child(8) { animation-delay: 0.4s; }
+
+/* Improved Table Design */
+table {
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+th {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 1rem 1.25rem;
+}
+
+/* Light Mode: Enhanced table header */
+body:not(.dark-mode) th {
+    background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+    border-bottom: 2px solid var(--ibc-gray-300);
+    font-weight: 700;
+}
+
+/* Dark Mode: Enhanced table header */
+.dark-mode th {
+    background: linear-gradient(135deg, #1a1f2e 0%, #242938 100%);
+    border-bottom: 2px solid var(--border-color);
+    font-weight: 700;
+}
+
+td {
+    padding: 0.875rem 1.25rem;
+}
+
+tbody tr {
+    transition: all var(--transition-fast);
+}
+
+/* Light Mode: Enhanced row hover */
+body:not(.dark-mode) tbody tr:hover {
+    background: linear-gradient(90deg, rgba(0, 102, 179, 0.04) 0%, rgba(0, 166, 81, 0.04) 100%);
+    transform: scale(1.005);
+}
+
+/* Dark Mode: Enhanced row hover */
+.dark-mode tbody tr:hover {
+    background: linear-gradient(90deg, rgba(51, 133, 196, 0.08) 0%, rgba(51, 184, 114, 0.08) 100%);
+    transform: scale(1.005);
+}
+
+tbody tr:hover {
+    background-color: rgba(0, 102, 179, 0.04);
+}
+
+/* Badge/Tag Enhancements */
+.badge,
+[class*="rounded-full"][class*="text-xs"],
+[class*="rounded-full"][class*="text-sm"] {
+    font-weight: 600;
+    letter-spacing: 0.03em;
+}
+
+/* Light Mode: Glassmorphism effect for special cards */
+body:not(.dark-mode) .glass-effect {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 102, 179, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+}
+
+/* Dark Mode: Glassmorphism effect for special cards */
+.dark-mode .glass-effect {
+    background: rgba(26, 31, 46, 0.8);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(51, 133, 196, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+/* Elevated cards - Common positioning */
+.card-elevated {
+    position: relative;
+}
+
+/* Light Mode: Elevated cards with premium effect */
+body:not(.dark-mode) .card-elevated {
+    background: linear-gradient(135deg, #ffffff 0%, #fafbfc 100%);
+    box-shadow: var(--shadow-elevated);
+    border: 1px solid rgba(0, 102, 179, 0.08);
+}
+
+/* Dark Mode: Elevated cards with premium effect */
+.dark-mode .card-elevated {
+    background: linear-gradient(135deg, #1a1f2e 0%, #242938 100%);
+    box-shadow: var(--shadow-elevated);
+    border: 1px solid rgba(51, 133, 196, 0.15);
+}
+
+/* Card elevated - Common pseudo-element styling */
+.card-elevated::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: var(--radius-lg);
+    padding: 1px;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity var(--transition-normal);
+}
+
+/* Light Mode: Gradient border effect - Green to Blue */
+body:not(.dark-mode) .card-elevated::before {
+    /* Gradient border effect using mask composite technique:
+     * Creates a 1px gradient border by masking out the content area,
+     * revealing only the border region with green-to-blue gradient */
+    background: linear-gradient(135deg, var(--ibc-green), var(--ibc-blue));
+}
+
+/* Dark Mode: Gradient border effect - Lighter shades for visibility */
+.dark-mode .card-elevated::before {
+    background: linear-gradient(135deg, var(--ibc-green-light), var(--ibc-blue-light));
+}
+
+body:not(.dark-mode) .card-elevated:hover::before {
+    opacity: 0.5;
+}
+
+.dark-mode .card-elevated:hover::before {
+    opacity: 0.7;
+}
+
+/* Smooth Scrollbar for the whole page */
+html {
+    scroll-behavior: smooth;
+    color-scheme: light;
+}
+
+.dark-mode {
+    color-scheme: dark;
+}
+
+/* Focus Visible for Accessibility */
+:focus-visible {
+    outline: 2px solid var(--ibc-blue);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+/* Selection Colors */
+::selection {
+    background-color: rgba(0, 166, 81, 0.2);
+    color: inherit;
+}
+
+/* Stat Widget Icon Backgrounds */
+.stat-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    transition: transform var(--transition-normal);
+}
+
+.card:hover .stat-icon {
+    transform: scale(1.1) rotate(-5deg);
+}
+
+/* Dark Mode Enhanced Card */
+body.dark-mode .card::before {
+    background: linear-gradient(90deg, var(--ibc-green-light), var(--ibc-blue-light));
+}
+
+body.dark-mode .card:hover {
+    border-color: rgba(51, 133, 196, 0.3);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2), 0 20px 40px rgba(0,0,0,0.3);
+}
+
+/* Dark Mode Sidebar - Dark gray with subtle contrast */
+body.dark-mode .sidebar {
+    background: var(--sidebar-bg-dark) !important;
+}
+
+/* Improved Transitions for Theme Switch */
+.card, .sidebar, .sidebar a, input, select, textarea, button, a, main {
+    transition: background-color 250ms ease, border-color 250ms ease, color 250ms ease, box-shadow 250ms ease;
+}
+
+/* Loading skeleton animation */
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+.skeleton {
+    background: linear-gradient(90deg, var(--ibc-gray-200) 25%, var(--ibc-gray-100) 50%, var(--ibc-gray-200) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: var(--radius-sm);
+}
+
+/* ========================================
+   PERFECT RESPONSIVE DESIGN SYSTEM 2026
+   Mobile-First Approach
+   ======================================== */
+
+/* Base Mobile Styles (0-640px) - Mobile First */
+@media (max-width: 640px) {
+    /* Typography - Better readability on small screens */
+    body {
+        font-size: 0.9375rem; /* 15px */
+        line-height: 1.6;
+    }
+    
+    h1 {
+        font-size: 1.75rem !important; /* 28px */
+        line-height: 1.2;
+        margin-bottom: 1rem;
+    }
+    
+    h2 {
+        font-size: 1.5rem !important; /* 24px */
+        line-height: 1.3;
+        margin-bottom: 0.875rem;
+    }
+    
+    h3 {
+        font-size: 1.25rem !important; /* 20px */
+        line-height: 1.4;
+        margin-bottom: 0.75rem;
+    }
+    
+    /* Card Improvements - Better mobile spacing */
+    .card {
+        padding: 1rem !important;
+        margin-bottom: 1rem;
+        border-radius: var(--radius-md) !important;
+    }
+    
+    .card:hover {
+        transform: translateY(-2px); /* Less movement on mobile */
+    }
+    
+    /* Button Optimizations - Larger touch targets */
+    /* Only make primary buttons and button links full-width on mobile */
+    .btn-primary,
+    a.btn {
+        min-height: 44px; /* iOS recommended touch target */
+        padding: 0.75rem 1.5rem !important;
+        font-size: 1rem;
+        width: 100%;
+        display: block;
+        text-align: center;
+        margin-bottom: 0.5rem;
+    }
+
+    /* Ensure all interactive elements meet touch target minimum */
+    button {
+        min-height: 44px;
+    }
+    
+    /* Form Elements - Better mobile UX */
+    input:not([type="checkbox"]):not([type="radio"]),
+    select,
+    textarea {
+        font-size: 16px !important; /* Prevents iOS zoom */
+        min-height: 44px;
+        padding: 0.75rem !important;
+        width: 100%;
+        border-radius: var(--radius-sm) !important;
+    }
+    
+    /* Tables - Horizontal scroll with better visibility */
+    table {
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        white-space: nowrap;
+        border-radius: var(--radius-md);
+    }
+    
+    th, td {
+        padding: 0.75rem 0.875rem !important;
+        font-size: 0.875rem;
+    }
+    
+    /* Flex containers - Stack vertically on mobile */
+    .flex.space-x-2,
+    .flex.space-x-3,
+    .flex.space-x-4 {
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .flex.space-x-2 > *,
+    .flex.space-x-3 > *,
+    .flex.space-x-4 > * {
+        width: 100%;
+        margin: 0 !important;
+    }
+    
+    /* Grid Improvements - Single column on mobile */
+    .grid:not(.grid-no-stack):not(.grid-cols-1) {
+        grid-template-columns: 1fr !important;
+        gap: 1rem !important;
+    }
+    
+    /* Image Optimization */
+    img {
+        max-width: 100%;
+        height: auto;
+        border-radius: var(--radius-sm);
+    }
+    
+    /* Main Content Area - Better mobile spacing */
+    main {
+        padding: 1rem 1.5rem !important;
+        padding-top: 5rem !important; /* Space for mobile header */
+    }
+    
+    /* Modal/Dialog - Full screen on mobile */
+    .modal,
+    [role="dialog"] {
+        width: 100% !important;
+        height: 100vh !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+    }
+    
+    /* Stats Cards - Better mobile layout */
+    .stat-icon {
+        width: 48px !important;
+        height: 48px !important;
+        font-size: 1.25rem !important;
+    }
+    
+    /* Navigation - Mobile optimized */
+    .sidebar nav a {
+        padding: 0.875rem 1rem !important;
+        font-size: 0.9375rem;
+    }
+    
+    /* Badges - Larger for readability */
+    .badge,
+    [class*="badge"] {
+        padding: 0.375rem 0.75rem !important;
+        font-size: 0.8125rem !important;
+    }
+}
+
+/* Small Tablets (641px - 768px) */
+@media (min-width: 641px) and (max-width: 768px) {
+    body {
+        font-size: 1rem;
+    }
+    
+    h1 {
+        font-size: 2rem !important;
+    }
+    
+    h2 {
+        font-size: 1.625rem !important;
+    }
+    
+    h3 {
+        font-size: 1.375rem !important;
+    }
+    
+    .card {
+        padding: 1.25rem !important;
+    }
+    
+    .grid:not(.grid-cols-1) {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+    
+    main {
+        padding: 1.5rem !important;
+        padding-top: 5rem !important;
+    }
+    
+    /* Buttons can be inline on small tablets */
+    .btn-primary,
+    button:not(.w-full),
+    a.btn:not(.w-full) {
+        width: auto;
+        display: inline-block;
+    }
+}
+
+/* Tablets (768px - 1024px) */
+@media (min-width: 768px) and (max-width: 1024px) {
+    body {
+        font-size: 1rem;
+    }
+    
+    .card {
+        padding: 1.5rem !important;
+    }
+    
+    .grid:not(.grid-cols-1) {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+    
+    main {
+        padding: 1.75rem !important;
+        padding-top: 1.75rem !important;
+    }
+    
+    /* Sidebar visible but narrower - matches md:ml-64 (256px) offset on main content */
+    .sidebar {
+        width: 16rem !important;
+    }
+}
+
+/* Desktop (1025px - 1280px) */
+@media (min-width: 1025px) and (max-width: 1280px) {
+    .card {
+        padding: 1.75rem !important;
+    }
+    
+    main {
+        padding: 2rem !important;
+    }
+    
+    .grid.grid-cols-3 {
+        grid-template-columns: repeat(3, 1fr) !important;
+    }
+}
+
+/* Large Desktop (1281px+) */
+@media (min-width: 1281px) {
+    .card {
+        padding: 2rem !important;
+    }
+    
+    main {
+        padding: 2.5rem !important;
+    }
+    
+    .container {
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+}
+
+/* Landscape Mobile Optimization */
+@media (max-height: 500px) and (orientation: landscape) {
+    /* Compact header on landscape mobile */
+    .sidebar {
+        width: 14rem !important;
+    }
+    
+    .sidebar nav a {
+        padding: 0.5rem 1rem !important;
+        font-size: 0.875rem;
+    }
+    
+    main {
+        padding-top: 1rem !important;
+    }
+}
+
+/* High Resolution Displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    /* Sharper borders and shadows */
+    .card {
+        border-width: 0.5px;
+    }
+    
+    body {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+}
+
+/* Touch Device Optimizations */
+@media (hover: none) and (pointer: coarse) {
+    /* Larger touch targets for touch devices */
+    a, button, input, select, textarea {
+        min-height: 44px;
+    }
+    
+    /* Remove hover effects on touch devices */
+    .card:hover {
+        transform: none;
+    }
+    
+    /* Better tap feedback */
+    a:active, button:active {
+        opacity: 0.7;
+        transform: scale(0.98);
+    }
+}
+
+/* Reduced Motion Preference */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Print Styles */
+@media print {
+    /* Hide navigation and interactive elements */
+    .sidebar,
+    #mobile-menu-btn,
+    #sidebar-overlay,
+    button,
+    nav {
+        display: none !important;
+    }
+    
+    /* Optimize content for print */
+    body {
+        background: white !important;
+        color: black !important;
+    }
+    
+    .card {
+        break-inside: avoid;
+        border: 1px solid #000;
+        box-shadow: none;
+    }
+    
+    main {
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    
+    /* Show links as text */
+    a::after {
+        content: " (" attr(href) ")";
+        font-size: 0.8em;
+    }
+}
+
+/* ========================================
+   UTILITY CLASSES & POLISH
+   ======================================== */
+
+/* Container utilities */
+.container-fluid {
+    width: 100%;
+    padding-right: 1rem;
+    padding-left: 1rem;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+.container-narrow {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+/* Responsive spacing utilities */
+.section-padding {
+    padding: 2rem 1rem;
+}
+
+@media (min-width: 768px) {
+    .section-padding {
+        padding: 3rem 1.5rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .section-padding {
+        padding: 4rem 2rem;
+    }
+}
+
+/* Responsive text utilities */
+.text-responsive-xs {
+    font-size: 0.75rem;
+}
+
+.text-responsive-sm {
+    font-size: 0.875rem;
+}
+
+.text-responsive-base {
+    font-size: 1rem;
+}
+
+@media (min-width: 768px) {
+    .text-responsive-xs { font-size: 0.8125rem; }
+    .text-responsive-sm { font-size: 0.9375rem; }
+    .text-responsive-base { font-size: 1.0625rem; }
+}
+
+/* Enhanced animations */
+@keyframes slideInFromLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInFromRight {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideInFromBottom {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes pulse-subtle {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.8;
+    }
+}
+
+/* Animation classes */
+.animate-slide-in-left {
+    animation: slideInFromLeft 0.5s ease-out;
+}
+
+.animate-slide-in-right {
+    animation: slideInFromRight 0.5s ease-out;
+}
+
+.animate-slide-in-bottom {
+    animation: slideInFromBottom 0.5s ease-out;
+}
+
+.animate-scale-in {
+    animation: scaleIn 0.4s ease-out;
+}
+
+.animate-pulse-subtle {
+    animation: pulse-subtle 2s ease-in-out infinite;
+}
+
+/* Stagger animation for lists */
+.stagger-item {
+    opacity: 0;
+    animation: fadeSlideUp 0.5s ease-out forwards;
+}
+
+.stagger-item:nth-child(1) { animation-delay: 0.05s; }
+.stagger-item:nth-child(2) { animation-delay: 0.1s; }
+.stagger-item:nth-child(3) { animation-delay: 0.15s; }
+.stagger-item:nth-child(4) { animation-delay: 0.2s; }
+.stagger-item:nth-child(5) { animation-delay: 0.25s; }
+.stagger-item:nth-child(6) { animation-delay: 0.3s; }
+
+/* Smooth reveal on scroll */
+.reveal-on-scroll {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.reveal-on-scroll.revealed {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Glass morphism effect */
+.glass {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+body.dark-mode .glass {
+    background: rgba(30, 41, 59, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Gradient text */
+.gradient-text {
+    background: linear-gradient(135deg, var(--ibc-green), var(--ibc-blue));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Loading spinner */
+.spinner {
+    border: 3px solid rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    border-top-color: var(--ibc-blue);
+    width: 40px;
+    height: 40px;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Better focus states for accessibility */
+*:focus-visible {
+    outline: 2px solid var(--ibc-blue);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+/* Truncate text utilities */
+.truncate-1 {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.truncate-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.truncate-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* Responsive visibility utilities */
+.mobile-only {
+    display: block;
+}
+
+.tablet-up {
+    display: none;
+}
+
+@media (min-width: 768px) {
+    .mobile-only {
+        display: none;
+    }
+    
+    .tablet-up {
+        display: block;
+    }
+}
+
+.desktop-only {
+    display: none;
+}
+
+@media (min-width: 1024px) {
+    .desktop-only {
+        display: block;
+    }
+}
+
+/* Aspect ratio utilities */
+.aspect-square {
+    aspect-ratio: 1 / 1;
+}
+
+.aspect-video {
+    aspect-ratio: 16 / 9;
+}
+
+.aspect-portrait {
+    aspect-ratio: 3 / 4;
+}
+
+/* Better image loading */
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+img[loading="lazy"] {
+    background: linear-gradient(90deg, var(--ibc-gray-200) 25%, var(--ibc-gray-100) 50%, var(--ibc-gray-200) 75%);
+    background-size: 200% 100%;
+}
+
+/* Scroll snap for carousels */
+.scroll-snap-x {
+    scroll-snap-type: x mandatory;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.scroll-snap-item {
+    scroll-snap-align: start;
+}
+
+/* Better scrollbars */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: var(--ibc-gray-100);
+    border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: var(--ibc-gray-400);
+    border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: var(--ibc-gray-500);
+}
+
+body.dark-mode .custom-scrollbar::-webkit-scrollbar-track {
+    background: var(--bg-card);
+}
+
+body.dark-mode .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: var(--ibc-gray-600);
+}
+
+/* Status indicators */
+.status-online {
+    position: relative;
+}
+
+.status-online::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 10px;
+    height: 10px;
+    background: var(--ibc-success);
+    border: 2px solid var(--bg-card);
+    border-radius: 50%;
+}
+
+/* Better button states */
+button:disabled,
+a.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* Tooltip base styles */
+[data-tooltip] {
+    position: relative;
+    cursor: help;
+}
+
+[data-tooltip]::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 0.5rem 0.75rem;
+    background: var(--ibc-gray-900);
+    color: white;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    border-radius: var(--radius-sm);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    margin-bottom: 0.5rem;
+}
+
+[data-tooltip]:hover::after {
+    opacity: 1;
+}
+
+/* Accessibility - Skip to content */
+.skip-to-content {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: var(--ibc-blue);
+    color: white;
+    padding: 0.5rem 1rem;
+    text-decoration: none;
+    border-radius: 0 0 var(--radius-sm) 0;
+    z-index: 100;
+}
+
+.skip-to-content:focus {
+    top: 0;
+}
+
+/* Perfect end of file */
+
+/* ============================================
+   PERFECT DARK MODE ENHANCEMENTS
+   ============================================ */
+
+/* Dark Mode: Enhanced Gradient Sections */
+body.dark-mode .bg-gradient-to-r,
+body.dark-mode .bg-gradient-to-br,
+body.dark-mode [class*="bg-gradient"] {
+    position: relative;
+}
+
+/* Dark mode hero gradient override */
+body.dark-mode [class*="from-blue-"]:not(.from-blue-50) {
+    background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #1e3a8a 100%) !important;
+}
+
+body.dark-mode [class*="from-green-"]:not(.from-green-50) {
+    background: linear-gradient(135deg, #065f46 0%, #047857 50%, #065f46 100%) !important;
+}
+
+/* Dark Mode: Better Button Styles */
+body.dark-mode .btn-primary {
+    background: linear-gradient(135deg, var(--ibc-blue) 0%, var(--ibc-blue-dark) 50%, var(--ibc-blue-darker) 100%);
+    box-shadow: 0 4px 20px rgba(0, 102, 179, 0.45), 0 2px 8px rgba(0, 102, 179, 0.3);
+    color: #ffffff !important;
+}
+
+body.dark-mode .btn-primary:hover {
+    box-shadow: 0 8px 32px rgba(0, 102, 179, 0.55), 0 4px 16px rgba(0, 102, 179, 0.4);
+    transform: translateY(-2px);
+}
+
+/* Dark Mode: Button ripple effect on click */
+body.dark-mode .btn-primary::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+body.dark-mode .btn-primary:active::after {
+    width: 300px;
+    height: 300px;
+    transition: width 0s, height 0s;
+}
+
+body.dark-mode .btn,
+body.dark-mode button:not(.bg-transparent) {
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    color: #ffffff !important;
+}
+
+body.dark-mode .btn-primary,
+body.dark-mode .btn-secondary,
+body.dark-mode .btn-login-premium {
+    border-color: rgba(255, 255, 255, 0.1) !important;
+    color: #ffffff !important;
+}
+
+/* Dark Mode: Enhanced borders for better structure */
+body.dark-mode .border {
+    border-color: var(--border-color) !important;
+}
+
+body.dark-mode .border-t,
+body.dark-mode .border-b,
+body.dark-mode .border-l,
+body.dark-mode .border-r {
+    border-color: var(--border-color) !important;
+}
+
+body.dark-mode .divide-y > * {
+    border-color: var(--border-color) !important;
+}
+
+/* Dark Mode: Better separation for list items */
+body.dark-mode .space-y-4 > *:not(:last-child),
+body.dark-mode .space-y-6 > *:not(:last-child) {
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 1rem;
+    margin-bottom: 1rem !important;
+}
+
+/* Dark Mode: Enhanced shadows for depth */
+body.dark-mode .shadow-sm {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.24) !important;
+}
+
+body.dark-mode .shadow {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4), 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+}
+
+body.dark-mode .shadow-md {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.35) !important;
+}
+
+body.dark-mode .shadow-lg {
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45), 0 12px 32px rgba(0, 0, 0, 0.4) !important;
+}
+
+body.dark-mode .shadow-xl {
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5), 0 16px 48px rgba(0, 0, 0, 0.45) !important;
+}
+
+body.dark-mode .shadow-2xl {
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.55), 0 24px 64px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Dark Mode: Card gradient backgrounds for visual interest */
+body.dark-mode .card:not(.no-gradient) {
+    background: linear-gradient(145deg, #1a1f2e 0%, #141822 100%) !important;
+}
+
+/* Dark Mode: Better colored cards */
+body.dark-mode .bg-gradient-to-br.from-white {
+    background: linear-gradient(to bottom right, var(--bg-card) 0%, var(--bg-body) 100%) !important;
+}
+
+body.dark-mode .bg-gradient-to-br.from-white.to-orange-50 {
+    background: linear-gradient(to bottom right, #2a1f1a 0%, #1a1410 100%) !important;
+}
+
+body.dark-mode .bg-gradient-to-br.from-white.to-blue-50 {
+    background: linear-gradient(to bottom right, #1a1f2e 0%, #141822 100%) !important;
+}
+
+body.dark-mode .bg-gradient-to-br.from-white.to-green-50 {
+    background: linear-gradient(to bottom right, #1a251f 0%, #14181a 100%) !important;
+}
+
+body.dark-mode .bg-gradient-to-br.from-white.to-purple-50 {
+    background: linear-gradient(to bottom right, #211a2e 0%, #181422 100%) !important;
+}
+
+body.dark-mode .bg-gradient-to-br.from-white.to-gray-50 {
+    background: linear-gradient(to bottom right, #1e1e1e 0%, #141414 100%) !important;
+}
+
+/* Dark Mode: Improve icon visibility */
+body.dark-mode i,
+body.dark-mode .fa,
+body.dark-mode [class*="fas"],
+body.dark-mode [class*="far"] {
+    opacity: 0.95;
+}
+
+/* Dark Mode: Better badge/tag styling */
+body.dark-mode .badge,
+body.dark-mode .tag {
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Dark Mode: Perfect text colors for specific elements */
+body.dark-mode .text-ibc-blue {
+    color: #ffffff !important; /* White instead of blue for better contrast on dark backgrounds */
+}
+
+body.dark-mode .text-green-600 {
+    color: #4ade80 !important; /* green-400 */
+}
+
+body.dark-mode .text-orange-600 {
+    color: #fb923c !important; /* orange-400 */
+}
+
+body.dark-mode .text-purple-600 {
+    color: #c084fc !important; /* purple-400 */
+}
+
+body.dark-mode .text-red-600 {
+    color: #f87171 !important; /* red-400 */
+}
+
+body.dark-mode .text-yellow-600 {
+    color: #fbbf24 !important; /* yellow-400 */
+}
+
+/* Dark Mode: Enhanced hover states */
+body.dark-mode a:hover:not(.btn):not(.no-hover) {
+    color: #ffffff !important; /* White instead of blue on hover */
+}
+
+body.dark-mode p a:hover {
+    text-decoration: underline;
+    text-decoration-color: rgba(255, 255, 255, 0.5);
+}
+
+body.dark-mode .hover\:shadow-2xl:hover {
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6), 0 20px 40px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Dark Mode: Perfect modal/overlay styling */
+body.dark-mode .modal,
+body.dark-mode .overlay {
+    background-color: rgba(10, 15, 30, 0.95) !important;
+}
+
+body.dark-mode .modal-content {
+    background: linear-gradient(145deg, #1a1f2e 0%, #141822 100%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.7) !important;
+}
+
+/* Dark Mode: Perfect form styling */
+body.dark-mode .form-group label {
+    color: #e2e8f0 !important; /* slate-200 */
+    font-weight: 500;
+}
+
+body.dark-mode .form-control:focus,
+body.dark-mode input:focus,
+body.dark-mode textarea:focus,
+body.dark-mode select:focus {
+    background-color: #0f1419 !important;
+    border-color: var(--ibc-blue-light) !important;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3), 0 0 0 3px rgba(51, 133, 196, 0.25) !important;
+}
+
+/* Dark Mode: Better transitions for interactive elements */
+body.dark-mode .card,
+body.dark-mode button,
+body.dark-mode a,
+body.dark-mode input,
+body.dark-mode textarea,
+body.dark-mode select,
+body.dark-mode .btn,
+body.dark-mode [class*="hover:"],
+body.dark-mode .dropdown-menu,
+body.dark-mode .modal {
+    transition-property: background-color, border-color, color, box-shadow, transform, opacity;
+    transition-duration: 300ms;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Dark Mode: Improved glass effect */
+body.dark-mode .glass,
+body.dark-mode .glass-card {
+    background: rgba(26, 31, 46, 0.8) !important;
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+
+/* Dark Mode: Perfect code block styling */
+body.dark-mode code,
+body.dark-mode pre {
+    background-color: #0f1419 !important;
+    color: #e2e8f0 !important;
+    border: 1px solid #334155;
+}
+
+/* Dark Mode: Better alert/notification styling */
+body.dark-mode .alert {
+    border-left-width: 4px;
+    border-left-color: var(--ibc-blue-light);
+    background-color: rgba(51, 133, 196, 0.1) !important;
+}
+
+body.dark-mode .alert-success {
+    border-left-color: var(--ibc-green) !important;
+    background-color: rgba(0, 166, 81, 0.1) !important;
+}
+
+body.dark-mode .alert-warning {
+    border-left-color: var(--ibc-warning) !important;
+    background-color: rgba(245, 158, 11, 0.1) !important;
+}
+
+body.dark-mode .alert-error,
+body.dark-mode .alert-danger {
+    border-left-color: var(--ibc-error) !important;
+    background-color: rgba(239, 68, 68, 0.1) !important;
+}
+
+/* Dark Mode: Smooth scrollbar */
+body.dark-mode::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+
+body.dark-mode::-webkit-scrollbar-track {
+    background: var(--bg-body);
+}
+
+body.dark-mode::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 6px;
+    border: 2px solid var(--bg-body);
+}
+
+body.dark-mode::-webkit-scrollbar-thumb:hover {
+    background: #475569;
+}
+
+/* Dark Mode: Firefox scrollbar */
+body.dark-mode {
+    scrollbar-width: thin;
+    scrollbar-color: #334155 var(--bg-body);
+}
+
+/* Dark Mode: Perfect loading states */
+body.dark-mode .skeleton {
+    background: linear-gradient(90deg, #1a1f2e 25%, #242938 50%, #1a1f2e 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s ease-in-out infinite;
+}
+
+@keyframes loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* Dark Mode: Better dropdown menus */
+body.dark-mode .dropdown-menu,
+body.dark-mode .menu {
+    background-color: var(--bg-card) !important;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5) !important;
+}
+
+body.dark-mode .dropdown-item:hover,
+body.dark-mode .menu-item:hover {
+    background-color: rgba(51, 133, 196, 0.15) !important;
+}
+
+/* Dark Mode: Perfect finish for all interactive elements */
+body.dark-mode button:not(:disabled):hover,
+body.dark-mode a.btn:not(.disabled):hover {
+    filter: brightness(1.15);
+}
+
+body.dark-mode button:not(:disabled):active,
+body.dark-mode a.btn:not(.disabled):active {
+    transform: scale(0.98);
+}
+
+/* Dark Mode: Perfect Hero Section Styling */
+body.dark-mode .hero-gradient {
+    background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 30%, #065f46 70%, #047857 100%) !important;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), 0 4px 16px rgba(0, 0, 0, 0.5) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .hero-gradient .hero-title {
+    color: #ffffff !important;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-mode .hero-gradient .hero-subtitle {
+    color: rgba(226, 232, 240, 0.95) !important; /* slate-200 */
+}
+
+body.dark-mode .hero-gradient .hero-date {
+    color: rgba(203, 213, 225, 0.9) !important; /* slate-300 */
+}
+
+/* Light Mode: Ensure hero is vibrant */
+body:not(.dark-mode) .hero-gradient .hero-title {
+    color: #ffffff !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+body:not(.dark-mode) .hero-gradient .hero-subtitle,
+body:not(.dark-mode) .hero-gradient .hero-date {
+    color: rgba(219, 234, 254, 0.95) !important;
+}
+
+/* ============================================
+   END OF PERFECT DARK MODE ENHANCEMENTS
+   ============================================ */
+
+/* ============================================
+   RESPONSIVE & TOUCH-FRIENDLY ENHANCEMENTS
+   ============================================ */
+
+/* Touch-friendly buttons - minimum 44px touch target 
+   Note: !important is used to ensure accessibility requirements 
+   are met regardless of other styling */
+.touch-target {
+    min-height: 44px !important;
+    min-width: 44px !important;
+}
+
+/* Ensure all buttons are touch-friendly on mobile 
+   Note: !important ensures accessibility standards are enforced */
+@media (max-width: 768px) {
+    button,
+    .btn,
+    a.btn,
+    input[type="submit"],
+    input[type="button"] {
+        min-height: 44px !important;
+        padding: 0.75rem 1rem !important;
+        font-size: 1rem !important;
+    }
+}
+
+/* Horizontal overflow prevention
+   Note: !important ensures no horizontal scrolling on mobile */
+.no-horizontal-scroll {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+}
+
+/* Table responsive wrapper */
+.table-responsive {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.table-responsive table {
+    width: 100%;
+    max-width: 100%;
+}
+
+/* Ensure tables don't cause horizontal scroll on mobile */
+@media (max-width: 768px) {
+    table {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        white-space: nowrap;
+    }
+}
+
+/* Responsive iframe container (for embedded content like Microsoft Forms) */
+.iframe-container {
+    position: relative;
+    width: 100%;
+    padding-bottom: 56.25%; /* 16:9 aspect ratio */
+    height: 0;
+    overflow: hidden;
+}
+
+.iframe-container iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
+/* Mobile-friendly form inputs */
+@media (max-width: 768px) {
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="url"],
+    input[type="date"],
+    input[type="datetime-local"],
+    input[type="number"],
+    textarea,
+    select {
+        font-size: 16px !important; /* Prevents iOS zoom on focus */
+    }
+}
+
+/* Better card stacking on mobile */
+@media (max-width: 768px) {
+    .card {
+        margin-bottom: 1rem;
+    }
+}
+
+/* Improved filter button layout */
+.filter-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+@media (max-width: 640px) {
+    .filter-buttons a,
+    .filter-buttons button {
+        flex: 1 1 calc(50% - 0.25rem);
+        min-width: 140px;
+        text-align: center;
+    }
+}
+
+/* Status badges responsive */
+@media (max-width: 768px) {
+    .badge,
+    [class*="badge"],
+    .status-badge {
+        display: inline-block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 100%;
+    }
+}
+
+/* ============================================
+   END OF RESPONSIVE ENHANCEMENTS
+   ============================================ */
+
+/* ============================================
+   UI/UX FIXES FOR LIGHT MODE AND MOBILE
+   ============================================ */
+
+/* --- SIDEBAR FIXES (Immer dunkel, Schrift immer weiß) --- */
+.sidebar {
+    background-color: var(--sidebar-bg-light) !important;
+    color: #ffffff !important;
+}
+.sidebar a, .sidebar i, .sidebar span {
+    color: #ffffff !important; /* Erzwinge Weiß auch im Lightmode */
+}
+.sidebar a:hover {
+    background-color: rgba(255, 255, 255, 0.08) !important;
+    backdrop-filter: blur(4px);
+}
+.sidebar .active-link { /* Falls du eine Klasse für aktive Links hast */
+    border-left: 4px solid var(--ibc-blue-light);
+    background-color: rgba(255, 255, 255, 0.12);
+}
+
+/* --- LIGHT/DARK MODE GLOBALS --- */
+body.light-mode {
+    background-color: #f8f9fa !important; /* Helles Grau für den Body - softened */
+    color: #1f2937 !important; /* Dunkles Grau für Text */
+}
+body.light-mode .card, body.light-mode .bg-white {
+    background-color: #ffffff !important;
+    border: 1px solid #e9ecef;
+}
+body.dark-mode {
+    background-color: #111827 !important; /* Sehr dunkles Grau */
+    color: #f9fafb !important;
+}
+
+/* Sidebar overlay - hidden globally, shown on mobile when active */
+.sidebar-overlay {
+    display: none;
+}
+
+/* --- MOBILE RESPONSIVENESS --- */
+@media (max-width: 767px) {
+    .sidebar {
+        position: fixed;
+        top: 60px; /* Start below mobile topbar */
+        left: 0;
+        height: calc(100vh - 60px);
+        height: calc(100dvh - 60px);
+        width: 85%;
+        max-width: 320px;
+        z-index: 1050 !important; /* Must be above overlay (1040); !important overrides Tailwind z-40 */
+        transform: translateX(-100%); /* Standardmäßig versteckt */
+        transition: transform 0.3s ease-in-out;
+        display: flex;
+        flex-direction: column;
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+    .sidebar.open {
+        transform: translateX(0) !important; /* Zeigen wenn Klasse 'open' */
+    }
+    .sidebar nav,
+    .sidebar .sidebar-scroll {
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+    .main-content {
+        margin-left: 0 !important; /* Kein Rand auf Handy */
+        width: 100% !important;
+    }
+    /* Overlay wenn Sidebar offen */
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 1040;
+    }
+    .sidebar-overlay.active {
+        display: block;
+    }
+    /* Sidebar footer icons - ensure they stay centered and don't slide left */
+    .sidebar-footer a,
+    .sidebar-footer button {
+        justify-content: center;
+    }
+}
+
+/* Mobile top navbar */
+.mobile-topbar {
+    background: var(--ibc-blue);
+    min-height: 60px;
+    z-index: 1060;
+}
+
+/* ===== BOOTSTRAP 5 COMPATIBILITY OVERRIDES ===== */
+/* Prevent Bootstrap from overriding IBC custom styles */
+
+/* Ensure body background from Bootstrap doesn't override ours */
+body {
+    background-color: var(--bg-body) !important;
+    font-family: var(--ibc-font-family) !important;
+}
+
+/* Prevent Bootstrap table styling from overriding theme */
+.table {
+    color: var(--text-main);
+}
+
+/* Ensure Bootstrap containers don't create unexpected padding */
+.container, .container-fluid, .container-sm, .container-md, .container-lg, .container-xl {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+/* Bootstrap row negative margins fix */
+.row {
+    --bs-gutter-x: 1.5rem;
+}
+
+/* Prevent Bootstrap link decoration from overriding sidebar links */
+.sidebar a {
+    text-decoration: none !important;
+}
+
+/* Bootstrap form-control should not override our styled inputs */
+.form-control, .form-select {
+    background-color: var(--bg-input) !important;
+    color: var(--text-main) !important;
+    border-color: var(--border-color) !important;
+}
+
+.dark-mode .form-control,
+.dark-mode .form-select {
+    background-color: var(--bg-input) !important;
+    color: var(--text-main) !important;
+    border-color: var(--border-light) !important;
+}
+
+/* Ensure Bootstrap modal z-index doesn't conflict with sidebar */
+.modal {
+    z-index: 1055 !important;
+}
+.modal-backdrop {
+    z-index: 1054 !important;
+}
+
+/* Bootstrap accordion compatibility */
+.accordion-button {
+    background-color: var(--bg-card) !important;
+    color: var(--text-main) !important;
+}
+
+.dark-mode .accordion-button {
+    background-color: var(--bg-card) !important;
+    color: var(--text-main) !important;
+}
+
+.accordion-button:not(.collapsed) {
+    background-color: var(--ibc-blue) !important;
+    color: #ffffff !important;
+}
+
+/* Bootstrap badge compatibility */
+.badge {
+    font-weight: 600 !important;
+}
+
+/* ===== END BOOTSTRAP 5 COMPATIBILITY OVERRIDES ===== */
+
+/* ===== GLOBAL LINK DECORATION ===== */
+/* Remove underlines from all links globally */
+a {
+    text-decoration: none !important;
+}
+
+/* Exception: links inside text paragraphs retain underline for readability */
+p a {
+    text-decoration: underline !important;
+} 
+
+/* ============================================================
+   CROSS-BROWSER & PERFORMANCE IMPROVEMENTS 2026
+   - iOS Safari safe-area support
+   - Mobile viewport height fix (100dvh)  
+   - Additional vendor prefixes
+   - Performance optimizations
+   ============================================================ */
+
+/* iOS Safari: Fix 100vh issue with dynamic viewport height */
+:root {
+    --app-height: 100vh;
+}
+
+/* Use modern dynamic viewport height where supported */
+@supports (height: 100dvh) {
+    :root {
+        --app-height: 100dvh;
+    }
+}
+
+/* iOS safe area support for the sidebar and mobile topbar */
+.sidebar {
+    padding-bottom: constant(safe-area-inset-bottom, 0); /* iOS < 11.2 fallback */
+    padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+.mobile-topbar {
+    padding-top: constant(safe-area-inset-top, 0);
+    padding-top: env(safe-area-inset-top, 0);
+    padding-left: calc(1rem + constant(safe-area-inset-left, 0));
+    padding-left: calc(1rem + env(safe-area-inset-left, 0));
+    padding-right: calc(1rem + constant(safe-area-inset-right, 0));
+    padding-right: calc(1rem + env(safe-area-inset-right, 0));
+}
+
+/* Bottom safe-area padding for main content on iPhone with home indicator */
+main {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom, 0)) !important;
+}
+
+@media (min-width: 768px) {
+    main {
+        padding-bottom: max(2rem, env(safe-area-inset-bottom, 0)) !important;
+    }
+}
+
+/* Mobile full-height sidebar fix for iOS */
+@media (max-width: 767px) {
+    .sidebar {
+        height: calc(100vh - 60px); /* fallback */
+        height: calc(100dvh - 60px); /* modern browsers */
+        height: calc(100svh - 60px); /* iOS Safari small viewport */
+    }
+}
+
+/* ============================================================
+   CROSS-BROWSER APPEARANCE FIXES
+   ============================================================ */
+
+/* Ensure consistent form element appearance across all browsers */
+input,
+select,
+textarea,
+button {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+/* Exception: keep native styling for checkboxes and radios */
+input[type="checkbox"],
+input[type="radio"] {
+    -webkit-appearance: auto;
+    -moz-appearance: auto;
+    appearance: auto;
+}
+
+/* Safari fix: Remove inner padding on search inputs */
+input[type="search"]::-webkit-search-decoration,
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-results-button,
+input[type="search"]::-webkit-search-results-decoration {
+    -webkit-appearance: none;
+}
+
+/* Firefox: Remove number input arrows */
+input[type="number"] {
+    -moz-appearance: textfield;
+}
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Safari: Fix button/input text inheritance */
+button,
+input,
+optgroup,
+select,
+textarea {
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+}
+
+/* ============================================================
+   SAFARI-SPECIFIC FIXES
+   ============================================================ */
+
+/* Safari: Fix sticky positioning */
+.sidebar {
+    -webkit-overflow-scrolling: touch;
+    overflow-y: auto;
+}
+
+/* Safari: Fix backdrop-filter (already handled but ensure fallback) */
+@supports not (backdrop-filter: blur(1px)) {
+    .glass-card,
+    .glass,
+    .glass-effect {
+        background: rgba(15, 20, 35, 0.95) !important;
+    }
+    .login-container {
+        background: rgba(15, 20, 35, 0.97) !important;
+    }
+    .auth-card {
+        background: rgba(10, 15, 30, 0.97) !important;
+    }
+}
+
+/* Safari: Fix transform performance */
+.card,
+.sidebar nav a,
+.btn-primary {
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-perspective: 1000px;
+    perspective: 1000px;
+}
+
+/* ============================================================
+   FIREFOX-SPECIFIC IMPROVEMENTS
+   ============================================================ */
+
+/* Firefox: Ensure consistent select rendering */
+@-moz-document url-prefix() {
+    select {
+        text-indent: 0.01px;
+        text-overflow: '';
+    }
+}
+
+/* Firefox: Better focus rings */
+::-moz-focus-inner {
+    border: 0;
+    padding: 0;
+}
+
+/* ============================================================
+   PERFORMANCE OPTIMIZATIONS
+   ============================================================ */
+
+/* GPU acceleration for animated elements - use will-change instead of transform hack
+   to avoid overriding sidebar translateX positioning on mobile */
+.sidebar,
+.modal {
+    will-change: transform;
+}
+
+/* Hint browser about animated properties - only on hover for efficiency */
+.card:hover {
+    will-change: transform, box-shadow;
+}
+
+.card:not(:hover) {
+    will-change: auto;
+}
+
+.sidebar nav a:hover {
+    will-change: background-color, transform;
+}
+
+/* Contain layout/paint for performance
+   Note: 'contain: style' is omitted intentionally – it is not supported in Safari < 15.4 */
+.card {
+    contain: layout;
+}
+
+/* Optimize font rendering across all browsers */
+body {
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+}
+
+/* ============================================================
+   ENHANCED MOBILE TOPBAR
+   ============================================================ */
+
+/* Premium glass topbar with gradient */
+.mobile-topbar {
+    background: linear-gradient(90deg, var(--ibc-blue-dark) 0%, var(--ibc-blue) 60%, var(--ibc-blue-dark) 100%);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+}
+
+/* ============================================================
+   ENHANCED SIDEBAR DESIGN  
+   ============================================================ */
+
+/* Refined sidebar with IBC Corporate Blue (#00457D) */
+.sidebar {
+    background: var(--sidebar-bg-light) !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.25);
+}
+
+/* Sidebar logo section */
+.sidebar .sidebar-logo-section {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Refined active nav item - transparent overlay with blue left indicator */
+.sidebar nav a.active,
+.sidebar nav a[class*="bg-white/20"] {
+    background: rgba(255, 255, 255, 0.12) !important;
+    border-left: 4px solid var(--ibc-blue-light) !important;
+    border-radius: 8px !important;
+    color: #ffffff !important;
+}
+
+/* Sidebar section label */
+.sidebar p[class*="uppercase"] {
+    color: #b2bec3 !important;
+    font-size: 0.75rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.1em !important;
+}
+
+/* ============================================================
+   ENHANCED CARD DESIGN
+   ============================================================ */
+
+/* Light mode: premium card with subtle shimmer */
+body:not(.dark-mode) .card {
+    background: linear-gradient(145deg, #ffffff 0%, #fafbfd 100%) !important;
+    border: 1px solid rgba(0, 0, 0, 0.04) !important;
+    box-shadow: 
+        0 1px 2px rgba(0, 0, 0, 0.03),
+        0 4px 16px rgba(0, 0, 0, 0.06),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+}
+
+body:not(.dark-mode) .card:hover {
+    box-shadow: 
+        0 4px 12px rgba(0, 0, 0, 0.06),
+        0 16px 40px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9) !important;
+    border-color: rgba(0, 102, 179, 0.1) !important;
+    transform: translateY(-5px);
+}
+
+/* ============================================================
+   IMPROVED TYPOGRAPHY ACROSS BROWSERS
+   ============================================================ */
+
+/* Refined heading styles */
+h1, h2, h3, h4, h5, h6 {
+    font-feature-settings: "kern" 1, "liga" 1;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Better paragraph spacing */
+p {
+    -webkit-hyphens: auto;
+    -ms-hyphens: auto;
+    hyphens: auto;
+    orphans: 3;
+    widows: 3;
+}
+
+/* ============================================================
+   RESPONSIVE TABLE IMPROVEMENTS  
+   ============================================================ */
+
+/* Scrollable tables with visual hint */
+.table-scroll-wrapper {
+    position: relative;
+    overflow: hidden;
+}
+
+.table-scroll-wrapper::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 40px;
+    background: linear-gradient(to right, transparent, rgba(0, 0, 0, 0.06));
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.table-scroll-wrapper.has-overflow::after {
+    opacity: 1;
+}
+
+@media (max-width: 768px) {
+    /* Better table UX on mobile */
+    .table-responsive {
+        border-radius: var(--radius-md);
+        box-shadow: inset 0 0 0 1px var(--border-color);
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior-x: contain;
+    }
+
+    /* Frozen first column option */
+    .table-responsive .sticky-col {
+        position: -webkit-sticky;
+        position: sticky;
+        left: 0;
+        background: var(--bg-card);
+        z-index: 1;
+        box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
+    }
+}
+
+/* ============================================================
+   IMPROVED FOCUS STATES FOR ACCESSIBILITY + CROSS-BROWSER
+   ============================================================ */
+
+/* Better focus for Firefox (it uses :focus instead of :focus-visible) */
+@-moz-document url-prefix() {
+    a:focus:not(:focus-visible),
+    button:focus:not(:focus-visible) {
+        outline: none;
+    }
+    a:focus-visible,
+    button:focus-visible {
+        outline: 2px solid var(--ibc-blue);
+        outline-offset: 2px;
+    }
+}
+
+/* ============================================================
+   MODAL IMPROVEMENTS FOR ALL BROWSERS
+   ============================================================ */
+
+/* Prevent body scroll when modal is open */
+body.modal-open {
+    overflow: hidden;
+    /* iOS fix: use padding instead of overflow on body to prevent content shift */
+    padding-right: 0 !important;
+}
+
+/* ============================================================
+   SAFARI GRID/FLEX FIXES
+   ============================================================ */
+
+/* Safari: gap property in flex containers */
+.flex.gap-1 { gap: 0.25rem; }
+.flex.gap-2 { gap: 0.5rem; }
+.flex.gap-3 { gap: 0.75rem; }
+.flex.gap-4 { gap: 1rem; }
+
+/* ============================================================
+   OVERSCROLL BEHAVIOR  
+   ============================================================ */
+
+/* Prevent pull-to-refresh in modals/sidebars */
+.sidebar,
+.modal-content,
+[role="dialog"] {
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* ============================================================
+   IMAGE LOADING IMPROVEMENTS
+   ============================================================ */
+
+/* Smooth image loading with fade-in */
+img {
+    -webkit-transition: opacity 0.3s ease;
+    transition: opacity 0.3s ease;
+}
+
+/* Loading state for images */
+img[loading="lazy"] {
+    opacity: 0;
+}
+
+img[loading="lazy"].loaded,
+img:not([loading]) {
+    opacity: 1;
+}
+
+/* ============================================================
+   END CROSS-BROWSER & PERFORMANCE IMPROVEMENTS
+   ============================================================ */
+
+/* ============================================================
+   MEMBER & ALUMNI DIRECTORY - Modern Search Bar
+   ============================================================ */
+
+/* Wrapper for search input with icon inside */
+.directory-search-wrapper {
+    position: relative;
+}
+
+.directory-search-wrapper .directory-search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    z-index: 2;
+    color: #6b7280;
+    font-size: 0.875rem;
+}
+
+.directory-search-wrapper .directory-search-icon--purple {
+    color: #7c3aed;
+}
+
+.directory-search-wrapper input {
+    padding-left: 2.5rem !important;
+    border-radius: 50px !important;
+    border: 1px solid #d1d5db;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.directory-search-wrapper input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    outline: none;
+}
+
+.dark-mode .directory-search-wrapper .directory-search-icon {
+    color: #9ca3af;
+}
+
+.dark-mode .directory-search-wrapper input {
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+.dark-mode .directory-search-wrapper input:focus {
+    border-color: #3385c4;
+    box-shadow: 0 0 0 3px rgba(51, 133, 196, 0.2);
+}
+
+/* Directory avatar circle */
+.directory-avatar {
+    width: 96px;
+    height: 96px;
+    font-size: 1.875rem;
+    flex-shrink: 0;
+}
+
+.directory-avatar img {
+    object-fit: cover;
+    aspect-ratio: 1 / 1;
+    border-radius: 50%;
+}
+
+/* Avatar placeholder: colored circle with bold white initials (MS-Teams style) */
+.avatar-placeholder {
+    width: 96px;
+    height: 96px;
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+}
+
+/* Alumni avatar with purple gradient */
+.directory-avatar--purple {
+    background: linear-gradient(135deg, #a78bfa, #7c3aed);
+}
+
+/* Directory card hover - lift animation */
+.directory-card {
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.directory-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15), 0 6px 16px rgba(0, 0, 0, 0.1);
+}
+
+.dark-mode .directory-card:hover {
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), 0 6px 16px rgba(0, 0, 0, 0.5);
+}
+
+/* Directory card name typography */
+.directory-card-name {
+    font-weight: 600;
+}
+
+/* Prevent long text from stretching the alumni directory card */
+.directory-card-text-truncate {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+/* Role badge - rounded corners */
+.directory-role-badge {
+    border-radius: 20px;
+}
+
+/* Contact icons - subtle gray with IBC-blue on hover */
+.directory-contact-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    color: #6b7280;
+    background-color: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    text-decoration: none;
+}
+
+.directory-contact-icon:hover,
+.directory-card:hover .directory-contact-icon {
+    color: var(--ibc-blue);
+    background-color: #eff6ff;
+    border-color: #bfdbfe;
+}
+
+/* Mobile Optimization for Member Directory */
+@media (max-width: 767px) {
+    /* Cards take full width: remove column gutters so cards span edge-to-edge */
+    .row.row-cols-1 > .col {
+        padding-left: 0;
+        padding-right: 0;
+    }
+
+    /* Profile images: ensure centered above the name on mobile */
+    .directory-card .directory-avatar {
+        display: block;
+        margin: 0 auto;
+    }
+
+    /* Action buttons: large, easy-to-tap at the bottom of the card */
+    .directory-card .btn {
+        min-height: 3rem;
+        font-size: 1rem;
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+    }
+}
+
+/* Browser Date/Time Picker Styling */
+input[type="date"],
+input[type="datetime-local"],
+input[type="time"] {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    background-color: #ffffff;
+    color: inherit;
+    font-family: inherit;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+input[type="date"]:focus,
+input[type="datetime-local"]:focus,
+input[type="time"]:focus {
+    outline: none;
+    border-color: var(--ibc-blue);
+    box-shadow: 0 0 0 3px rgba(0, 102, 179, 0.2);
+}
+
+body.dark-mode input[type="date"],
+body.dark-mode input[type="datetime-local"],
+body.dark-mode input[type="time"] {
+    background-color: #374151;
+    border-color: #4b5563;
+    color: #f9fafb;
+}
+
+body.dark-mode input[type="date"]:focus,
+body.dark-mode input[type="datetime-local"]:focus,
+body.dark-mode input[type="time"]:focus {
+    border-color: var(--ibc-blue-light);
+    box-shadow: 0 0 0 3px rgba(51, 133, 196, 0.25);
+}
