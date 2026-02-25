@@ -765,14 +765,14 @@ class EasyVereinInventory {
 
         // 4. Update individual fields on the inventory object
         $objectUrl        = self::API_BASE . '/inventory-object/' . urlencode((string)$req['inventory_object_id']);
-        $customFieldsUrl  = $objectUrl . '/custom-fields';
+        $customFieldsUrl  = $objectUrl . '/custom-fields?query={id,value,customField{id,name}}';
         $cfData           = $this->request('GET', $customFieldsUrl);
         $customFields     = $cfData['results'] ?? $cfData['data'] ?? $cfData;
 
         $fieldsToUpdate = [];
         foreach ($customFields as $field) {
             $fieldId   = $field['id']   ?? null;
-            $fieldName = $field['name'] ?? '';
+            $fieldName = $field['customField']['name'] ?? '';
 
             if ($fieldId === null) {
                 continue;
@@ -860,7 +860,7 @@ class EasyVereinInventory {
 
         // 3. Update individual fields on the inventory object
         $objectUrl        = self::API_BASE . '/inventory-object/' . urlencode((string)$req['inventory_object_id']);
-        $customFieldsUrl  = $objectUrl . '/custom-fields';
+        $customFieldsUrl  = $objectUrl . '/custom-fields?query={id,value,customField{id,name}}';
         $cfData           = $this->request('GET', $customFieldsUrl);
         $customFields     = $cfData['results'] ?? $cfData['data'] ?? $cfData;
 
@@ -869,7 +869,7 @@ class EasyVereinInventory {
         $fieldsToUpdate = [];
         foreach ($customFields as $field) {
             $fieldId   = $field['id']   ?? null;
-            $fieldName = $field['name'] ?? '';
+            $fieldName = $field['customField']['name'] ?? '';
 
             if ($fieldId === null) {
                 continue;
