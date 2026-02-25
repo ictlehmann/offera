@@ -724,7 +724,7 @@ class EasyVereinInventory {
      * Approve a rental request.
      *
      * 1. Loads the pending request from the local DB.
-     * 2. Resolves the borrower's EasyVerein contact ID via getContactIdByEmail().
+     * 2. Resolves the borrower's EasyVerein contact ID via getContactIdByName().
      * 3. Creates the official lending record in EasyVerein via POST /api/v2.0/lending.
      * 4. Fetches the individual fields via GET /api/v2.0/inventory-object/{id}/custom-fields,
      *    finds 'Ausgeliehen von' and updates it with '$userName ($userEmail)'.
