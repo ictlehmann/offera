@@ -874,14 +874,14 @@ try {
 
         .welcome-title {
             font-size: 32px;
-            color: #ffffff;
+            color: #ffffff !important;
             margin-bottom: 12px;
             font-weight: 700;
             letter-spacing: -0.5px;
         }
 
         .welcome-subtitle {
-            color: #ffffff;
+            color: #ffffff !important;
             font-size: 16px;
             font-weight: 400;
         }
@@ -898,7 +898,7 @@ try {
             font-weight: 600;
             color: #2d2d2d;
             cursor: pointer;
-            display: flex;
+            display: flex !important;
             align-items: center;
             justify-content: center;
             gap: 15px;
@@ -1476,6 +1476,10 @@ try {
                 margin-bottom: 20px;
             }
         }
+
+        /* Override theme.css !important color rules for login page */
+        body .welcome-text h1.welcome-title { color: #ffffff !important; }
+        body .welcome-text p.welcome-subtitle { color: #ffffff !important; }
     </style>
 </head>
 
