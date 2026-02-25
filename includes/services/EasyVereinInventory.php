@@ -431,89 +431,51 @@ class EasyVereinInventory {
     }
 
     /**
-     * Get all inventory items currently assigned to the given user.
+     * Get all inventory objects currently lent to the given user.
      *
-     * Fetches all items via getItems() and returns only those currently checked
-     * out by $userIdentifier.  Two complementary strategies are used:
+     * Makes a GET request to /lending?futureReturnDate=true&limit=100 with a
+     * query that includes the parentInventoryObject and its customFields.
+     * For each active lending the customFields of the parentInventoryObject are
+     * inspected: if the field named 'Entra E-Mail' or 'Ausgeliehen von' matches
+     * $userIdentifier (case-insensitive), the parentInventoryObject is included
+     * in the returned array.
      *
-     * 1. Member-field match – checks whether the EasyVerein `member` field
-     *    equals $userIdentifier.  Handles scalar (integer / string) as well as
-     *    associative-array (object with id / email / username / name) values.
-     *
-     * 2. Note-field fallback – parses the structured checkout log written by
-     *    assignItem() / returnItem() into the EasyVerein note field.
-     *    assignItem() prepends:  "⏳ [dd.mm.YYYY HH:mm] AUSGELIEHEN: Nx an <id>. <purpose>"
-     *    returnItem() prepends:  "✅ [dd.mm.YYYY HH:mm] ZURÜCKGEGEBEN: Nx von <ref>."
-     *    Entries are stored newest-first, so inspecting the first
-     *    AUSGELIEHEN / ZURÜCKGEGEBEN line reveals the current assignment state.
-     *    If the most recent action is a checkout by this user, the item is
-     *    included; if it is a return (or a checkout by a different user) it is
-     *    excluded.  This fallback handles the common case where EasyVerein does
-     *    not preserve the `member` field value as-set (e.g. because the field
-     *    is a foreign-key relation to EasyVerein's own contact database).
-     *
-     * @param int|string $userIdentifier Local user ID, e-mail, or display name
-     * @return array Subset of raw EasyVerein item arrays assigned to the user
+     * @param int|string $userIdentifier User e-mail or identifier to match
+     * @return array parentInventoryObject records assigned to the user
      * @throws Exception On API or network errors
      */
     public function getMyAssignedItems($userIdentifier): array {
-        $allItems   = $this->getItems();
-        $identifier = (string)$userIdentifier;
+        $url  = self::API_BASE . '/lending?futureReturnDate=true&limit=100&query={id,parentInventoryObject{*,customFields{id,value,customField{id,name}}}}';
+        $data  = $this->request('GET', $url);
+        $items = $data['results'] ?? $data['data'] ?? $data;
 
-        return array_values(array_filter($allItems, function (array $item) use ($identifier): bool {
-            // Strategy 1: check the member field
-            $member = $item['member'] ?? null;
-            if ($member !== null && $member !== '') {
-                if (is_array($member)) {
-                    $lc             = strtolower($identifier);
-                    $memberId       = isset($member['id'])       ? (string)$member['id']           : null;
-                    $memberEmail    = isset($member['email'])    ? strtolower($member['email'])     : null;
-                    $memberUsername = isset($member['username']) ? strtolower($member['username'])  : null;
-                    $memberName     = isset($member['name'])     ? strtolower($member['name'])      : null;
+        if (!is_array($items)) {
+            return [];
+        }
 
-                    if ($memberId === $identifier
-                        || $memberEmail    === $lc
-                        || $memberUsername === $lc
-                        || $memberName     === $lc
-                    ) {
-                        return true;
-                    }
-                } elseif ((string)$member === $identifier) {
-                    return true;
-                }
+        $lc      = strtolower((string)$userIdentifier);
+        $myItems = [];
+
+        foreach ($items as $lending) {
+            $obj = $lending['parentInventoryObject'] ?? null;
+            if (!is_array($obj)) {
+                continue;
             }
 
-            // Strategy 2: parse the structured checkout log in the note field.
-            // Log entries are prepended (newest first); the first AUSGELIEHEN or
-            // ZURÜCKGEGEBEN line determines the current assignment state.
-            $note = $item['note'] ?? $item['description'] ?? '';
-            if ($note === '') {
-                return false;
-            }
-
-            // The pattern is anchored to the exact log format written by assignItem():
-            //   "⏳ [dd.mm.YYYY HH:mm] AUSGELIEHEN: Nx an <id>. <purpose>"
-            // The "] " prefix ensures we only match our structured log lines.
-            $checkoutPattern = '/\] AUSGELIEHEN: \d+x an ' . preg_quote($identifier, '/') . '(?:[.\s]|$)/';
-
-            foreach (array_map('trim', explode("\n", $note)) as $line) {
-                if ($line === '') {
+            $customFields = $obj['customFields'] ?? [];
+            foreach ($customFields as $cf) {
+                $fieldName = strtolower($cf['customField']['name'] ?? '');
+                if ($fieldName !== 'entra e-mail' && $fieldName !== 'ausgeliehen von') {
                     continue;
                 }
-                // Use the emoji prefix to restrict matching to our structured log lines;
-                // "return" exits the closure immediately (early exit on first action line).
-                if (strpos($line, '⏳') !== false && strpos($line, 'AUSGELIEHEN') !== false) {
-                    // Most recent action is a checkout – return whether it belongs to this user
-                    return (bool)preg_match($checkoutPattern, $line);
-                }
-                if (strpos($line, '✅') !== false && strpos($line, 'ZURÜCKGEGEBEN') !== false) {
-                    // Most recent action is a return – item is not with any user
-                    return false;
+                if (strtolower((string)($cf['value'] ?? '')) === $lc) {
+                    $myItems[] = $obj;
+                    break;
                 }
             }
+        }
 
-            return false;
-        }));
+        return $myItems;
     }
 
     /**
