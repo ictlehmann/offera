@@ -881,7 +881,7 @@ try {
         }
 
         .welcome-subtitle {
-            color: rgba(255, 255, 255, 0.6);
+            color: #ffffff;
             font-size: 16px;
             font-weight: 400;
         }
@@ -1531,7 +1531,6 @@ try {
 
     <!-- LOGIN CONTAINER -->
     <div class="login-container">
-        <img src="<?php echo asset('assets/img/flaticon.webp'); ?>" class="mb-4" width="64" alt="IBC Flaticon">
         <!-- MEGA COOL LOGO ANIMATION -->
         <div class="logo-container">
             <div class="logo-glow"></div>

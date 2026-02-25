@@ -415,57 +415,6 @@ ob_start();
 
     </div>
 
-    <!-- Change Request Section -->
-    <div class="mt-6">
-        <div class="card p-6">
-            <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
-                <i class="fas fa-edit text-green-600 mr-2"></i>
-                Änderungsantrag
-            </h2>
-            <p class="text-gray-600 dark:text-gray-300 mb-6">
-                Beantragen Sie Änderungen an Ihrer Rolle oder E-Mail-Adresse
-            </p>
-
-            <form method="POST" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Art der Änderung *</label>
-                    <select
-                        name="request_type"
-                        required
-                        class="w-full px-4 py-2 bg-white border border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 rounded-lg"
-                    >
-                        <option value="">Bitte wählen...</option>
-                        <option value="Rollenänderung">Rollenänderung</option>
-                        <option value="E-Mail-Adressenänderung">E-Mail-Adressenänderung</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Begründung / Neuer Wert *</label>
-                    <textarea
-                        name="request_reason"
-                        required
-                        minlength="10"
-                        maxlength="1000"
-                        rows="4"
-                        placeholder="Bitte geben Sie eine Begründung oder den neuen gewünschten Wert an..."
-                        class="w-full px-4 py-2 bg-white border border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 rounded-lg"
-                    ></textarea>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Mindestens 10, maximal 1000 Zeichen</p>
-                </div>
-
-                <button
-                    type="submit"
-                    name="submit_change_request"
-                    class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200"
-                >
-                    <i class="fas fa-paper-plane mr-2"></i>
-                    Beantragen
-                </button>
-            </form>
-        </div>
-    </div>
-
     <!-- Support Section -->
     <div class="mt-6">
         <div class="card p-6">
@@ -476,31 +425,31 @@ ob_start();
             <p class="text-gray-600 dark:text-gray-300 mb-6">
                 Wende dich bei Fragen oder Problemen direkt an die IT-Ressortleitung
             </p>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <a href="mailto:ressortleitung-it@business-consulting.de?subject=E-Mail%2FName%20%C3%A4ndern"
-                   class="flex items-center p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/40 transition">
-                    <i class="fas fa-envelope text-blue-600 dark:text-blue-400 text-2xl mr-4"></i>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <button type="button" onclick="openSupportModal('name_email_change')"
+                   class="flex items-center p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/40 transition text-left w-full">
+                    <i class="fas fa-envelope text-blue-600 dark:text-blue-400 text-2xl mr-4 shrink-0"></i>
                     <div>
                         <span class="block font-semibold text-gray-800 dark:text-gray-100">E-Mail/Name ändern</span>
                         <span class="block text-sm text-gray-600 dark:text-gray-400">Anfrage per E-Mail senden</span>
                     </div>
-                </a>
-                <a href="mailto:ressortleitung-it@business-consulting.de?subject=2FA%20zur%C3%BCcksetzen"
-                   class="flex items-center p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg hover:bg-yellow-100 dark:hover:bg-yellow-900/40 transition">
-                    <i class="fas fa-shield-alt text-yellow-600 dark:text-yellow-400 text-2xl mr-4"></i>
+                </button>
+                <button type="button" onclick="openSupportModal('2fa_reset')"
+                   class="flex items-center p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg hover:bg-yellow-100 dark:hover:bg-yellow-900/40 transition text-left w-full">
+                    <i class="fas fa-shield-alt text-yellow-600 dark:text-yellow-400 text-2xl mr-4 shrink-0"></i>
                     <div>
                         <span class="block font-semibold text-gray-800 dark:text-gray-100">2FA zurücksetzen</span>
                         <span class="block text-sm text-gray-600 dark:text-gray-400">Anfrage per E-Mail senden</span>
                     </div>
-                </a>
-                <a href="mailto:ressortleitung-it@business-consulting.de?subject=Bug%20melden"
-                   class="flex items-center p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/40 transition">
-                    <i class="fas fa-bug text-red-600 dark:text-red-400 text-2xl mr-4"></i>
+                </button>
+                <button type="button" onclick="openSupportModal('bug')"
+                   class="flex items-center p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/40 transition text-left w-full">
+                    <i class="fas fa-bug text-red-600 dark:text-red-400 text-2xl mr-4 shrink-0"></i>
                     <div>
                         <span class="block font-semibold text-gray-800 dark:text-gray-100">Bug melden</span>
                         <span class="block text-sm text-gray-600 dark:text-gray-400">Fehler per E-Mail melden</span>
                     </div>
-                </a>
+                </button>
             </div>
         </div>
     </div>
@@ -528,6 +477,19 @@ document.querySelectorAll('input[name="theme"]').forEach(radio => {
         selectedLabel.classList.add('border-purple-500', 'bg-purple-50');
     });
 });
+
+// Open the support modal with a pre-selected type
+function openSupportModal(type) {
+    const modalEl = document.getElementById('support-modal');
+    if (!modalEl) return;
+    const select = document.getElementById('support-type');
+    if (select) {
+        select.value = type;
+        select.dispatchEvent(new Event('change'));
+    }
+    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+    modal.show();
+}
 
 // Sync theme preference with localStorage after successful save
 <?php if ($message && strpos($message, 'Design-Einstellungen') !== false): ?>
