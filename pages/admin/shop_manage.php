@@ -25,9 +25,11 @@ $errorMessage   = '';
 $section        = $_GET['section'] ?? 'products';  // products | orders
 $editProductId  = isset($_GET['edit']) ? (int) $_GET['edit'] : 0;
 $editProduct    = null;
+$openModal      = false;
 
 if ($editProductId) {
     $editProduct = Shop::getProductById($editProductId);
+    $openModal   = true;
 }
 
 // ─── Handle POST ───────────────────────────────────────────────────────────────
@@ -47,7 +49,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ];
 
         if (empty($data['name'])) {
-            $errorMessage = 'Produktname darf nicht leer sein.';
+            $errorMessage  = 'Produktname darf nicht leer sein.';
+            $openModal     = true;
+            $editProductId = $pid;
+            if ($pid) {
+                $editProduct = Shop::getProductById($pid);
+            }
         } else {
             // Handle image upload
             if (isset($_FILES['product_image']) && $_FILES['product_image']['error'] === UPLOAD_ERR_OK) {
@@ -56,7 +63,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if ($uploadResult['success']) {
                     $data['image_path'] = $uploadResult['path'];
                 } else {
-                    $errorMessage = 'Bild-Upload fehlgeschlagen: ' . $uploadResult['error'];
+                    $errorMessage  = 'Bild-Upload fehlgeschlagen: ' . $uploadResult['error'];
+                    $openModal     = true;
+                    $editProductId = $pid;
+                    if ($pid) {
+                        $editProduct = Shop::getProductById($pid);
+                    }
                 }
             } elseif ($pid) {
                 // Keep existing image if no new one was uploaded
@@ -115,6 +127,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
+    // Delete product
+    if ($postAction === 'delete_product') {
+        $pid = (int) ($_POST['product_id'] ?? 0);
+        if ($pid) {
+            $ok = Shop::deleteProduct($pid);
+            if ($ok) {
+                header('Location: ' . asset('pages/admin/shop_manage.php?section=products&deleted=1'));
+                exit;
+            } else {
+                $errorMessage = 'Fehler beim Löschen des Produkts.';
+            }
+        }
+    }
+
     // Update order status
     if ($postAction === 'update_order') {
         $orderId        = (int) ($_POST['order_id'] ?? 0);
@@ -133,6 +159,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 if (isset($_GET['saved'])) {
     $successMessage = 'Änderungen erfolgreich gespeichert.';
+}
+if (isset($_GET['deleted'])) {
+    $successMessage = 'Produkt erfolgreich gelöscht.';
 }
 
 // ─── Data for view ─────────────────────────────────────────────────────────────
@@ -212,299 +241,95 @@ ob_start();
          PRODUCTS
     ═══════════════════════════════════════════════════════════════════════════ -->
 
-    <div class="grid grid-cols-1 xl:grid-cols-5 gap-8">
-
-        <!-- Product list -->
-        <div class="xl:col-span-3">
-            <div class="card rounded-xl shadow-lg p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">
-                        <i class="fas fa-list mr-2 text-blue-500"></i>Alle Produkte
-                    </h2>
-                    <a href="<?php echo asset('pages/admin/shop_manage.php?section=products'); ?>"
-                       class="text-sm text-blue-600 dark:text-blue-400 hover:underline no-underline">
-                        <i class="fas fa-plus mr-1"></i>Neues Produkt
-                    </a>
-                </div>
-
-                <?php if (empty($products)): ?>
-                <p class="text-gray-500 dark:text-gray-400 text-center py-8">Noch keine Produkte vorhanden.</p>
-                <?php else: ?>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-sm">
-                        <thead>
-                            <tr class="border-b border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 text-left">
-                                <th class="pb-3 font-semibold">Bild</th>
-                                <th class="pb-3 font-semibold">Name</th>
-                                <th class="pb-3 font-semibold text-right">Preis</th>
-                                <th class="pb-3 font-semibold text-center">Status</th>
-                                <th class="pb-3 font-semibold text-center">Varianten</th>
-                                <th class="pb-3"></th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
-                            <?php foreach ($products as $product): ?>
-                            <tr>
-                                <td class="py-3">
-                                    <?php if (!empty($product['image_path'])): ?>
-                                    <img src="<?php echo asset($product['image_path']); ?>"
-                                         alt="" class="w-12 h-12 object-cover rounded-lg">
-                                    <?php else: ?>
-                                    <div class="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
-                                        <i class="fas fa-box text-gray-400"></i>
-                                    </div>
-                                    <?php endif; ?>
-                                </td>
-                                <td class="py-3 font-medium text-gray-800 dark:text-gray-100">
-                                    <?php echo htmlspecialchars($product['name']); ?>
-                                </td>
-                                <td class="py-3 text-right text-gray-700 dark:text-gray-300">
-                                    <?php echo number_format((float) $product['base_price'], 2, ',', '.'); ?> €
-                                </td>
-                                <td class="py-3 text-center">
-                                    <?php if ($product['active']): ?>
-                                    <span class="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 rounded-full text-xs font-medium">Aktiv</span>
-                                    <?php else: ?>
-                                    <span class="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-full text-xs font-medium">Inaktiv</span>
-                                    <?php endif; ?>
-                                </td>
-                                <td class="py-3 text-center text-gray-500 dark:text-gray-400">
-                                    <?php echo count($product['variants']); ?>
-                                </td>
-                                <td class="py-3 text-right">
-                                    <a href="<?php echo asset('pages/admin/shop_manage.php?section=products&edit=' . $product['id']); ?>"
-                                       class="text-blue-600 dark:text-blue-400 hover:underline text-sm no-underline">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                </td>
-                            </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
-                <?php endif; ?>
-            </div>
+    <div class="card rounded-xl shadow-lg p-6">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">
+                <i class="fas fa-list mr-2 text-blue-500"></i>Alle Produkte
+            </h2>
+            <button type="button" onclick="openProductModal()"
+                    class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">
+                <i class="fas fa-plus"></i>Neues Produkt
+            </button>
         </div>
 
-        <!-- Product form -->
-        <div class="xl:col-span-2">
-            <div class="card rounded-xl shadow-lg overflow-hidden">
-                <!-- Form header -->
-                <div class="px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-700 flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center">
-                        <i class="fas fa-<?php echo $editProduct ? 'edit' : 'plus'; ?> text-white text-sm"></i>
-                    </div>
-                    <div>
-                        <h2 class="text-lg font-bold text-white leading-tight">
-                            <?php echo $editProduct ? 'Produkt bearbeiten' : 'Neues Produkt anlegen'; ?>
-                        </h2>
-                        <p class="text-blue-100 text-xs">Pflichtfelder sind mit <span class="text-red-300 font-semibold">*</span> markiert</p>
-                    </div>
-                </div>
-
-                <form method="POST" enctype="multipart/form-data" class="p-6 space-y-5">
-                    <input type="hidden" name="post_action" value="save_product">
-                    <?php if ($editProduct): ?>
-                    <input type="hidden" name="product_id" value="<?php echo $editProduct['id']; ?>">
-                    <?php endif; ?>
-
-                    <!-- ── Grunddaten ── -->
-                    <div class="space-y-4">
-                        <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 flex items-center gap-2">
-                            <span class="flex-1 border-t border-gray-200 dark:border-gray-700"></span>
-                            <i class="fas fa-info-circle"></i> Grunddaten
-                            <span class="flex-1 border-t border-gray-200 dark:border-gray-700"></span>
-                        </h3>
-
-                        <!-- Name -->
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                                Produktname <span class="text-red-500">*</span>
-                            </label>
-                            <input type="text" name="name" required
-                                   placeholder="z.B. IBC Hoodie, Kugelschreiber, ..."
-                                   value="<?php echo htmlspecialchars($editProduct['name'] ?? ''); ?>"
-                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500">
-                        </div>
-
-                        <!-- Description -->
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Beschreibung</label>
-                            <textarea name="description" rows="3"
-                                      placeholder="Kurze Produktbeschreibung (optional)"
-                                      class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500"><?php echo htmlspecialchars($editProduct['description'] ?? ''); ?></textarea>
-                        </div>
-
-                        <!-- Price + Active (side by side) -->
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                                    Preis (€) <span class="text-red-500">*</span>
-                                </label>
-                                <div class="relative">
-                                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 dark:text-gray-500 font-medium">€</span>
-                                    <input type="number" name="base_price" step="0.01" min="0" required
-                                           value="<?php echo htmlspecialchars($editProduct ? number_format((float) $editProduct['base_price'], 2, '.', '') : '0.00'); ?>"
-                                           class="w-full pl-7 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500">
-                                </div>
+        <?php if (empty($products)): ?>
+        <div class="flex flex-col items-center justify-center py-16 text-gray-400 dark:text-gray-500">
+            <i class="fas fa-box-open text-5xl mb-4 opacity-40"></i>
+            <p class="text-lg font-medium mb-4">Noch keine Produkte vorhanden.</p>
+            <button type="button" onclick="openProductModal()"
+                    class="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">
+                <i class="fas fa-plus"></i>Erstes Produkt erstellen
+            </button>
+        </div>
+        <?php else: ?>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="border-b border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 text-left">
+                        <th class="pb-3 font-semibold">Bild</th>
+                        <th class="pb-3 font-semibold">Name</th>
+                        <th class="pb-3 font-semibold hidden md:table-cell">Beschreibung</th>
+                        <th class="pb-3 font-semibold text-right">Preis</th>
+                        <th class="pb-3 font-semibold text-center hidden sm:table-cell">Status</th>
+                        <th class="pb-3 font-semibold text-center hidden sm:table-cell">Varianten</th>
+                        <th class="pb-3"></th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                    <?php foreach ($products as $product): ?>
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
+                        <td class="py-3 pr-3">
+                            <?php if (!empty($product['image_path'])): ?>
+                            <img src="<?php echo asset($product['image_path']); ?>"
+                                 alt="" class="w-14 h-14 object-cover rounded-lg border border-gray-100 dark:border-gray-700">
+                            <?php else: ?>
+                            <div class="w-14 h-14 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-box text-gray-400 text-lg"></i>
                             </div>
-                            <div class="flex flex-col justify-end">
-                                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Status</label>
-                                <label class="flex items-center gap-2 cursor-pointer h-[38px]">
-                                    <input type="checkbox" id="active" name="active" value="1"
-                                           <?php echo (!$editProduct || $editProduct['active']) ? 'checked' : ''; ?>
-                                           class="w-4 h-4 text-blue-600 rounded border-gray-300 dark:border-gray-600 focus:ring-blue-500">
-                                    <span class="text-sm text-gray-700 dark:text-gray-300">Produkt aktiv</span>
-                                </label>
+                            <?php endif; ?>
+                        </td>
+                        <td class="py-3 font-semibold text-gray-800 dark:text-gray-100">
+                            <?php echo htmlspecialchars($product['name']); ?>
+                        </td>
+                        <td class="py-3 text-gray-500 dark:text-gray-400 max-w-xs hidden md:table-cell">
+                            <span class="line-clamp-2"><?php echo htmlspecialchars($product['description'] ?? ''); ?></span>
+                        </td>
+                        <td class="py-3 text-right font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">
+                            <?php echo number_format((float) $product['base_price'], 2, ',', '.'); ?> €
+                        </td>
+                        <td class="py-3 text-center hidden sm:table-cell">
+                            <?php if ($product['active']): ?>
+                            <span class="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 rounded-full text-xs font-medium">Aktiv</span>
+                            <?php else: ?>
+                            <span class="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-full text-xs font-medium">Inaktiv</span>
+                            <?php endif; ?>
+                        </td>
+                        <td class="py-3 text-center hidden sm:table-cell">
+                            <?php
+                            $variantCount = count($product['variants']);
+                            $totalStock   = array_sum(array_column($product['variants'], 'stock_quantity'));
+                            ?>
+                            <div class="flex flex-col items-center">
+                                <span class="font-medium text-gray-700 dark:text-gray-300"><?php echo $variantCount; ?></span>
+                                <span class="text-xs text-gray-400 dark:text-gray-500"><?php echo $totalStock; ?> Stk.</span>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- ── Produktbild ── -->
-                    <div class="space-y-3">
-                        <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 flex items-center gap-2">
-                            <span class="flex-1 border-t border-gray-200 dark:border-gray-700"></span>
-                            <i class="fas fa-image"></i> Produktbild
-                            <span class="flex-1 border-t border-gray-200 dark:border-gray-700"></span>
-                        </h3>
-                        <?php if (!empty($editProduct['image_path'])): ?>
-                        <div class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/40 rounded-lg">
-                            <img src="<?php echo asset($editProduct['image_path']); ?>"
-                                 alt="Aktuelles Bild" class="w-16 h-16 object-cover rounded-lg shrink-0">
-                            <p class="text-xs text-gray-500 dark:text-gray-400">Neues Bild hochladen um das bestehende zu ersetzen.</p>
-                        </div>
-                        <?php endif; ?>
-                        <input type="file" name="product_image" accept="image/jpeg,image/png,image/webp"
-                               class="w-full text-sm text-gray-700 dark:text-gray-300 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 dark:file:bg-blue-900 dark:file:text-blue-300 hover:file:bg-blue-100">
-                        <p class="text-xs text-gray-400 dark:text-gray-500">JPG, PNG oder WebP · max. 5 MB</p>
-                    </div>
-
-                    <!-- ── Lagerbestand & Varianten ── -->
-                    <?php
-                    // Determine whether this product uses named variants or just a simple stock value
-                    $editHasVariants = false;
-                    $editSimpleStock = 0;
-                    foreach ($editProduct['variants'] ?? [] as $v) {
-                        if ($v['type'] !== '' || $v['value'] !== '') {
-                            $editHasVariants = true;
-                            break;
-                        }
-                    }
-                    if (!$editHasVariants && !empty($editProduct['variants'])) {
-                        $editSimpleStock = (int) $editProduct['variants'][0]['stock_quantity'];
-                    }
-                    // Group existing named variants by type for the variant builder
-                    $variantsByType = [];
-                    if ($editHasVariants) {
-                        foreach ($editProduct['variants'] as $v) {
-                            $variantsByType[$v['type']][] = $v;
-                        }
-                    }
-                    if (empty($variantsByType)) {
-                        $variantsByType = ['' => [['value' => '', 'stock_quantity' => 0]]];
-                    }
-                    ?>
-                    <div class="space-y-3">
-                        <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 flex items-center gap-2">
-                            <span class="flex-1 border-t border-gray-200 dark:border-gray-700"></span>
-                            <i class="fas fa-warehouse"></i> Lagerbestand &amp; Varianten
-                            <span class="flex-1 border-t border-gray-200 dark:border-gray-700"></span>
-                        </h3>
-
-                        <!-- Simple stock (shown when no variants) -->
-                        <div id="section-simple-stock" class="<?php echo $editHasVariants ? 'hidden' : ''; ?>">
-                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                                Lagerbestand
-                            </label>
-                            <input type="number" name="stock_quantity" id="stock_quantity"
-                                   value="<?php echo $editSimpleStock; ?>" min="0"
-                                   class="w-36 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500">
-                        </div>
-
-                        <!-- Has-variants toggle -->
-                        <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/40 border border-gray-200 dark:border-gray-600">
-                            <label class="flex items-start gap-3 cursor-pointer">
-                                <input type="checkbox" id="has_variants" name="has_variants" value="1"
-                                       <?php echo $editHasVariants ? 'checked' : ''; ?>
-                                       onchange="toggleVariantMode(this.checked)"
-                                       class="w-4 h-4 mt-0.5 text-purple-600 rounded border-gray-300 dark:border-gray-600 focus:ring-purple-500">
-                                <div>
-                                    <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">Produkt hat Varianten</span>
-                                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
-                                        Optional – nur nötig wenn das Produkt verschiedene Ausführungen hat (z.B. Größe, Farbe). Für normale Artikel wie Stifte, Tassen o.ä. nicht erforderlich.
-                                    </p>
-                                </div>
-                            </label>
-                        </div>
-
-                        <!-- Named variants builder (shown when has variants) -->
-                        <div id="section-variants" class="<?php echo $editHasVariants ? '' : 'hidden'; ?>">
-                            <div id="variants-container" class="space-y-3">
-                                <?php $vIdx = 0; foreach ($variantsByType as $typeName => $typeValues): ?>
-                                <div class="variant-block border border-gray-200 dark:border-gray-600 rounded-xl p-3 bg-gray-50 dark:bg-gray-700/50">
-                                    <div class="flex items-center gap-2 mb-3">
-                                        <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300 shrink-0">
-                                            <i class="fas fa-tag text-xs"></i>
-                                        </span>
-                                        <input type="text" name="variants[<?php echo $vIdx; ?>][name]"
-                                               value="<?php echo htmlspecialchars($typeName); ?>"
-                                               placeholder="Varianten-Typ (z.B. Größe, Farbe)"
-                                               class="flex-1 px-3 py-1.5 border border-purple-200 dark:border-purple-700 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 text-sm font-medium focus:ring-2 focus:ring-purple-500">
-                                        <button type="button" onclick="this.closest('.variant-block').remove()"
-                                                class="text-red-400 hover:text-red-600 p-1 ml-1 transition-colors" title="Variante entfernen">
-                                            <i class="fas fa-trash-alt text-xs"></i>
-                                        </button>
-                                    </div>
-                                    <div class="value-rows space-y-2 ml-8">
-                                        <?php $valIdx = 0; foreach ($typeValues as $s): ?>
-                                        <div class="value-row flex gap-2 items-center">
-                                            <span class="text-xs text-gray-400 dark:text-gray-500 w-16 shrink-0">Wert</span>
-                                            <input type="text" name="variants[<?php echo $vIdx; ?>][values][<?php echo $valIdx; ?>][value]"
-                                                   value="<?php echo htmlspecialchars($s['value']); ?>"
-                                                   placeholder="z.B. Rot, XL ..."
-                                                   class="flex-1 min-w-0 px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 text-sm focus:ring-2 focus:ring-blue-500">
-                                            <span class="text-xs text-gray-400 dark:text-gray-500 shrink-0">Bestand</span>
-                                            <input type="number" name="variants[<?php echo $vIdx; ?>][values][<?php echo $valIdx; ?>][stock]"
-                                                   value="<?php echo (int) $s['stock_quantity']; ?>"
-                                                   min="0"
-                                                   class="w-16 px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 text-sm focus:ring-2 focus:ring-blue-500">
-                                            <button type="button" onclick="this.closest('.value-row').remove()"
-                                                    class="text-red-400 hover:text-red-600 p-1 transition-colors" title="Wert entfernen">
-                                                <i class="fas fa-times text-xs"></i>
-                                            </button>
-                                        </div>
-                                        <?php $valIdx++; endforeach; ?>
-                                    </div>
-                                    <button type="button" onclick="addValueRow(this, <?php echo $vIdx; ?>)"
-                                            class="mt-2 ml-8 text-xs text-blue-600 dark:text-blue-400 hover:underline">
-                                        <i class="fas fa-plus mr-1"></i>+ Wert hinzufügen
-                                    </button>
-                                </div>
-                                <?php $vIdx++; endforeach; ?>
-                            </div>
-                            <button type="button" id="add-variant"
-                                    class="mt-3 w-full py-2.5 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl text-sm text-gray-500 dark:text-gray-400 hover:border-purple-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors">
-                                <i class="fas fa-plus mr-1"></i>+ Neuen Varianten-Typ hinzufügen
+                        </td>
+                        <td class="py-3 text-right">
+                            <button type="button"
+                                    onclick="openProductModal(<?php echo htmlspecialchars(json_encode($product), ENT_QUOTES); ?>)"
+                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg text-xs font-medium transition-colors">
+                                <i class="fas fa-edit"></i>Bearbeiten
                             </button>
-                        </div>
-                    </div>
-
-                    <!-- Submit -->
-                    <div class="flex gap-3 pt-1">
-                        <button type="submit"
-                                class="flex-1 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 font-semibold transition-all shadow">
-                            <i class="fas fa-save mr-2"></i><?php echo $editProduct ? 'Änderungen speichern' : 'Produkt erstellen'; ?>
-                        </button>
-                        <?php if ($editProduct): ?>
-                        <a href="<?php echo asset('pages/admin/shop_manage.php?section=products'); ?>"
-                           class="px-4 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-all font-medium text-center no-underline">
-                            Abbrechen
-                        </a>
-                        <?php endif; ?>
-                    </div>
-                </form>
-            </div>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
         </div>
+        <p class="mt-4 text-xs text-gray-400 dark:text-gray-500">
+            <?php echo count($products); ?> Produkt<?php echo count($products) !== 1 ? 'e' : ''; ?> insgesamt
+        </p>
+        <?php endif; ?>
     </div>
 
     <?php elseif ($section === 'orders'): ?>
@@ -674,66 +499,442 @@ ob_start();
     <?php endif; ?>
 </div>
 
+<!-- ══════════════════════════════════════════════════════════════════════════════
+     PRODUCT MODAL (create / edit)
+══════════════════════════════════════════════════════════════════════════════ -->
+<div id="product-modal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-start justify-center p-4 overflow-y-auto">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-3xl my-6 border border-gray-100 dark:border-gray-700">
+
+        <!-- Modal header -->
+        <div class="px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-700 rounded-t-2xl flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+                <i id="modal-header-icon" class="fas fa-plus text-white"></i>
+            </div>
+            <div class="flex-1">
+                <h2 id="modal-title" class="text-xl font-bold text-white leading-tight">Neues Produkt anlegen</h2>
+                <p class="text-blue-100 text-xs mt-0.5">Pflichtfelder sind mit <span class="text-red-300 font-semibold">*</span> markiert</p>
+            </div>
+            <button type="button" onclick="closeProductModal()"
+                    class="text-white/70 hover:text-white transition-colors p-1 ml-2">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+
+        <!-- Modal body -->
+        <form method="POST" enctype="multipart/form-data" id="product-form" class="p-6">
+            <input type="hidden" name="post_action" value="save_product">
+            <input type="hidden" name="product_id" id="modal-product-id" value="">
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+
+                <!-- ── Left column ── -->
+                <div class="space-y-5">
+
+                    <!-- Section: Grunddaten -->
+                    <div>
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 flex items-center gap-2 mb-3">
+                            <i class="fas fa-info-circle text-blue-400"></i> Grunddaten
+                            <span class="flex-1 border-t border-gray-200 dark:border-gray-700"></span>
+                        </h3>
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                                    Produktname <span class="text-red-500">*</span>
+                                </label>
+                                <input type="text" name="name" id="modal-name" required
+                                       placeholder="z.B. IBC Hoodie, Kugelschreiber, ..."
+                                       class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                                    Beschreibung <span class="font-normal text-gray-400 dark:text-gray-500">(optional)</span>
+                                </label>
+                                <textarea name="description" id="modal-description" rows="4"
+                                          placeholder="Kurze Produktbeschreibung, z.B. Material, Verwendungszweck, ..."
+                                          class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition resize-none"></textarea>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                                        Preis (€) <span class="text-red-500">*</span>
+                                    </label>
+                                    <div class="relative">
+                                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 dark:text-gray-500 font-medium pointer-events-none">€</span>
+                                        <input type="number" name="base_price" id="modal-base-price"
+                                               step="0.01" min="0" required value="0.00"
+                                               class="w-full pl-7 pr-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+                                    </div>
+                                </div>
+                                <div class="flex flex-col justify-end">
+                                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Status</label>
+                                    <label class="flex items-center gap-2.5 cursor-pointer h-[42px] px-3 rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/40 hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+                                        <input type="checkbox" id="modal-active" name="active" value="1" checked
+                                               class="w-4 h-4 text-blue-600 rounded border-gray-300 dark:border-gray-600 focus:ring-blue-500">
+                                        <span class="text-sm text-gray-700 dark:text-gray-300">Produkt aktiv</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section: Produktbild -->
+                    <div>
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 flex items-center gap-2 mb-3">
+                            <i class="fas fa-image text-blue-400"></i> Produktbild
+                            <span class="flex-1 border-t border-gray-200 dark:border-gray-700"></span>
+                        </h3>
+                        <div id="image-preview-area" class="mb-3 hidden">
+                            <div class="relative inline-block">
+                                <img id="image-preview" src="" alt="Vorschau"
+                                     class="w-32 h-32 object-cover rounded-xl border-2 border-blue-200 dark:border-blue-700 shadow">
+                                <button type="button" onclick="clearImagePreview()"
+                                        class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition shadow text-xs">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Neue Bildvorschau</p>
+                        </div>
+                        <div id="current-image-area" class="mb-3 hidden">
+                            <div class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/40 rounded-lg border border-gray-200 dark:border-gray-600">
+                                <img id="current-image" src="" alt="Aktuelles Bild"
+                                     class="w-16 h-16 object-cover rounded-lg shrink-0">
+                                <p class="text-xs text-gray-500 dark:text-gray-400">
+                                    Aktuelles Bild.<br>Neues Bild hochladen, um es zu ersetzen.
+                                </p>
+                            </div>
+                        </div>
+                        <label for="modal-product-image"
+                               class="flex flex-col items-center justify-center w-full h-28 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl cursor-pointer bg-gray-50 dark:bg-gray-700/30 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:border-blue-400 dark:hover:border-blue-500 transition-colors group">
+                            <div class="flex flex-col items-center justify-center py-4">
+                                <i class="fas fa-cloud-upload-alt text-2xl text-gray-400 group-hover:text-blue-500 dark:group-hover:text-blue-400 mb-1 transition-colors"></i>
+                                <p class="text-sm text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors font-medium">Bild auswählen</p>
+                                <p class="text-xs text-gray-400 dark:text-gray-500">JPG, PNG oder WebP · max. 5 MB</p>
+                            </div>
+                            <input id="modal-product-image" type="file" name="product_image"
+                                   accept="image/jpeg,image/png,image/webp" class="hidden"
+                                   onchange="previewProductImage(event)">
+                        </label>
+                    </div>
+                </div>
+
+                <!-- ── Right column ── -->
+                <div class="space-y-5">
+
+                    <!-- Section: Lagerbestand & Varianten -->
+                    <div>
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 flex items-center gap-2 mb-3">
+                            <i class="fas fa-warehouse text-blue-400"></i> Lagerbestand &amp; Varianten
+                            <span class="flex-1 border-t border-gray-200 dark:border-gray-700"></span>
+                        </h3>
+                        <div id="modal-section-simple-stock" class="mb-3">
+                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Lagerbestand</label>
+                            <div class="flex items-center gap-2">
+                                <input type="number" name="stock_quantity" id="modal-stock-quantity"
+                                       value="0" min="0"
+                                       class="w-32 px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 transition">
+                                <span class="text-sm text-gray-500 dark:text-gray-400">Stück verfügbar</span>
+                            </div>
+                        </div>
+                        <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/40 border border-gray-200 dark:border-gray-600 mb-3">
+                            <label class="flex items-start gap-3 cursor-pointer">
+                                <input type="checkbox" id="modal-has-variants" name="has_variants" value="1"
+                                       onchange="toggleVariantMode(this.checked)"
+                                       class="w-4 h-4 mt-0.5 text-purple-600 rounded border-gray-300 dark:border-gray-600 focus:ring-purple-500">
+                                <div>
+                                    <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">Produkt hat Varianten</span>
+                                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+                                        Für Artikel mit verschiedenen Ausführungen (z.B. Größe, Farbe). Für normale Artikel nicht nötig.
+                                    </p>
+                                </div>
+                            </label>
+                        </div>
+                        <div id="modal-section-variants" class="hidden">
+                            <div id="variants-container" class="space-y-3"></div>
+                            <button type="button" id="add-variant"
+                                    class="mt-3 w-full py-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl text-sm text-gray-500 dark:text-gray-400 hover:border-purple-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors flex items-center justify-center gap-2">
+                                <i class="fas fa-plus"></i> Neuen Varianten-Typ hinzufügen
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Tips box -->
+                    <div class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-800">
+                        <p class="text-xs font-semibold text-blue-700 dark:text-blue-300 mb-2">
+                            <i class="fas fa-lightbulb mr-1"></i>Tipps
+                        </p>
+                        <ul class="text-xs text-blue-600 dark:text-blue-400 space-y-1 list-none m-0 p-0">
+                            <li><i class="fas fa-check-circle mr-1 text-blue-400"></i>Gib einen klaren, beschreibenden Produktnamen ein.</li>
+                            <li><i class="fas fa-check-circle mr-1 text-blue-400"></i>Verwende ein Produktbild für bessere Übersicht im Shop.</li>
+                            <li><i class="fas fa-check-circle mr-1 text-blue-400"></i>Setze „Produkt aktiv" nur, wenn es kaufbar sein soll.</li>
+                            <li><i class="fas fa-check-circle mr-1 text-blue-400"></i>Varianten brauchst du nur für Artikel mit Größen / Farben.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal footer -->
+            <div class="flex items-center justify-between mt-6 pt-5 border-t border-gray-200 dark:border-gray-700 gap-3 flex-wrap">
+                <div id="modal-delete-area" class="hidden">
+                    <button type="button" onclick="confirmDeleteProduct()"
+                            class="inline-flex items-center gap-2 px-4 py-2.5 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/40 font-medium text-sm transition-colors">
+                        <i class="fas fa-trash-alt"></i>Produkt löschen
+                    </button>
+                </div>
+                <div class="flex gap-3 ml-auto">
+                    <button type="button" onclick="closeProductModal()"
+                            class="px-5 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 font-medium transition-colors">
+                        Abbrechen
+                    </button>
+                    <button type="submit"
+                            class="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 font-semibold transition-all shadow flex items-center gap-2">
+                        <i class="fas fa-save"></i>
+                        <span id="modal-submit-label">Produkt erstellen</span>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Delete confirmation modal -->
+<div id="delete-confirm-modal" class="hidden fixed inset-0 bg-black/70 z-[60] flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 w-full max-w-sm border border-gray-100 dark:border-gray-700">
+        <div class="flex items-center gap-3 mb-4">
+            <div class="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/40 flex items-center justify-center shrink-0">
+                <i class="fas fa-exclamation-triangle text-red-500 text-xl"></i>
+            </div>
+            <div>
+                <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100">Produkt löschen?</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">Diese Aktion kann nicht rückgängig gemacht werden.</p>
+            </div>
+        </div>
+        <p class="text-sm text-gray-600 dark:text-gray-300 mb-5">
+            Soll <strong id="delete-product-name" class="text-gray-800 dark:text-gray-100"></strong> wirklich gelöscht werden? Alle Varianten werden ebenfalls entfernt.
+        </p>
+        <form method="POST" id="delete-product-form">
+            <input type="hidden" name="post_action" value="delete_product">
+            <input type="hidden" name="product_id" id="delete-product-id">
+            <div class="flex gap-3">
+                <button type="button" onclick="closeDeleteConfirm()"
+                        class="flex-1 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 font-medium transition-colors">
+                    Abbrechen
+                </button>
+                <button type="submit"
+                        class="flex-1 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 font-semibold transition-colors flex items-center justify-center gap-2">
+                    <i class="fas fa-trash-alt"></i>Löschen
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
-// ── Variant mode toggle ──────────────────────────────────────────────────────
-
-function toggleVariantMode(hasVariants) {
-    document.getElementById('section-simple-stock').classList.toggle('hidden', hasVariants);
-    document.getElementById('section-variants').classList.toggle('hidden', !hasVariants);
-}
-
-// ── Variant builder ──────────────────────────────────────────────────────────
-
-let variantCount = document.querySelectorAll('.variant-block').length;
+// ── Product Modal ─────────────────────────────────────────────────────────────
 
 const INPUT_CLASS = 'border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 text-sm focus:ring-2';
 
-function valueRowHtml(vIdx, valIdx) {
+let variantCount       = 0;
+let currentProductId   = null;
+let currentProductName = '';
+
+function openProductModal(product) {
+    const isEdit = product && product.id;
+
+    // Reset form
+    document.getElementById('product-form').reset();
+    document.getElementById('modal-product-id').value  = isEdit ? product.id : '';
+    document.getElementById('modal-name').value        = isEdit ? (product.name || '') : '';
+    document.getElementById('modal-description').value = isEdit ? (product.description || '') : '';
+    document.getElementById('modal-base-price').value  = isEdit ? parseFloat(product.base_price || 0).toFixed(2) : '0.00';
+    document.getElementById('modal-active').checked    = isEdit ? (product.active == 1) : true;
+
+    // Header
+    document.getElementById('modal-title').textContent        = isEdit ? 'Produkt bearbeiten' : 'Neues Produkt anlegen';
+    document.getElementById('modal-header-icon').className    = 'fas ' + (isEdit ? 'fa-edit' : 'fa-plus') + ' text-white';
+    document.getElementById('modal-submit-label').textContent = isEdit ? 'Änderungen speichern' : 'Produkt erstellen';
+
+    // Delete area
+    const deleteArea = document.getElementById('modal-delete-area');
+    if (isEdit) {
+        deleteArea.classList.remove('hidden');
+        currentProductId   = product.id;
+        currentProductName = product.name || '';
+    } else {
+        deleteArea.classList.add('hidden');
+        currentProductId   = null;
+        currentProductName = '';
+    }
+
+    // Current image
+    const currentImageArea = document.getElementById('current-image-area');
+    if (isEdit && product.image_path) {
+        document.getElementById('current-image').src = product.image_path;
+        currentImageArea.classList.remove('hidden');
+    } else {
+        currentImageArea.classList.add('hidden');
+    }
+
+    // Reset new image preview
+    document.getElementById('image-preview-area').classList.add('hidden');
+    document.getElementById('image-preview').src = '';
+
+    // Build variant UI
+    buildVariantUI(isEdit ? (product.variants || []) : []);
+
+    document.getElementById('product-modal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    document.getElementById('modal-name').focus();
+}
+
+function closeProductModal() {
+    document.getElementById('product-modal').classList.add('hidden');
+    document.body.style.overflow = '';
+}
+
+// ── Variant UI ────────────────────────────────────────────────────────────────
+
+function buildVariantUI(variants) {
+    variantCount = 0;
+    const container = document.getElementById('variants-container');
+    container.innerHTML = '';
+
+    const groups = {};
+    variants.forEach(v => {
+        if (v.type !== '' || v.value !== '') {
+            if (!groups[v.type]) groups[v.type] = [];
+            groups[v.type].push(v);
+        }
+    });
+
+    const hasNamedVariants = Object.keys(groups).length > 0;
+
+    if (hasNamedVariants) {
+        Object.keys(groups).forEach(typeName => {
+            container.appendChild(createVariantBlock(variantCount++, typeName, groups[typeName]));
+        });
+        document.getElementById('modal-has-variants').checked = true;
+        document.getElementById('modal-section-simple-stock').classList.add('hidden');
+        document.getElementById('modal-section-variants').classList.remove('hidden');
+        document.getElementById('modal-stock-quantity').value = 0;
+    } else {
+        document.getElementById('modal-has-variants').checked = false;
+        document.getElementById('modal-section-simple-stock').classList.remove('hidden');
+        document.getElementById('modal-section-variants').classList.add('hidden');
+        const simpleStock = variants.length > 0 ? (parseInt(variants[0].stock_quantity) || 0) : 0;
+        document.getElementById('modal-stock-quantity').value = simpleStock;
+    }
+}
+
+function createVariantBlock(idx, typeName, values) {
+    const block = document.createElement('div');
+    block.className = 'variant-block border border-gray-200 dark:border-gray-600 rounded-xl p-3 bg-gray-50 dark:bg-gray-700/50';
+    block.innerHTML = `
+        <div class="flex items-center gap-2 mb-3">
+            <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300 shrink-0">
+                <i class="fas fa-tag text-xs"></i>
+            </span>
+            <input type="text" name="variants[${idx}][name]"
+                   value="${escapeHtml(typeName)}"
+                   placeholder="Varianten-Typ (z.B. Größe, Farbe)"
+                   class="flex-1 px-3 py-1.5 border border-purple-200 dark:border-purple-700 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 text-sm font-medium focus:ring-2 focus:ring-purple-500 transition">
+            <button type="button" onclick="this.closest('.variant-block').remove()"
+                    class="text-red-400 hover:text-red-600 p-1.5 ml-1 transition-colors rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20" title="Typ entfernen">
+                <i class="fas fa-trash-alt text-xs"></i>
+            </button>
+        </div>
+        <div class="value-rows space-y-2 ml-9">
+            ${(values || [{value:'',stock_quantity:0}]).map((v, vi) => valueRowHtml(idx, vi, v.value || '', v.stock_quantity || 0)).join('')}
+        </div>
+        <button type="button" onclick="addValueRow(this, ${idx})"
+                class="mt-2 ml-9 text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">
+            <i class="fas fa-plus"></i> Ausprägung hinzufügen
+        </button>`;
+    return block;
+}
+
+function valueRowHtml(vIdx, valIdx, value, stock) {
     return `<div class="value-row flex gap-2 items-center">
-        <span class="text-xs text-gray-400 dark:text-gray-500 w-20 shrink-0">Ausprägung</span>
-        <input type="text" name="variants[${vIdx}][values][${valIdx}][value]" placeholder="z.B. Rot"
-               class="w-28 px-2 py-1.5 ${INPUT_CLASS} focus:ring-blue-500">
-        <span class="text-xs text-gray-400 dark:text-gray-500 shrink-0">Bestand</span>
-        <input type="number" name="variants[${vIdx}][values][${valIdx}][stock]" value="0" min="0"
-               class="w-20 px-2 py-1.5 ${INPUT_CLASS} focus:ring-blue-500">
+        <span class="text-xs text-gray-400 dark:text-gray-500 w-12 shrink-0 text-right">Wert</span>
+        <input type="text" name="variants[${vIdx}][values][${valIdx}][value]"
+               value="${escapeHtml(value)}" placeholder="z.B. Rot, XL ..."
+               class="flex-1 min-w-0 px-2 py-1.5 ${INPUT_CLASS} focus:ring-blue-500">
+        <span class="text-xs text-gray-400 dark:text-gray-500 shrink-0">Stk.</span>
+        <input type="number" name="variants[${vIdx}][values][${valIdx}][stock]"
+               value="${parseInt(stock) || 0}" min="0"
+               class="w-16 px-2 py-1.5 ${INPUT_CLASS} focus:ring-blue-500">
         <button type="button" onclick="this.closest('.value-row').remove()"
-                class="text-red-400 hover:text-red-600 p-1 transition-colors" title="Ausprägung entfernen">
+                class="text-red-400 hover:text-red-600 p-1 transition-colors rounded hover:bg-red-50 dark:hover:bg-red-900/20" title="Ausprägung entfernen">
             <i class="fas fa-times text-xs"></i>
         </button>
     </div>`;
 }
 
-document.getElementById('add-variant')?.addEventListener('click', function () {
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+document.getElementById('add-variant').addEventListener('click', function () {
     const idx   = variantCount++;
-    const block = document.createElement('div');
-    block.className = 'variant-block border border-gray-200 dark:border-gray-600 rounded-xl p-3 bg-gray-50 dark:bg-gray-700/50';
-    block.innerHTML = `
-        <div class="flex items-center gap-2 mb-3">
-            <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300">
-                <i class="fas fa-tag text-xs"></i>
-            </span>
-            <input type="text" name="variants[${idx}][name]" placeholder="Varianten-Name (z.B. Farbe)"
-                   class="flex-1 px-3 py-1.5 border border-purple-200 dark:border-purple-700 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 text-sm font-medium focus:ring-2 focus:ring-purple-500">
-            <button type="button" onclick="this.closest('.variant-block').remove()"
-                    class="text-red-400 hover:text-red-600 p-1 ml-1 transition-colors" title="Variante entfernen">
-                <i class="fas fa-trash-alt text-xs"></i>
-            </button>
-        </div>
-        <div class="value-rows space-y-2 ml-8">${valueRowHtml(idx, 0)}</div>
-        <button type="button" onclick="addValueRow(this, ${idx})"
-                class="mt-2 ml-8 text-xs text-blue-600 dark:text-blue-400 hover:underline">
-            <i class="fas fa-plus mr-1"></i>+ Ausprägung hinzufügen
-        </button>`;
+    const block = createVariantBlock(idx, '', [{value:'',stock_quantity:0}]);
     document.getElementById('variants-container').appendChild(block);
+    block.querySelector('input[type="text"]').focus();
 });
 
 function addValueRow(btn, vIdx) {
-    const valueContainer = btn.previousElementSibling; // .value-rows
+    const valueContainer = btn.previousElementSibling;
     const nextIdx        = valueContainer.querySelectorAll('.value-row').length;
-    valueContainer.insertAdjacentHTML('beforeend', valueRowHtml(vIdx, nextIdx));
+    valueContainer.insertAdjacentHTML('beforeend', valueRowHtml(vIdx, nextIdx, '', 0));
 }
 
-// ── Order modal ──────────────────────────────────────────────────────────────
+function toggleVariantMode(hasVariants) {
+    document.getElementById('modal-section-simple-stock').classList.toggle('hidden', hasVariants);
+    document.getElementById('modal-section-variants').classList.toggle('hidden', !hasVariants);
+    if (hasVariants && document.getElementById('variants-container').children.length === 0) {
+        document.getElementById('variants-container').appendChild(
+            createVariantBlock(variantCount++, '', [{value:'',stock_quantity:0}])
+        );
+    }
+}
+
+// ── Image preview ─────────────────────────────────────────────────────────────
+
+function previewProductImage(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        document.getElementById('image-preview').src = e.target.result;
+        document.getElementById('image-preview-area').classList.remove('hidden');
+        document.getElementById('current-image-area').classList.add('hidden');
+    };
+    reader.readAsDataURL(file);
+}
+
+function clearImagePreview() {
+    document.getElementById('modal-product-image').value = '';
+    document.getElementById('image-preview').src = '';
+    document.getElementById('image-preview-area').classList.add('hidden');
+    const currentSrc = document.getElementById('current-image').src;
+    if (currentSrc && currentSrc !== window.location.href) {
+        document.getElementById('current-image-area').classList.remove('hidden');
+    }
+}
+
+// ── Delete product ────────────────────────────────────────────────────────────
+
+function confirmDeleteProduct() {
+    if (!currentProductId) return;
+    document.getElementById('delete-product-name').textContent = currentProductName;
+    document.getElementById('delete-product-id').value         = currentProductId;
+    document.getElementById('delete-confirm-modal').classList.remove('hidden');
+}
+
+function closeDeleteConfirm() {
+    document.getElementById('delete-confirm-modal').classList.add('hidden');
+}
+
+// ── Order modal ───────────────────────────────────────────────────────────────
 
 function openOrderModal(order) {
     document.getElementById('modal-order-id').value          = order.id;
@@ -746,9 +947,40 @@ function closeOrderModal() {
     document.getElementById('order-modal').classList.add('hidden');
 }
 
+// ── Backdrop & ESC close ──────────────────────────────────────────────────────
+
+document.getElementById('product-modal')?.addEventListener('click', function (e) {
+    if (e.target === this) closeProductModal();
+});
 document.getElementById('order-modal')?.addEventListener('click', function (e) {
     if (e.target === this) closeOrderModal();
 });
+document.getElementById('delete-confirm-modal')?.addEventListener('click', function (e) {
+    if (e.target === this) closeDeleteConfirm();
+});
+document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+        closeDeleteConfirm();
+        closeProductModal();
+        closeOrderModal();
+    }
+});
+
+// ── Auto-open on page load ────────────────────────────────────────────────────
+
+<?php if ($openModal && $editProduct): ?>
+openProductModal(<?php echo json_encode([
+    'id'          => $editProduct['id'],
+    'name'        => $editProduct['name'],
+    'description' => $editProduct['description'],
+    'base_price'  => $editProduct['base_price'],
+    'active'      => $editProduct['active'],
+    'image_path'  => !empty($editProduct['image_path']) ? asset($editProduct['image_path']) : '',
+    'variants'    => $editProduct['variants'],
+]); ?>);
+<?php elseif ($openModal): ?>
+openProductModal();
+<?php endif; ?>
 </script>
 
 <?php
