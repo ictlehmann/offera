@@ -1020,12 +1020,6 @@ if (Auth::check() && isset($_SESSION['profile_incomplete']) && $_SESSION['profil
                 <span>Einstellungen</span>
             </a>
 
-            <!-- Änderungen & Support -->
-            <button type="button" class='sidebar-footer-btn' data-bs-toggle="modal" data-bs-target="#support-modal">
-                <i class='fas fa-headset'></i>
-                <span>Änderungen &amp; Support</span>
-            </button>
-
             <!-- Dark/Light Mode Toggle -->
             <button id="theme-toggle" class='sidebar-footer-btn' aria-label="Zwischen hellem und dunklem Modus wechseln">
                 <i id="theme-icon" class='fas fa-moon'></i>
