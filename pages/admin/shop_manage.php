@@ -212,10 +212,10 @@ ob_start();
          PRODUCTS
     ═══════════════════════════════════════════════════════════════════════════ -->
 
-    <div class="grid grid-cols-1 xl:grid-cols-3 gap-8">
+    <div class="grid grid-cols-1 xl:grid-cols-5 gap-8">
 
         <!-- Product list -->
-        <div class="xl:col-span-2">
+        <div class="xl:col-span-3">
             <div class="card rounded-xl shadow-lg p-6">
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">
@@ -287,64 +287,99 @@ ob_start();
         </div>
 
         <!-- Product form -->
-        <div>
-            <div class="card rounded-xl shadow-lg p-6">
-                <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
-                    <i class="fas fa-<?php echo $editProduct ? 'edit' : 'plus-circle'; ?> mr-2 text-blue-500"></i>
-                    <?php echo $editProduct ? 'Produkt bearbeiten' : 'Neues Produkt'; ?>
-                </h2>
+        <div class="xl:col-span-2">
+            <div class="card rounded-xl shadow-lg overflow-hidden">
+                <!-- Form header -->
+                <div class="px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-700 flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center">
+                        <i class="fas fa-<?php echo $editProduct ? 'edit' : 'plus'; ?> text-white text-sm"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-white leading-tight">
+                            <?php echo $editProduct ? 'Produkt bearbeiten' : 'Neues Produkt anlegen'; ?>
+                        </h2>
+                        <p class="text-blue-100 text-xs">Pflichtfelder sind mit <span class="text-red-300 font-semibold">*</span> markiert</p>
+                    </div>
+                </div>
 
-                <form method="POST" enctype="multipart/form-data" class="space-y-4">
+                <form method="POST" enctype="multipart/form-data" class="p-6 space-y-5">
                     <input type="hidden" name="post_action" value="save_product">
                     <?php if ($editProduct): ?>
                     <input type="hidden" name="product_id" value="<?php echo $editProduct['id']; ?>">
                     <?php endif; ?>
 
-                    <!-- Name -->
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Produktname <span class="text-red-500">*</span></label>
-                        <input type="text" name="name" required
-                               value="<?php echo htmlspecialchars($editProduct['name'] ?? ''); ?>"
-                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500">
+                    <!-- ── Grunddaten ── -->
+                    <div class="space-y-4">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 flex items-center gap-2">
+                            <span class="flex-1 border-t border-gray-200 dark:border-gray-700"></span>
+                            <i class="fas fa-info-circle"></i> Grunddaten
+                            <span class="flex-1 border-t border-gray-200 dark:border-gray-700"></span>
+                        </h3>
+
+                        <!-- Name -->
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                                Produktname <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" name="name" required
+                                   placeholder="z.B. IBC Hoodie, Kugelschreiber, ..."
+                                   value="<?php echo htmlspecialchars($editProduct['name'] ?? ''); ?>"
+                                   class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500">
+                        </div>
+
+                        <!-- Description -->
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Beschreibung</label>
+                            <textarea name="description" rows="3"
+                                      placeholder="Kurze Produktbeschreibung (optional)"
+                                      class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500"><?php echo htmlspecialchars($editProduct['description'] ?? ''); ?></textarea>
+                        </div>
+
+                        <!-- Price + Active (side by side) -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                                    Preis (€) <span class="text-red-500">*</span>
+                                </label>
+                                <div class="relative">
+                                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 dark:text-gray-500 font-medium">€</span>
+                                    <input type="number" name="base_price" step="0.01" min="0" required
+                                           value="<?php echo htmlspecialchars($editProduct ? number_format((float) $editProduct['base_price'], 2, '.', '') : '0.00'); ?>"
+                                           class="w-full pl-7 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500">
+                                </div>
+                            </div>
+                            <div class="flex flex-col justify-end">
+                                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Status</label>
+                                <label class="flex items-center gap-2 cursor-pointer h-[38px]">
+                                    <input type="checkbox" id="active" name="active" value="1"
+                                           <?php echo (!$editProduct || $editProduct['active']) ? 'checked' : ''; ?>
+                                           class="w-4 h-4 text-blue-600 rounded border-gray-300 dark:border-gray-600 focus:ring-blue-500">
+                                    <span class="text-sm text-gray-700 dark:text-gray-300">Produkt aktiv</span>
+                                </label>
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- Description -->
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Beschreibung</label>
-                        <textarea name="description" rows="3"
-                                  class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500"><?php echo htmlspecialchars($editProduct['description'] ?? ''); ?></textarea>
-                    </div>
-
-                    <!-- Price -->
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Grundpreis (€) <span class="text-red-500">*</span></label>
-                        <input type="number" name="base_price" step="0.01" min="0" required
-                               value="<?php echo htmlspecialchars($editProduct ? number_format((float) $editProduct['base_price'], 2, '.', '') : '0.00'); ?>"
-                               class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500">
-                    </div>
-
-                    <!-- Image -->
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Produktbild (JPG/PNG/WebP, max. 5 MB)</label>
+                    <!-- ── Produktbild ── -->
+                    <div class="space-y-3">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 flex items-center gap-2">
+                            <span class="flex-1 border-t border-gray-200 dark:border-gray-700"></span>
+                            <i class="fas fa-image"></i> Produktbild
+                            <span class="flex-1 border-t border-gray-200 dark:border-gray-700"></span>
+                        </h3>
                         <?php if (!empty($editProduct['image_path'])): ?>
-                        <div class="mb-2">
+                        <div class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/40 rounded-lg">
                             <img src="<?php echo asset($editProduct['image_path']); ?>"
-                                 alt="Aktuelles Bild" class="w-24 h-24 object-cover rounded-lg">
-                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Neues Bild hochladen um das bestehende zu ersetzen.</p>
+                                 alt="Aktuelles Bild" class="w-16 h-16 object-cover rounded-lg shrink-0">
+                            <p class="text-xs text-gray-500 dark:text-gray-400">Neues Bild hochladen um das bestehende zu ersetzen.</p>
                         </div>
                         <?php endif; ?>
                         <input type="file" name="product_image" accept="image/jpeg,image/png,image/webp"
                                class="w-full text-sm text-gray-700 dark:text-gray-300 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 dark:file:bg-blue-900 dark:file:text-blue-300 hover:file:bg-blue-100">
+                        <p class="text-xs text-gray-400 dark:text-gray-500">JPG, PNG oder WebP · max. 5 MB</p>
                     </div>
 
-                    <!-- Active toggle -->
-                    <div class="flex items-center gap-3">
-                        <input type="checkbox" id="active" name="active" value="1"
-                               <?php echo (!$editProduct || $editProduct['active']) ? 'checked' : ''; ?>
-                               class="w-4 h-4 text-blue-600 rounded border-gray-300 dark:border-gray-600 focus:ring-blue-500">
-                        <label for="active" class="text-sm font-semibold text-gray-700 dark:text-gray-300">Produkt aktiv</label>
-                    </div>
-
+                    <!-- ── Lagerbestand & Varianten ── -->
                     <?php
                     // Determine whether this product uses named variants or just a simple stock value
                     $editHasVariants = false;
@@ -369,84 +404,96 @@ ob_start();
                         $variantsByType = ['' => [['value' => '', 'stock_quantity' => 0]]];
                     }
                     ?>
+                    <div class="space-y-3">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 flex items-center gap-2">
+                            <span class="flex-1 border-t border-gray-200 dark:border-gray-700"></span>
+                            <i class="fas fa-warehouse"></i> Lagerbestand &amp; Varianten
+                            <span class="flex-1 border-t border-gray-200 dark:border-gray-700"></span>
+                        </h3>
 
-                    <!-- Has-variants checkbox -->
-                    <div class="flex items-center gap-3">
-                        <input type="checkbox" id="has_variants" name="has_variants" value="1"
-                               <?php echo $editHasVariants ? 'checked' : ''; ?>
-                               onchange="toggleVariantMode(this.checked)"
-                               class="w-4 h-4 text-blue-600 rounded border-gray-300 dark:border-gray-600 focus:ring-blue-500">
-                        <label for="has_variants" class="text-sm font-semibold text-gray-700 dark:text-gray-300">Dieses Produkt hat Varianten</label>
-                    </div>
+                        <!-- Simple stock (shown when no variants) -->
+                        <div id="section-simple-stock" class="<?php echo $editHasVariants ? 'hidden' : ''; ?>">
+                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                                Lagerbestand
+                            </label>
+                            <input type="number" name="stock_quantity" id="stock_quantity"
+                                   value="<?php echo $editSimpleStock; ?>" min="0"
+                                   class="w-36 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500">
+                        </div>
 
-                    <!-- Simple stock (shown when no variants) -->
-                    <div id="section-simple-stock" class="<?php echo $editHasVariants ? 'hidden' : ''; ?>">
-                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                            <i class="fas fa-warehouse mr-1 text-blue-500"></i>Lagerbestand
-                        </label>
-                        <input type="number" name="stock_quantity" id="stock_quantity"
-                               value="<?php echo $editSimpleStock; ?>" min="0"
-                               class="w-32 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500">
-                    </div>
-
-                    <!-- Named variants builder (shown when has variants) -->
-                    <div id="section-variants" class="<?php echo $editHasVariants ? '' : 'hidden'; ?>">
-                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                            <i class="fas fa-tags mr-1 text-purple-500"></i>Varianten
-                        </label>
-                        <div id="variants-container" class="space-y-3">
-                            <?php $vIdx = 0; foreach ($variantsByType as $typeName => $typeValues): ?>
-                            <div class="variant-block border border-gray-200 dark:border-gray-600 rounded-xl p-3 bg-gray-50 dark:bg-gray-700/50">
-                                <div class="flex items-center gap-2 mb-3">
-                                    <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300">
-                                        <i class="fas fa-tag text-xs"></i>
-                                    </span>
-                                    <input type="text" name="variants[<?php echo $vIdx; ?>][name]"
-                                           value="<?php echo htmlspecialchars($typeName); ?>"
-                                           placeholder="Varianten-Name (z.B. Farbe)"
-                                           class="flex-1 px-3 py-1.5 border border-purple-200 dark:border-purple-700 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 text-sm font-medium focus:ring-2 focus:ring-purple-500">
-                                    <button type="button" onclick="this.closest('.variant-block').remove()"
-                                            class="text-red-400 hover:text-red-600 p-1 ml-1 transition-colors" title="Variante entfernen">
-                                        <i class="fas fa-trash-alt text-xs"></i>
-                                    </button>
+                        <!-- Has-variants toggle -->
+                        <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/40 border border-gray-200 dark:border-gray-600">
+                            <label class="flex items-start gap-3 cursor-pointer">
+                                <input type="checkbox" id="has_variants" name="has_variants" value="1"
+                                       <?php echo $editHasVariants ? 'checked' : ''; ?>
+                                       onchange="toggleVariantMode(this.checked)"
+                                       class="w-4 h-4 mt-0.5 text-purple-600 rounded border-gray-300 dark:border-gray-600 focus:ring-purple-500">
+                                <div>
+                                    <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">Produkt hat Varianten</span>
+                                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+                                        Optional – nur nötig wenn das Produkt verschiedene Ausführungen hat (z.B. Größe, Farbe). Für normale Artikel wie Stifte, Tassen o.ä. nicht erforderlich.
+                                    </p>
                                 </div>
-                                <div class="value-rows space-y-2 ml-8">
-                                    <?php $valIdx = 0; foreach ($typeValues as $s): ?>
-                                    <div class="value-row flex gap-2 items-center">
-                                        <span class="text-xs text-gray-400 dark:text-gray-500 w-20 shrink-0">Ausprägung</span>
-                                        <input type="text" name="variants[<?php echo $vIdx; ?>][values][<?php echo $valIdx; ?>][value]"
-                                               value="<?php echo htmlspecialchars($s['value']); ?>"
-                                               placeholder="z.B. Rot"
-                                               class="w-28 px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 text-sm focus:ring-2 focus:ring-blue-500">
-                                        <span class="text-xs text-gray-400 dark:text-gray-500 shrink-0">Bestand</span>
-                                        <input type="number" name="variants[<?php echo $vIdx; ?>][values][<?php echo $valIdx; ?>][stock]"
-                                               value="<?php echo (int) $s['stock_quantity']; ?>"
-                                               min="0"
-                                               class="w-20 px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 text-sm focus:ring-2 focus:ring-blue-500">
-                                        <button type="button" onclick="this.closest('.value-row').remove()"
-                                                class="text-red-400 hover:text-red-600 p-1 transition-colors" title="Ausprägung entfernen">
-                                            <i class="fas fa-times text-xs"></i>
+                            </label>
+                        </div>
+
+                        <!-- Named variants builder (shown when has variants) -->
+                        <div id="section-variants" class="<?php echo $editHasVariants ? '' : 'hidden'; ?>">
+                            <div id="variants-container" class="space-y-3">
+                                <?php $vIdx = 0; foreach ($variantsByType as $typeName => $typeValues): ?>
+                                <div class="variant-block border border-gray-200 dark:border-gray-600 rounded-xl p-3 bg-gray-50 dark:bg-gray-700/50">
+                                    <div class="flex items-center gap-2 mb-3">
+                                        <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300 shrink-0">
+                                            <i class="fas fa-tag text-xs"></i>
+                                        </span>
+                                        <input type="text" name="variants[<?php echo $vIdx; ?>][name]"
+                                               value="<?php echo htmlspecialchars($typeName); ?>"
+                                               placeholder="Varianten-Typ (z.B. Größe, Farbe)"
+                                               class="flex-1 px-3 py-1.5 border border-purple-200 dark:border-purple-700 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 text-sm font-medium focus:ring-2 focus:ring-purple-500">
+                                        <button type="button" onclick="this.closest('.variant-block').remove()"
+                                                class="text-red-400 hover:text-red-600 p-1 ml-1 transition-colors" title="Variante entfernen">
+                                            <i class="fas fa-trash-alt text-xs"></i>
                                         </button>
                                     </div>
-                                    <?php $valIdx++; endforeach; ?>
+                                    <div class="value-rows space-y-2 ml-8">
+                                        <?php $valIdx = 0; foreach ($typeValues as $s): ?>
+                                        <div class="value-row flex gap-2 items-center">
+                                            <span class="text-xs text-gray-400 dark:text-gray-500 w-16 shrink-0">Wert</span>
+                                            <input type="text" name="variants[<?php echo $vIdx; ?>][values][<?php echo $valIdx; ?>][value]"
+                                                   value="<?php echo htmlspecialchars($s['value']); ?>"
+                                                   placeholder="z.B. Rot, XL ..."
+                                                   class="flex-1 min-w-0 px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 text-sm focus:ring-2 focus:ring-blue-500">
+                                            <span class="text-xs text-gray-400 dark:text-gray-500 shrink-0">Bestand</span>
+                                            <input type="number" name="variants[<?php echo $vIdx; ?>][values][<?php echo $valIdx; ?>][stock]"
+                                                   value="<?php echo (int) $s['stock_quantity']; ?>"
+                                                   min="0"
+                                                   class="w-16 px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 text-sm focus:ring-2 focus:ring-blue-500">
+                                            <button type="button" onclick="this.closest('.value-row').remove()"
+                                                    class="text-red-400 hover:text-red-600 p-1 transition-colors" title="Wert entfernen">
+                                                <i class="fas fa-times text-xs"></i>
+                                            </button>
+                                        </div>
+                                        <?php $valIdx++; endforeach; ?>
+                                    </div>
+                                    <button type="button" onclick="addValueRow(this, <?php echo $vIdx; ?>)"
+                                            class="mt-2 ml-8 text-xs text-blue-600 dark:text-blue-400 hover:underline">
+                                        <i class="fas fa-plus mr-1"></i>+ Wert hinzufügen
+                                    </button>
                                 </div>
-                                <button type="button" onclick="addValueRow(this, <?php echo $vIdx; ?>)"
-                                        class="mt-2 ml-8 text-xs text-blue-600 dark:text-blue-400 hover:underline">
-                                    <i class="fas fa-plus mr-1"></i>+ Ausprägung hinzufügen
-                                </button>
+                                <?php $vIdx++; endforeach; ?>
                             </div>
-                            <?php $vIdx++; endforeach; ?>
+                            <button type="button" id="add-variant"
+                                    class="mt-3 w-full py-2.5 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl text-sm text-gray-500 dark:text-gray-400 hover:border-purple-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors">
+                                <i class="fas fa-plus mr-1"></i>+ Neuen Varianten-Typ hinzufügen
+                            </button>
                         </div>
-                        <button type="button" id="add-variant"
-                                class="mt-3 w-full py-2.5 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl text-sm text-gray-500 dark:text-gray-400 hover:border-purple-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors">
-                            <i class="fas fa-plus mr-1"></i>+ Neue Variante hinzufügen
-                        </button>
                     </div>
 
-                    <div class="flex gap-3 pt-2">
+                    <!-- Submit -->
+                    <div class="flex gap-3 pt-1">
                         <button type="submit"
                                 class="flex-1 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 font-semibold transition-all shadow">
-                            <i class="fas fa-save mr-2"></i>Speichern
+                            <i class="fas fa-save mr-2"></i><?php echo $editProduct ? 'Änderungen speichern' : 'Produkt erstellen'; ?>
                         </button>
                         <?php if ($editProduct): ?>
                         <a href="<?php echo asset('pages/admin/shop_manage.php?section=products'); ?>"
