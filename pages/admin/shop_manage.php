@@ -79,21 +79,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 // Save variants if product was saved successfully
                 if ($ok && $pid) {
-                    $colorGroups = $_POST['colors'] ?? [];
-                    $variants    = [];
-                    foreach ($colorGroups as $colorData) {
-                        $colorName = trim($colorData['name'] ?? '');
-                        if ($colorName === '') {
-                            continue;
-                        }
-                        foreach ($colorData['sizes'] ?? [] as $sizeData) {
-                            $sizeName = trim($sizeData['value'] ?? '');
-                            if ($sizeName !== '') {
-                                $variants[] = [
-                                    'type'           => $colorName,
-                                    'value'          => $sizeName,
-                                    'stock_quantity' => (int) ($sizeData['stock'] ?? 0),
-                                ];
+                    $hasVariants = isset($_POST['has_variants']);
+                    if (!$hasVariants) {
+                        // No named variants – store a single default variant with empty type/value
+                        $stockQty = (int) ($_POST['stock_quantity'] ?? 0);
+                        $variants = [['type' => '', 'value' => '', 'stock_quantity' => $stockQty]];
+                    } else {
+                        $variantGroups = $_POST['variants'] ?? [];
+                        $variants      = [];
+                        foreach ($variantGroups as $groupData) {
+                            $typeName = trim($groupData['name'] ?? '');
+                            if ($typeName === '') {
+                                continue;
+                            }
+                            foreach ($groupData['values'] ?? [] as $valueData) {
+                                $valueName = trim($valueData['value'] ?? '');
+                                if ($valueName !== '') {
+                                    $variants[] = [
+                                        'type'           => $typeName,
+                                        'value'          => $valueName,
+                                        'stock_quantity' => (int) ($valueData['stock'] ?? 0),
+                                    ];
+                                }
                             }
                         }
                     }
@@ -338,67 +345,101 @@ ob_start();
                         <label for="active" class="text-sm font-semibold text-gray-700 dark:text-gray-300">Produkt aktiv</label>
                     </div>
 
-                    <!-- Variants: Color + Sizes -->
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                            <i class="fas fa-palette mr-1 text-purple-500"></i>Varianten (Farbe &amp; Größen)
+                    <?php
+                    // Determine whether this product uses named variants or just a simple stock value
+                    $editHasVariants = false;
+                    $editSimpleStock = 0;
+                    foreach ($editProduct['variants'] ?? [] as $v) {
+                        if ($v['type'] !== '' || $v['value'] !== '') {
+                            $editHasVariants = true;
+                            break;
+                        }
+                    }
+                    if (!$editHasVariants && !empty($editProduct['variants'])) {
+                        $editSimpleStock = (int) $editProduct['variants'][0]['stock_quantity'];
+                    }
+                    // Group existing named variants by type for the variant builder
+                    $variantsByType = [];
+                    if ($editHasVariants) {
+                        foreach ($editProduct['variants'] as $v) {
+                            $variantsByType[$v['type']][] = $v;
+                        }
+                    }
+                    if (empty($variantsByType)) {
+                        $variantsByType = ['' => [['value' => '', 'stock_quantity' => 0]]];
+                    }
+                    ?>
+
+                    <!-- Has-variants checkbox -->
+                    <div class="flex items-center gap-3">
+                        <input type="checkbox" id="has_variants" name="has_variants" value="1"
+                               <?php echo $editHasVariants ? 'checked' : ''; ?>
+                               onchange="toggleVariantMode(this.checked)"
+                               class="w-4 h-4 text-blue-600 rounded border-gray-300 dark:border-gray-600 focus:ring-blue-500">
+                        <label for="has_variants" class="text-sm font-semibold text-gray-700 dark:text-gray-300">Dieses Produkt hat Varianten</label>
+                    </div>
+
+                    <!-- Simple stock (shown when no variants) -->
+                    <div id="section-simple-stock" class="<?php echo $editHasVariants ? 'hidden' : ''; ?>">
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                            <i class="fas fa-warehouse mr-1 text-blue-500"></i>Lagerbestand
                         </label>
-                        <?php
-                        // Group existing variants by color (type)
-                        $variantsByColor = [];
-                        foreach ($editProduct['variants'] ?? [] as $v) {
-                            $variantsByColor[$v['type']][] = $v;
-                        }
-                        if (empty($variantsByColor)) {
-                            $variantsByColor = ['' => [['value' => '', 'stock_quantity' => 0]]];
-                        }
-                        ?>
-                        <div id="colors-container" class="space-y-3">
-                            <?php $colorIdx = 0; foreach ($variantsByColor as $colorName => $sizes): ?>
-                            <div class="color-block border border-gray-200 dark:border-gray-600 rounded-xl p-3 bg-gray-50 dark:bg-gray-700/50">
+                        <input type="number" name="stock_quantity" id="stock_quantity"
+                               value="<?php echo $editSimpleStock; ?>" min="0"
+                               class="w-32 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500">
+                    </div>
+
+                    <!-- Named variants builder (shown when has variants) -->
+                    <div id="section-variants" class="<?php echo $editHasVariants ? '' : 'hidden'; ?>">
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                            <i class="fas fa-tags mr-1 text-purple-500"></i>Varianten
+                        </label>
+                        <div id="variants-container" class="space-y-3">
+                            <?php $vIdx = 0; foreach ($variantsByType as $typeName => $typeValues): ?>
+                            <div class="variant-block border border-gray-200 dark:border-gray-600 rounded-xl p-3 bg-gray-50 dark:bg-gray-700/50">
                                 <div class="flex items-center gap-2 mb-3">
                                     <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300">
-                                        <i class="fas fa-circle text-xs"></i>
+                                        <i class="fas fa-tag text-xs"></i>
                                     </span>
-                                    <input type="text" name="colors[<?php echo $colorIdx; ?>][name]"
-                                           value="<?php echo htmlspecialchars($colorName); ?>"
-                                           placeholder="Farbe (z.B. Blau)"
+                                    <input type="text" name="variants[<?php echo $vIdx; ?>][name]"
+                                           value="<?php echo htmlspecialchars($typeName); ?>"
+                                           placeholder="Varianten-Name (z.B. Farbe)"
                                            class="flex-1 px-3 py-1.5 border border-purple-200 dark:border-purple-700 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 text-sm font-medium focus:ring-2 focus:ring-purple-500">
-                                    <button type="button" onclick="this.closest('.color-block').remove()"
-                                            class="text-red-400 hover:text-red-600 p-1 ml-1 transition-colors" title="Farbe entfernen">
+                                    <button type="button" onclick="this.closest('.variant-block').remove()"
+                                            class="text-red-400 hover:text-red-600 p-1 ml-1 transition-colors" title="Variante entfernen">
                                         <i class="fas fa-trash-alt text-xs"></i>
                                     </button>
                                 </div>
-                                <div class="size-rows space-y-2 ml-8">
-                                    <?php $sizeIdx = 0; foreach ($sizes as $s): ?>
-                                    <div class="size-row flex gap-2 items-center">
-                                        <span class="text-xs text-gray-400 dark:text-gray-500 w-12 shrink-0">Größe</span>
-                                        <input type="text" name="colors[<?php echo $colorIdx; ?>][sizes][<?php echo $sizeIdx; ?>][value]"
+                                <div class="value-rows space-y-2 ml-8">
+                                    <?php $valIdx = 0; foreach ($typeValues as $s): ?>
+                                    <div class="value-row flex gap-2 items-center">
+                                        <span class="text-xs text-gray-400 dark:text-gray-500 w-20 shrink-0">Ausprägung</span>
+                                        <input type="text" name="variants[<?php echo $vIdx; ?>][values][<?php echo $valIdx; ?>][value]"
                                                value="<?php echo htmlspecialchars($s['value']); ?>"
-                                               placeholder="z.B. M"
-                                               class="w-24 px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 text-sm focus:ring-2 focus:ring-blue-500">
+                                               placeholder="z.B. Rot"
+                                               class="w-28 px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 text-sm focus:ring-2 focus:ring-blue-500">
                                         <span class="text-xs text-gray-400 dark:text-gray-500 shrink-0">Bestand</span>
-                                        <input type="number" name="colors[<?php echo $colorIdx; ?>][sizes][<?php echo $sizeIdx; ?>][stock]"
+                                        <input type="number" name="variants[<?php echo $vIdx; ?>][values][<?php echo $valIdx; ?>][stock]"
                                                value="<?php echo (int) $s['stock_quantity']; ?>"
                                                min="0"
                                                class="w-20 px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 text-sm focus:ring-2 focus:ring-blue-500">
-                                        <button type="button" onclick="this.closest('.size-row').remove()"
-                                                class="text-red-400 hover:text-red-600 p-1 transition-colors" title="Größe entfernen">
+                                        <button type="button" onclick="this.closest('.value-row').remove()"
+                                                class="text-red-400 hover:text-red-600 p-1 transition-colors" title="Ausprägung entfernen">
                                             <i class="fas fa-times text-xs"></i>
                                         </button>
                                     </div>
-                                    <?php $sizeIdx++; endforeach; ?>
+                                    <?php $valIdx++; endforeach; ?>
                                 </div>
-                                <button type="button" onclick="addSizeRow(this, <?php echo $colorIdx; ?>)"
+                                <button type="button" onclick="addValueRow(this, <?php echo $vIdx; ?>)"
                                         class="mt-2 ml-8 text-xs text-blue-600 dark:text-blue-400 hover:underline">
-                                    <i class="fas fa-plus mr-1"></i>+ Größe hinzufügen
+                                    <i class="fas fa-plus mr-1"></i>+ Ausprägung hinzufügen
                                 </button>
                             </div>
-                            <?php $colorIdx++; endforeach; ?>
+                            <?php $vIdx++; endforeach; ?>
                         </div>
-                        <button type="button" id="add-color"
+                        <button type="button" id="add-variant"
                                 class="mt-3 w-full py-2.5 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl text-sm text-gray-500 dark:text-gray-400 hover:border-purple-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors">
-                            <i class="fas fa-plus mr-1"></i>+ Neue Farbe hinzufügen
+                            <i class="fas fa-plus mr-1"></i>+ Neue Variante hinzufügen
                         </button>
                     </div>
 
@@ -587,55 +628,62 @@ ob_start();
 </div>
 
 <script>
-// ── Color + Size variant builder ─────────────────────────────────────────────
+// ── Variant mode toggle ──────────────────────────────────────────────────────
 
-let colorCount = document.querySelectorAll('.color-block').length;
+function toggleVariantMode(hasVariants) {
+    document.getElementById('section-simple-stock').classList.toggle('hidden', hasVariants);
+    document.getElementById('section-variants').classList.toggle('hidden', !hasVariants);
+}
+
+// ── Variant builder ──────────────────────────────────────────────────────────
+
+let variantCount = document.querySelectorAll('.variant-block').length;
 
 const INPUT_CLASS = 'border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 text-sm focus:ring-2';
 
-function sizeRowHtml(colorIdx, sizeIdx) {
-    return `<div class="size-row flex gap-2 items-center">
-        <span class="text-xs text-gray-400 dark:text-gray-500 w-12 shrink-0">Größe</span>
-        <input type="text" name="colors[${colorIdx}][sizes][${sizeIdx}][value]" placeholder="z.B. M"
-               class="w-24 px-2 py-1.5 ${INPUT_CLASS} focus:ring-blue-500">
+function valueRowHtml(vIdx, valIdx) {
+    return `<div class="value-row flex gap-2 items-center">
+        <span class="text-xs text-gray-400 dark:text-gray-500 w-20 shrink-0">Ausprägung</span>
+        <input type="text" name="variants[${vIdx}][values][${valIdx}][value]" placeholder="z.B. Rot"
+               class="w-28 px-2 py-1.5 ${INPUT_CLASS} focus:ring-blue-500">
         <span class="text-xs text-gray-400 dark:text-gray-500 shrink-0">Bestand</span>
-        <input type="number" name="colors[${colorIdx}][sizes][${sizeIdx}][stock]" value="0" min="0"
+        <input type="number" name="variants[${vIdx}][values][${valIdx}][stock]" value="0" min="0"
                class="w-20 px-2 py-1.5 ${INPUT_CLASS} focus:ring-blue-500">
-        <button type="button" onclick="this.closest('.size-row').remove()"
-                class="text-red-400 hover:text-red-600 p-1 transition-colors" title="Größe entfernen">
+        <button type="button" onclick="this.closest('.value-row').remove()"
+                class="text-red-400 hover:text-red-600 p-1 transition-colors" title="Ausprägung entfernen">
             <i class="fas fa-times text-xs"></i>
         </button>
     </div>`;
 }
 
-document.getElementById('add-color')?.addEventListener('click', function () {
-    const idx   = colorCount++;
+document.getElementById('add-variant')?.addEventListener('click', function () {
+    const idx   = variantCount++;
     const block = document.createElement('div');
-    block.className = 'color-block border border-gray-200 dark:border-gray-600 rounded-xl p-3 bg-gray-50 dark:bg-gray-700/50';
+    block.className = 'variant-block border border-gray-200 dark:border-gray-600 rounded-xl p-3 bg-gray-50 dark:bg-gray-700/50';
     block.innerHTML = `
         <div class="flex items-center gap-2 mb-3">
             <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300">
-                <i class="fas fa-circle text-xs"></i>
+                <i class="fas fa-tag text-xs"></i>
             </span>
-            <input type="text" name="colors[${idx}][name]" placeholder="Farbe (z.B. Blau)"
+            <input type="text" name="variants[${idx}][name]" placeholder="Varianten-Name (z.B. Farbe)"
                    class="flex-1 px-3 py-1.5 border border-purple-200 dark:border-purple-700 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 text-sm font-medium focus:ring-2 focus:ring-purple-500">
-            <button type="button" onclick="this.closest('.color-block').remove()"
-                    class="text-red-400 hover:text-red-600 p-1 ml-1 transition-colors" title="Farbe entfernen">
+            <button type="button" onclick="this.closest('.variant-block').remove()"
+                    class="text-red-400 hover:text-red-600 p-1 ml-1 transition-colors" title="Variante entfernen">
                 <i class="fas fa-trash-alt text-xs"></i>
             </button>
         </div>
-        <div class="size-rows space-y-2 ml-8">${sizeRowHtml(idx, 0)}</div>
-        <button type="button" onclick="addSizeRow(this, ${idx})"
+        <div class="value-rows space-y-2 ml-8">${valueRowHtml(idx, 0)}</div>
+        <button type="button" onclick="addValueRow(this, ${idx})"
                 class="mt-2 ml-8 text-xs text-blue-600 dark:text-blue-400 hover:underline">
-            <i class="fas fa-plus mr-1"></i>+ Größe hinzufügen
+            <i class="fas fa-plus mr-1"></i>+ Ausprägung hinzufügen
         </button>`;
-    document.getElementById('colors-container').appendChild(block);
+    document.getElementById('variants-container').appendChild(block);
 });
 
-function addSizeRow(btn, colorIdx) {
-    const sizeContainer = btn.previousElementSibling; // .size-rows
-    const nextIdx       = sizeContainer.querySelectorAll('.size-row').length;
-    sizeContainer.insertAdjacentHTML('beforeend', sizeRowHtml(colorIdx, nextIdx));
+function addValueRow(btn, vIdx) {
+    const valueContainer = btn.previousElementSibling; // .value-rows
+    const nextIdx        = valueContainer.querySelectorAll('.value-row').length;
+    valueContainer.insertAdjacentHTML('beforeend', valueRowHtml(vIdx, nextIdx));
 }
 
 // ── Order modal ──────────────────────────────────────────────────────────────
