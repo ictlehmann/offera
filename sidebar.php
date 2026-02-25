@@ -7,10 +7,40 @@
  */
 
 require_once __DIR__ . '/classes/Auth.php';
+require_once __DIR__ . '/includes/helpers.php';
+require_once __DIR__ . '/includes/models/Alumni.php';
 
 $userName  = Auth::getUserName()  ?? 'Gast';
 $userEmail = Auth::getUserEmail() ?? '';
 $userRole  = $_SESSION['user_role'] ?? 'Benutzer';
+
+$_sidebarUserId = Auth::getUserId();
+$_sidebarProfileImageUrl = null;
+if ($_sidebarUserId) {
+    try {
+        $_sidebarProfile = Alumni::getProfileByUserId($_sidebarUserId);
+        if ($_sidebarProfile && !empty($_sidebarProfile['image_path'])) {
+            $_defaultImg = defined('DEFAULT_PROFILE_IMAGE') ? DEFAULT_PROFILE_IMAGE : 'assets/img/default_profil.png';
+            $_resolved   = getProfileImageUrl($_sidebarProfile['image_path']);
+            if ($_resolved !== $_defaultImg) {
+                $_sidebarProfileImageUrl = $_resolved;
+            }
+        }
+    } catch (Exception $_e) {
+        // Ignore – show initials avatar as fallback
+    }
+}
+
+// Generate initials from user name for the avatar fallback
+$_sidebarInitials = 'U';
+if (!empty($userName)) {
+    $_parts = explode(' ', trim($userName));
+    if (count($_parts) >= 2) {
+        $_sidebarInitials = strtoupper(substr($_parts[0], 0, 1) . substr($_parts[count($_parts) - 1], 0, 1));
+    } else {
+        $_sidebarInitials = strtoupper(substr($userName, 0, 1));
+    }
+}
 ?>
 <aside
     id="sidebar"
@@ -55,10 +85,24 @@ $userRole  = $_SESSION['user_role'] ?? 'Benutzer';
     <!-- ===================== USER PROFILE ===================== -->
     <div class="shrink-0 border-t border-gray-700 px-2 py-2 md:px-3 md:py-3">
         <!-- User info -->
-        <div class="mb-2 min-w-0">
-            <p class="text-sm font-semibold truncate leading-tight"><?= htmlspecialchars($userName) ?></p>
-            <p class="text-xs text-gray-400 truncate leading-tight"><?= htmlspecialchars($userEmail) ?></p>
-            <p class="text-xs text-gray-500 leading-tight"><?= htmlspecialchars($userRole) ?></p>
+        <div class="flex items-center gap-3 mb-2">
+            <!-- Profile image or initials avatar -->
+            <?php if (!empty($_sidebarProfileImageUrl)): ?>
+            <img
+                src="<?= htmlspecialchars($_sidebarProfileImageUrl) ?>"
+                alt="Profilbild"
+                class="w-9 h-9 rounded-full object-cover shrink-0"
+            >
+            <?php else: ?>
+            <div class="w-9 h-9 rounded-full bg-gradient-to-br from-emerald-400 to-cyan-500 flex items-center justify-center text-white font-bold text-xs shrink-0">
+                <?= htmlspecialchars($_sidebarInitials) ?>
+            </div>
+            <?php endif; ?>
+            <div class="min-w-0">
+                <p class="text-sm font-semibold truncate leading-tight"><?= htmlspecialchars($userName) ?></p>
+                <p class="text-xs text-gray-400 truncate leading-tight"><?= htmlspecialchars($userEmail) ?></p>
+                <p class="text-xs text-gray-500 leading-tight"><?= htmlspecialchars($userRole) ?></p>
+            </div>
         </div>
 
         <!--
