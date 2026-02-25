@@ -4140,6 +4140,9 @@ body.dark-mode {
         flex-direction: column;
         overflow-x: hidden;
         overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+        touch-action: pan-y;
     }
     .sidebar.open {
         transform: translateX(0) !important; /* Zeigen wenn Klasse 'open' */
@@ -4163,6 +4166,9 @@ body.dark-mode {
         height: 100%;
         background: rgba(0,0,0,0.5);
         z-index: 1040;
+        /* Smooth fade-in */
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
     }
     .sidebar-overlay.active {
         display: block;
@@ -4171,6 +4177,14 @@ body.dark-mode {
     .sidebar-footer a,
     .sidebar-footer button {
         justify-content: center;
+    }
+
+    /* Body scroll lock when sidebar is open (iOS Safari fix: use JS to set top) */
+    body.sidebar-open {
+        overflow: hidden;
+        position: fixed;
+        width: 100%;
+        /* top is set dynamically via JavaScript to preserve scroll position */
     }
 }
 
@@ -4876,4 +4890,49 @@ body.dark-mode input[type="datetime-local"]:focus,
 body.dark-mode input[type="time"]:focus {
     border-color: var(--ibc-blue-light);
     box-shadow: 0 0 0 3px rgba(51, 133, 196, 0.25);
+}
+
+/* ============================================================
+   TOUCH & INTERACTION IMPROVEMENTS
+   - Eliminates 300ms tap delay on older mobile browsers
+   - Improves touch responsiveness across all browsers
+   ============================================================ */
+
+/* Fast tap response on all interactive elements */
+a,
+button,
+input,
+select,
+textarea,
+label,
+[role="button"],
+[tabindex] {
+    touch-action: manipulation;
+}
+
+/* Swipe edge zone visual affordance hint (invisible but improves UX) */
+@media (max-width: 767px) {
+    /* Left-edge swipe zone for opening sidebar */
+    body::before {
+        content: '';
+        position: fixed;
+        top: 60px; /* below mobile topbar */
+        left: 0;
+        width: 10px;
+        height: calc(100% - 60px);
+        z-index: 1039; /* below sidebar overlay */
+        /* Invisible touch zone - no visual */
+        pointer-events: none;
+    }
+
+    /* Improve tap highlight color to match brand */
+    a, button {
+        -webkit-tap-highlight-color: rgba(0, 102, 179, 0.15);
+    }
+}
+
+/* Prevent horizontal overflow on all pages */
+html, body {
+    overflow-x: hidden;
+    max-width: 100%;
 }
