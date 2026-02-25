@@ -1152,7 +1152,7 @@ try {
         .alert-timeout {
             background: rgba(255, 193, 7, 0.15);
             border: 1px solid rgba(255, 193, 7, 0.4);
-            color: #ffc107;
+            color: #ffffff;
         }
 
         .alert-success {
