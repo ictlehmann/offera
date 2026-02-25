@@ -10,17 +10,36 @@ if (!Auth::check()) {
 
 $userId = (int)Auth::getUserId();
 
-// Load active and pending_return rentals for the current user from the local table.
+// Load rental requests for the current user from inventory_requests (new flow).
 $rentals = [];
 try {
     $db   = Database::getContentDB();
     $stmt = $db->prepare(
-        "SELECT * FROM inventory_rentals WHERE user_id = ? AND status IN ('active', 'pending_return') ORDER BY rented_at DESC"
+        "SELECT id, inventory_object_id AS easyverein_item_id, quantity, start_date AS rented_at, end_date, status, created_at
+           FROM inventory_requests
+          WHERE user_id = ? AND status IN ('pending', 'approved')
+          ORDER BY created_at DESC"
     );
     $stmt->execute([$userId]);
     $rentals = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (Exception $e) {
-    error_log('my_rentals: DB query failed: ' . $e->getMessage());
+    error_log('my_rentals: inventory_requests query failed: ' . $e->getMessage());
+}
+
+// Also load from legacy inventory_rentals table if it exists.
+try {
+    $db   = Database::getContentDB();
+    $stmt = $db->prepare(
+        "SELECT id, easyverein_item_id, quantity, rented_at, NULL AS end_date, status, rented_at AS created_at
+           FROM inventory_rentals
+          WHERE user_id = ? AND status IN ('active', 'pending_return')
+          ORDER BY rented_at DESC"
+    );
+    $stmt->execute([$userId]);
+    $legacyRentals = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $rentals = array_merge($rentals, $legacyRentals);
+} catch (Exception $e) {
+    // Table may not exist in the new schema – silently ignore
 }
 
 // Batch-resolve item names from EasyVerein to avoid N+1 API calls.
@@ -113,9 +132,16 @@ ob_start();
                 $itemName     = $itemNames[$easyvereinId] ?? ('Artikel #' . $easyvereinId);
                 $quantity     = (int)$rental['quantity'];
                 $rentedAt     = $rental['rented_at']
-                    ? date('d.m.Y H:i', strtotime($rental['rented_at']))
+                    ? date('d.m.Y', strtotime($rental['rented_at']))
                     : '-';
-                $isPending    = $rental['status'] === 'pending_return';
+                $endDate      = !empty($rental['end_date'])
+                    ? date('d.m.Y', strtotime($rental['end_date']))
+                    : null;
+                $status       = $rental['status'];
+                $isAwaitingApproval = $status === 'pending';
+                $isAwaitingReturn   = $status === 'pending_return';
+                // Legacy rentals use 'active'; new requests use 'approved'
+                $isActive     = ($status === 'active' || $status === 'approved');
                 ?>
                 <tr class="hover:bg-gray-50">
                     <td class="px-4 py-3">
@@ -128,9 +154,16 @@ ob_start();
                     </td>
                     <td class="px-4 py-3 text-sm text-gray-600">
                         <?php echo htmlspecialchars($rentedAt); ?>
+                        <?php if ($endDate): ?>
+                        <span class="text-gray-400"> – <?php echo htmlspecialchars($endDate); ?></span>
+                        <?php endif; ?>
                     </td>
                     <td class="px-4 py-3">
-                        <?php if ($isPending): ?>
+                        <?php if ($isAwaitingApproval): ?>
+                        <span class="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded-full">
+                            Ausstehend
+                        </span>
+                        <?php elseif ($isAwaitingReturn): ?>
                         <span class="px-2 py-1 text-xs bg-yellow-100 text-yellow-700 rounded-full">
                             Rückgabe ausstehend
                         </span>
@@ -141,11 +174,15 @@ ob_start();
                         <?php endif; ?>
                     </td>
                     <td class="px-4 py-3">
-                        <?php if ($isPending): ?>
+                        <?php if ($isAwaitingApproval): ?>
+                        <span class="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-800 rounded text-sm font-medium">
+                            <i class="fas fa-clock mr-1"></i>Wartet auf Genehmigung
+                        </span>
+                        <?php elseif ($isAwaitingReturn): ?>
                         <span class="inline-flex items-center px-3 py-1 bg-yellow-100 text-yellow-800 rounded text-sm font-medium">
                             <i class="fas fa-clock mr-1"></i>Wartet auf Bestätigung durch den Vorstand
                         </span>
-                        <?php else: ?>
+                        <?php elseif ($isActive && $status === 'active'): ?>
                         <form method="POST" action="rental.php" onsubmit="return confirm('Rückgabe für diesen Artikel melden?')">
                             <input type="hidden" name="request_return" value="1">
                             <input type="hidden" name="rental_id" value="<?php echo (int)$rental['id']; ?>">
@@ -154,6 +191,10 @@ ob_start();
                                 <i class="fas fa-undo mr-1"></i>Rückgabe melden
                             </button>
                         </form>
+                        <?php else: ?>
+                        <span class="inline-flex items-center px-3 py-1 bg-green-100 text-green-800 rounded text-sm font-medium">
+                            <i class="fas fa-check mr-1"></i>Genehmigt
+                        </span>
                         <?php endif; ?>
                     </td>
                 </tr>
