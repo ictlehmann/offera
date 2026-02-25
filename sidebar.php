@@ -3,7 +3,8 @@
  * Responsive Sidebar Component
  *
  * Usage: include this file inside any page that needs the sidebar.
- * Expected session variables: user_name, user_email, user_role
+ * Expected session variables: user_name, user_email
+ * The displayed role is resolved from the database (entra_roles or internal role).
  */
 
 require_once __DIR__ . '/classes/Auth.php';
@@ -12,9 +13,32 @@ require_once __DIR__ . '/includes/models/Alumni.php';
 
 $userName  = Auth::getUserName()  ?? 'Gast';
 $userEmail = Auth::getUserEmail() ?? '';
-$userRole  = $_SESSION['user_role'] ?? 'Benutzer';
 
 $_sidebarUserId = Auth::getUserId();
+
+// Determine display role: prefer entra_roles from DB, fall back to internal role label
+$userRole = 'Mitglied';
+if ($_sidebarUserId) {
+    try {
+        $_sidebarDb = Database::getUserDB();
+        $_sidebarUserStmt = $_sidebarDb->prepare("SELECT entra_roles, role FROM users WHERE id = ?");
+        $_sidebarUserStmt->execute([$_sidebarUserId]);
+        $_sidebarUserData = $_sidebarUserStmt->fetch();
+        if ($_sidebarUserData && !empty($_sidebarUserData['entra_roles'])) {
+            $_sidebarEntraArr = json_decode($_sidebarUserData['entra_roles'], true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($_sidebarEntraArr)) {
+                $_sidebarNames = extractGroupDisplayNames($_sidebarEntraArr);
+                if (!empty($_sidebarNames)) {
+                    $userRole = implode(', ', $_sidebarNames);
+                }
+            }
+        } elseif ($_sidebarUserData && !empty($_sidebarUserData['role'])) {
+            $userRole = translateRole($_sidebarUserData['role']);
+        }
+    } catch (Exception $_e) {
+        // Ignore – fall back to default
+    }
+}
 $_sidebarProfileImageUrl = null;
 if ($_sidebarUserId) {
     try {
