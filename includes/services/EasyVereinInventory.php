@@ -752,7 +752,7 @@ class EasyVereinInventory {
         }
 
         // 2. Resolve the borrower's EasyVerein contact ID
-        $evContactId = $this->getContactIdByEmail($userEmail);
+        $evContactId = $this->getContactIdByName($userName);
 
         // 3. Create the official lending record in EasyVerein
         $this->createLending(
@@ -779,7 +779,9 @@ class EasyVereinInventory {
             }
 
             if ($fieldName === 'Ausgeliehen von') {
-                $fieldsToUpdate[] = ['id' => $fieldId, 'value' => "{$userName} ({$userEmail})"];
+                $fieldsToUpdate[] = ['id' => $fieldId, 'value' => $userName];
+            } elseif ($fieldName === 'Entra E-Mail') {
+                $fieldsToUpdate[] = ['id' => $fieldId, 'value' => $userEmail];
             } elseif ($fieldName === 'Zustand der letzten Rückgabe') {
                 $fieldsToUpdate[] = ['id' => $fieldId, 'value' => ''];
             }
@@ -875,6 +877,8 @@ class EasyVereinInventory {
 
             if ($fieldName === 'Ausgeliehen von') {
                 $fieldsToUpdate[] = ['id' => $fieldId, 'value' => ''];
+            } elseif ($fieldName === 'Entra E-Mail') {
+                $fieldsToUpdate[] = ['id' => $fieldId, 'value' => ''];
             } elseif ($fieldName === 'Zustand der letzten Rückgabe') {
                 $fieldsToUpdate[] = ['id' => $fieldId, 'value' => $conditionText];
             }
@@ -899,17 +903,17 @@ class EasyVereinInventory {
     }
 
     /**
-     * Resolve an e-mail address to an EasyVerein contact ID.
+     * Resolve a display name to an EasyVerein contact ID.
      *
-     * Calls GET /api/v2.0/contact-details?search={email} and returns the id of
+     * Calls GET /api/v2.0/contact-details?search={name} and returns the id of
      * the first matching contact as an integer.
      *
-     * @param string $email E-mail address to look up
+     * @param string $name Display name to look up
      * @return int EasyVerein contact ID
-     * @throws Exception If no contact is found for the given e-mail address
+     * @throws Exception If no contact is found for the given name
      */
-    private function getContactIdByEmail(string $email): int {
-        $url  = self::API_BASE . '/contact-details?search=' . urlencode($email);
+    private function getContactIdByName(string $name): int {
+        $url  = self::API_BASE . '/contact-details?search=' . urlencode($name);
         $data = $this->request('GET', $url);
 
         $results = $data['results'] ?? $data['data'] ?? [];
@@ -919,7 +923,7 @@ class EasyVereinInventory {
         }
 
         throw new Exception(
-            'Nutzer nicht in easyVerein gefunden. Die E-Mail (' . $email . ') muss einem Kontakt in easyVerein zugewiesen sein, um ausleihen zu können.'
+            'Nutzer nicht im easyVerein gefunden. Der Name (' . $name . ') muss in easyVerein existieren.'
         );
     }
 
