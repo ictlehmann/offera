@@ -980,6 +980,25 @@ try {
     );
 
     // ============================================
+    // INVENTORY QUANTITY COLUMNS (TEILAUSLEIHEN)
+    // ============================================
+    echo "\n--- INVENTORY QUANTITY COLUMNS ---\n";
+
+    // Add total_quantity column to inventory_items (total stock from EasyVerein data)
+    executeSql(
+        $content_db,
+        "ALTER TABLE inventory_items ADD COLUMN total_quantity INT NOT NULL DEFAULT 1 COMMENT 'Total stock from EasyVerein data'",
+        "Add total_quantity column to inventory_items table"
+    );
+
+    // Add rented_quantity column to inventory_rentals (units rented per transaction)
+    executeSql(
+        $content_db,
+        "ALTER TABLE inventory_rentals ADD COLUMN rented_quantity INT NOT NULL DEFAULT 1 COMMENT 'Number of units rented in this transaction (partial lending)'",
+        "Add rented_quantity column to inventory_rentals table"
+    );
+
+    // ============================================
     // SHOP MODULE TABLES
     // ============================================
     echo "\n--- SHOP MODULE TABLES ---\n";
