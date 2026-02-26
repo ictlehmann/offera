@@ -697,10 +697,11 @@ class EasyVereinInventory {
      * @param int    $requestId  Local inventory_requests row ID
      * @param string $userName   Display name of the borrower
      * @param string $userEmail  E-mail address of the borrower
+     * @param int    $quantity   Number of units approved for lending
      * @return void
      * @throws Exception On database or API errors
      */
-    public function approveRental(int $requestId, string $userName, string $userEmail): void {
+    public function approveRental(int $requestId, string $userName, string $userEmail, int $quantity): void {
         // 1. Load the pending request from the local DB
         $db   = Database::getContentDB();
         $stmt = $db->prepare(
@@ -720,7 +721,7 @@ class EasyVereinInventory {
         $this->createLending(
             $req['inventory_object_id'],
             $evContactId,
-            (int)$req['quantity'],
+            $quantity,
             $req['start_date'],
             $req['end_date']
         );

@@ -27,10 +27,41 @@ class Inventory {
     }
 
     /**
+     * Fetch a map of inventory_object_id => approved loaned quantity for items
+     * that have currently active approved rentals (today is within rental period).
+     *
+     * @return array<string, int>  Keys are EasyVerein inventory-object IDs (strings).
+     */
+    private static function getApprovedLoanedQuantities(): array {
+        try {
+            $db   = Database::getContentDB();
+            $stmt = $db->query(
+                "SELECT inventory_object_id, COALESCE(SUM(quantity), 0) AS loaned
+                 FROM inventory_requests
+                 WHERE status = 'approved'
+                   AND start_date <= CURDATE()
+                   AND end_date   >= CURDATE()
+                 GROUP BY inventory_object_id"
+            );
+            $result = [];
+            foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+                $result[(string)$row['inventory_object_id']] = (int)$row['loaned'];
+            }
+            return $result;
+        } catch (Exception $e) {
+            error_log('Inventory::getApprovedLoanedQuantities failed: ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
      * Normalise a raw EasyVerein API item into the field layout that the views
      * expect (mirrors the columns previously returned by the local DB queries).
+     *
+     * @param array $ev            Raw EasyVerein item data.
+     * @param int   $approvedLoaned Sum of approved active rental quantities for this item.
      */
-    private static function mapItem(array $ev): array {
+    private static function mapItem(array $ev, int $approvedLoaned = 0): array {
         $pieces      = (int)($ev['pieces'] ?? $ev['inventoryQuantity'] ?? $ev['quantity'] ?? 0);
         $loanedCount = (isset($ev['member']) && $ev['member'] !== null && $ev['member'] !== '') ? 1 : 0;
 
@@ -56,7 +87,7 @@ class Inventory {
             'category_name'             => $ev['category']      ?? null,
             'category_color'            => '#3B82F6',
             'location_name'             => $ev['locationName']  ?? $ev['location'] ?? null,
-            'available_quantity'        => max(0, $pieces - $loanedCount),
+            'available_quantity'        => max(0, $pieces - $approvedLoaned),
         ];
     }
 
@@ -69,9 +100,10 @@ class Inventory {
      */
     public static function getById($id): ?array {
         try {
+            $loanedMap = self::getApprovedLoanedQuantities();
             foreach (self::evi()->getItems() as $ev) {
                 if ((int)($ev['id'] ?? 0) === (int)$id) {
-                    return self::mapItem($ev);
+                    return self::mapItem($ev, $loanedMap[(string)($ev['id'] ?? '')] ?? 0);
                 }
             }
         } catch (Exception $e) {
@@ -98,7 +130,11 @@ class Inventory {
             if (empty($rawItems)) {
                 error_log('EasyVerein inventory: getItems() returned empty array – check API token and endpoint');
             }
-            $items = array_map([self::class, 'mapItem'], $rawItems);
+            $loanedMap = self::getApprovedLoanedQuantities();
+            $items = array_map(
+                fn($ev) => self::mapItem($ev, $loanedMap[(string)($ev['id'] ?? '')] ?? 0),
+                $rawItems
+            );
         } catch (Exception $e) {
             // Any API failure (404, network, auth) should not crash the page
             error_log('EasyVerein inventory fetch failed: ' . $e->getMessage());

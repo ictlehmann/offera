@@ -50,9 +50,9 @@ try {
     $db = Database::getContentDB();
 
     if ($action === 'approve') {
-        // Fetch the pending request to get the applicant's user_id
+        // Fetch the pending request to get the applicant's user_id and the requested quantity
         $stmt = $db->prepare(
-            "SELECT user_id FROM inventory_requests WHERE id = ? AND status = 'pending'"
+            "SELECT user_id, quantity FROM inventory_requests WHERE id = ? AND status = 'pending'"
         );
         $stmt->execute([$requestId]);
         $request = $stmt->fetch();
@@ -104,7 +104,7 @@ try {
         }
 
         $evi = new EasyVereinInventory();
-        $evi->approveRental($requestId, $userName, $userEmail, null);
+        $evi->approveRental($requestId, $userName, $userEmail, (int)$request['quantity']);
 
         echo json_encode(['success' => true, 'message' => 'Anfrage genehmigt']);
         exit;
