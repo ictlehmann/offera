@@ -565,6 +565,24 @@ class Inventory {
                     if ($uRow) {
                         $returnUserEmail = $uRow['email'] ?? '';
                         $returnUserName  = trim(($uRow['first_name'] ?? '') . ' ' . ($uRow['last_name'] ?? ''));
+                        // If no name is stored locally, try Microsoft Graph as a fallback
+                        if ($returnUserName === '' && $returnUserEmail !== '') {
+                            try {
+                                $graphService = new MicrosoftGraphService();
+                                $entraUsers   = $graphService->searchUsers($returnUserEmail);
+                                foreach ($entraUsers as $eu) {
+                                    if (strcasecmp($eu['mail'] ?? '', $returnUserEmail) === 0) {
+                                        $returnUserName = $eu['displayName'] ?? '';
+                                        break;
+                                    }
+                                }
+                                if ($returnUserName === '') {
+                                    error_log('approveReturn: Entra user not found for email ' . $returnUserEmail . ' – using email as fallback');
+                                }
+                            } catch (Exception $entraEx) {
+                                error_log('approveReturn: Entra lookup failed – ' . $entraEx->getMessage() . ' – using email as fallback');
+                            }
+                        }
                         if ($returnUserName === '') {
                             $returnUserName = $returnUserEmail;
                         }

@@ -791,10 +791,12 @@ class EasyVereinInventory {
      * @param string $adminName  Display name of the board member performing the verification
      * @param string $condition  Condition label of the returned item
      * @param string $notes      Optional notes about the return
+     * @param string $userName   Display name of the borrower (skips internal DB lookup when provided)
+     * @param string $userEmail  E-mail address of the borrower (skips internal DB lookup when provided)
      * @return void
      * @throws Exception On database or API errors
      */
-    public function verifyReturn(int $requestId, string $adminName, string $condition, string $notes): void {
+    public function verifyReturn(int $requestId, string $adminName, string $condition, string $notes, string $userName = '', string $userEmail = ''): void {
         // 1. Load the approved (or pending_return) request from the local DB
         $db   = Database::getContentDB();
         $stmt = $db->prepare(
@@ -840,24 +842,31 @@ class EasyVereinInventory {
         }
 
         // 3. Look up the returning user's display name and e-mail to remove from custom fields.
-        $returnUserName  = '';
-        $returnUserEmail = '';
-        try {
-            $userDb = Database::getUserDB();
-            $uStmt  = $userDb->prepare(
-                "SELECT first_name, last_name, email FROM users WHERE id = ? LIMIT 1"
-            );
-            $uStmt->execute([(int)$req['user_id']]);
-            $uRow = $uStmt->fetch(PDO::FETCH_ASSOC);
-            if ($uRow) {
-                $returnUserEmail = $uRow['email'] ?? '';
-                $returnUserName  = trim(($uRow['first_name'] ?? '') . ' ' . ($uRow['last_name'] ?? ''));
-                if ($returnUserName === '') {
-                    $returnUserName = $returnUserEmail;
+        //    Use caller-supplied values when provided; otherwise resolve from the local DB.
+        $returnUserName  = $userName;
+        $returnUserEmail = $userEmail;
+        if ($returnUserName === '' || $returnUserEmail === '') {
+            try {
+                $userDb = Database::getUserDB();
+                $uStmt  = $userDb->prepare(
+                    "SELECT first_name, last_name, email FROM users WHERE id = ? LIMIT 1"
+                );
+                $uStmt->execute([(int)$req['user_id']]);
+                $uRow = $uStmt->fetch(PDO::FETCH_ASSOC);
+                if ($uRow) {
+                    if ($returnUserEmail === '') {
+                        $returnUserEmail = $uRow['email'] ?? '';
+                    }
+                    if ($returnUserName === '') {
+                        $returnUserName = trim(($uRow['first_name'] ?? '') . ' ' . ($uRow['last_name'] ?? ''));
+                        if ($returnUserName === '') {
+                            $returnUserName = $returnUserEmail;
+                        }
+                    }
                 }
+            } catch (Exception $e) {
+                error_log('EasyVereinInventory::verifyReturn: failed to look up user ' . $req['user_id'] . ': ' . $e->getMessage());
             }
-        } catch (Exception $e) {
-            error_log('EasyVereinInventory::verifyReturn: failed to look up user ' . $req['user_id'] . ': ' . $e->getMessage());
         }
 
         // 4. Update custom fields: remove this borrower and write the condition text.
