@@ -785,10 +785,10 @@ class EasyVereinInventory {
      * @throws Exception On database or API errors
      */
     public function verifyReturn(int $requestId, string $adminName, string $condition, string $notes): void {
-        // 1. Load the approved request from the local DB
+        // 1. Load the approved (or pending_return) request from the local DB
         $db   = Database::getContentDB();
         $stmt = $db->prepare(
-            "SELECT * FROM inventory_requests WHERE id = ? AND status = 'approved'"
+            "SELECT * FROM inventory_requests WHERE id = ? AND status IN ('approved', 'pending_return')"
         );
         $stmt->execute([$requestId]);
         $req = $stmt->fetch(PDO::FETCH_ASSOC);
