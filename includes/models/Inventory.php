@@ -7,6 +7,7 @@
  */
 
 require_once __DIR__ . '/../services/EasyVereinInventory.php';
+require_once __DIR__ . '/../services/MicrosoftGraphService.php';
 require_once __DIR__ . '/../database.php';
 
 class Inventory {
@@ -231,10 +232,28 @@ class Inventory {
                 $userRow = $userStmt->fetch(PDO::FETCH_ASSOC);
                 if ($userRow) {
                     $userName  = trim(($userRow['first_name'] ?? '') . ' ' . ($userRow['last_name'] ?? ''));
-                    if ($userName === '') {
-                        $userName = $userRow['email'] ?? '';
-                    }
                     $userEmail = $userRow['email'] ?? '';
+                    // If no name is stored locally, try Microsoft Graph as a fallback
+                    if ($userName === '' && $userEmail !== '') {
+                        try {
+                            $graphService = new MicrosoftGraphService();
+                            $entraUsers   = $graphService->searchUsers($userEmail);
+                            foreach ($entraUsers as $eu) {
+                                if (strcasecmp($eu['mail'] ?? '', $userEmail) === 0) {
+                                    $userName = $eu['displayName'] ?? '';
+                                    break;
+                                }
+                            }
+                            if ($userName === '') {
+                                error_log('checkoutItem: Entra user not found for email ' . $userEmail . ' – using email as fallback');
+                            }
+                        } catch (Exception $entraEx) {
+                            error_log('checkoutItem: Entra lookup failed – ' . $entraEx->getMessage() . ' – using email as fallback');
+                        }
+                    }
+                    if ($userName === '') {
+                        $userName = $userEmail;
+                    }
                 }
             } catch (Exception $userEx) {
                 error_log('checkoutItem: user lookup failed: ' . $userEx->getMessage());
