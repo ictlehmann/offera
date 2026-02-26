@@ -950,6 +950,81 @@ class EasyVereinInventory {
     }
 
     /**
+     * Verify the return of a direct rental (inventory_rentals workflow).
+     *
+     * Mirrors the EasyVerein-side steps of verifyReturn() but operates on an
+     * EasyVerein inventory-object ID directly instead of an inventory_requests
+     * row.  Called by Inventory::approveReturn() so that board verifications
+     * always update both the local DB and EasyVerein.
+     *
+     * 1. Finds the active EasyVerein lending for the inventory object and sets
+     *    its returnDate to today via PATCH /api/v2.0/lending/{id}.
+     * 2. Writes the condition text to the custom field
+     *    'Zustand der letzten Rückgabe' on the inventory object.
+     *
+     * Errors from EasyVerein are logged but do not throw, so that a temporary
+     * API outage never prevents the local DB record from being marked returned.
+     *
+     * @param int    $easyvereinItemId EasyVerein inventory-object ID
+     * @param string $adminName        Display name of the board member verifying the return
+     * @param string $condition        Condition label (e.g. 'funktionsfähig', 'beschädigt')
+     * @param string $notes            Optional remarks about the return
+     */
+    public function verifyReturnForRental(int $easyvereinItemId, string $adminName, string $condition, string $notes): void {
+        $tz             = new DateTimeZone('Europe/Berlin');
+        $today          = (new DateTime('now', $tz))->format('Y-m-d');
+        $todayFormatted = (new DateTime('now', $tz))->format('d.m.Y');
+
+        // 1. End the active lending in EasyVerein by patching its returnDate to today.
+        //    Wrapped in try-catch so an EasyVerein API failure does not prevent
+        //    the local DB update that marks the item as available again.
+        try {
+            $activeLendings = $this->getActiveLendings($easyvereinItemId);
+            $lendingPatched = false;
+            foreach ($activeLendings as $lending) {
+                $lendingId = $lending['id'] ?? null;
+                if ($lendingId === null) {
+                    continue;
+                }
+                $this->request('PATCH', self::API_BASE . '/lending/' . $lendingId, ['returnDate' => $today]);
+                $lendingPatched = true;
+                break;
+            }
+            if (!$lendingPatched) {
+                error_log(sprintf(
+                    'EasyVereinInventory::verifyReturnForRental: no active lending found for inventory object %d',
+                    $easyvereinItemId
+                ));
+            }
+        } catch (Exception $evEx) {
+            error_log(sprintf(
+                'EasyVereinInventory::verifyReturnForRental: lending patch failed for inventory object %d: %s',
+                $easyvereinItemId, $evEx->getMessage()
+            ));
+        }
+
+        // 2. Update the 'Zustand der letzten Rückgabe' custom field on the inventory object.
+        $byClause      = $adminName !== '' ? " durch {$adminName}" : '';
+        $conditionText = "{$condition} - Geprüft am {$todayFormatted}{$byClause}."
+            . ($notes !== '' ? " Notiz: {$notes}" : '');
+        try {
+            $this->updateInventoryCustomFields($easyvereinItemId, [
+                'Zustand der letzten Rückgabe' => $conditionText,
+            ]);
+        } catch (Exception $cfEx) {
+            error_log(sprintf(
+                'EasyVereinInventory::verifyReturnForRental: custom field update failed for inventory object %d: %s',
+                $easyvereinItemId, $cfEx->getMessage()
+            ));
+        }
+
+        error_log(sprintf(
+            'EasyVereinInventory: direct rental for inventory object %d verified as returned by %s (condition: %s)',
+            $easyvereinItemId, $adminName, $condition
+        ));
+    }
+
+    /**
      * Update inventory custom fields via individual PATCH or POST requests.
      *
      * Fetches existing custom field values for the given inventory object and,
