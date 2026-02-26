@@ -156,6 +156,24 @@ class Shop {
         }
     }
 
+    /**
+     * Delete a product and all its variants (cascade).
+     *
+     * @param int $id
+     * @return bool
+     */
+    public static function deleteProduct(int $id): bool {
+        try {
+            $db   = Database::getContentDB();
+            $stmt = $db->prepare("DELETE FROM shop_products WHERE id = ?");
+            $stmt->execute([$id]);
+            return $stmt->rowCount() > 0;
+        } catch (Exception $e) {
+            error_log('Shop::deleteProduct – ' . $e->getMessage());
+            return false;
+        }
+    }
+
     // -------------------------------------------------------------------------
     // Variants
     // -------------------------------------------------------------------------
