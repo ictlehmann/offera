@@ -210,8 +210,22 @@ class Shop {
      * @return bool
      */
     public static function setVariants(int $productId, array $variants): bool {
+        $db = null;
         try {
             $db = Database::getContentDB();
+
+            // Capture out-of-stock (type, value) combinations before update
+            $prevStmt = $db->prepare("
+                SELECT type, value, stock_quantity
+                FROM shop_variants
+                WHERE product_id = ?
+            ");
+            $prevStmt->execute([$productId]);
+            $prevVariants = [];
+            foreach ($prevStmt->fetchAll() as $row) {
+                $prevVariants[$row['type'] . '|||' . $row['value']] = (int) $row['stock_quantity'];
+            }
+
             $db->beginTransaction();
 
             $del = $db->prepare("DELETE FROM shop_variants WHERE product_id = ?");
@@ -231,11 +245,187 @@ class Shop {
             }
 
             $db->commit();
+
+            // Send restock notifications for variants that were previously out of stock and now have stock
+            foreach ($variants as $v) {
+                $type  = $v['type']  ?? '';
+                $value = $v['value'] ?? '';
+                $stock = (int) ($v['stock_quantity'] ?? 0);
+                $key   = $type . '|||' . $value;
+                // Only notify if variant was previously tracked and was out of stock
+                $wasOutOfStock = isset($prevVariants[$key]) && $prevVariants[$key] <= 0;
+                if ($stock > 0 && $wasOutOfStock) {
+                    self::sendRestockNotifications($productId, $type, $value);
+                }
+            }
+
             return true;
         } catch (Exception $e) {
-            $db->rollBack();
+            if ($db !== null && $db->inTransaction()) {
+                $db->rollBack();
+            }
             error_log('Shop::setVariants – ' . $e->getMessage());
             return false;
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Restock Notifications
+    // -------------------------------------------------------------------------
+
+    /**
+     * Subscribe a user to a restock notification for a specific product variant.
+     *
+     * @param int    $userId
+     * @param int    $productId
+     * @param string $variantType
+     * @param string $variantValue
+     * @param string $email
+     * @return bool
+     */
+    public static function addRestockNotification(int $userId, int $productId, string $variantType, string $variantValue, string $email): bool {
+        try {
+            $db   = Database::getContentDB();
+            $stmt = $db->prepare("
+                INSERT INTO shop_restock_notifications
+                    (user_id, product_id, variant_type, variant_value, email)
+                VALUES (?, ?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE email = VALUES(email), notified_at = NULL
+            ");
+            $stmt->execute([$userId, $productId, $variantType, $variantValue, $email]);
+            return true;
+        } catch (Exception $e) {
+            error_log('Shop::addRestockNotification – ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Remove a restock notification subscription.
+     *
+     * @param int    $userId
+     * @param int    $productId
+     * @param string $variantType
+     * @param string $variantValue
+     * @return bool
+     */
+    public static function removeRestockNotification(int $userId, int $productId, string $variantType, string $variantValue): bool {
+        try {
+            $db   = Database::getContentDB();
+            $stmt = $db->prepare("
+                DELETE FROM shop_restock_notifications
+                WHERE user_id = ? AND product_id = ? AND variant_type = ? AND variant_value = ?
+            ");
+            $stmt->execute([$userId, $productId, $variantType, $variantValue]);
+            return true;
+        } catch (Exception $e) {
+            error_log('Shop::removeRestockNotification – ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Check if a user is already subscribed to restock notifications for a variant.
+     *
+     * @param int    $userId
+     * @param int    $productId
+     * @param string $variantType
+     * @param string $variantValue
+     * @return bool
+     */
+    public static function hasRestockNotification(int $userId, int $productId, string $variantType, string $variantValue): bool {
+        try {
+            $db   = Database::getContentDB();
+            $stmt = $db->prepare("
+                SELECT 1 FROM shop_restock_notifications
+                WHERE user_id = ? AND product_id = ? AND variant_type = ? AND variant_value = ?
+                LIMIT 1
+            ");
+            $stmt->execute([$userId, $productId, $variantType, $variantValue]);
+            return $stmt->fetchColumn() !== false;
+        } catch (Exception $e) {
+            error_log('Shop::hasRestockNotification – ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Get all active restock notification subscriptions for a user.
+     *
+     * @param int $userId
+     * @return array
+     */
+    public static function getUserRestockNotifications(int $userId): array {
+        try {
+            $db   = Database::getContentDB();
+            $stmt = $db->prepare("
+                SELECT n.id, n.product_id, n.variant_type, n.variant_value, n.created_at,
+                       p.name AS product_name
+                FROM shop_restock_notifications n
+                JOIN shop_products p ON p.id = n.product_id
+                WHERE n.user_id = ?
+                ORDER BY n.created_at DESC
+            ");
+            $stmt->execute([$userId]);
+            return $stmt->fetchAll();
+        } catch (Exception $e) {
+            error_log('Shop::getUserRestockNotifications – ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Send restock notification emails to all subscribers of a given product variant
+     * and mark their subscriptions as notified.
+     *
+     * @param int    $productId
+     * @param string $variantType
+     * @param string $variantValue
+     * @return void
+     */
+    private static function sendRestockNotifications(int $productId, string $variantType, string $variantValue): void {
+        try {
+            $db   = Database::getContentDB();
+            $stmt = $db->prepare("
+                SELECT id, user_id, email
+                FROM shop_restock_notifications
+                WHERE product_id = ? AND variant_type = ? AND variant_value = ?
+                  AND notified_at IS NULL
+            ");
+            $stmt->execute([$productId, $variantType, $variantValue]);
+            $subscribers = $stmt->fetchAll();
+
+            if (empty($subscribers)) {
+                return;
+            }
+
+            $product = self::getProductById($productId);
+            if (!$product) {
+                return;
+            }
+
+            require_once __DIR__ . '/../../src/MailService.php';
+
+            $ids = [];
+            foreach ($subscribers as $sub) {
+                MailService::sendRestockNotification(
+                    $sub['email'],
+                    $product['name'],
+                    $variantType,
+                    $variantValue
+                );
+                $ids[] = (int) $sub['id'];
+            }
+
+            if (!empty($ids)) {
+                $placeholders = implode(',', array_fill(0, count($ids), '?'));
+                $upd = $db->prepare(
+                    "UPDATE shop_restock_notifications SET notified_at = NOW() WHERE id IN ($placeholders)"
+                );
+                $upd->execute($ids);
+            }
+        } catch (Exception $e) {
+            error_log('Shop::sendRestockNotifications – ' . $e->getMessage());
         }
     }
 
