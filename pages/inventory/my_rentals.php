@@ -102,7 +102,7 @@ ob_start();
 <div class="card p-6 mb-6">
     <h2 class="text-xl font-bold text-gray-800 mb-4">
         <i class="fas fa-hourglass-half text-blue-600 mr-2"></i>
-        Aktive Ausleihen
+        Meine offenen Ausleihen
     </h2>
     
     <?php if (empty($rentals)): ?>
@@ -165,8 +165,8 @@ ob_start();
                             Ausstehend
                         </span>
                         <?php elseif ($isAwaitingReturn): ?>
-                        <span class="px-2 py-1 text-xs bg-yellow-100 text-yellow-700 rounded-full">
-                            Rückgabe ausstehend
+                        <span class="px-2 py-1 text-xs bg-orange-100 text-orange-700 rounded-full">
+                            Rückgabe in Prüfung
                         </span>
                         <?php else: ?>
                         <span class="px-2 py-1 text-xs bg-green-100 text-green-700 rounded-full">
