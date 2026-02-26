@@ -175,6 +175,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
         }
+    } elseif ($postAction === 'toggle_restock_notification') {
+        $pid  = (int) ($_POST['product_id'] ?? 0);
+        $type = trim($_POST['variant_type']  ?? '');
+        $val  = trim($_POST['variant_value'] ?? '');
+
+        if ($pid && $userId) {
+            $hasNotif = Shop::hasRestockNotification($userId, $pid, $type, $val);
+            if ($hasNotif) {
+                Shop::removeRestockNotification($userId, $pid, $type, $val);
+                $successMessage = 'Benachrichtigung deaktiviert.';
+            } else {
+                $userEmail = $user['email'] ?? '';
+                Shop::addRestockNotification($userId, $pid, $type, $val, $userEmail);
+                $successMessage = 'Du wirst benachrichtigt, sobald der Artikel wieder verfügbar ist.';
+            }
+        }
+        $action    = 'detail';
+        $productId = $pid;
     }
 }
 
@@ -341,15 +359,49 @@ ob_start();
                         <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                             <?php echo htmlspecialchars($type); ?>
                         </label>
-                        <select name="variant_id"
-                                class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500">
+                        <div class="flex flex-wrap gap-2">
                             <?php foreach ($variants as $v): ?>
-                            <option value="<?php echo $v['id']; ?>"
-                                    <?php echo $v['stock_quantity'] <= 0 ? 'disabled' : ''; ?>>
-                                <?php echo htmlspecialchars($v['value']); ?><?php echo $v['stock_quantity'] <= 0 ? ' – Ausverkauft' : ''; ?>
-                            </option>
+                            <?php $outOfStock = $v['stock_quantity'] <= 0; ?>
+                            <label class="relative cursor-pointer<?php echo $outOfStock ? ' opacity-60' : ''; ?>">
+                                <input type="radio" name="variant_id" value="<?php echo $v['id']; ?>"
+                                       <?php echo $outOfStock ? 'disabled' : ''; ?>
+                                       class="sr-only peer"
+                                       <?php echo !$outOfStock ? 'required' : ''; ?>>
+                                <span class="inline-flex items-center px-4 py-2 border-2 rounded-lg text-sm font-medium transition-all
+                                    <?php echo $outOfStock
+                                        ? 'border-gray-200 dark:border-gray-600 text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-gray-700/30 line-through'
+                                        : 'border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 peer-checked:border-blue-500 peer-checked:bg-blue-50 dark:peer-checked:bg-blue-900/30 peer-checked:text-blue-700 dark:peer-checked:text-blue-300 hover:border-blue-400'; ?>">
+                                    <?php echo htmlspecialchars($v['value']); ?>
+                                    <?php if ($outOfStock): ?><span class="ml-1 text-xs">(Ausverkauft)</span><?php endif; ?>
+                                </span>
+                            </label>
                             <?php endforeach; ?>
-                        </select>
+                        </div>
+
+                        <!-- Restock notification for sold-out variants in this type group -->
+                        <?php foreach ($variants as $v):
+                            if ($v['stock_quantity'] > 0) continue;
+                            $hasNotif = Shop::hasRestockNotification($userId, $currentProduct['id'], $type, $v['value']);
+                        ?>
+                        <form method="POST"
+                              action="<?php echo asset('pages/shop/index.php?action=detail&product_id=' . $currentProduct['id']); ?>"
+                              class="mt-1 inline-block">
+                            <input type="hidden" name="post_action"   value="toggle_restock_notification">
+                            <input type="hidden" name="product_id"    value="<?php echo $currentProduct['id']; ?>">
+                            <input type="hidden" name="variant_type"  value="<?php echo htmlspecialchars($type); ?>">
+                            <input type="hidden" name="variant_value" value="<?php echo htmlspecialchars($v['value']); ?>">
+                            <button type="submit"
+                                    class="mt-1 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors
+                                        <?php echo $hasNotif
+                                            ? 'border-amber-300 dark:border-amber-600 bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-300 hover:bg-amber-100'
+                                            : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:border-blue-400 hover:text-blue-600 dark:hover:text-blue-400'; ?>">
+                                <i class="fas <?php echo $hasNotif ? 'fa-bell-slash' : 'fa-bell'; ?>"></i>
+                                <?php echo $hasNotif
+                                    ? 'Benachrichtigung für ' . htmlspecialchars($v['value']) . ' deaktivieren'
+                                    : 'Benachrichtigung wenn ' . htmlspecialchars($v['value']) . ' wieder verfügbar'; ?>
+                            </button>
+                        </form>
+                        <?php endforeach; ?>
                     </div>
                     <?php endforeach; ?>
                     <?php endif; ?>
@@ -361,10 +413,21 @@ ob_start();
                                class="w-20 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500">
                     </div>
 
+                    <?php
+                        $anyInStock = !empty($currentProduct['variants'])
+                            ? array_sum(array_column($currentProduct['variants'], 'stock_quantity')) > 0
+                            : true;
+                    ?>
+                    <?php if ($anyInStock): ?>
                     <button type="submit"
                             class="w-full py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 font-semibold transition-all shadow-lg text-lg">
                         <i class="fas fa-cart-plus mr-2"></i>In den Warenkorb
                     </button>
+                    <?php else: ?>
+                    <div class="w-full py-3 bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-lg text-center font-semibold text-lg">
+                        <i class="fas fa-ban mr-2"></i>Derzeit nicht verfügbar
+                    </div>
+                    <?php endif; ?>
                 </form>
             </div>
         </div>
@@ -450,7 +513,7 @@ ob_start();
                 <a href="<?php echo asset('pages/shop/index.php'); ?>"
                    class="px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-all text-center font-medium no-underline">
                     <i class="fas fa-arrow-left mr-2"></i>Weiter einkaufen
-                </button>
+                </a>
                 <div class="flex gap-3">
                     <button type="submit" form="cart-form"
                             class="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-all font-medium">

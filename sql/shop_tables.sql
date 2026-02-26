@@ -1,5 +1,5 @@
 -- Shop Module Tables
--- Creates tables for products, variants, orders and order items
+-- Creates tables for products, variants, orders, order items and restock notifications
 
 CREATE TABLE IF NOT EXISTS `shop_products` (
     `id`          INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -52,4 +52,19 @@ CREATE TABLE IF NOT EXISTS `shop_order_items` (
     CONSTRAINT `fk_item_order`   FOREIGN KEY (`order_id`)   REFERENCES `shop_orders`   (`id`) ON DELETE CASCADE,
     CONSTRAINT `fk_item_product` FOREIGN KEY (`product_id`) REFERENCES `shop_products` (`id`),
     CONSTRAINT `fk_item_variant` FOREIGN KEY (`variant_id`) REFERENCES `shop_variants` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `shop_restock_notifications` (
+    `id`            INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `user_id`       INT UNSIGNED NOT NULL,
+    `product_id`    INT UNSIGNED NOT NULL,
+    `variant_type`  VARCHAR(100) NOT NULL DEFAULT '' COMMENT 'Varianten-Typ (z.B. Größe)',
+    `variant_value` VARCHAR(100) NOT NULL DEFAULT '' COMMENT 'Varianten-Wert (z.B. XL)',
+    `email`         VARCHAR(255) NOT NULL,
+    `created_at`    DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `notified_at`   DATETIME     DEFAULT NULL COMMENT 'Zeitpunkt der letzten Benachrichtigung',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uq_user_variant` (`user_id`, `product_id`, `variant_type`, `variant_value`),
+    KEY `fk_restock_product` (`product_id`),
+    CONSTRAINT `fk_restock_product` FOREIGN KEY (`product_id`) REFERENCES `shop_products` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

@@ -1287,6 +1287,46 @@ class MailService {
     }
 
     /**
+     * Send a back-in-stock notification email.
+     *
+     * @param string $toEmail      Recipient email address
+     * @param string $productName  Name of the product
+     * @param string $variantType  Variant type (e.g. 'Größe')
+     * @param string $variantValue Variant value (e.g. 'XL')
+     * @return bool
+     */
+    public static function sendRestockNotification(string $toEmail, string $productName, string $variantType, string $variantValue): bool {
+        if (self::isVendorMissing()) {
+            error_log('Cannot send restock notification: Composer vendor missing');
+            return false;
+        }
+
+        $subject = 'Wieder verfügbar: ' . $productName;
+
+        $variantInfo = '';
+        if ($variantType !== '' && $variantValue !== '') {
+            $variantInfo = '<tr><td>' . htmlspecialchars($variantType) . '</td><td>' . htmlspecialchars($variantValue) . '</td></tr>';
+        }
+
+        $shopUrl = defined('BASE_URL') ? BASE_URL . '/pages/shop/index.php' : '#';
+
+        $bodyContent = '
+        <p class="email-text">Gute Neuigkeit!</p>
+        <p class="email-text">Der folgende Artikel ist jetzt wieder auf Lager:</p>
+        <table class="info-table">
+            <tr><td>Produkt</td><td>' . htmlspecialchars($productName) . '</td></tr>
+            ' . $variantInfo . '
+        </table>
+        <p class="email-text">Besuche jetzt unseren Shop, bevor der Artikel wieder ausverkauft ist!</p>
+        <p class="email-text">Viele Grüße,<br>dein IBC-Team</p>';
+
+        $ctaButton = '<a href="' . htmlspecialchars($shopUrl) . '" class="button">Jetzt im Shop ansehen</a>';
+        $htmlBody  = self::getTemplate('Wieder verfügbar!', $bodyContent, $ctaButton);
+
+        return self::sendEmailWithEmbeddedImage($toEmail, $subject, $htmlBody);
+    }
+
+    /**
      * Send email with file attachment from file path
      * 
      * @param string $toEmail Recipient email address
