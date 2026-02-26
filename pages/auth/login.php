@@ -1480,6 +1480,7 @@ try {
         /* Override theme.css !important color rules for login page */
         body .welcome-text h1.welcome-title { color: #ffffff !important; }
         body .welcome-text p.welcome-subtitle { color: #ffffff !important; }
+        .text-white { color: #ffffff !important; }
     </style>
 </head>
 
@@ -1558,8 +1559,8 @@ try {
 
         <?php if (isset($_GET['timeout']) && $_GET['timeout'] == 1): ?>
         <div class="alert-message alert-timeout">
-            <span class="alert-icon">⏱️</span>
-            <span>Aus Sicherheitsgründen wurdest du automatisch ausgeloggt.</span>
+            <span class="alert-icon text-white">⏱️</span>
+            <span class="text-white">Aus Sicherheitsgründen wurdest du automatisch ausgeloggt.</span>
         </div>
         <?php endif; ?>
 
