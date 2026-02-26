@@ -15,82 +15,58 @@ $error = '';
 
 // Handle rental creation
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_rental'])) {
-    $itemId = intval($_POST['item_id'] ?? 0);
-    $amount = intval($_POST['amount'] ?? 0);
+    $itemId         = intval($_POST['item_id'] ?? 0);
+    $quantity       = intval($_POST['quantity'] ?? 0);
     $expectedReturn = $_POST['expected_return'] ?? '';
-    $purpose = trim($_POST['purpose'] ?? '');
-    
-    if ($itemId <= 0 || $amount <= 0) {
+    $purpose        = trim($_POST['purpose'] ?? '');
+
+    if ($itemId <= 0 || $quantity < 1) {
         $_SESSION['rental_error'] = 'Ungültige Artikel-ID oder Menge';
         header('Location: view.php?id=' . $itemId);
         exit;
     }
-    
+
     if (empty($expectedReturn)) {
         $_SESSION['rental_error'] = 'Bitte geben Sie ein voraussichtliches Rückgabedatum an';
         header('Location: view.php?id=' . $itemId);
         exit;
     }
-    
-    // Get item to check stock
+
+    // Get item info for the notification email
     $item = Inventory::getById($itemId);
     if (!$item) {
         $_SESSION['rental_error'] = 'Artikel nicht gefunden';
         header('Location: index.php');
         exit;
     }
-    
-    $available = max(0, (int)($item['available_quantity'] ?? 0));
-    if ($available < $amount) {
-        $_SESSION['rental_error'] = 'Nicht genügend Bestand verfügbar. Verfügbar: ' . max(0, $available);
+
+    // Check available quantity using the Inventory Model
+    $available = Inventory::getAvailableQuantity($itemId);
+    if ($available < $quantity) {
+        $_SESSION['rental_error'] = 'Nicht genügend Bestand verfügbar. Nur noch ' . $available . ' vorhanden.';
         header('Location: view.php?id=' . $itemId);
         exit;
     }
-    
+
     try {
         $db = Database::getContentDB();
-        $db->beginTransaction();
-        
-        // Create rental record
-        $stmt = $db->prepare("
-            INSERT INTO inventory_rentals (user_id, item_id, amount, expected_return, purpose, status)
-            VALUES (?, ?, ?, ?, ?, 'rented')
-        ");
-        $stmt->execute([
-            $_SESSION['user_id'],
-            $itemId,
-            $amount,
-            $expectedReturn,
-            $purpose
-        ]);
-        
-        // Increment quantity_rented and loaned_count (track rented items without touching total stock)
-        $stmt = $db->prepare("UPDATE inventory_items SET quantity_rented = COALESCE(quantity_rented, 0) + ?, loaned_count = COALESCE(loaned_count, 0) + ? WHERE id = ?");
-        $stmt->execute([$amount, $amount, $itemId]);
-        
-        // Log the change
-        Inventory::logHistory(
-            $itemId,
-            $_SESSION['user_id'],
-            'checkout',
-            $item['quantity'],
-            $item['quantity'],
-            -$amount,
-            'Ausgeliehen',
-            $purpose
+
+        // Create rental record with rented_quantity
+        $stmt = $db->prepare(
+            "INSERT INTO inventory_rentals (easyverein_item_id, user_id, rented_quantity, purpose, expected_return, status)
+             VALUES (?, ?, ?, ?, ?, 'active')"
         );
-        
-        $db->commit();
-        
+        $stmt->execute([(string)$itemId, (int)$_SESSION['user_id'], $quantity, $purpose, $expectedReturn]);
+
         // Send notification email to board
         $borrowerEmail = $_SESSION['user_email'] ?? 'Unbekannt';
-        $safeSubject = str_replace(["\r", "\n"], '', $item['name']);
+        $safeSubject   = str_replace(["\r", "\n"], '', $item['name']);
         $emailBody = MailService::getTemplate(
             'Neue Ausleihe im Inventar',
             '<p class="email-text">Ein Mitglied hat einen Artikel aus dem Inventar ausgeliehen.</p>
             <table class="info-table">
                 <tr><td>Artikel</td><td>' . htmlspecialchars($item['name']) . '</td></tr>
-                <tr><td>Menge</td><td>' . htmlspecialchars($amount . ' ' . ($item['unit'] ?? 'Stück')) . '</td></tr>
+                <tr><td>Menge</td><td>' . htmlspecialchars($quantity . ' ' . ($item['unit'] ?? 'Stück')) . '</td></tr>
                 <tr><td>Ausgeliehen von</td><td>' . htmlspecialchars($borrowerEmail) . '</td></tr>
                 <tr><td>Verwendungszweck</td><td>' . htmlspecialchars($purpose) . '</td></tr>
                 <tr><td>Rückgabe bis</td><td>' . htmlspecialchars(date('d.m.Y', strtotime($expectedReturn))) . '</td></tr>
@@ -98,13 +74,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_rental'])) {
             </table>'
         );
         MailService::sendEmail(INVENTORY_BOARD_EMAIL, 'Neue Ausleihe: ' . $safeSubject, $emailBody);
-        
+
         $_SESSION['rental_success'] = 'Artikel erfolgreich ausgeliehen! Bitte geben Sie ihn bis zum ' . date('d.m.Y', strtotime($expectedReturn)) . ' zurück.';
         header('Location: view.php?id=' . $itemId);
         exit;
-        
+
     } catch (Exception $e) {
-        $db->rollBack();
         $_SESSION['rental_error'] = 'Fehler beim Ausleihen: ' . $e->getMessage();
         header('Location: view.php?id=' . $itemId);
         exit;
