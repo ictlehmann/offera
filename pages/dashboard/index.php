@@ -81,15 +81,26 @@ if (!empty($userUpcomingEvents)) {
 
 // Get user's open tasks from inventory_requests and inventory_rentals tables
 $openTasksCount = 0;
+$userId = (int)Auth::getUserId();
 try {
     $contentDb = Database::getContentDB();
     $stmt = $contentDb->prepare(
-        "SELECT (SELECT COUNT(*) FROM inventory_requests WHERE user_id = ? AND status IN ('pending', 'approved', 'pending_return')) + (SELECT COUNT(*) FROM inventory_rentals WHERE user_id = ? AND status IN ('active', 'pending_return'))"
+        "SELECT COUNT(*) FROM inventory_requests WHERE user_id = ? AND status IN ('pending', 'approved', 'pending_return')"
     );
-    $stmt->execute([$user['id'], $user['id']]);
-    $openTasksCount = (int)$stmt->fetchColumn();
+    $stmt->execute([$userId]);
+    $openTasksCount += (int)$stmt->fetchColumn();
 } catch (Exception $e) {
-    error_log('dashboard: open tasks count failed: ' . $e->getMessage());
+    error_log('dashboard: open tasks count (requests) failed: ' . $e->getMessage());
+}
+try {
+    $contentDb = Database::getContentDB();
+    $stmt = $contentDb->prepare(
+        "SELECT COUNT(*) FROM inventory_rentals WHERE user_id = ? AND status IN ('active', 'pending_return')"
+    );
+    $stmt->execute([$userId]);
+    $openTasksCount += (int)$stmt->fetchColumn();
+} catch (Exception $e) {
+    // Legacy table may not exist in deployments running the new inventory_requests schema – silently ignore
 }
 
 // Get events that need helpers (for all users)
