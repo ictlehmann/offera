@@ -561,17 +561,16 @@ class Inventory {
     /**
      * Approve a pending return.
      *
-     * Sets the rental status to 'returned', records the return timestamp, and
-     * synchronises the result with EasyVerein: ends the active lending record
-     * and writes the condition to the custom field 'Zustand der letzten Rückgabe'.
+     * Deletes the inventory_rentals record so the item is immediately available
+     * again, and synchronises the return with EasyVerein: ends the active lending
+     * and removes the borrower from custom fields.
      *
-     * @param int    $rentalId   Local inventory_rentals.id
-     * @param string $condition  Item condition at return ('funktionsfähig' or 'beschädigt')
-     * @param string $adminName  Display name of the board member approving the return
-     * @param string $notes      Optional remarks about the return
+     * @param int    $rentalId  Local inventory_rentals.id
+     * @param string $adminName Display name of the board member approving the return
+     * @param string $notes     Optional remarks about the return
      * @return array ['success' => bool, 'message' => string]
      */
-    public static function approveReturn($rentalId, $condition = 'funktionsfähig', $adminName = '', $notes = ''): array {
+    public static function approveReturn($rentalId, $adminName = '', $notes = ''): array {
         try {
             $db = Database::getContentDB();
 
@@ -586,20 +585,12 @@ class Inventory {
                 return ['success' => false, 'message' => 'Ausleihe nicht gefunden oder nicht im Status "pending_return"'];
             }
 
-            // Sanitise condition to allowed values.
-            $allowedConditions = ['funktionsfähig', 'beschädigt'];
-            if (!in_array($condition, $allowedConditions, true)) {
-                return ['success' => false, 'message' => 'Ungültiger Zustand: ' . $condition];
-            }
+            // Delete the rental record so the item is immediately available again.
+            $del = $db->prepare("DELETE FROM inventory_rentals WHERE id = ?");
+            $del->execute([(int)$rentalId]);
 
-            // Mark the local record as returned.
-            $upd = $db->prepare(
-                "UPDATE inventory_rentals SET status = 'returned', returned_at = NOW(), `condition` = ? WHERE id = ?"
-            );
-            $upd->execute([$condition, (int)$rentalId]);
-
-            // Synchronise the return with EasyVerein: end the active lending,
-            // remove the borrower from custom fields, and update the condition.
+            // Synchronise the return with EasyVerein: end the active lending and
+            // remove the borrower from custom fields.
             try {
                 $returnUserName  = '';
                 $returnUserEmail = '';
@@ -641,13 +632,12 @@ class Inventory {
                 self::evi()->verifyReturnForRental(
                     (int)$rental['easyverein_item_id'],
                     $adminName,
-                    $condition,
-                    $notes,
                     $returnUserName,
-                    $returnUserEmail
+                    $returnUserEmail,
+                    $notes
                 );
             } catch (Exception $eviEx) {
-                // Log but do not fail: the local DB was already updated.
+                // Log but do not fail: the local DB record was already deleted.
                 error_log('approveReturn: EasyVerein sync failed: ' . $eviEx->getMessage());
             }
 

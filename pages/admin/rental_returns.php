@@ -74,6 +74,7 @@ function buildItemNameMap(): array {
 $pendingRequests   = [];
 $activeLoans       = [];
 $pendingReturnLoans = [];
+$pendingRentalReturns = [];
 $dbError           = '';
 
 try {
@@ -95,6 +96,15 @@ try {
            FROM inventory_requests WHERE status = 'pending_return' ORDER BY created_at ASC"
     );
     $pendingReturnLoans = enrichWithUsers($stmt3->fetchAll(PDO::FETCH_ASSOC));
+
+    // Also load legacy inventory_rentals rows that are pending board confirmation.
+    $stmt4 = $db->query(
+        "SELECT id, easyverein_item_id AS inventory_object_id, user_id,
+                rented_quantity AS quantity, rented_at AS created_at,
+                expected_return AS end_date
+           FROM inventory_rentals WHERE status = 'pending_return' ORDER BY rented_at ASC"
+    );
+    $pendingRentalReturns = enrichWithUsers($stmt4->fetchAll(PDO::FETCH_ASSOC));
 } catch (Exception $e) {
     $dbError = 'Datenbankfehler: ' . $e->getMessage();
     error_log('rental_returns: ' . $e->getMessage());
@@ -146,7 +156,7 @@ ob_start();
         <button class="nav-link" id="pending-return-tab" data-bs-toggle="tab" data-bs-target="#pending-return" type="button" role="tab" aria-controls="pending-return" aria-selected="false">
             <i class="fas fa-undo-alt text-orange-600 mr-1"></i>
             Rückgaben prüfen
-            <span class="badge bg-warning text-white ms-1"><?php echo count($pendingReturnLoans); ?></span>
+            <span class="badge bg-warning text-white ms-1"><?php echo count($pendingReturnLoans) + count($pendingRentalReturns); ?></span>
         </button>
     </li>
     <li class="nav-item" role="presentation">
@@ -245,14 +255,14 @@ ob_start();
         <div class="card p-6">
             <h2 class="text-xl font-bold text-gray-800 mb-4">
                 <i class="fas fa-undo-alt text-orange-600 mr-2"></i>
-                Gemeldete Rückgaben (<?php echo count($pendingReturnLoans); ?>)
+                Gemeldete Rückgaben (<?php echo count($pendingReturnLoans) + count($pendingRentalReturns); ?>)
             </h2>
             <p class="text-sm text-gray-500 mb-4">
                 <i class="fas fa-info-circle mr-1"></i>
                 Diese Mitglieder haben ihre Ausleihe vorzeitig beendet und die Rückgabe gemeldet. Bitte Artikel prüfen und Rückgabe verifizieren.
             </p>
 
-            <?php if (empty($pendingReturnLoans)): ?>
+            <?php if (empty($pendingReturnLoans) && empty($pendingRentalReturns)): ?>
             <div class="text-center py-12">
                 <i class="fas fa-check-circle text-6xl text-green-300 mb-4"></i>
                 <p class="text-gray-500 text-lg">Keine ausstehenden Rückgaben</p>
@@ -298,6 +308,43 @@ ob_start();
                             <td class="px-4 py-3 text-sm">
                                 <button
                                     onclick="confirmReturn(<?php echo (int)$loan['id']; ?>, 'pending-return')"
+                                    class="inline-flex items-center px-3 py-1.5 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition font-medium text-sm">
+                                    <i class="fas fa-check mr-1"></i>Rückgabe bestätigen
+                                </button>
+                            </td>
+                            <?php endif; ?>
+                        </tr>
+                        <?php endforeach; ?>
+                        <?php foreach ($pendingRentalReturns as $rental): ?>
+                        <tr id="rental-return-row-<?php echo (int)$rental['id']; ?>" class="hover:bg-orange-50">
+                            <td class="px-4 py-3 text-sm font-semibold text-gray-800">
+                                <?php
+                                $itemName = $itemNames[(string)$rental['inventory_object_id']] ?? '';
+                                echo $itemName !== ''
+                                    ? htmlspecialchars($itemName)
+                                    : '<span class="text-gray-400">#' . htmlspecialchars($rental['inventory_object_id']) . '</span>';
+                                ?>
+                            </td>
+                            <td class="px-4 py-3 text-sm text-gray-700"><?php echo (int)$rental['quantity']; ?></td>
+                            <td class="px-4 py-3 text-sm text-gray-700">
+                                <i class="fas fa-user text-gray-400 mr-1"></i>
+                                <?php echo htmlspecialchars($rental['user_name'] ?? $rental['user_email'] ?? 'Unbekannt'); ?>
+                                <?php if (!empty($rental['user_email']) && $rental['user_name'] !== $rental['user_email']): ?>
+                                    <span class="block text-xs text-gray-400"><?php echo htmlspecialchars($rental['user_email']); ?></span>
+                                <?php endif; ?>
+                            </td>
+                            <td class="px-4 py-3 text-sm text-gray-600">
+                                <?php if (!empty($rental['end_date'])): ?>
+                                    <?php echo htmlspecialchars(date('d.m.Y', strtotime($rental['end_date']))); ?>
+                                <?php else: ?>
+                                    &mdash;
+                                <?php endif; ?>
+                                <span class="block text-xs text-orange-600 font-medium mt-0.5">Rückgabe gemeldet</span>
+                            </td>
+                            <?php if (!$readOnly): ?>
+                            <td class="px-4 py-3 text-sm">
+                                <button
+                                    onclick="confirmRentalReturn(<?php echo (int)$rental['id']; ?>)"
                                     class="inline-flex items-center px-3 py-1.5 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition font-medium text-sm">
                                     <i class="fas fa-check mr-1"></i>Rückgabe bestätigen
                                 </button>
@@ -450,6 +497,20 @@ ob_start();
                 row.style.transition = 'opacity 0.4s';
                 row.style.opacity    = '0';
                 setTimeout(function () { row.remove(); updateBadge(tbody); }, 400);
+            }
+        });
+    };
+
+    // ── Confirm return for legacy inventory_rentals rows ──────────────────────
+    window.confirmRentalReturn = function (rentalId) {
+        if (!confirm('Rückgabe bestätigen?')) return;
+
+        postAction({ action: 'verify_rental_return', rental_id: rentalId }, function () {
+            const row = document.getElementById('rental-return-row-' + rentalId);
+            if (row) {
+                row.style.transition = 'opacity 0.4s';
+                row.style.opacity    = '0';
+                setTimeout(function () { row.remove(); updateBadge('pending-return'); }, 400);
             }
         });
     };

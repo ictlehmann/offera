@@ -5,9 +5,10 @@
  * Handles approve, reject, and verify_return actions for inventory_requests.
  * Accessible only to board members (board_finance, board_internal, board_external).
  *
- * action: approve       – Sets request status to 'approved'
- * action: reject        – Sets request status to 'rejected'
- * action: verify_return – Sets request status to 'returned' with condition and optional notes
+ * action: approve              – Sets request status to 'approved'
+ * action: reject               – Sets request status to 'rejected'
+ * action: verify_return        – Sets inventory_requests status to 'returned'
+ * action: verify_rental_return – Deletes the inventory_rentals record, making the item available again
  */
 
 require_once __DIR__ . '/../src/Auth.php';
@@ -15,6 +16,7 @@ require_once __DIR__ . '/../src/Database.php';
 require_once __DIR__ . '/../includes/helpers.php';
 require_once __DIR__ . '/../includes/services/EasyVereinInventory.php';
 require_once __DIR__ . '/../includes/services/MicrosoftGraphService.php';
+require_once __DIR__ . '/../includes/models/Inventory.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -141,6 +143,35 @@ try {
         $inventory->verifyReturn($requestId, $adminName, '', $notes);
 
         echo json_encode(['success' => true, 'message' => 'Rückgabe erfolgreich verifiziert']);
+        exit;
+    }
+
+    if ($action === 'verify_rental_return') {
+        $rentalId  = (int)($input['rental_id'] ?? 0);
+        $notes     = $input['notes'] ?? '';
+
+        if ($rentalId <= 0) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'Ungültige Ausleihe-ID']);
+            exit;
+        }
+
+        $admin     = Auth::user();
+        $adminName = $admin
+            ? trim(($admin['first_name'] ?? '') . ' ' . ($admin['last_name'] ?? ''))
+            : ($_SESSION['user_email'] ?? 'Unbekannt');
+        if ($adminName === '') {
+            $adminName = $admin['email'] ?? 'Unbekannt';
+        }
+
+        $result = Inventory::approveReturn($rentalId, $adminName, $notes);
+
+        if ($result['success']) {
+            echo json_encode(['success' => true, 'message' => $result['message']]);
+        } else {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => $result['message']]);
+        }
         exit;
     }
 
