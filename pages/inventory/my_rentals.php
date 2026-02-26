@@ -142,7 +142,7 @@ ob_start();
                 $isAwaitingReturn   = $status === 'pending_return';
                 // Legacy rentals use 'active'; new requests use 'approved'
                 $isActive     = ($status === 'active' || $status === 'approved');
-                $isEarlyReturn = $isActive && !empty($rental['end_date']) && strtotime($rental['end_date']) > time();
+                $isEarlyReturn = $isActive && !empty($rental['end_date']) && strtotime($rental['end_date']) > strtotime('today');
                 ?>
                 <tr class="hover:bg-gray-50">
                     <td class="px-4 py-3">
@@ -190,7 +190,7 @@ ob_start();
                             <input type="hidden" name="rental_id" value="<?php echo (int)$rental['id']; ?>">
                             <button type="submit"
                                     class="inline-flex items-center px-3 py-1 <?php echo $isEarlyReturn ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'; ?> text-white rounded transition text-sm">
-                                <i class="fas fa-undo mr-1"></i><?php echo $isEarlyReturn ? 'Vorzeitig zurückgeben' : 'Rückgabe melden'; ?>
+                                <i class="fas fa-undo mr-1"></i><?php echo $isEarlyReturn ? 'Frühere Rückgabe' : 'Zurückgeben'; ?>
                             </button>
                         </form>
                         <?php elseif ($isActive && $status === 'approved'): ?>
@@ -200,7 +200,7 @@ ob_start();
                             <input type="hidden" name="request_id" value="<?php echo (int)$rental['id']; ?>">
                             <button type="submit"
                                     class="inline-flex items-center px-3 py-1 <?php echo $isEarlyReturn ? 'bg-red-600 hover:bg-red-700' : 'bg-orange-600 hover:bg-orange-700'; ?> text-white rounded transition text-sm">
-                                <i class="fas fa-undo mr-1"></i><?php echo $isEarlyReturn ? 'Vorzeitig zurückgeben' : 'Rückgabe melden'; ?>
+                                <i class="fas fa-undo mr-1"></i><?php echo $isEarlyReturn ? 'Frühere Rückgabe' : 'Zurückgeben'; ?>
                             </button>
                         </form>
                         <?php else: ?>

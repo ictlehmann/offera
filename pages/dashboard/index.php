@@ -79,9 +79,18 @@ if (!empty($userUpcomingEvents)) {
     }
 }
 
-// Get user's open tasks from inventory rentals
-$userRentals = Inventory::getUserCheckouts($user['id'], false); // false = only unreturned items
-$openTasksCount = count($userRentals);
+// Get user's open tasks from inventory rentals (inventory_requests table)
+$openTasksCount = 0;
+try {
+    $contentDb = Database::getContentDB();
+    $stmt = $contentDb->prepare(
+        "SELECT COUNT(*) FROM inventory_requests WHERE user_id = ? AND status IN ('pending', 'approved', 'pending_return')"
+    );
+    $stmt->execute([$user['id']]);
+    $openTasksCount = (int)$stmt->fetchColumn();
+} catch (Exception $e) {
+    error_log('dashboard: inventory_requests count failed: ' . $e->getMessage());
+}
 
 // Get events that need helpers (for all users)
 $contentDb = Database::getContentDB();
