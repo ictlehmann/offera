@@ -149,6 +149,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['request_return'])) {
     exit;
 }
 
+// Handle early return request for approved inventory_requests (new board-approval workflow).
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['request_return_approved'])) {
+    $requestId = intval($_POST['request_id'] ?? 0);
+
+    if ($requestId <= 0) {
+        $_SESSION['rental_error'] = 'Ungültige Anfrage-ID';
+        header('Location: my_rentals.php');
+        exit;
+    }
+
+    try {
+        $db   = Database::getContentDB();
+        $stmt = $db->prepare(
+            "UPDATE inventory_requests SET status = 'pending_return' WHERE id = ? AND user_id = ? AND status = 'approved'"
+        );
+        $stmt->execute([$requestId, (int)Auth::getUserId()]);
+
+        if ($stmt->rowCount() === 0) {
+            $_SESSION['rental_error'] = 'Anfrage nicht gefunden, nicht berechtigt oder bereits in Bearbeitung';
+        } else {
+            $_SESSION['rental_success'] = 'Rückgabe gemeldet – wartet auf Bestätigung durch den Vorstand.';
+        }
+    } catch (Exception $e) {
+        $_SESSION['rental_error'] = 'Datenbankfehler: ' . $e->getMessage();
+    }
+    header('Location: my_rentals.php');
+    exit;
+}
+
 // Handle rental return via EasyVerein API
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['return_rental'])) {
     $itemId         = intval($_POST['rental_id'] ?? 0);

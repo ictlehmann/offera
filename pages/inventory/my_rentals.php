@@ -17,7 +17,7 @@ try {
     $stmt = $db->prepare(
         "SELECT id, inventory_object_id AS easyverein_item_id, quantity, start_date AS rented_at, end_date, status, created_at
            FROM inventory_requests
-          WHERE user_id = ? AND status IN ('pending', 'approved')
+          WHERE user_id = ? AND status IN ('pending', 'approved', 'pending_return')
           ORDER BY created_at DESC"
     );
     $stmt->execute([$userId]);
@@ -188,6 +188,15 @@ ob_start();
                             <input type="hidden" name="rental_id" value="<?php echo (int)$rental['id']; ?>">
                             <button type="submit"
                                     class="inline-flex items-center px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition text-sm">
+                                <i class="fas fa-undo mr-1"></i>Rückgabe melden
+                            </button>
+                        </form>
+                        <?php elseif ($isActive && $status === 'approved'): ?>
+                        <form method="POST" action="rental.php" onsubmit="return confirm('Rückgabe jetzt melden? Der Vorstand wird benachrichtigt.')">
+                            <input type="hidden" name="request_return_approved" value="1">
+                            <input type="hidden" name="request_id" value="<?php echo (int)$rental['id']; ?>">
+                            <button type="submit"
+                                    class="inline-flex items-center px-3 py-1 bg-orange-600 text-white rounded hover:bg-orange-700 transition text-sm">
                                 <i class="fas fa-undo mr-1"></i>Rückgabe melden
                             </button>
                         </form>

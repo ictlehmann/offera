@@ -71,9 +71,10 @@ function buildItemNameMap(): array {
 }
 
 // ── Fetch data ────────────────────────────────────────────────────────────────
-$pendingRequests = [];
-$activeLoans     = [];
-$dbError         = '';
+$pendingRequests   = [];
+$activeLoans       = [];
+$pendingReturnLoans = [];
+$dbError           = '';
 
 try {
     $db   = Database::getContentDB();
@@ -88,6 +89,12 @@ try {
            FROM inventory_requests WHERE status = 'approved' ORDER BY start_date ASC"
     );
     $activeLoans = enrichWithUsers($stmt2->fetchAll(PDO::FETCH_ASSOC));
+
+    $stmt3 = $db->query(
+        "SELECT id, inventory_object_id, user_id, start_date, end_date, quantity, created_at
+           FROM inventory_requests WHERE status = 'pending_return' ORDER BY created_at ASC"
+    );
+    $pendingReturnLoans = enrichWithUsers($stmt3->fetchAll(PDO::FETCH_ASSOC));
 } catch (Exception $e) {
     $dbError = 'Datenbankfehler: ' . $e->getMessage();
     error_log('rental_returns: ' . $e->getMessage());
@@ -141,6 +148,13 @@ ob_start();
             <i class="fas fa-clock text-yellow-600 mr-1"></i>
             Ausstehende Anfragen
             <span class="badge bg-warning text-white ms-1"><?php echo count($pendingRequests); ?></span>
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="pending-return-tab" data-bs-toggle="tab" data-bs-target="#pending-return" type="button" role="tab" aria-controls="pending-return" aria-selected="false">
+            <i class="fas fa-undo-alt text-orange-600 mr-1"></i>
+            Rückgaben prüfen
+            <span class="badge bg-warning text-white ms-1"><?php echo count($pendingReturnLoans); ?></span>
         </button>
     </li>
     <li class="nav-item" role="presentation">
@@ -234,7 +248,79 @@ ob_start();
         </div>
     </div>
 
-    <!-- ── Section 2: Aktive Ausleihen ────────────────────────────────────── -->
+    <!-- ── Section 2: Gemeldete Rückgaben ────────────────────────────────── -->
+    <div class="tab-pane fade" id="pending-return" role="tabpanel" aria-labelledby="pending-return-tab">
+        <div class="card p-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">
+                <i class="fas fa-undo-alt text-orange-600 mr-2"></i>
+                Gemeldete Rückgaben (<?php echo count($pendingReturnLoans); ?>)
+            </h2>
+            <p class="text-sm text-gray-500 mb-4">
+                <i class="fas fa-info-circle mr-1"></i>
+                Diese Mitglieder haben ihre Ausleihe vorzeitig beendet und die Rückgabe gemeldet. Bitte Artikel prüfen und Rückgabe verifizieren.
+            </p>
+
+            <?php if (empty($pendingReturnLoans)): ?>
+            <div class="text-center py-12">
+                <i class="fas fa-check-circle text-6xl text-green-300 mb-4"></i>
+                <p class="text-gray-500 text-lg">Keine ausstehenden Rückgaben</p>
+            </div>
+            <?php else: ?>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-orange-50">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Artikel</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Menge</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ausgeliehen von</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Zeitraum</th>
+                            <?php if (!$readOnly): ?><th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aktion</th><?php endif; ?>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200" id="pending-return-tbody">
+                        <?php foreach ($pendingReturnLoans as $loan): ?>
+                        <tr id="pending-return-row-<?php echo (int)$loan['id']; ?>" class="hover:bg-orange-50">
+                            <td class="px-4 py-3 text-sm font-semibold text-gray-800">
+                                <?php
+                                $itemName = $itemNames[(string)$loan['inventory_object_id']] ?? '';
+                                echo $itemName !== ''
+                                    ? htmlspecialchars($itemName)
+                                    : '<span class="text-gray-400">#' . htmlspecialchars($loan['inventory_object_id']) . '</span>';
+                                ?>
+                            </td>
+                            <td class="px-4 py-3 text-sm text-gray-700"><?php echo (int)$loan['quantity']; ?></td>
+                            <td class="px-4 py-3 text-sm text-gray-700">
+                                <i class="fas fa-user text-gray-400 mr-1"></i>
+                                <?php echo htmlspecialchars($loan['user_name'] ?? $loan['user_email'] ?? 'Unbekannt'); ?>
+                                <?php if (!empty($loan['user_email']) && $loan['user_name'] !== $loan['user_email']): ?>
+                                    <span class="block text-xs text-gray-400"><?php echo htmlspecialchars($loan['user_email']); ?></span>
+                                <?php endif; ?>
+                            </td>
+                            <td class="px-4 py-3 text-sm text-gray-600">
+                                <?php echo htmlspecialchars(date('d.m.Y', strtotime($loan['start_date']))); ?>
+                                &ndash;
+                                <?php echo htmlspecialchars(date('d.m.Y', strtotime($loan['end_date']))); ?>
+                                <span class="block text-xs text-orange-600 font-medium mt-0.5">Vorzeitige Rückgabe gemeldet</span>
+                            </td>
+                            <?php if (!$readOnly): ?>
+                            <td class="px-4 py-3 text-sm">
+                                <button
+                                    onclick="openReturnModal(<?php echo (int)$loan['id']; ?>, 'pending-return')"
+                                    class="inline-flex items-center px-3 py-1.5 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition font-medium text-sm">
+                                    <i class="fas fa-check mr-1"></i>Rückgabe verifizieren
+                                </button>
+                            </td>
+                            <?php endif; ?>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+            <?php endif; ?>
+        </div>
+    </div>
+
+    <!-- ── Section 3: Aktive Ausleihen ────────────────────────────────────── -->
     <div class="tab-pane fade" id="active" role="tabpanel" aria-labelledby="active-tab">
         <div class="card p-6">
             <h2 class="text-xl font-bold text-gray-800 mb-4">
@@ -349,7 +435,8 @@ ob_start();
 (function () {
     'use strict';
 
-    let currentRequestId = null;
+    let currentRequestId     = null;
+    let currentSourceSection = null;
 
     // ── Show Bootstrap alert ──────────────────────────────────────────────────
     function showAlert(message, type) {
@@ -404,8 +491,9 @@ ob_start();
     };
 
     // ── Open return modal ─────────────────────────────────────────────────────
-    window.openReturnModal = function (loanId) {
-        currentRequestId = loanId;
+    window.openReturnModal = function (loanId, sourceSection) {
+        currentRequestId    = loanId;
+        currentSourceSection = sourceSection || 'active';
         document.getElementById('return-condition').value = 'einwandfrei';
         document.getElementById('return-notes').value     = '';
         var modal = new bootstrap.Modal(document.getElementById('returnModal'));
@@ -425,13 +513,17 @@ ob_start();
 
         postAction({ action: 'verify_return', request_id: currentRequestId, condition: condition, notes: notes }, function () {
             bootstrap.Modal.getInstance(document.getElementById('returnModal')).hide();
-            const row = document.getElementById('active-row-' + currentRequestId);
+            // Remove the row from either the active or pending-return section
+            const rowId  = (currentSourceSection === 'pending-return' ? 'pending-return-row-' : 'active-row-') + currentRequestId;
+            const row    = document.getElementById(rowId);
+            const tbody  = currentSourceSection === 'pending-return' ? 'pending-return' : 'active';
             if (row) {
                 row.style.transition = 'opacity 0.4s';
                 row.style.opacity    = '0';
-                setTimeout(function () { row.remove(); updateBadge('active'); }, 400);
+                setTimeout(function () { row.remove(); updateBadge(tbody); }, 400);
             }
-            currentRequestId = null;
+            currentRequestId     = null;
+            currentSourceSection = null;
             btn.disabled  = false;
             btn.innerHTML = '<i class="fas fa-check mr-1"></i>Verifizieren';
         }, function () {
@@ -448,8 +540,7 @@ ob_start();
         const count  = tbody.querySelectorAll('tr').length;
         const badge  = tab.querySelector('.badge');
         if (badge) badge.textContent = count;
-    }
-}());
+    }}());
 </script>
 
 <?php

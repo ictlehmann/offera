@@ -928,6 +928,18 @@ try {
     );
 
     // ============================================
+    // INVENTORY REQUESTS: EARLY RETURN SUPPORT
+    // ============================================
+    echo "\n--- INVENTORY REQUESTS EARLY RETURN UPDATES ---\n";
+
+    // Add pending_return to inventory_requests status ENUM so users can request early return
+    executeSql(
+        $content_db,
+        "ALTER TABLE inventory_requests MODIFY COLUMN status ENUM('pending','approved','rejected','returned','pending_return') NOT NULL DEFAULT 'pending' COMMENT 'Approval workflow status'",
+        "Add pending_return to inventory_requests status ENUM"
+    );
+
+    // ============================================
     // SUMMARY
     // ============================================
     echo "==============================================\n";
