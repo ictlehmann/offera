@@ -990,12 +990,22 @@ if (Auth::check() && isset($_SESSION['profile_incomplete']) && $_SESSION['profil
                         <?php echo htmlspecialchars($email); ?>
                     </p>
                     <?php
+                    // Show the user's internal role translated to German.
+                    // Fall back to entra_roles group lookup, then 'Mitglied'.
                     $entraRoleDisplay = '';
-                    if (!empty($currentUser['entra_roles'])) {
+                    if (!empty($role) && $role !== 'User') {
+                        $entraRoleDisplay = translateRole($role);
+                    } elseif (!empty($currentUser['entra_roles'])) {
                         $entraRolesArr = json_decode($currentUser['entra_roles'], true);
-                        if (json_last_error() === JSON_ERROR_NONE && is_array($entraRolesArr)) {
-                            $names = extractGroupDisplayNames($entraRolesArr);
-                            $entraRoleDisplay = implode(', ', $names);
+                        if (json_last_error() === JSON_ERROR_NONE && is_array($entraRolesArr) && defined('ROLE_MAPPING')) {
+                            $roleMapping = array_flip(ROLE_MAPPING);
+                            foreach ($entraRolesArr as $group) {
+                                $groupId = is_array($group) ? ($group['id'] ?? null) : null;
+                                if ($groupId && isset($roleMapping[$groupId])) {
+                                    $entraRoleDisplay = translateRole($roleMapping[$groupId]);
+                                    break;
+                                }
+                            }
                         }
                     }
                     if (empty($entraRoleDisplay)) {
