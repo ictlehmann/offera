@@ -896,22 +896,31 @@ class EasyVereinInventory {
         $today          = (new DateTime('now', $tz))->format('Y-m-d');
         $todayFormatted = (new DateTime('now', $tz))->format('d.m.Y');
 
-        // 2. End the active lending in EasyVerein by patching its returnDate to today
-        $activeLendings  = $this->getActiveLendings($req['inventory_object_id']);
-        $lendingPatched  = false;
-        foreach ($activeLendings as $lending) {
-            $lendingId = $lending['id'] ?? null;
-            if ($lendingId === null) {
-                continue;
+        // 2. End the active lending in EasyVerein by patching its returnDate to today.
+        //    Wrapped in try-catch so an EasyVerein API failure does not prevent
+        //    the local DB update that marks the item as available again.
+        try {
+            $activeLendings  = $this->getActiveLendings($req['inventory_object_id']);
+            $lendingPatched  = false;
+            foreach ($activeLendings as $lending) {
+                $lendingId = $lending['id'] ?? null;
+                if ($lendingId === null) {
+                    continue;
+                }
+                $this->request('PATCH', self::API_BASE . '/lending/' . $lendingId, ['returnDate' => $today]);
+                $lendingPatched = true;
+                break;
             }
-            $this->request('PATCH', self::API_BASE . '/lending/' . $lendingId, ['returnDate' => $today]);
-            $lendingPatched = true;
-            break;
-        }
-        if (!$lendingPatched) {
+            if (!$lendingPatched) {
+                error_log(sprintf(
+                    'EasyVereinInventory::verifyReturn: no active lending found for inventory object %s (request %d)',
+                    $req['inventory_object_id'], $requestId
+                ));
+            }
+        } catch (Exception $evEx) {
             error_log(sprintf(
-                'EasyVereinInventory::verifyReturn: no active lending found for inventory object %s (request %d)',
-                $req['inventory_object_id'], $requestId
+                'EasyVereinInventory::verifyReturn: lending patch failed for inventory object %s (request %d): %s',
+                $req['inventory_object_id'], $requestId, $evEx->getMessage()
             ));
         }
 
@@ -961,37 +970,48 @@ class EasyVereinInventory {
             $emailsValue = implode("\n", $emailLines);
         }
 
-        // 4. Update individual fields on the inventory object
-        $objectUrl        = self::API_BASE . '/inventory-object/' . urlencode((string)$req['inventory_object_id']);
-        $customFieldsUrl  = $objectUrl . '/custom-fields?query={id,value,customField{id,name}}';
-        $cfData           = $this->request('GET', $customFieldsUrl);
-        $customFields     = $cfData['results'] ?? $cfData['data'] ?? $cfData;
-
-        $conditionText  = "{$condition} - Geprüft am {$todayFormatted} durch {$adminName}."
+        // 4. Update individual fields on the inventory object.
+        //    Wrapped in try-catch so a custom-fields API failure does not
+        //    prevent the local DB update below.
+        $conditionText = "{$condition} - Geprüft am {$todayFormatted} durch {$adminName}."
             . ($notes !== '' ? " Notiz: {$notes}" : '');
-        $fieldsToUpdate = [];
-        foreach ($customFields as $field) {
-            $fieldId   = $field['id']   ?? null;
-            $fieldName = $field['customField']['name'] ?? '';
+        try {
+            $objectUrl        = self::API_BASE . '/inventory-object/' . urlencode((string)$req['inventory_object_id']);
+            $customFieldsUrl  = $objectUrl . '/custom-fields?query={id,value,customField{id,name}}';
+            $cfData           = $this->request('GET', $customFieldsUrl);
+            $customFields     = $cfData['results'] ?? $cfData['data'] ?? $cfData;
 
-            if ($fieldId === null) {
-                continue;
+            $fieldsToUpdate = [];
+            if (is_array($customFields)) {
+                foreach ($customFields as $field) {
+                    $fieldId   = $field['id']   ?? null;
+                    $fieldName = $field['customField']['name'] ?? '';
+
+                    if ($fieldId === null) {
+                        continue;
+                    }
+
+                    if ($fieldName === 'Aktuelle Ausleiher') {
+                        $fieldsToUpdate[] = ['id' => $fieldId, 'value' => $namesValue];
+                    } elseif ($fieldName === 'Entra E-Mail') {
+                        $fieldsToUpdate[] = ['id' => $fieldId, 'value' => $emailsValue];
+                    } elseif ($fieldName === 'Zustand der letzten Rückgabe') {
+                        $fieldsToUpdate[] = ['id' => $fieldId, 'value' => $conditionText];
+                    }
+                }
             }
 
-            if ($fieldName === 'Aktuelle Ausleiher') {
-                $fieldsToUpdate[] = ['id' => $fieldId, 'value' => $namesValue];
-            } elseif ($fieldName === 'Entra E-Mail') {
-                $fieldsToUpdate[] = ['id' => $fieldId, 'value' => $emailsValue];
-            } elseif ($fieldName === 'Zustand der letzten Rückgabe') {
-                $fieldsToUpdate[] = ['id' => $fieldId, 'value' => $conditionText];
+            if (!empty($fieldsToUpdate)) {
+                $this->request('PATCH', $objectUrl . '/custom-fields/bulk-update', $fieldsToUpdate);
             }
+        } catch (Exception $cfEx) {
+            error_log(sprintf(
+                'EasyVereinInventory::verifyReturn: custom-fields update failed for inventory object %s (request %d): %s',
+                $req['inventory_object_id'], $requestId, $cfEx->getMessage()
+            ));
         }
 
-        if (!empty($fieldsToUpdate)) {
-            $this->request('PATCH', $objectUrl . '/custom-fields/bulk-update', $fieldsToUpdate);
-        }
-
-        // 5. Update local DB status to 'returned' (only after all API calls succeed)
+        // 5. Update local DB status to 'returned' so the item is available again locally.
         $upd = $db->prepare(
             "UPDATE inventory_requests
                 SET status = 'returned', returned_condition = ?, return_notes = ?, returned_at = NOW()
