@@ -142,6 +142,7 @@ ob_start();
                 $isAwaitingReturn   = $status === 'pending_return';
                 // Legacy rentals use 'active'; new requests use 'approved'
                 $isActive     = ($status === 'active' || $status === 'approved');
+                $isEarlyReturn = $isActive && !empty($rental['end_date']) && strtotime($rental['end_date']) > time();
                 ?>
                 <tr class="hover:bg-gray-50">
                     <td class="px-4 py-3">
@@ -183,21 +184,23 @@ ob_start();
                             <i class="fas fa-clock mr-1"></i>Wartet auf Bestätigung durch den Vorstand
                         </span>
                         <?php elseif ($isActive && $status === 'active'): ?>
-                        <form method="POST" action="rental.php" onsubmit="return confirm('Rückgabe für diesen Artikel melden?')">
+                        <?php $confirmMsg = $isEarlyReturn ? 'Vorzeitige Rückgabe melden? Das Gerät wird sofort wieder freigegeben.' : 'Rückgabe für diesen Artikel melden?'; ?>
+                        <form method="POST" action="rental.php" onsubmit="return confirm('<?php echo htmlspecialchars($confirmMsg, ENT_QUOTES, 'UTF-8'); ?>')">
                             <input type="hidden" name="request_return" value="1">
                             <input type="hidden" name="rental_id" value="<?php echo (int)$rental['id']; ?>">
                             <button type="submit"
-                                    class="inline-flex items-center px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition text-sm">
-                                <i class="fas fa-undo mr-1"></i>Rückgabe melden
+                                    class="inline-flex items-center px-3 py-1 <?php echo $isEarlyReturn ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'; ?> text-white rounded transition text-sm">
+                                <i class="fas fa-undo mr-1"></i><?php echo $isEarlyReturn ? 'Vorzeitig zurückgeben' : 'Rückgabe melden'; ?>
                             </button>
                         </form>
                         <?php elseif ($isActive && $status === 'approved'): ?>
-                        <form method="POST" action="rental.php" onsubmit="return confirm('Rückgabe jetzt melden? Der Vorstand wird benachrichtigt.')">
+                        <?php $confirmMsg = $isEarlyReturn ? 'Vorzeitige Rückgabe melden? Das Gerät wird sofort wieder freigegeben.' : 'Rückgabe jetzt melden? Der Vorstand wird benachrichtigt.'; ?>
+                        <form method="POST" action="rental.php" onsubmit="return confirm('<?php echo htmlspecialchars($confirmMsg, ENT_QUOTES, 'UTF-8'); ?>')">
                             <input type="hidden" name="request_return_approved" value="1">
                             <input type="hidden" name="request_id" value="<?php echo (int)$rental['id']; ?>">
                             <button type="submit"
-                                    class="inline-flex items-center px-3 py-1 bg-orange-600 text-white rounded hover:bg-orange-700 transition text-sm">
-                                <i class="fas fa-undo mr-1"></i>Rückgabe melden
+                                    class="inline-flex items-center px-3 py-1 <?php echo $isEarlyReturn ? 'bg-red-600 hover:bg-red-700' : 'bg-orange-600 hover:bg-orange-700'; ?> text-white rounded transition text-sm">
+                                <i class="fas fa-undo mr-1"></i><?php echo $isEarlyReturn ? 'Vorzeitig zurückgeben' : 'Rückgabe melden'; ?>
                             </button>
                         </form>
                         <?php else: ?>

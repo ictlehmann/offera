@@ -940,6 +940,46 @@ try {
     );
 
     // ============================================
+    // INVENTORY RENTALS: QUANTITY AND EASYVEREIN COLUMNS
+    // ============================================
+    echo "\n--- INVENTORY RENTALS QUANTITY UPDATES ---\n";
+
+    // Add quantity column to inventory_rentals (used by new EasyVerein-based checkout flow)
+    executeSql(
+        $content_db,
+        "ALTER TABLE inventory_rentals ADD COLUMN quantity INT UNSIGNED NOT NULL DEFAULT 1 COMMENT 'Number of units rented'",
+        "Add quantity column to inventory_rentals table"
+    );
+
+    // Add easyverein_item_id column to inventory_rentals (used by new EasyVerein-based checkout flow)
+    executeSql(
+        $content_db,
+        "ALTER TABLE inventory_rentals ADD COLUMN easyverein_item_id VARCHAR(64) DEFAULT NULL COMMENT 'EasyVerein inventory-object ID'",
+        "Add easyverein_item_id column to inventory_rentals table"
+    );
+
+    // Add rented_at column to inventory_rentals
+    executeSql(
+        $content_db,
+        "ALTER TABLE inventory_rentals ADD COLUMN rented_at DATETIME DEFAULT NULL COMMENT 'Timestamp when item was rented'",
+        "Add rented_at column to inventory_rentals table"
+    );
+
+    // Add returned_at column to inventory_rentals
+    executeSql(
+        $content_db,
+        "ALTER TABLE inventory_rentals ADD COLUMN returned_at DATETIME DEFAULT NULL COMMENT 'Timestamp when item was returned'",
+        "Add returned_at column to inventory_rentals table"
+    );
+
+    // Update status enum on inventory_rentals to include 'active' (used by EasyVerein-based flow)
+    executeSql(
+        $content_db,
+        "ALTER TABLE inventory_rentals MODIFY COLUMN status ENUM('active','rented','pending_return','returned','overdue') NOT NULL DEFAULT 'active' COMMENT 'Rental status'",
+        "Add active status to inventory_rentals status ENUM"
+    );
+
+    // ============================================
     // SUMMARY
     // ============================================
     echo "==============================================\n";
