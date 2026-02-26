@@ -1380,4 +1380,88 @@ class MailService {
             return false;
         }
     }
+
+    /**
+     * Send a new shop order notification to the merch team.
+     *
+     * @param int         $orderId        Order ID
+     * @param string      $firstName      Buyer's first name
+     * @param string      $lastName       Buyer's last name
+     * @param string      $buyerEmail     Buyer's e-mail address
+     * @param array       $cartItems      Cart items (keys: product_name, variant_name, quantity, price)
+     * @param string      $paymentMethod  'paypal' or 'sepa'
+     * @param float       $total          Grand total in EUR
+     * @param string|null $shippingAddress Delivery address or null for pickup
+     * @return bool
+     */
+    public static function sendNewOrderNotification(
+        int $orderId,
+        string $firstName,
+        string $lastName,
+        string $buyerEmail,
+        array $cartItems,
+        string $paymentMethod,
+        float $total,
+        ?string $shippingAddress = null
+    ): bool {
+        $subject = 'Neue Shop-Bestellung eingegangen';
+
+        $paymentLabel = match ($paymentMethod) {
+            'sepa'   => 'SEPA-Lastschrift',
+            'paypal' => 'PayPal',
+            default  => htmlspecialchars($paymentMethod),
+        };
+
+        // Build rows for the items table
+        $itemRows = '';
+        foreach ($cartItems as $item) {
+            $name = htmlspecialchars($item['product_name'] ?? '');
+            if (!empty($item['variant_name'])) {
+                $name .= ' (' . htmlspecialchars($item['variant_name']) . ')';
+            }
+            $qty        = (int) ($item['quantity'] ?? 1);
+            $lineTotal  = number_format((float) ($item['price'] ?? 0) * $qty, 2, ',', '.');
+            $itemRows  .= '<tr>
+                <td>' . $name . '</td>
+                <td style="text-align:center;">' . $qty . '</td>
+                <td style="text-align:right;">' . $lineTotal . ' &euro;</td>
+            </tr>';
+        }
+
+        $deliveryRow = $shippingAddress
+            ? '<tr><td>Lieferadresse</td><td>' . nl2br(htmlspecialchars($shippingAddress)) . '</td></tr>'
+            : '<tr><td>Versand</td><td>Abholung</td></tr>';
+
+        $bodyContent = '
+        <p class="email-text">Es ist eine neue Bestellung im Shop eingegangen.</p>
+
+        <table class="info-table">
+            <tr><td>Bestellnummer</td><td>#' . $orderId . '</td></tr>
+            <tr><td>Vorname</td><td>' . htmlspecialchars($firstName) . '</td></tr>
+            <tr><td>Nachname</td><td>' . htmlspecialchars($lastName) . '</td></tr>
+            <tr><td>E-Mail</td><td>' . htmlspecialchars($buyerEmail) . '</td></tr>
+            <tr><td>Zahlungsmethode</td><td>' . $paymentLabel . '</td></tr>
+            <tr><td>Gesamtpreis</td><td>' . number_format($total, 2, ',', '.') . ' &euro;</td></tr>
+            ' . $deliveryRow . '
+        </table>
+
+        <p class="email-text"><strong>Bestellte Artikel:</strong></p>
+
+        <table class="info-table">
+            <tr>
+                <td><strong>Artikel</strong></td>
+                <td style="text-align:center;"><strong>Menge</strong></td>
+                <td style="text-align:right;"><strong>Preis</strong></td>
+            </tr>
+            ' . $itemRows . '
+            <tr>
+                <td colspan="2"><strong>Gesamt</strong></td>
+                <td style="text-align:right;"><strong>' . number_format($total, 2, ',', '.') . ' &euro;</strong></td>
+            </tr>
+        </table>';
+
+        $htmlBody = self::getTemplate($subject, $bodyContent);
+
+        return self::sendEmail('merch@business-consulting.de', $subject, $htmlBody);
+    }
 }

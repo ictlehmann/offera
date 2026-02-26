@@ -7,6 +7,7 @@
 require_once __DIR__ . '/../../includes/handlers/AuthHandler.php';
 require_once __DIR__ . '/../../includes/models/Shop.php';
 require_once __DIR__ . '/../../src/ShopPaymentService.php';
+require_once __DIR__ . '/../../src/MailService.php';
 
 // Start session and set JSON response header
 AuthHandler::startSession();
@@ -64,6 +65,22 @@ try {
     Shop::decrementStock($orderId);
 
     $total = array_sum(array_map(fn($i) => $i['price'] * $i['quantity'], $cart));
+
+    // 5b. Send order notification e-mail to merch team (non-blocking)
+    try {
+        $fullUser = User::getByEmail($user['email'] ?? '');
+        MailService::sendNewOrderNotification(
+            $orderId,
+            $fullUser['first_name'] ?? '',
+            $fullUser['last_name']  ?? '',
+            $user['email']          ?? '',
+            $cart,
+            $paymentMethod,
+            $total
+        );
+    } catch (Exception $e) {
+        error_log('api/shop/checkout.php – order notification email failed: ' . $e->getMessage());
+    }
 
     // 6. Call ShopPaymentService to initiate payment
     if ($paymentMethod === 'paypal') {

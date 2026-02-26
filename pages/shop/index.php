@@ -9,6 +9,7 @@ require_once __DIR__ . '/../../src/Auth.php';
 require_once __DIR__ . '/../../includes/helpers.php';
 require_once __DIR__ . '/../../includes/models/Shop.php';
 require_once __DIR__ . '/../../src/ShopPaymentService.php';
+require_once __DIR__ . '/../../src/MailService.php';
 
 // Authentication check
 if (!Auth::check()) {
@@ -145,7 +146,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                         if ($payResult['success'] && !empty($payResult['redirect_url'])) {
                             Shop::decrementStock($orderId);
+                            $cartForEmail = array_values($_SESSION['shop_cart']);
+                            $totalForEmail = array_sum(array_map(fn($i) => $i['price'] * $i['quantity'], $cartForEmail));
                             $_SESSION['shop_cart'] = [];
+                            try {
+                                MailService::sendNewOrderNotification(
+                                    $orderId,
+                                    $user['first_name'] ?? '',
+                                    $user['last_name']  ?? '',
+                                    $user['email']      ?? '',
+                                    $cartForEmail,
+                                    $paymentMethod,
+                                    $totalForEmail
+                                );
+                            } catch (Exception $e) {
+                                error_log('pages/shop/index.php – order notification email failed: ' . $e->getMessage());
+                            }
                             header('Location: ' . $payResult['redirect_url']);
                             exit;
                         }
@@ -158,6 +174,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                         if ($payResult['success']) {
                             Shop::decrementStock($orderId);
+                            $cartForEmail = array_values($_SESSION['shop_cart']);
+                            $totalForEmail = array_sum(array_map(fn($i) => $i['price'] * $i['quantity'], $cartForEmail));
+                            try {
+                                MailService::sendNewOrderNotification(
+                                    $orderId,
+                                    $user['first_name'] ?? '',
+                                    $user['last_name']  ?? '',
+                                    $user['email']      ?? '',
+                                    $cartForEmail,
+                                    $paymentMethod,
+                                    $totalForEmail
+                                );
+                            } catch (Exception $e) {
+                                error_log('pages/shop/index.php – order notification email failed: ' . $e->getMessage());
+                            }
                             $successMessage = 'Bestellung #' . $orderId . ' aufgegeben! Ihre SEPA-Lastschrift wurde bei der Bank eingereicht.';
                         } else {
                             $errorMessage = $payResult['error'] ?? 'SEPA-Zahlung fehlgeschlagen.';
