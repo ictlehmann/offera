@@ -120,17 +120,17 @@ if (!empty($userName)) {
             <img
                 src="<?= htmlspecialchars($_sidebarProfileImageUrl) ?>"
                 alt="Profilbild"
-                class="w-9 h-9 rounded-full object-cover shrink-0"
+                class="w-8 h-8 rounded-full object-cover shrink-0"
             >
             <?php else: ?>
-            <div class="w-9 h-9 rounded-full bg-gradient-to-br from-emerald-400 to-cyan-500 flex items-center justify-center text-white font-bold text-xs shrink-0">
+            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 to-cyan-500 flex items-center justify-center text-white font-bold text-xs shrink-0">
                 <?= htmlspecialchars($_sidebarInitials) ?>
             </div>
             <?php endif; ?>
             <div class="min-w-0">
-                <p class="text-sm font-semibold truncate leading-tight"><?= htmlspecialchars($userName) ?></p>
-                <p class="text-xs text-gray-400 truncate leading-tight"><?= htmlspecialchars($userEmail) ?></p>
-                <p class="text-xs text-gray-500 leading-tight"><?= htmlspecialchars($userRole) ?></p>
+                <p class="text-xs font-semibold truncate leading-tight"><?= htmlspecialchars($userName) ?></p>
+                <p class="text-[10px] text-gray-400 truncate leading-tight"><?= htmlspecialchars($userEmail) ?></p>
+                <span aria-label="Rolle: <?= htmlspecialchars($userRole) ?>" class="inline-block px-1.5 py-0.5 mt-0.5 rounded-md text-[10px] font-medium bg-purple-500/20 text-purple-300 border border-purple-500/30 truncate max-w-full"><?= htmlspecialchars($userRole) ?></span>
             </div>
         </div>
 
