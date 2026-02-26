@@ -123,6 +123,54 @@ class Inventory {
     }
 
     /**
+     * Calculate the available quantity for a given inventory item.
+     *
+     * Formula: total_quantity (from inventory_items) MINUS the sum of all active
+     * rented_quantity entries in inventory_rentals that have not been returned.
+     *
+     * @param int|string $inventoryId EasyVerein inventory-object ID
+     * @return int Number of available units (minimum 0)
+     */
+    public static function getAvailableQuantity($inventoryId): int {
+        $inventoryId = (string)$inventoryId;
+        try {
+            $db   = Database::getContentDB();
+            $stmt = $db->prepare(
+                "SELECT ii.total_quantity,
+                        COALESCE(SUM(ir.rented_quantity), 0) AS rented
+                 FROM inventory_items ii
+                 LEFT JOIN inventory_rentals ir
+                        ON ir.easyverein_item_id = ii.easyverein_id
+                       AND ir.status != 'returned'
+                 WHERE ii.easyverein_id = ?
+                 GROUP BY ii.easyverein_id"
+            );
+            $stmt->execute([$inventoryId]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$row) {
+                return 0;
+            }
+            return max(0, (int)$row['total_quantity'] - (int)$row['rented']);
+        } catch (Exception $e) {
+            error_log('Inventory::getAvailableQuantity failed: ' . $e->getMessage());
+            return 0;
+        }
+    }
+
+    /**
+     * Check whether an inventory item is available for borrowing.
+     *
+     * Returns true when getAvailableQuantity() > 0, i.e. at least one unit
+     * is not currently rented out.
+     *
+     * @param int|string $inventoryId EasyVerein inventory-object ID
+     * @return bool True if at least one unit is available
+     */
+    public static function isAvailable($inventoryId): bool {
+        return self::getAvailableQuantity($inventoryId) > 0;
+    }
+
+    /**
      * Get all items with optional filters.
      */
     public static function getAll($filters = []): array {
