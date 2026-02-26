@@ -494,13 +494,17 @@ class Inventory {
     /**
      * Approve a pending return.
      *
-     * Sets the rental status to 'returned' and records the return timestamp.
+     * Sets the rental status to 'returned', records the return timestamp, and
+     * synchronises the result with EasyVerein: ends the active lending record
+     * and writes the condition to the custom field 'Zustand der letzten Rückgabe'.
      *
-     * @param int $rentalId  Local inventory_rentals.id
-     * @param string $condition Item condition at return ('funktionsfähig' or 'beschädigt')
+     * @param int    $rentalId   Local inventory_rentals.id
+     * @param string $condition  Item condition at return ('funktionsfähig' or 'beschädigt')
+     * @param string $adminName  Display name of the board member approving the return
+     * @param string $notes      Optional remarks about the return
      * @return array ['success' => bool, 'message' => string]
      */
-    public static function approveReturn($rentalId, $condition = 'funktionsfähig'): array {
+    public static function approveReturn($rentalId, $condition = 'funktionsfähig', $adminName = '', $notes = ''): array {
         try {
             $db = Database::getContentDB();
 
@@ -526,6 +530,20 @@ class Inventory {
                 "UPDATE inventory_rentals SET status = 'returned', returned_at = NOW(), `condition` = ? WHERE id = ?"
             );
             $upd->execute([$condition, (int)$rentalId]);
+
+            // Synchronise the return with EasyVerein: end the active lending and
+            // update the 'Zustand der letzten Rückgabe' custom field.
+            try {
+                self::evi()->verifyReturnForRental(
+                    (int)$rental['easyverein_item_id'],
+                    $adminName,
+                    $condition,
+                    $notes
+                );
+            } catch (Exception $eviEx) {
+                // Log but do not fail: the local DB was already updated.
+                error_log('approveReturn: EasyVerein sync failed: ' . $eviEx->getMessage());
+            }
 
             return ['success' => true, 'message' => 'Rückgabe bestätigt'];
         } catch (Exception $e) {
