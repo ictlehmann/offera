@@ -37,7 +37,7 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
             $item['name'],
             $item['category_name'] ?? '',
             $item['quantity'],
-            $item['loaned_count'],
+            $item['quantity'] - $item['available_quantity'],
             $item['available_quantity'],
             $item['unit'],
         ], ';');
@@ -282,7 +282,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         <?php echo $item['quantity']; ?> <?php echo htmlspecialchars($item['unit']); ?>
                     </td>
                     <td class="px-4 py-3 text-sm text-gray-600">
-                        <?php echo $item['loaned_count'] ?? 0; ?>
+                        <?php echo (int)$item['quantity'] - (int)$item['available_quantity']; ?>
                     </td>
                     <td class="px-4 py-3 text-sm font-semibold <?php echo $available <= 0 ? 'text-red-600' : ($available <= ($item['min_stock'] ?? 0) ? 'text-yellow-600' : 'text-green-700'); ?>">
                         <?php echo $available; ?> <?php echo htmlspecialchars($item['unit']); ?>

@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../../src/Auth.php';
 require_once __DIR__ . '/../../includes/handlers/AuthHandler.php';
 require_once __DIR__ . '/../../includes/handlers/CSRFHandler.php';
-require_once __DIR__ . '/../../includes/services/EasyVereinInventory.php';
+require_once __DIR__ . '/../../includes/models/Inventory.php';
 
 if (!Auth::check()) {
     header('Location: ../auth/login.php');
@@ -16,28 +16,18 @@ unset($_SESSION['sync_result']);
 // Get search / filter parameters
 $search = trim($_GET['search'] ?? '');
 
-// Load inventory objects from EasyVerein
+// Load inventory objects via Inventory model (includes SUM-based rental quantities)
 $inventoryObjects = [];
 $loadError = null;
 try {
-    $evi = new EasyVereinInventory();
-    $inventoryObjects = $evi->getInventoryObjects();
-
-    // Apply search filter
+    $filters = [];
     if ($search !== '') {
-        $needle = strtolower($search);
-        $inventoryObjects = array_values(array_filter($inventoryObjects, function ($item) use ($needle) {
-            $name = strtolower($item['name'] ?? '');
-            $desc = strtolower($item['note'] ?? $item['description'] ?? '');
-            return strpos($name, $needle) !== false || strpos($desc, $needle) !== false;
-        }));
+        $filters['search'] = $search;
     }
-
-    // Sort alphabetically by name
-    usort($inventoryObjects, fn($a, $b) => strcmp($a['name'] ?? '', $b['name'] ?? ''));
+    $inventoryObjects = Inventory::getAll($filters);
 } catch (Exception $e) {
     $loadError = $e->getMessage();
-    error_log('Inventory index: EasyVerein fetch failed: ' . $e->getMessage());
+    error_log('Inventory index: fetch failed: ' . $e->getMessage());
 }
 
 // Flash messages from checkout redirects
@@ -165,11 +155,13 @@ ob_start();
 <?php else: ?>
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
     <?php foreach ($inventoryObjects as $item):
-        $itemId       = $item['id'] ?? '';
-        $itemName     = $item['name'] ?? '';
-        $itemDesc     = $item['note'] ?? $item['description'] ?? '';
-        $itemPieces   = (int)($item['pieces'] ?? $item['inventoryQuantity'] ?? $item['quantity'] ?? 0);
-        $rawImage     = $item['picture'] ?? $item['image'] ?? null;
+        $itemId        = $item['id'] ?? '';
+        $itemName      = $item['name'] ?? '';
+        $itemDesc      = $item['description'] ?? '';
+        $itemPieces    = (int)($item['quantity'] ?? 0);
+        $itemLoaned    = $itemPieces - (int)$item['available_quantity'];
+        $itemAvailable = (int)$item['available_quantity'];
+        $rawImage      = $item['image_path'] ?? null;
         if ($rawImage && strpos($rawImage, 'easyverein.com') !== false) {
             $imageSrc = '/api/easyverein_image.php?url=' . urlencode($rawImage);
         } elseif ($rawImage) {
@@ -177,7 +169,7 @@ ob_start();
         } else {
             $imageSrc = null;
         }
-        $hasStock = $itemPieces > 0;
+        $hasStock = $itemAvailable > 0;
     ?>
     <div class="group bg-white dark:bg-slate-800 rounded-2xl shadow-md overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-slate-700 flex flex-col">
 
@@ -196,7 +188,7 @@ ob_start();
             <div class="absolute top-3 right-3">
                 <?php if ($hasStock): ?>
                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-full bg-green-500 text-white shadow-lg">
-                    <i class="fas fa-check-circle"></i><?php echo $itemPieces; ?> verfügbar
+                    <i class="fas fa-check-circle"></i><?php echo $itemAvailable; ?> verfügbar
                 </span>
                 <?php else: ?>
                 <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-full bg-red-500 text-white shadow-lg">
@@ -220,13 +212,11 @@ ob_start();
             <div class="flex-1"></div>
             <?php endif; ?>
 
-            <!-- Available Stock Badge (prominent) -->
+            <!-- Stock Info (Bestand | Ausgeliehen | Verfügbar) -->
             <div class="flex items-center justify-between mb-4 p-3 rounded-xl <?php echo $hasStock ? 'bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800' : 'bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800'; ?>">
-                <span class="text-xs font-semibold <?php echo $hasStock ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300'; ?> uppercase tracking-wide flex items-center gap-1.5">
-                    <i class="fas fa-cubes"></i>Verfügbarer Bestand
-                </span>
-                <span class="text-xl font-extrabold <?php echo $hasStock ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'; ?>">
-                    <?php echo $itemPieces; ?>
+                <span class="text-xs font-semibold <?php echo $hasStock ? 'text-green-700 dark:text-green-300' : 'text-red-700 dark:text-red-300'; ?> flex items-center gap-1.5">
+                    <i class="fas fa-cubes"></i>
+                    Bestand: <?php echo $itemPieces; ?> | Ausgeliehen: <?php echo $itemLoaned; ?> | Verfügbar: <?php echo $itemAvailable; ?>
                 </span>
             </div>
 
@@ -237,7 +227,7 @@ ob_start();
                 onclick="openRentalModal(<?php echo htmlspecialchars(json_encode([
                     'id'     => (string)$itemId,
                     'name'   => $itemName,
-                    'pieces' => $itemPieces,
+                    'pieces' => $itemAvailable,
                 ], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8'); ?>)"
                 class="w-full py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-xl font-bold text-sm transition-all transform hover:scale-[1.02] shadow-md hover:shadow-lg flex items-center justify-center gap-2"
             >
