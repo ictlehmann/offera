@@ -127,15 +127,7 @@ try {
     }
 
     if ($action === 'verify_return') {
-        $allowedConditions = ['einwandfrei', 'leichte_gebrauchsspuren', 'beschädigt', 'defekt_verlust'];
-        $condition         = $input['condition'] ?? '';
-        $notes             = $input['notes']     ?? '';
-
-        if (!in_array($condition, $allowedConditions, true)) {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'message' => 'Ungültiger Zustand']);
-            exit;
-        }
+        $notes = $input['notes'] ?? '';
 
         $admin     = Auth::user();
         $adminName = $admin
@@ -146,7 +138,7 @@ try {
         }
 
         $inventory = new EasyVereinInventory();
-        $inventory->verifyReturn($requestId, $adminName, $condition, $notes);
+        $inventory->verifyReturn($requestId, $adminName, '', $notes);
 
         echo json_encode(['success' => true, 'message' => 'Rückgabe erfolgreich verifiziert']);
         exit;

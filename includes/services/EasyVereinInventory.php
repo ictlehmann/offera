@@ -888,7 +888,7 @@ class EasyVereinInventory {
         }
 
         // 4. Update custom fields: remove this borrower and write the condition text.
-        $conditionText = "{$condition} - Geprüft am {$todayFormatted} durch {$adminName}."
+        $conditionText = ($condition !== '' ? "{$condition} - " : '') . "Geprüft am {$todayFormatted} durch {$adminName}."
             . ($notes !== '' ? " Notiz: {$notes}" : '');
         $removeFrom = [];
         if ($returnUserName  !== '') $removeFrom['Aktuelle Ausleiher'] = $returnUserName;

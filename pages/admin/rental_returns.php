@@ -102,14 +102,6 @@ try {
 
 $itemNames = buildItemNameMap();
 
-// ── Condition labels ──────────────────────────────────────────────────────────
-$conditionLabels = [
-    'einwandfrei'              => 'Einwandfrei',
-    'leichte_gebrauchsspuren'  => 'Leichte Gebrauchsspuren',
-    'beschädigt'              => 'Beschädigt',
-    'defekt_verlust'           => 'Defekt/Verlust',
-];
-
 $title = 'Inventarverwaltung - IBC Intranet';
 ob_start();
 ?>
@@ -305,9 +297,9 @@ ob_start();
                             <?php if (!$readOnly): ?>
                             <td class="px-4 py-3 text-sm">
                                 <button
-                                    onclick="openReturnModal(<?php echo (int)$loan['id']; ?>, 'pending-return')"
+                                    onclick="confirmReturn(<?php echo (int)$loan['id']; ?>, 'pending-return')"
                                     class="inline-flex items-center px-3 py-1.5 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition font-medium text-sm">
-                                    <i class="fas fa-check mr-1"></i>Rückgabe verifizieren
+                                    <i class="fas fa-check mr-1"></i>Rückgabe bestätigen
                                 </button>
                             </td>
                             <?php endif; ?>
@@ -372,9 +364,9 @@ ob_start();
                             <?php if (!$readOnly): ?>
                             <td class="px-4 py-3 text-sm">
                                 <button
-                                    onclick="openReturnModal(<?php echo (int)$loan['id']; ?>)"
+                                    onclick="confirmReturn(<?php echo (int)$loan['id']; ?>)"
                                     class="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium text-sm">
-                                    <i class="fas fa-undo-alt mr-1"></i>Rückgabe verifizieren
+                                    <i class="fas fa-undo-alt mr-1"></i>Rückgabe bestätigen
                                 </button>
                             </td>
                             <?php endif; ?>
@@ -389,54 +381,9 @@ ob_start();
 
 </div><!-- /tab-content -->
 
-<!-- ── Return Verification Modal ──────────────────────────────────────────── -->
-<div class="modal fade" id="returnModal" tabindex="-1" aria-labelledby="returnModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="returnModalLabel">
-                    <i class="fas fa-undo-alt text-blue-600 mr-2"></i>
-                    Rückgabe verifizieren
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button>
-            </div>
-            <div class="modal-body">
-                <div class="mb-4">
-                    <label for="return-condition" class="block text-sm font-medium text-gray-700 mb-1">
-                        Zustand <span class="text-red-500">*</span>
-                    </label>
-                    <select id="return-condition" class="form-select w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
-                        <option value="einwandfrei">Einwandfrei</option>
-                        <option value="leichte_gebrauchsspuren">Leichte Gebrauchsspuren</option>
-                        <option value="beschädigt">Beschädigt</option>
-                        <option value="defekt_verlust">Defekt/Verlust</option>
-                    </select>
-                </div>
-                <div class="mb-2">
-                    <label for="return-notes" class="block text-sm font-medium text-gray-700 mb-1">
-                        Bemerkungen (optional)
-                    </label>
-                    <textarea id="return-notes" rows="3"
-                        class="form-control w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                        placeholder="Optionale Anmerkungen zur Rückgabe …"></textarea>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Abbrechen</button>
-                <button type="button" id="verify-return-btn" class="btn btn-primary" onclick="submitReturnVerification()">
-                    <i class="fas fa-check mr-1"></i>Verifizieren
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <script>
 (function () {
     'use strict';
-
-    let currentRequestId     = null;
-    let currentSourceSection = null;
 
     // ── Show Bootstrap alert ──────────────────────────────────────────────────
     function showAlert(message, type) {
@@ -490,45 +437,20 @@ ob_start();
         });
     };
 
-    // ── Open return modal ─────────────────────────────────────────────────────
-    window.openReturnModal = function (loanId, sourceSection) {
-        currentRequestId    = loanId;
-        currentSourceSection = sourceSection || 'active';
-        document.getElementById('return-condition').value = 'einwandfrei';
-        document.getElementById('return-notes').value     = '';
-        var modal = new bootstrap.Modal(document.getElementById('returnModal'));
-        modal.show();
-    };
+    // ── Confirm return ────────────────────────────────────────────────────────
+    window.confirmReturn = function (loanId, sourceSection) {
+        sourceSection = sourceSection || 'active';
+        if (!confirm('Rückgabe bestätigen?')) return;
 
-    // ── Submit return verification ────────────────────────────────────────────
-    window.submitReturnVerification = function () {
-        if (!currentRequestId) return;
-
-        const condition = document.getElementById('return-condition').value;
-        const notes     = document.getElementById('return-notes').value.trim();
-        const btn       = document.getElementById('verify-return-btn');
-
-        btn.disabled    = true;
-        btn.innerHTML   = '<i class="fas fa-spinner fa-spin mr-1"></i>Speichern …';
-
-        postAction({ action: 'verify_return', request_id: currentRequestId, condition: condition, notes: notes }, function () {
-            bootstrap.Modal.getInstance(document.getElementById('returnModal')).hide();
-            // Remove the row from either the active or pending-return section
-            const rowId  = (currentSourceSection === 'pending-return' ? 'pending-return-row-' : 'active-row-') + currentRequestId;
-            const row    = document.getElementById(rowId);
-            const tbody  = currentSourceSection === 'pending-return' ? 'pending-return' : 'active';
+        postAction({ action: 'verify_return', request_id: loanId }, function () {
+            const rowId = (sourceSection === 'pending-return' ? 'pending-return-row-' : 'active-row-') + loanId;
+            const row   = document.getElementById(rowId);
+            const tbody = sourceSection === 'pending-return' ? 'pending-return' : 'active';
             if (row) {
                 row.style.transition = 'opacity 0.4s';
                 row.style.opacity    = '0';
                 setTimeout(function () { row.remove(); updateBadge(tbody); }, 400);
             }
-            currentRequestId     = null;
-            currentSourceSection = null;
-            btn.disabled  = false;
-            btn.innerHTML = '<i class="fas fa-check mr-1"></i>Verifizieren';
-        }, function () {
-            btn.disabled  = false;
-            btn.innerHTML = '<i class="fas fa-check mr-1"></i>Verifizieren';
         });
     };
 
