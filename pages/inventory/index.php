@@ -454,26 +454,27 @@ ob_start();
         .then(function (r) { return r.json(); })
         .then(function (data) {
             if (data.success !== undefined) {
-                showAvailability(data.success ? data.available : 0, data.success);
+                showAvailability(data.success ? data.available : 0, data.success, data.total ?? null);
             }
         })
         .catch(function () {});
     }
 
-    function showAvailability(avail, success) {
+    function showAvailability(avail, success, total) {
         var el  = document.getElementById('availabilityInfo');
         var txt = document.getElementById('availabilityText');
         var btn = document.getElementById('rentalSubmitBtn');
         var qty = document.getElementById('rentalQuantity');
 
         el.className = 'flex items-center gap-3 p-3 rounded-xl border text-sm ';
+        var availLabel = total !== null ? avail + ' / ' + total : avail;
         if (success && avail > 0) {
-            txt.textContent = 'Für diesen Zeitraum verfügbar: ' + avail + ' Stück';
+            txt.textContent = 'Verfügbar: ' + availLabel + ' Stück';
             el.className   += 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300';
             btn.disabled    = false;
             btn.classList.remove('opacity-50', 'cursor-not-allowed');
         } else {
-            txt.textContent = 'Für diesen Zeitraum sind keine Einheiten verfügbar.';
+            txt.textContent = 'Für diesen Zeitraum nicht verfügbar' + (total !== null ? ' (Bestand: 0 / ' + total + ')' : '') + '.';
             el.className   += 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-700 dark:text-red-300';
             btn.disabled    = true;
             btn.classList.add('opacity-50', 'cursor-not-allowed');

@@ -55,10 +55,12 @@ try {
         }
 
         $available = $evi->getAvailableQuantity($inventoryObjectId, $startDate, $endDate);
+        $total     = $evi->getTotalPieces($inventoryObjectId);
 
         echo json_encode([
             'success'   => true,
             'available' => $available,
+            'total'     => $total,
         ]);
         exit;
     }
