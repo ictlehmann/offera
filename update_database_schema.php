@@ -939,6 +939,13 @@ try {
         "Add pending_return to inventory_requests status ENUM"
     );
 
+    // Drop returned_condition column from inventory_requests (return condition feature removed)
+    executeSql(
+        $content_db,
+        "ALTER TABLE inventory_requests DROP COLUMN returned_condition",
+        "Drop returned_condition column from inventory_requests table"
+    );
+
     // ============================================
     // INVENTORY RENTALS: QUANTITY AND EASYVEREIN COLUMNS
     // ============================================

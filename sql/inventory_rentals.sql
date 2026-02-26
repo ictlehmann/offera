@@ -29,7 +29,6 @@ CREATE TABLE IF NOT EXISTS `inventory_requests` (
   `end_date`            DATE                NOT NULL    COMMENT 'Requested end date of the loan',
   `quantity`            INT UNSIGNED        NOT NULL DEFAULT 1 COMMENT 'Number of units requested',
   `status`              ENUM('pending','approved','rejected','returned','pending_return') NOT NULL DEFAULT 'pending' COMMENT 'Approval workflow status',
-  `returned_condition`  ENUM('einwandfrei','leichte_gebrauchsspuren','beschädigt','defekt_verlust') DEFAULT NULL COMMENT 'Item condition at return',
   `return_notes`        TEXT                DEFAULT NULL COMMENT 'Optional remarks at return',
   `returned_at`         DATETIME            DEFAULT NULL COMMENT 'When the return was verified',
   `created_at`          DATETIME            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'When the request was created',
