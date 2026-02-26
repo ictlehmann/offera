@@ -497,6 +497,38 @@ ob_start();
                 </div>
             </div>
             
+            <!-- Event Costs Total Section -->
+            <div class="mb-8">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-semibold text-gray-800 dark:text-gray-100">
+                        <i class="fas fa-euro-sign mr-2 text-red-600"></i>
+                        Eventkosten (Gesamt)
+                    </h3>
+                </div>
+                <div class="flex items-center gap-4 p-4 bg-gray-50 dark:bg-gray-600 rounded-lg border border-gray-200 dark:border-gray-500">
+                    <div class="flex-1">
+                        <label class="text-xs text-gray-600 dark:text-gray-300 mb-1 block">Gesamtbetrag Kosten (€)</label>
+                        <input
+                            type="number"
+                            name="total_costs"
+                            id="totalCosts"
+                            step="0.01"
+                            min="0"
+                            value="<?php echo htmlspecialchars($documentation['total_costs'] ?? ''); ?>"
+                            class="w-full px-3 py-2 border border-gray-300 dark:border-gray-500 rounded bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100"
+                            placeholder="0.00"
+                        >
+                    </div>
+                    <button
+                        id="saveTotalCostsBtn"
+                        class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all"
+                    >
+                        <i class="fas fa-save mr-2"></i>
+                        Kosten speichern
+                    </button>
+                </div>
+            </div>
+
             <!-- Donations Total Section -->
             <div class="mb-8">
                 <div class="flex items-center justify-between mb-4">
@@ -853,6 +885,45 @@ document.getElementById('saveDocumentationBtn')?.addEventListener('click', funct
 document.addEventListener('DOMContentLoaded', function() {
     renderSalesEntries();
     updateChart();
+});
+
+// Save total costs
+document.getElementById('saveTotalCostsBtn')?.addEventListener('click', function() {
+    const input = document.getElementById('totalCosts');
+    if (!input) {
+        showMessage('Eingabefeld nicht gefunden', 'error');
+        return;
+    }
+    const val = input.value.trim();
+    const amount = val === '' ? null : parseFloat(val);
+    const eventId = <?php echo intval($eventId); ?>;
+
+    if (amount !== null && (isNaN(amount) || amount < 0)) {
+        showMessage('Bitte geben Sie einen gültigen Kostenbetrag ein (≥ 0)', 'error');
+        return;
+    }
+
+    this.disabled = true;
+    this.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Wird gespeichert...';
+
+    fetch('../../api/save_event_documentation.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ event_id: eventId, total_costs: amount })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showMessage('Kosten erfolgreich gespeichert', 'success');
+        } else {
+            showMessage(data.message || 'Fehler beim Speichern', 'error');
+        }
+    })
+    .catch(() => showMessage('Netzwerkfehler beim Speichern', 'error'))
+    .finally(() => {
+        this.disabled = false;
+        this.innerHTML = '<i class="fas fa-save mr-2"></i>Kosten speichern';
+    });
 });
 
 // Save donations total
