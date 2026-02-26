@@ -436,9 +436,9 @@ class EasyVereinInventory {
      * Makes a GET request to /lending?futureReturnDate=true&limit=100 with a
      * query that includes the parentInventoryObject and its customFields.
      * For each active lending the customFields of the parentInventoryObject are
-     * inspected: if the field named 'Entra E-Mail' or 'Ausgeliehen von' matches
-     * $userIdentifier (case-insensitive), the parentInventoryObject is included
-     * in the returned array.
+     * inspected: if the field named 'Entra E-Mail' or 'Aktuelle Ausleiher'
+     * contains $userIdentifier (case-insensitive substring match), the
+     * parentInventoryObject is included in the returned array.
      *
      * @param int|string $userIdentifier User e-mail or identifier to match
      * @return array parentInventoryObject records assigned to the user
@@ -465,12 +465,15 @@ class EasyVereinInventory {
             $customFields = $obj['customFields'] ?? [];
             foreach ($customFields as $cf) {
                 $fieldName = strtolower($cf['customField']['name'] ?? '');
-                if ($fieldName !== 'entra e-mail' && $fieldName !== 'ausgeliehen von') {
+                if ($fieldName !== 'entra e-mail' && $fieldName !== 'aktuelle ausleiher') {
                     continue;
                 }
-                if (strtolower((string)($cf['value'] ?? '')) === $lc) {
-                    $myItems[] = $obj;
-                    break;
+                $fieldValue = (string)($cf['value'] ?? '');
+                foreach (explode("\n", $fieldValue) as $line) {
+                    if (str_starts_with(strtolower(trim($line)), $lc . ' (')) {
+                        $myItems[] = $obj;
+                        break 2;
+                    }
                 }
             }
         }
@@ -688,11 +691,14 @@ class EasyVereinInventory {
      * 1. Loads the pending request from the local DB.
      * 2. Resolves the borrower's EasyVerein contact ID via getContactIdByName().
      * 3. Creates the official lending record in EasyVerein via POST /api/v2.0/lending.
-     * 4. Fetches the individual fields via GET /api/v2.0/inventory-object/{id}/custom-fields,
-     *    finds 'Ausgeliehen von' and updates it with '$userName ($userEmail)'.
-     *    Finds the individual field 'Zustand der letzten Rückgabe' and clears it (empty string).
-     *    Sends both field updates as a JSON array to PATCH /api/v2.0/inventory-object/{id}/custom-fields/bulk-update.
-     * 5. Updates the local DB status to 'approved'.
+     * 4. Queries all currently active (approved) rentals for this item from the local DB
+     *    (including the request being approved now) and builds multiline strings for the
+     *    custom fields 'Aktuelle Ausleiher' and 'Entra E-Mail'.
+     * 5. Fetches the individual fields via GET /api/v2.0/inventory-object/{id}/custom-fields,
+     *    updates 'Aktuelle Ausleiher' and 'Entra E-Mail' with the multiline strings, and
+     *    clears 'Zustand der letzten Rückgabe'.
+     *    Sends all field updates as a JSON array to PATCH /api/v2.0/inventory-object/{id}/custom-fields/bulk-update.
+     * 6. Updates the local DB status to 'approved'.
      *
      * @param int    $requestId  Local inventory_requests row ID
      * @param string $userName   Display name of the borrower
@@ -726,7 +732,52 @@ class EasyVereinInventory {
             $req['end_date']
         );
 
-        // 4. Update individual fields on the inventory object
+        // 4. Build multiline custom-field values from all active rentals for this item
+        //    (currently approved ones + the request being approved now)
+        $userDb = Database::getUserDB();
+        $activeStmt = $db->prepare(
+            "SELECT ir.user_id, ir.quantity
+               FROM inventory_requests ir
+              WHERE ir.inventory_object_id = ?
+                AND (ir.status = 'approved' OR ir.id = ?)"
+        );
+        $activeStmt->execute([$req['inventory_object_id'], $requestId]);
+        $activeRequests = $activeStmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Aggregate quantities per user
+        $userQtyMap = [];
+        foreach ($activeRequests as $ar) {
+            $uid = (int)$ar['user_id'];
+            $userQtyMap[$uid] = ($userQtyMap[$uid] ?? 0) + (int)$ar['quantity'];
+        }
+
+        // Fetch user details from the user DB
+        $nameLines  = [];
+        $emailLines = [];
+        if (!empty($userQtyMap)) {
+            $placeholders = implode(',', array_fill(0, count($userQtyMap), '?'));
+            $uStmt = $userDb->prepare(
+                "SELECT id, first_name, last_name, email FROM users WHERE id IN ({$placeholders})"
+            );
+            $uStmt->execute(array_keys($userQtyMap));
+            $userRows = $uStmt->fetchAll(PDO::FETCH_ASSOC);
+
+            foreach ($userRows as $uRow) {
+                $uid  = (int)$uRow['id'];
+                $qty  = $userQtyMap[$uid] ?? 1;
+                $name = trim(($uRow['first_name'] ?? '') . ' ' . ($uRow['last_name'] ?? ''));
+                if ($name === '') {
+                    $name = $uRow['email'] ?? 'Unbekannt';
+                }
+                $nameLines[]  = "{$name} ({$qty}x)";
+                $emailLines[] = ($uRow['email'] ?? '') . " ({$qty}x)";
+            }
+        }
+
+        $namesValue  = implode("\n", $nameLines);
+        $emailsValue = implode("\n", $emailLines);
+
+        // 5. Update individual fields on the inventory object
         $objectUrl        = self::API_BASE . '/inventory-object/' . urlencode((string)$req['inventory_object_id']);
         $customFieldsUrl  = $objectUrl . '/custom-fields?query={id,value,customField{id,name}}';
         $cfData           = $this->request('GET', $customFieldsUrl);
@@ -741,10 +792,10 @@ class EasyVereinInventory {
                 continue;
             }
 
-            if ($fieldName === 'Ausgeliehen von') {
-                $fieldsToUpdate[] = ['id' => $fieldId, 'value' => $userName];
+            if ($fieldName === 'Aktuelle Ausleiher') {
+                $fieldsToUpdate[] = ['id' => $fieldId, 'value' => $namesValue];
             } elseif ($fieldName === 'Entra E-Mail') {
-                $fieldsToUpdate[] = ['id' => $fieldId, 'value' => $userEmail];
+                $fieldsToUpdate[] = ['id' => $fieldId, 'value' => $emailsValue];
             } elseif ($fieldName === 'Zustand der letzten Rückgabe') {
                 $fieldsToUpdate[] = ['id' => $fieldId, 'value' => ''];
             }
@@ -754,7 +805,7 @@ class EasyVereinInventory {
             $this->request('PATCH', $objectUrl . '/custom-fields/bulk-update', $fieldsToUpdate);
         }
 
-        // 5. Update local DB status to 'approved' (only after all API calls succeed)
+        // 6. Update local DB status to 'approved' (only after all API calls succeed)
         $upd = $db->prepare(
             "UPDATE inventory_requests SET status = 'approved' WHERE id = ?"
         );
@@ -771,11 +822,13 @@ class EasyVereinInventory {
      *
      * 1. Finds the active EasyVerein lending for the inventory object and sets
      *    its returnDate to today via PATCH /api/v2.0/lending/{id}.
-     * 2. Fetches the individual fields via GET /api/v2.0/inventory-object/{id}/custom-fields,
-     *    finds 'Ausgeliehen von' and clears it (empty string).
+     * 2. Queries all remaining active (approved) rentals for this item from the local DB
+     *    (excluding the request being returned) and builds multiline strings for the
+     *    custom fields 'Aktuelle Ausleiher' and 'Entra E-Mail'. Sets both to '' if nobody
+     *    still has the item.
      * 3. Finds the individual field 'Zustand der letzten Rückgabe' and writes
      *    '$condition - Geprüft am [DATE] durch $adminName. Notiz: $notes'.
-     *    Sends both field updates as a JSON array to PATCH /api/v2.0/inventory-object/{id}/custom-fields/bulk-update.
+     *    Sends all field updates as a JSON array to PATCH /api/v2.0/inventory-object/{id}/custom-fields/bulk-update.
      * 4. Updates the local DB status to 'returned'.
      *
      * @param int    $requestId  Local inventory_requests row ID
@@ -821,7 +874,53 @@ class EasyVereinInventory {
             ));
         }
 
-        // 3. Update individual fields on the inventory object
+        // 3. Build multiline custom-field values from remaining active rentals for this item
+        //    (all approved requests for this item except the one being returned now)
+        $remainingStmt = $db->prepare(
+            "SELECT ir.user_id, ir.quantity
+               FROM inventory_requests ir
+              WHERE ir.inventory_object_id = ?
+                AND ir.status = 'approved'
+                AND ir.id != ?"
+        );
+        $remainingStmt->execute([$req['inventory_object_id'], $requestId]);
+        $remainingRequests = $remainingStmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Aggregate quantities per user
+        $userQtyMap = [];
+        foreach ($remainingRequests as $rr) {
+            $uid = (int)$rr['user_id'];
+            $userQtyMap[$uid] = ($userQtyMap[$uid] ?? 0) + (int)$rr['quantity'];
+        }
+
+        $namesValue  = '';
+        $emailsValue = '';
+        if (!empty($userQtyMap)) {
+            $userDb = Database::getUserDB();
+            $placeholders = implode(',', array_fill(0, count($userQtyMap), '?'));
+            $uStmt = $userDb->prepare(
+                "SELECT id, first_name, last_name, email FROM users WHERE id IN ({$placeholders})"
+            );
+            $uStmt->execute(array_keys($userQtyMap));
+            $userRows = $uStmt->fetchAll(PDO::FETCH_ASSOC);
+
+            $nameLines  = [];
+            $emailLines = [];
+            foreach ($userRows as $uRow) {
+                $uid  = (int)$uRow['id'];
+                $qty  = $userQtyMap[$uid] ?? 1;
+                $name = trim(($uRow['first_name'] ?? '') . ' ' . ($uRow['last_name'] ?? ''));
+                if ($name === '') {
+                    $name = $uRow['email'] ?? 'Unbekannt';
+                }
+                $nameLines[]  = "{$name} ({$qty}x)";
+                $emailLines[] = ($uRow['email'] ?? '') . " ({$qty}x)";
+            }
+            $namesValue  = implode("\n", $nameLines);
+            $emailsValue = implode("\n", $emailLines);
+        }
+
+        // 4. Update individual fields on the inventory object
         $objectUrl        = self::API_BASE . '/inventory-object/' . urlencode((string)$req['inventory_object_id']);
         $customFieldsUrl  = $objectUrl . '/custom-fields?query={id,value,customField{id,name}}';
         $cfData           = $this->request('GET', $customFieldsUrl);
@@ -838,10 +937,10 @@ class EasyVereinInventory {
                 continue;
             }
 
-            if ($fieldName === 'Ausgeliehen von') {
-                $fieldsToUpdate[] = ['id' => $fieldId, 'value' => ''];
+            if ($fieldName === 'Aktuelle Ausleiher') {
+                $fieldsToUpdate[] = ['id' => $fieldId, 'value' => $namesValue];
             } elseif ($fieldName === 'Entra E-Mail') {
-                $fieldsToUpdate[] = ['id' => $fieldId, 'value' => ''];
+                $fieldsToUpdate[] = ['id' => $fieldId, 'value' => $emailsValue];
             } elseif ($fieldName === 'Zustand der letzten Rückgabe') {
                 $fieldsToUpdate[] = ['id' => $fieldId, 'value' => $conditionText];
             }
@@ -851,7 +950,7 @@ class EasyVereinInventory {
             $this->request('PATCH', $objectUrl . '/custom-fields/bulk-update', $fieldsToUpdate);
         }
 
-        // 4. Update local DB status to 'returned' (only after all API calls succeed)
+        // 5. Update local DB status to 'returned' (only after all API calls succeed)
         $upd = $db->prepare(
             "UPDATE inventory_requests
                 SET status = 'returned', returned_condition = ?, return_notes = ?, returned_at = NOW()
