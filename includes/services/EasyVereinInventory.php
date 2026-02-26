@@ -902,10 +902,10 @@ class EasyVereinInventory {
         // 5. Update local DB status to 'returned' so the item is available again locally.
         $upd = $db->prepare(
             "UPDATE inventory_requests
-                SET status = 'returned', return_notes = ?, returned_at = NOW()
+                SET status = 'returned', returned_at = NOW()
               WHERE id = ?"
         );
-        $upd->execute([$notes !== '' ? $notes : null, $requestId]);
+        $upd->execute([$requestId]);
 
         error_log(sprintf(
             'EasyVereinInventory: request %d verified as returned by %s (condition: %s), inventory object %s',
