@@ -923,27 +923,25 @@ class EasyVereinInventory {
      *
      * 1. Finds the active EasyVerein lending for the inventory object and sets
      *    its returnDate to today via PATCH /api/v2.0/lending/{id}.
-     * 2. Writes the condition text to the custom field
-     *    'Zustand der letzten Rückgabe' on the inventory object.
+     * 2. Removes the borrower from the custom fields on the inventory object.
      *
      * Errors from EasyVerein are logged but do not throw, so that a temporary
-     * API outage never prevents the local DB record from being marked returned.
+     * API outage never prevents the local DB record from being deleted.
      *
      * @param int    $easyvereinItemId EasyVerein inventory-object ID
      * @param string $adminName        Display name of the board member verifying the return
-     * @param string $condition        Condition label (e.g. 'funktionsfähig', 'beschädigt')
-     * @param string $notes            Optional remarks about the return
      * @param string $userName         Display name of the borrower (used to remove from custom fields)
      * @param string $userEmail        E-mail address of the borrower (used to remove from custom fields)
+     * @param string $notes            Optional remarks about the return
      */
-    public function verifyReturnForRental(int $easyvereinItemId, string $adminName, string $condition, string $notes, string $userName = '', string $userEmail = ''): void {
+    public function verifyReturnForRental(int $easyvereinItemId, string $adminName, string $userName = '', string $userEmail = '', string $notes = ''): void {
         $tz             = new DateTimeZone('Europe/Berlin');
         $today          = (new DateTime('now', $tz))->format('Y-m-d');
         $todayFormatted = (new DateTime('now', $tz))->format('d.m.Y');
 
         // 1. End the active lending in EasyVerein by patching its returnDate to today.
         //    Wrapped in try-catch so an EasyVerein API failure does not prevent
-        //    the local DB update that marks the item as available again.
+        //    the local DB record from being deleted.
         try {
             $activeLendings = $this->getActiveLendings($easyvereinItemId);
             $lendingPatched = false;
@@ -969,16 +967,16 @@ class EasyVereinInventory {
             ));
         }
 
-        // 2. Remove the borrower from custom fields and write the condition text.
-        $byClause      = $adminName !== '' ? " durch {$adminName}" : '';
-        $conditionText = "{$condition} - Geprüft am {$todayFormatted}{$byClause}."
+        // 2. Remove the borrower from custom fields.
+        $byClause   = $adminName !== '' ? " durch {$adminName}" : '';
+        $returnText = "Zurückgegeben am {$todayFormatted}{$byClause}."
             . ($notes !== '' ? " Notiz: {$notes}" : '');
         $removeFrom = [];
         if ($userName  !== '') $removeFrom['Aktuelle Ausleiher'] = $userName;
         if ($userEmail !== '') $removeFrom['Entra E-Mail']       = $userEmail;
         try {
             $this->modifyCustomFields($easyvereinItemId,
-                ['Zustand der letzten Rückgabe' => $conditionText],
+                ['Zustand der letzten Rückgabe' => $returnText],
                 [],
                 $removeFrom
             );
@@ -990,8 +988,8 @@ class EasyVereinInventory {
         }
 
         error_log(sprintf(
-            'EasyVereinInventory: direct rental for inventory object %d verified as returned by %s (condition: %s)',
-            $easyvereinItemId, $adminName, $condition
+            'EasyVereinInventory: direct rental for inventory object %d verified as returned by %s',
+            $easyvereinItemId, $adminName
         ));
     }
 
