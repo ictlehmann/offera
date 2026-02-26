@@ -596,18 +596,18 @@ try {
         <span class="ml-3 text-sm font-normal" style="color: var(--text-muted)">(Nur für Vorstand sichtbar)</span>
     </div>
 
-    <div class="card rounded-2xl shadow-lg overflow-hidden" style="background-color: var(--bg-card)">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
-                    <tr style="background-color: var(--bg-body); border-bottom: 2px solid var(--border-color)">
-                        <th class="px-5 py-3 text-left font-semibold" style="color: var(--text-muted)">Event</th>
-                        <th class="px-5 py-3 text-left font-semibold" style="color: var(--text-muted)">Datum</th>
-                        <th class="px-5 py-3 text-right font-semibold" style="color: var(--text-muted)">Kosten (€)</th>
-                        <th class="px-5 py-3 text-right font-semibold" style="color: var(--text-muted)">Verkäufe (€)</th>
-                        <th class="px-5 py-3 text-right font-semibold" style="color: var(--text-muted)">Differenz (€)</th>
-                        <th class="px-5 py-3 text-center font-semibold" style="color: var(--text-muted)">Kalkulation</th>
-                        <th class="px-5 py-3 text-center font-semibold" style="color: var(--text-muted)">Aktion</th>
+                    <tr class="bg-gray-50/50 dark:bg-gray-700/50">
+                        <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Event</th>
+                        <th class="px-4 py-2.5 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Datum</th>
+                        <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide">Kosten (€)</th>
+                        <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide">Verkäufe (€)</th>
+                        <th class="px-4 py-2.5 text-right text-xs font-semibold text-gray-500 uppercase tracking-wide">Differenz (€)</th>
+                        <th class="px-4 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide">Kalkulation</th>
+                        <th class="px-4 py-2.5 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide">Aktion</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -617,16 +617,16 @@ try {
                         $sales = floatval($row['sales_total']);
                         $diff = ($costs !== null) ? ($sales - $costs) : null;
                     ?>
-                    <tr class="border-b" style="border-color: var(--border-color)" data-event-id="<?php echo $row['id']; ?>">
-                        <td class="px-5 py-3 font-medium" style="color: var(--text-main)">
+                    <tr class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors" data-event-id="<?php echo $row['id']; ?>">
+                        <td class="px-4 py-2.5 font-medium" style="color: var(--text-main)">
                             <a href="../events/view.php?id=<?php echo $row['id']; ?>" class="hover:text-teal-600 transition-colors">
                                 <?php echo htmlspecialchars($row['title']); ?>
                             </a>
                         </td>
-                        <td class="px-5 py-3" style="color: var(--text-muted)">
+                        <td class="px-4 py-2.5 text-sm" style="color: var(--text-muted)">
                             <?php echo date('d.m.Y', strtotime($row['start_time'])); ?>
                         </td>
-                        <td class="px-5 py-3 text-right">
+                        <td class="px-4 py-2.5 text-right">
                             <input
                                 type="number"
                                 step="0.01"
@@ -638,19 +638,21 @@ try {
                                 data-event-id="<?php echo $row['id']; ?>"
                             >
                         </td>
-                        <td class="px-5 py-3 text-right font-medium" style="color: var(--text-main)">
-                            <?php echo number_format($sales, 2, ',', '.'); ?> €
+                        <td class="px-4 py-2.5 text-right">
+                            <span class="inline-block text-green-700 bg-green-50 px-2 py-0.5 rounded-md font-medium">
+                                <?php echo number_format($sales, 2, ',', '.'); ?> €
+                            </span>
                         </td>
-                        <td class="px-5 py-3 text-right font-semibold">
+                        <td class="px-4 py-2.5 text-right">
                             <?php if ($diff !== null): ?>
-                                <span class="<?php echo $diff >= 0 ? 'text-green-600' : 'text-red-600'; ?>">
+                                <span class="inline-block px-2 py-0.5 rounded-md font-medium <?php echo $diff >= 0 ? 'text-green-700 bg-green-50' : 'text-red-700 bg-red-50'; ?>">
                                     <?php echo ($diff >= 0 ? '+' : '') . number_format($diff, 2, ',', '.'); ?> €
                                 </span>
                             <?php else: ?>
                                 <span style="color: var(--text-muted)">–</span>
                             <?php endif; ?>
                         </td>
-                        <td class="px-5 py-3 text-center">
+                        <td class="px-4 py-2.5 text-center">
                             <?php if (!empty($row['calculation_link'])): ?>
                             <a href="<?php echo htmlspecialchars($row['calculation_link']); ?>"
                                target="_blank" rel="noopener noreferrer"
@@ -661,7 +663,7 @@ try {
                             <span class="text-sm" style="color: var(--text-muted)">–</span>
                             <?php endif; ?>
                         </td>
-                        <td class="px-5 py-3 text-center">
+                        <td class="px-4 py-2.5 text-center">
                             <button
                                 class="save-costs-btn px-3 py-1 bg-teal-600 text-white rounded text-xs font-semibold hover:bg-teal-700 transition-all"
                                 data-event-id="<?php echo $row['id']; ?>"
@@ -673,7 +675,7 @@ try {
                     <?php endforeach; ?>
                     <?php if (empty($financialSummary)): ?>
                     <tr>
-                        <td colspan="7" class="px-5 py-8 text-center" style="color: var(--text-muted)">
+                        <td colspan="7" class="px-4 py-8 text-center" style="color: var(--text-muted)">
                             Noch keine Events vorhanden.
                         </td>
                     </tr>
