@@ -114,23 +114,23 @@ if (!empty($userName)) {
     <!-- ===================== USER PROFILE ===================== -->
     <div class="shrink-0 border-t border-gray-700 px-2 py-2 md:px-3 md:py-3">
         <!-- User info -->
-        <div class="flex items-center gap-3 mb-2">
+        <div class="flex items-start gap-2 mb-2">
             <!-- Profile image or initials avatar -->
             <?php if (!empty($_sidebarProfileImageUrl)): ?>
             <img
                 src="<?= htmlspecialchars($_sidebarProfileImageUrl) ?>"
                 alt="Profilbild"
-                class="w-8 h-8 rounded-full object-cover shrink-0"
+                class="w-7 h-7 rounded-full object-cover shrink-0"
             >
             <?php else: ?>
-            <div class="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 to-cyan-500 flex items-center justify-center text-white font-bold text-xs shrink-0">
+            <div class="w-7 h-7 rounded-full bg-gradient-to-br from-emerald-400 to-cyan-500 flex items-center justify-center text-white font-bold text-xs shrink-0">
                 <?= htmlspecialchars($_sidebarInitials) ?>
             </div>
             <?php endif; ?>
-            <div class="min-w-0">
-                <p class="text-xs font-semibold truncate leading-tight"><?= htmlspecialchars($userName) ?></p>
-                <p class="text-[10px] text-gray-400 truncate leading-tight"><?= htmlspecialchars($userEmail) ?></p>
-                <span aria-label="Rolle: <?= htmlspecialchars($userRole) ?>" class="inline-block px-1.5 py-0.5 mt-0.5 rounded-md text-[10px] font-medium bg-purple-500/20 text-purple-300 border border-purple-500/30 truncate max-w-full"><?= htmlspecialchars($userRole) ?></span>
+            <div class="min-w-0 flex flex-col gap-0.5">
+                <p class="text-xs font-semibold leading-tight"><?= htmlspecialchars($userName) ?></p>
+                <span class="text-[10px] text-gray-400 leading-tight block break-all"><?= htmlspecialchars($userEmail) ?></span>
+                <span aria-label="Rolle: <?= htmlspecialchars($userRole) ?>" class="inline-block w-full mt-1 px-1.5 py-0.5 rounded text-[9px] font-medium bg-purple-500/10 text-purple-400 border border-purple-500/20 whitespace-normal leading-snug text-center"><?= htmlspecialchars($userRole) ?></span>
             </div>
         </div>
 
@@ -175,16 +175,16 @@ if (!empty($userName)) {
         <!-- Desktop (md+): full buttons with icon + label (hidden on mobile) -->
         <div class="hidden md:flex md:flex-col md:gap-1">
             <a href="/profil"
-               class="flex items-center gap-2 rounded-md px-3 py-1.5 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors">
-                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+               class="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-gray-300 hover:bg-gray-700 hover:text-white transition-colors">
+                <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M5.121 17.804A10.97 10.97 0 0112 15c2.59 0 4.974.894 6.879 2.375M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
                 </svg>
                 Mein Profil
             </a>
             <a href="/einstellungen"
-               class="flex items-center gap-2 rounded-md px-3 py-1.5 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors">
-                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+               class="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-gray-300 hover:bg-gray-700 hover:text-white transition-colors">
+                <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
@@ -192,16 +192,16 @@ if (!empty($userName)) {
                 Einstellungen
             </a>
             <button type="button" id="theme-toggle-desktop"
-                    class="flex items-center gap-2 rounded-md px-3 py-1.5 text-sm text-gray-300 hover:bg-gray-700 hover:text-white transition-colors w-full text-left">
-                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    class="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-gray-300 hover:bg-gray-700 hover:text-white transition-colors w-full text-left">
+                <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M12 7a5 5 0 000 10 5 5 0 000-10z"/>
                 </svg>
                 Lightmode
             </button>
             <a href="/logout"
-               class="flex items-center gap-2 rounded-md px-3 py-1.5 text-sm text-gray-300 hover:bg-red-700 hover:text-white transition-colors">
-                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+               class="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-gray-300 hover:bg-red-700 hover:text-white transition-colors">
+                <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H6a2 2 0 01-2-2V7a2 2 0 012-2h5a2 2 0 012 2v1"/>
                 </svg>
