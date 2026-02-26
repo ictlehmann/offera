@@ -293,21 +293,48 @@ ob_start();
         <p class="text-xl">Derzeit sind keine Produkte verfügbar.</p>
     </div>
     <?php else: ?>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        <?php foreach ($products as $product): ?>
-        <div class="card rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden flex flex-col">
+
+    <!-- ── Availability filter pills ── -->
+    <div class="mb-6 flex flex-wrap gap-2" id="filter-bar">
+        <button type="button" data-filter="all"
+                class="filter-pill px-4 py-1.5 rounded-full text-sm font-medium transition-all bg-purple-600 text-white shadow-sm">
+            Alle
+        </button>
+        <button type="button" data-filter="available"
+                class="filter-pill px-4 py-1.5 rounded-full text-sm font-medium transition-all bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-purple-600 hover:text-white">
+            Verfügbar
+        </button>
+        <button type="button" data-filter="soldout"
+                class="filter-pill px-4 py-1.5 rounded-full text-sm font-medium transition-all bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-purple-600 hover:text-white">
+            Ausverkauft
+        </button>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="product-grid">
+        <?php foreach ($products as $product):
+            $productOutOfStock = !empty($product['variants']) && array_sum(array_column($product['variants'], 'stock_quantity')) === 0;
+        ?>
+        <div class="card rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col <?php echo $productOutOfStock ? 'opacity-60' : ''; ?>"
+             data-instock="<?php echo $productOutOfStock ? '0' : '1'; ?>">
             <!-- Product image -->
-            <?php if (!empty($product['image_path'])): ?>
-            <div class="h-48 overflow-hidden bg-gray-100 dark:bg-gray-700">
-                <img src="<?php echo asset($product['image_path']); ?>"
-                     alt="<?php echo htmlspecialchars($product['name']); ?>"
-                     class="w-full h-full object-cover">
+            <div class="relative">
+                <?php if (!empty($product['image_path'])): ?>
+                <div class="h-52 overflow-hidden bg-gray-100 dark:bg-gray-700">
+                    <img src="<?php echo asset($product['image_path']); ?>"
+                         alt="<?php echo htmlspecialchars($product['name']); ?>"
+                         class="w-full h-full object-cover transition-transform duration-300 hover:scale-105">
+                </div>
+                <?php else: ?>
+                <div class="h-52 bg-gradient-to-br from-purple-100 to-blue-200 dark:from-purple-900 dark:to-blue-800 flex items-center justify-center">
+                    <i class="fas fa-box text-purple-400 text-5xl opacity-50"></i>
+                </div>
+                <?php endif; ?>
+                <?php if ($productOutOfStock): ?>
+                <span class="absolute top-3 left-3 px-3 py-1 bg-gray-800 bg-opacity-75 text-white text-xs font-bold rounded-full uppercase tracking-wide">
+                    Ausverkauft
+                </span>
+                <?php endif; ?>
             </div>
-            <?php else: ?>
-            <div class="h-48 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800 flex items-center justify-center">
-                <i class="fas fa-box text-blue-400 text-5xl opacity-50"></i>
-            </div>
-            <?php endif; ?>
 
             <!-- Product info -->
             <div class="p-4 flex flex-col flex-1">
@@ -322,12 +349,12 @@ ob_start();
                 <div class="flex-1"></div>
                 <?php endif; ?>
                 <div class="flex items-center justify-between mt-3">
-                    <span class="text-xl font-bold text-blue-600 dark:text-blue-400">
+                    <span class="text-xl font-bold text-purple-600 dark:text-purple-400">
                         <?php echo number_format((float) $product['base_price'], 2, ',', '.'); ?> €
                     </span>
                     <a href="<?php echo asset('pages/shop/index.php?action=detail&product_id=' . $product['id']); ?>"
-                       class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium no-underline">
-                        Ansehen
+                       class="px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg hover:from-purple-700 hover:to-purple-800 transition-all text-sm font-semibold no-underline shadow-sm">
+                        <?php echo $productOutOfStock ? 'Details' : 'Kaufen'; ?>
                     </a>
                 </div>
             </div>
@@ -616,19 +643,19 @@ ob_start();
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Kontoinhaber</label>
                             <input type="text" name="sepa_holder" placeholder="Max Mustermann"
-                                   class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500">
+                                   class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-shadow">
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">IBAN</label>
                             <input type="text" name="sepa_iban" placeholder="DE89 3704 0044 0532 0130 00"
-                                   class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500">
+                                   class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-shadow">
                         </div>
                     </div>
 
                     <button type="submit" form="checkout-form"
-                            class="w-full py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 font-bold text-lg transition-all shadow-lg">
+                            class="w-full py-4 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl hover:from-purple-700 hover:to-purple-800 font-bold text-lg transition-all shadow-lg">
                         <i class="fas fa-lock mr-2"></i>
-                        Jetzt kaufen – <?php echo number_format($cartTotalAmt, 2, ',', '.'); ?> €
+                        Kostenpflichtig bestellen – <?php echo number_format($cartTotalAmt, 2, ',', '.'); ?> €
                     </button>
                 </form>
             </div>
@@ -667,6 +694,40 @@ ob_start();
     <?php endif; ?>
 
 </div>
+
+<script>
+// ── Filter pills ─────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+    const pills = document.querySelectorAll('.filter-pill');
+    const grid  = document.getElementById('product-grid');
+
+    if (pills.length && grid) {
+        pills.forEach(function(pill) {
+            pill.addEventListener('click', function() {
+                // Update active pill styles
+                pills.forEach(function(p) {
+                    p.dataset.active = '0';
+                    p.className = 'filter-pill px-4 py-1.5 rounded-full text-sm font-medium transition-all bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-purple-600 hover:text-white';
+                });
+                this.dataset.active = '1';
+                this.className = 'filter-pill px-4 py-1.5 rounded-full text-sm font-medium transition-all bg-purple-600 text-white shadow-sm';
+
+                const filter = this.dataset.filter;
+                grid.querySelectorAll('[data-instock]').forEach(function(card) {
+                    const inStock = card.dataset.instock === '1';
+                    if (filter === 'all') {
+                        card.style.display = '';
+                    } else if (filter === 'available') {
+                        card.style.display = inStock ? '' : 'none';
+                    } else if (filter === 'soldout') {
+                        card.style.display = inStock ? 'none' : '';
+                    }
+                });
+            });
+        });
+    }
+});
+</script>
 
 <script>
 // Show/hide SEPA fields based on payment selection
