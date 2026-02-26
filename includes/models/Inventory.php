@@ -123,10 +123,41 @@ class Inventory {
     }
 
     /**
+     * Calculate the total number of currently rented (active) units for a given
+     * inventory item.
+     *
+     * Sums the quantity of all approved rentals in inventory_requests where today
+     * falls within the rental period (start_date <= today <= end_date).
+     * Returns 0 when no active rentals exist or on any database error.
+     *
+     * @param int|string $inventoryId EasyVerein inventory-object ID
+     * @return int Total rented units (0 if none or on error)
+     */
+    public static function getRentedQuantity($inventoryId): int {
+        try {
+            $db   = Database::getContentDB();
+            $stmt = $db->prepare(
+                "SELECT COALESCE(SUM(quantity), 0) AS rented
+                 FROM inventory_requests
+                 WHERE inventory_object_id = ?
+                   AND status = 'approved'
+                   AND start_date <= CURDATE()
+                   AND end_date   >= CURDATE()"
+            );
+            $stmt->execute([(string)$inventoryId]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            return (int)($row['rented'] ?? 0);
+        } catch (Exception $e) {
+            error_log('Inventory::getRentedQuantity failed: ' . $e->getMessage());
+            return 0;
+        }
+    }
+
+    /**
      * Calculate the available quantity for a given inventory item.
      *
-     * Formula: total_quantity (from inventory_items) MINUS the sum of all active
-     * rented_quantity entries in inventory_rentals that have not been returned.
+     * Formula: total pieces (from EasyVerein API) MINUS the currently rented
+     * quantity (via getRentedQuantity()).
      *
      * @param int|string $inventoryId EasyVerein inventory-object ID
      * @return int Number of available units (minimum 0)
@@ -134,23 +165,9 @@ class Inventory {
     public static function getAvailableQuantity($inventoryId): int {
         $inventoryId = (string)$inventoryId;
         try {
-            $db   = Database::getContentDB();
-            $stmt = $db->prepare(
-                "SELECT ii.total_quantity,
-                        COALESCE(SUM(ir.rented_quantity), 0) AS rented
-                 FROM inventory_items ii
-                 LEFT JOIN inventory_rentals ir
-                        ON ir.easyverein_item_id = ii.easyverein_id
-                       AND ir.status != 'returned'
-                 WHERE ii.easyverein_id = ?
-                 GROUP BY ii.easyverein_id"
-            );
-            $stmt->execute([$inventoryId]);
-            $row = $stmt->fetch(PDO::FETCH_ASSOC);
-            if (!$row) {
-                return 0;
-            }
-            return max(0, (int)$row['total_quantity'] - (int)$row['rented']);
+            $totalPieces = self::evi()->getTotalPieces($inventoryId);
+            $rented      = self::getRentedQuantity($inventoryId);
+            return max(0, $totalPieces - $rented);
         } catch (Exception $e) {
             error_log('Inventory::getAvailableQuantity failed: ' . $e->getMessage());
             return 0;
