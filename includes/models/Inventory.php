@@ -220,7 +220,27 @@ class Inventory {
         $note = implode(' | ', $noteParts);
 
         try {
-            self::evi()->assignItem((int)$itemId, (int)$userId, (int)$quantity, $note);
+            // Look up the borrower's name and e-mail so that the EasyVerein custom fields
+            // 'Entra E-Mail' and 'Aktuelle Ausleiher' can be updated during checkout.
+            $userName  = '';
+            $userEmail = '';
+            try {
+                $userDb   = Database::getUserDB();
+                $userStmt = $userDb->prepare("SELECT first_name, last_name, email FROM users WHERE id = ?");
+                $userStmt->execute([(int)$userId]);
+                $userRow = $userStmt->fetch(PDO::FETCH_ASSOC);
+                if ($userRow) {
+                    $userName  = trim(($userRow['first_name'] ?? '') . ' ' . ($userRow['last_name'] ?? ''));
+                    if ($userName === '') {
+                        $userName = $userRow['email'] ?? '';
+                    }
+                    $userEmail = $userRow['email'] ?? '';
+                }
+            } catch (Exception $userEx) {
+                error_log('checkoutItem: user lookup failed: ' . $userEx->getMessage());
+            }
+
+            self::evi()->assignItem((int)$itemId, (int)$userId, (int)$quantity, $note, $userName, $userEmail);
 
             // Record the rental locally for history tracking and the return-approval workflow.
             try {

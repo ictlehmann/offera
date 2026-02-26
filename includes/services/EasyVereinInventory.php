@@ -370,14 +370,16 @@ class EasyVereinInventory {
      * higher-level locking (e.g. a database transaction) when concurrent
      * assignments of the same item are possible.
      *
-     * @param int    $itemId   EasyVerein inventory-item ID
-     * @param int    $memberId EasyVerein member ID to assign to
-     * @param int    $quantity Number of units to assign
-     * @param string $purpose  Free-text reason / purpose of the assignment
+     * @param int    $itemId    EasyVerein inventory-item ID
+     * @param int    $memberId  EasyVerein member ID to assign to
+     * @param int    $quantity  Number of units to assign
+     * @param string $purpose   Free-text reason / purpose of the assignment
+     * @param string $userName  Display name of the borrower (used to update 'Aktuelle Ausleiher' custom field)
+     * @param string $userEmail E-mail address of the borrower (used to update 'Entra E-Mail' custom field)
      * @return array API response data
      * @throws Exception On API or validation errors
      */
-    public function assignItem(int $itemId, int $memberId, int $quantity, string $purpose): array {
+    public function assignItem(int $itemId, int $memberId, int $quantity, string $purpose, string $userName = '', string $userEmail = ''): array {
         if ($quantity < 1) {
             throw new Exception('Quantity must be at least 1');
         }
@@ -420,6 +422,45 @@ class EasyVereinInventory {
         $cacheFile = $this->getCacheFile();
         if (file_exists($cacheFile)) {
             unlink($cacheFile);
+        }
+
+        // Update the EasyVerein custom fields on the inventory object:
+        //   – 'Entra E-Mail'              → borrower's e-mail address
+        //   – 'Aktuelle Ausleiher'        → borrower's display name
+        //   – 'Zustand der letzten Rückgabe' → cleared (new checkout)
+        if ($userName !== '' || $userEmail !== '') {
+            try {
+                $cfUrl        = $url . '/custom-fields?query={id,value,customField{id,name}}';
+                $cfData       = $this->request('GET', $cfUrl);
+                $customFields = $cfData['results'] ?? $cfData['data'] ?? $cfData;
+
+                $nameEntry  = $userName  !== '' ? "{$userName} ({$quantity}x)"  : '';
+                $emailEntry = $userEmail !== '' ? "{$userEmail} ({$quantity}x)" : '';
+
+                $fieldsToUpdate = [];
+                foreach ($customFields as $field) {
+                    $fieldId   = $field['id'] ?? null;
+                    $fieldName = $field['customField']['name'] ?? '';
+
+                    if ($fieldId === null) {
+                        continue;
+                    }
+
+                    if ($fieldName === 'Aktuelle Ausleiher') {
+                        $fieldsToUpdate[] = ['id' => $fieldId, 'value' => $nameEntry];
+                    } elseif ($fieldName === 'Entra E-Mail') {
+                        $fieldsToUpdate[] = ['id' => $fieldId, 'value' => $emailEntry];
+                    } elseif ($fieldName === 'Zustand der letzten Rückgabe') {
+                        $fieldsToUpdate[] = ['id' => $fieldId, 'value' => ''];
+                    }
+                }
+
+                if (!empty($fieldsToUpdate)) {
+                    $this->request('PATCH', $url . '/custom-fields/bulk-update', $fieldsToUpdate);
+                }
+            } catch (Exception $cfEx) {
+                error_log('EasyVereinInventory::assignItem: custom fields update failed: ' . $cfEx->getMessage());
+            }
         }
 
         error_log(sprintf(
