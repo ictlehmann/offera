@@ -550,14 +550,35 @@ class Inventory {
             );
             $upd->execute([$condition, (int)$rentalId]);
 
-            // Synchronise the return with EasyVerein: end the active lending and
-            // update the 'Zustand der letzten Rückgabe' custom field.
+            // Synchronise the return with EasyVerein: end the active lending,
+            // remove the borrower from custom fields, and update the condition.
             try {
+                $returnUserName  = '';
+                $returnUserEmail = '';
+                try {
+                    $userDb  = Database::getUserDB();
+                    $uStmt   = $userDb->prepare(
+                        "SELECT first_name, last_name, email FROM users WHERE id = ? LIMIT 1"
+                    );
+                    $uStmt->execute([(int)$rental['user_id']]);
+                    $uRow = $uStmt->fetch(PDO::FETCH_ASSOC);
+                    if ($uRow) {
+                        $returnUserEmail = $uRow['email'] ?? '';
+                        $returnUserName  = trim(($uRow['first_name'] ?? '') . ' ' . ($uRow['last_name'] ?? ''));
+                        if ($returnUserName === '') {
+                            $returnUserName = $returnUserEmail;
+                        }
+                    }
+                } catch (Exception $userEx) {
+                    error_log('approveReturn: failed to look up user info: ' . $userEx->getMessage());
+                }
                 self::evi()->verifyReturnForRental(
                     (int)$rental['easyverein_item_id'],
                     $adminName,
                     $condition,
-                    $notes
+                    $notes,
+                    $returnUserName,
+                    $returnUserEmail
                 );
             } catch (Exception $eviEx) {
                 // Log but do not fail: the local DB was already updated.

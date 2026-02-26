@@ -425,17 +425,18 @@ class EasyVereinInventory {
         }
 
         // Update the EasyVerein custom fields on the inventory object:
-        //   – 'Entra E-Mail'              → borrower's e-mail address
-        //   – 'Aktuelle Ausleiher'        → borrower's display name
+        //   – 'Entra E-Mail'              → append borrower's e-mail address
+        //   – 'Aktuelle Ausleiher'        → append borrower's display name
         //   – 'Zustand der letzten Rückgabe' → cleared (new checkout)
         if ($userName !== '' || $userEmail !== '') {
-            $nameEntry  = $userName  !== '' ? "{$userName} ({$quantity}x)"  : '';
-            $emailEntry = $userEmail !== '' ? "{$userEmail} ({$quantity}x)" : '';
-            $this->updateInventoryCustomFields($itemId, [
-                'Aktuelle Ausleiher'           => $nameEntry,
-                'Entra E-Mail'                 => $emailEntry,
-                'Zustand der letzten Rückgabe' => '',
-            ]);
+            $appendTo = [];
+            if ($userName  !== '') $appendTo['Aktuelle Ausleiher'] = $userName;
+            if ($userEmail !== '') $appendTo['Entra E-Mail']       = $userEmail;
+            $this->modifyCustomFields($itemId,
+                ['Zustand der letzten Rückgabe' => ''],
+                $appendTo,
+                []
+            );
         }
 
         error_log(sprintf(
@@ -485,8 +486,8 @@ class EasyVereinInventory {
                     continue;
                 }
                 $fieldValue = (string)($cf['value'] ?? '');
-                foreach (explode("\n", $fieldValue) as $line) {
-                    if (str_starts_with(strtolower(trim($line)), $lc . ' (')) {
+                foreach (array_map('trim', explode(',', $fieldValue)) as $entry) {
+                    if (strtolower($entry) === $lc) {
                         $myItems[] = $obj;
                         break 2;
                     }
@@ -749,59 +750,17 @@ class EasyVereinInventory {
             $req['end_date']
         );
 
-        // 4. Build multiline custom-field values from all active rentals for this item
-        //    (currently approved ones + the request being approved now)
-        $userDb = Database::getUserDB();
-        $activeStmt = $db->prepare(
-            "SELECT ir.user_id, ir.quantity
-               FROM inventory_requests ir
-              WHERE ir.inventory_object_id = ?
-                AND (ir.status = 'approved' OR ir.id = ?)"
+        // 4. Append the new borrower to the custom fields on the inventory object.
+        $appendTo = [];
+        if ($userName  !== '') $appendTo['Aktuelle Ausleiher'] = $userName;
+        if ($userEmail !== '') $appendTo['Entra E-Mail']       = $userEmail;
+        $this->modifyCustomFields((int)$req['inventory_object_id'],
+            ['Zustand der letzten Rückgabe' => ''],
+            $appendTo,
+            []
         );
-        $activeStmt->execute([$req['inventory_object_id'], $requestId]);
-        $activeRequests = $activeStmt->fetchAll(PDO::FETCH_ASSOC);
 
-        // Aggregate quantities per user
-        $userQtyMap = [];
-        foreach ($activeRequests as $ar) {
-            $uid = (int)$ar['user_id'];
-            $userQtyMap[$uid] = ($userQtyMap[$uid] ?? 0) + (int)$ar['quantity'];
-        }
-
-        // Fetch user details from the user DB
-        $nameLines  = [];
-        $emailLines = [];
-        if (!empty($userQtyMap)) {
-            $placeholders = implode(',', array_fill(0, count($userQtyMap), '?'));
-            $uStmt = $userDb->prepare(
-                "SELECT id, first_name, last_name, email FROM users WHERE id IN ({$placeholders})"
-            );
-            $uStmt->execute(array_keys($userQtyMap));
-            $userRows = $uStmt->fetchAll(PDO::FETCH_ASSOC);
-
-            foreach ($userRows as $uRow) {
-                $uid  = (int)$uRow['id'];
-                $qty  = $userQtyMap[$uid] ?? 1;
-                $name = trim(($uRow['first_name'] ?? '') . ' ' . ($uRow['last_name'] ?? ''));
-                if ($name === '') {
-                    $name = $uRow['email'] ?? 'Unbekannt';
-                }
-                $nameLines[]  = "{$name} ({$qty}x)";
-                $emailLines[] = ($uRow['email'] ?? '') . " ({$qty}x)";
-            }
-        }
-
-        $namesValue  = implode("\n", $nameLines);
-        $emailsValue = implode("\n", $emailLines);
-
-        // 5. Update individual fields on the inventory object
-        $this->updateInventoryCustomFields((int)$req['inventory_object_id'], [
-            'Aktuelle Ausleiher'           => $namesValue,
-            'Entra E-Mail'                 => $emailsValue,
-            'Zustand der letzten Rückgabe' => '',
-        ]);
-
-        // 6. Update local DB status to 'approved' (only after all API calls succeed)
+        // 5. Update local DB status to 'approved' (only after all API calls succeed)
         $upd = $db->prepare(
             "UPDATE inventory_requests SET status = 'approved' WHERE id = ?"
         );
@@ -880,60 +839,38 @@ class EasyVereinInventory {
             ));
         }
 
-        // 3. Build multiline custom-field values from remaining active rentals for this item
-        //    (all approved requests for this item except the one being returned now)
-        $remainingStmt = $db->prepare(
-            "SELECT ir.user_id, ir.quantity
-               FROM inventory_requests ir
-              WHERE ir.inventory_object_id = ?
-                AND ir.status = 'approved'
-                AND ir.id != ?"
-        );
-        $remainingStmt->execute([$req['inventory_object_id'], $requestId]);
-        $remainingRequests = $remainingStmt->fetchAll(PDO::FETCH_ASSOC);
-
-        // Aggregate quantities per user
-        $userQtyMap = [];
-        foreach ($remainingRequests as $rr) {
-            $uid = (int)$rr['user_id'];
-            $userQtyMap[$uid] = ($userQtyMap[$uid] ?? 0) + (int)$rr['quantity'];
-        }
-
-        $namesValue  = '';
-        $emailsValue = '';
-        if (!empty($userQtyMap)) {
+        // 3. Look up the returning user's display name and e-mail to remove from custom fields.
+        $returnUserName  = '';
+        $returnUserEmail = '';
+        try {
             $userDb = Database::getUserDB();
-            $placeholders = implode(',', array_fill(0, count($userQtyMap), '?'));
-            $uStmt = $userDb->prepare(
-                "SELECT id, first_name, last_name, email FROM users WHERE id IN ({$placeholders})"
+            $uStmt  = $userDb->prepare(
+                "SELECT first_name, last_name, email FROM users WHERE id = ? LIMIT 1"
             );
-            $uStmt->execute(array_keys($userQtyMap));
-            $userRows = $uStmt->fetchAll(PDO::FETCH_ASSOC);
-
-            $nameLines  = [];
-            $emailLines = [];
-            foreach ($userRows as $uRow) {
-                $uid  = (int)$uRow['id'];
-                $qty  = $userQtyMap[$uid] ?? 1;
-                $name = trim(($uRow['first_name'] ?? '') . ' ' . ($uRow['last_name'] ?? ''));
-                if ($name === '') {
-                    $name = $uRow['email'] ?? 'Unbekannt';
+            $uStmt->execute([(int)$req['user_id']]);
+            $uRow = $uStmt->fetch(PDO::FETCH_ASSOC);
+            if ($uRow) {
+                $returnUserEmail = $uRow['email'] ?? '';
+                $returnUserName  = trim(($uRow['first_name'] ?? '') . ' ' . ($uRow['last_name'] ?? ''));
+                if ($returnUserName === '') {
+                    $returnUserName = $returnUserEmail;
                 }
-                $nameLines[]  = "{$name} ({$qty}x)";
-                $emailLines[] = ($uRow['email'] ?? '') . " ({$qty}x)";
             }
-            $namesValue  = implode("\n", $nameLines);
-            $emailsValue = implode("\n", $emailLines);
+        } catch (Exception $e) {
+            error_log('EasyVereinInventory::verifyReturn: failed to look up user ' . $req['user_id'] . ': ' . $e->getMessage());
         }
 
-        // 4. Update individual fields on the inventory object.
+        // 4. Update custom fields: remove this borrower and write the condition text.
         $conditionText = "{$condition} - Geprüft am {$todayFormatted} durch {$adminName}."
             . ($notes !== '' ? " Notiz: {$notes}" : '');
-        $this->updateInventoryCustomFields((int)$req['inventory_object_id'], [
-            'Aktuelle Ausleiher'           => $namesValue,
-            'Entra E-Mail'                 => $emailsValue,
-            'Zustand der letzten Rückgabe' => $conditionText,
-        ]);
+        $removeFrom = [];
+        if ($returnUserName  !== '') $removeFrom['Aktuelle Ausleiher'] = $returnUserName;
+        if ($returnUserEmail !== '') $removeFrom['Entra E-Mail']       = $returnUserEmail;
+        $this->modifyCustomFields((int)$req['inventory_object_id'],
+            ['Zustand der letzten Rückgabe' => $conditionText],
+            [],
+            $removeFrom
+        );
 
         // 5. Update local DB status to 'returned' so the item is available again locally.
         $upd = $db->prepare(
@@ -969,8 +906,10 @@ class EasyVereinInventory {
      * @param string $adminName        Display name of the board member verifying the return
      * @param string $condition        Condition label (e.g. 'funktionsfähig', 'beschädigt')
      * @param string $notes            Optional remarks about the return
+     * @param string $userName         Display name of the borrower (used to remove from custom fields)
+     * @param string $userEmail        E-mail address of the borrower (used to remove from custom fields)
      */
-    public function verifyReturnForRental(int $easyvereinItemId, string $adminName, string $condition, string $notes): void {
+    public function verifyReturnForRental(int $easyvereinItemId, string $adminName, string $condition, string $notes, string $userName = '', string $userEmail = ''): void {
         $tz             = new DateTimeZone('Europe/Berlin');
         $today          = (new DateTime('now', $tz))->format('Y-m-d');
         $todayFormatted = (new DateTime('now', $tz))->format('d.m.Y');
@@ -1003,14 +942,19 @@ class EasyVereinInventory {
             ));
         }
 
-        // 2. Update the 'Zustand der letzten Rückgabe' custom field on the inventory object.
+        // 2. Remove the borrower from custom fields and write the condition text.
         $byClause      = $adminName !== '' ? " durch {$adminName}" : '';
         $conditionText = "{$condition} - Geprüft am {$todayFormatted}{$byClause}."
             . ($notes !== '' ? " Notiz: {$notes}" : '');
+        $removeFrom = [];
+        if ($userName  !== '') $removeFrom['Aktuelle Ausleiher'] = $userName;
+        if ($userEmail !== '') $removeFrom['Entra E-Mail']       = $userEmail;
         try {
-            $this->updateInventoryCustomFields($easyvereinItemId, [
-                'Zustand der letzten Rückgabe' => $conditionText,
-            ]);
+            $this->modifyCustomFields($easyvereinItemId,
+                ['Zustand der letzten Rückgabe' => $conditionText],
+                [],
+                $removeFrom
+            );
         } catch (Exception $cfEx) {
             error_log(sprintf(
                 'EasyVereinInventory::verifyReturnForRental: custom field update failed for inventory object %d: %s',
@@ -1025,18 +969,24 @@ class EasyVereinInventory {
     }
 
     /**
-     * Update inventory custom fields via individual PATCH or POST requests.
+     * Modify inventory custom fields via intelligent append, remove, or set operations.
      *
-     * Fetches existing custom field values for the given inventory object and,
-     * for each entry in $fieldsToUpdate (fieldName → newValue), either PATCHes
-     * an existing value (when the field already has a stored value id) or POSTs
-     * a new custom-field-value record.  Errors per field are logged but do not
-     * abort the caller's process.
+     * Fetches existing custom field values for the given inventory object and
+     * applies one of three operations per field:
+     *   – $setTo:      Overwrite the value directly.
+     *   – $appendTo:   Split the current value at commas, add the new value if not
+     *                  already present, and rejoin with commas.
+     *   – $removeFrom: Split the current value at commas, remove the given value,
+     *                  and rejoin with commas.
+     * After computing the new value, PATCHes an existing custom-field-value record
+     * or POSTs a new one.  Errors per field are logged but do not abort the caller.
      *
-     * @param int   $objectId       EasyVerein inventory-object ID
-     * @param array $fieldsToUpdate Map of custom-field name to new value string
+     * @param int   $objectId   EasyVerein inventory-object ID
+     * @param array $setTo      fieldName → value to set directly
+     * @param array $appendTo   fieldName → value to append (if not already present)
+     * @param array $removeFrom fieldName → value to remove
      */
-    private function updateInventoryCustomFields(int $objectId, array $fieldsToUpdate): void {
+    private function modifyCustomFields(int $objectId, array $setTo, array $appendTo, array $removeFrom): void {
         $cfUrl = self::API_BASE . '/inventory-object/' . $objectId
             . '/custom-fields?query={id,value,customField{id,name}}';
 
@@ -1044,7 +994,7 @@ class EasyVereinInventory {
             $cfData = $this->request('GET', $cfUrl);
         } catch (Exception $e) {
             error_log(sprintf(
-                'EasyVereinInventory::updateInventoryCustomFields: failed to fetch custom fields for object %d: %s',
+                'EasyVereinInventory::modifyCustomFields: failed to fetch custom fields for object %d: %s',
                 $objectId, $e->getMessage()
             ));
             return;
@@ -1055,27 +1005,44 @@ class EasyVereinInventory {
             return;
         }
 
+        $allFieldNames = array_unique(array_merge(array_keys($setTo), array_keys($appendTo), array_keys($removeFrom)));
+
         foreach ($existingFields as $field) {
             $fieldName        = $field['customField']['name'] ?? '';
             $customFieldDefId = $field['customField']['id']   ?? null;
             $valueId          = $field['id']                  ?? null;
 
-            if (!array_key_exists($fieldName, $fieldsToUpdate) || $customFieldDefId === null) {
+            if (!in_array($fieldName, $allFieldNames, true) || $customFieldDefId === null) {
                 continue;
             }
 
-            $newValue = $fieldsToUpdate[$fieldName];
+            $currentValue = (string)($field['value'] ?? '');
+            $newValue     = $currentValue;
+
+            if (array_key_exists($fieldName, $setTo)) {
+                $newValue = $setTo[$fieldName];
+            } elseif (array_key_exists($fieldName, $appendTo)) {
+                $toAdd = $appendTo[$fieldName];
+                $parts = $currentValue !== '' ? array_values(array_filter(array_map('trim', explode(',', $currentValue)))) : [];
+                if ($toAdd !== '' && !in_array($toAdd, $parts, true)) {
+                    $parts[] = $toAdd;
+                }
+                $newValue = implode(', ', $parts);
+            } elseif (array_key_exists($fieldName, $removeFrom)) {
+                $toRemove = $removeFrom[$fieldName];
+                $parts    = $currentValue !== '' ? array_values(array_filter(array_map('trim', explode(',', $currentValue)))) : [];
+                $parts    = array_values(array_diff($parts, [$toRemove]));
+                $newValue = implode(', ', $parts);
+            }
 
             try {
                 if ($valueId !== null) {
-                    // Existing value – update it
                     $this->request(
                         'PATCH',
                         self::API_BASE . '/custom-field-values/' . $valueId,
                         ['value' => $newValue]
                     );
                 } else {
-                    // No value yet – create it
                     $this->request(
                         'POST',
                         self::API_BASE . '/custom-field-values',
@@ -1088,7 +1055,7 @@ class EasyVereinInventory {
                 }
             } catch (Exception $e) {
                 error_log(sprintf(
-                    'EasyVereinInventory::updateInventoryCustomFields: failed to update field "%s" for object %d: %s',
+                    'EasyVereinInventory::modifyCustomFields: failed to update field "%s" for object %d: %s',
                     $fieldName, $objectId, $e->getMessage()
                 ));
             }
