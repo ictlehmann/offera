@@ -558,6 +558,24 @@ class EasyVereinInventory {
     }
 
     /**
+     * Return the total number of pieces stored in EasyVerein for an inventory object.
+     *
+     * The field name varies across EasyVerein API versions:
+     *   – 'pieces'            (current stable API v2)
+     *   – 'inventoryQuantity' (legacy v1 field)
+     *   – 'quantity'          (fallback / custom deployments)
+     *
+     * @param int|string $inventoryObjectId EasyVerein inventory-object ID
+     * @return int Total pieces
+     * @throws Exception On API errors
+     */
+    public function getTotalPieces($inventoryObjectId): int {
+        $url  = self::API_BASE . '/inventory-object/' . urlencode((string)$inventoryObjectId);
+        $item = $this->request('GET', $url);
+        return (int)($item['pieces'] ?? $item['inventoryQuantity'] ?? $item['quantity'] ?? 0);
+    }
+
+    /**
      * Calculate the number of available units for a given inventory object and
      * date range, taking into account both EasyVerein active lendings and
      * locally stored inventory requests.
