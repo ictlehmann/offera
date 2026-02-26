@@ -429,38 +429,13 @@ class EasyVereinInventory {
         //   – 'Aktuelle Ausleiher'        → borrower's display name
         //   – 'Zustand der letzten Rückgabe' → cleared (new checkout)
         if ($userName !== '' || $userEmail !== '') {
-            try {
-                $cfUrl        = $url . '/custom-fields?query={id,value,customField{id,name}}';
-                $cfData       = $this->request('GET', $cfUrl);
-                $customFields = $cfData['results'] ?? $cfData['data'] ?? $cfData;
-
-                $nameEntry  = $userName  !== '' ? "{$userName} ({$quantity}x)"  : '';
-                $emailEntry = $userEmail !== '' ? "{$userEmail} ({$quantity}x)" : '';
-
-                $fieldsToUpdate = [];
-                foreach ($customFields as $field) {
-                    $fieldId   = $field['id'] ?? null;
-                    $fieldName = $field['customField']['name'] ?? '';
-
-                    if ($fieldId === null) {
-                        continue;
-                    }
-
-                    if ($fieldName === 'Aktuelle Ausleiher') {
-                        $fieldsToUpdate[] = ['id' => $fieldId, 'value' => $nameEntry];
-                    } elseif ($fieldName === 'Entra E-Mail') {
-                        $fieldsToUpdate[] = ['id' => $fieldId, 'value' => $emailEntry];
-                    } elseif ($fieldName === 'Zustand der letzten Rückgabe') {
-                        $fieldsToUpdate[] = ['id' => $fieldId, 'value' => ''];
-                    }
-                }
-
-                if (!empty($fieldsToUpdate)) {
-                    $this->request('PATCH', $url . '/custom-fields/bulk-update', $fieldsToUpdate);
-                }
-            } catch (Exception $cfEx) {
-                error_log('EasyVereinInventory::assignItem: custom fields update failed: ' . $cfEx->getMessage());
-            }
+            $nameEntry  = $userName  !== '' ? "{$userName} ({$quantity}x)"  : '';
+            $emailEntry = $userEmail !== '' ? "{$userEmail} ({$quantity}x)" : '';
+            $this->updateInventoryCustomFields($itemId, [
+                'Aktuelle Ausleiher'           => $nameEntry,
+                'Entra E-Mail'                 => $emailEntry,
+                'Zustand der letzten Rückgabe' => '',
+            ]);
         }
 
         error_log(sprintf(
@@ -738,7 +713,8 @@ class EasyVereinInventory {
      * 5. Fetches the individual fields via GET /api/v2.0/inventory-object/{id}/custom-fields,
      *    updates 'Aktuelle Ausleiher' and 'Entra E-Mail' with the multiline strings, and
      *    clears 'Zustand der letzten Rückgabe'.
-     *    Sends all field updates as a JSON array to PATCH /api/v2.0/inventory-object/{id}/custom-fields/bulk-update.
+     *    For each field, PATCHes /api/v2.0/custom-field-values/{id} if a value already
+     *    exists, or POSTs /api/v2.0/custom-field-values to create it otherwise.
      * 6. Updates the local DB status to 'approved'.
      *
      * @param int    $requestId  Local inventory_requests row ID
@@ -819,32 +795,11 @@ class EasyVereinInventory {
         $emailsValue = implode("\n", $emailLines);
 
         // 5. Update individual fields on the inventory object
-        $objectUrl        = self::API_BASE . '/inventory-object/' . urlencode((string)$req['inventory_object_id']);
-        $customFieldsUrl  = $objectUrl . '/custom-fields?query={id,value,customField{id,name}}';
-        $cfData           = $this->request('GET', $customFieldsUrl);
-        $customFields     = $cfData['results'] ?? $cfData['data'] ?? $cfData;
-
-        $fieldsToUpdate = [];
-        foreach ($customFields as $field) {
-            $fieldId   = $field['id']   ?? null;
-            $fieldName = $field['customField']['name'] ?? '';
-
-            if ($fieldId === null) {
-                continue;
-            }
-
-            if ($fieldName === 'Aktuelle Ausleiher') {
-                $fieldsToUpdate[] = ['id' => $fieldId, 'value' => $namesValue];
-            } elseif ($fieldName === 'Entra E-Mail') {
-                $fieldsToUpdate[] = ['id' => $fieldId, 'value' => $emailsValue];
-            } elseif ($fieldName === 'Zustand der letzten Rückgabe') {
-                $fieldsToUpdate[] = ['id' => $fieldId, 'value' => ''];
-            }
-        }
-
-        if (!empty($fieldsToUpdate)) {
-            $this->request('PATCH', $objectUrl . '/custom-fields/bulk-update', $fieldsToUpdate);
-        }
+        $this->updateInventoryCustomFields((int)$req['inventory_object_id'], [
+            'Aktuelle Ausleiher'           => $namesValue,
+            'Entra E-Mail'                 => $emailsValue,
+            'Zustand der letzten Rückgabe' => '',
+        ]);
 
         // 6. Update local DB status to 'approved' (only after all API calls succeed)
         $upd = $db->prepare(
@@ -869,7 +824,8 @@ class EasyVereinInventory {
      *    still has the item.
      * 3. Finds the individual field 'Zustand der letzten Rückgabe' and writes
      *    '$condition - Geprüft am [DATE] durch $adminName. Notiz: $notes'.
-     *    Sends all field updates as a JSON array to PATCH /api/v2.0/inventory-object/{id}/custom-fields/bulk-update.
+     *    For each field, PATCHes /api/v2.0/custom-field-values/{id} if a value already
+     *    exists, or POSTs /api/v2.0/custom-field-values to create it otherwise.
      * 4. Updates the local DB status to 'returned'.
      *
      * @param int    $requestId  Local inventory_requests row ID
@@ -971,45 +927,13 @@ class EasyVereinInventory {
         }
 
         // 4. Update individual fields on the inventory object.
-        //    Wrapped in try-catch so a custom-fields API failure does not
-        //    prevent the local DB update below.
         $conditionText = "{$condition} - Geprüft am {$todayFormatted} durch {$adminName}."
             . ($notes !== '' ? " Notiz: {$notes}" : '');
-        try {
-            $objectUrl        = self::API_BASE . '/inventory-object/' . urlencode((string)$req['inventory_object_id']);
-            $customFieldsUrl  = $objectUrl . '/custom-fields?query={id,value,customField{id,name}}';
-            $cfData           = $this->request('GET', $customFieldsUrl);
-            $customFields     = $cfData['results'] ?? $cfData['data'] ?? $cfData;
-
-            $fieldsToUpdate = [];
-            if (is_array($customFields)) {
-                foreach ($customFields as $field) {
-                    $fieldId   = $field['id']   ?? null;
-                    $fieldName = $field['customField']['name'] ?? '';
-
-                    if ($fieldId === null) {
-                        continue;
-                    }
-
-                    if ($fieldName === 'Aktuelle Ausleiher') {
-                        $fieldsToUpdate[] = ['id' => $fieldId, 'value' => $namesValue];
-                    } elseif ($fieldName === 'Entra E-Mail') {
-                        $fieldsToUpdate[] = ['id' => $fieldId, 'value' => $emailsValue];
-                    } elseif ($fieldName === 'Zustand der letzten Rückgabe') {
-                        $fieldsToUpdate[] = ['id' => $fieldId, 'value' => $conditionText];
-                    }
-                }
-            }
-
-            if (!empty($fieldsToUpdate)) {
-                $this->request('PATCH', $objectUrl . '/custom-fields/bulk-update', $fieldsToUpdate);
-            }
-        } catch (Exception $cfEx) {
-            error_log(sprintf(
-                'EasyVereinInventory::verifyReturn: custom-fields update failed for inventory object %s (request %d): %s',
-                $req['inventory_object_id'], $requestId, $cfEx->getMessage()
-            ));
-        }
+        $this->updateInventoryCustomFields((int)$req['inventory_object_id'], [
+            'Aktuelle Ausleiher'           => $namesValue,
+            'Entra E-Mail'                 => $emailsValue,
+            'Zustand der letzten Rückgabe' => $conditionText,
+        ]);
 
         // 5. Update local DB status to 'returned' so the item is available again locally.
         $upd = $db->prepare(
@@ -1023,6 +947,77 @@ class EasyVereinInventory {
             'EasyVereinInventory: request %d verified as returned by %s (condition: %s), inventory object %s',
             $requestId, $adminName, $condition, $req['inventory_object_id']
         ));
+    }
+
+    /**
+     * Update inventory custom fields via individual PATCH or POST requests.
+     *
+     * Fetches existing custom field values for the given inventory object and,
+     * for each entry in $fieldsToUpdate (fieldName → newValue), either PATCHes
+     * an existing value (when the field already has a stored value id) or POSTs
+     * a new custom-field-value record.  Errors per field are logged but do not
+     * abort the caller's process.
+     *
+     * @param int   $objectId       EasyVerein inventory-object ID
+     * @param array $fieldsToUpdate Map of custom-field name to new value string
+     */
+    private function updateInventoryCustomFields(int $objectId, array $fieldsToUpdate): void {
+        $cfUrl = self::API_BASE . '/inventory-object/' . $objectId
+            . '/custom-fields?query={id,value,customField{id,name}}';
+
+        try {
+            $cfData = $this->request('GET', $cfUrl);
+        } catch (Exception $e) {
+            error_log(sprintf(
+                'EasyVereinInventory::updateInventoryCustomFields: failed to fetch custom fields for object %d: %s',
+                $objectId, $e->getMessage()
+            ));
+            return;
+        }
+
+        $existingFields = $cfData['results'] ?? $cfData['data'] ?? $cfData;
+        if (!is_array($existingFields)) {
+            return;
+        }
+
+        foreach ($existingFields as $field) {
+            $fieldName        = $field['customField']['name'] ?? '';
+            $customFieldDefId = $field['customField']['id']   ?? null;
+            $valueId          = $field['id']                  ?? null;
+
+            if (!array_key_exists($fieldName, $fieldsToUpdate) || $customFieldDefId === null) {
+                continue;
+            }
+
+            $newValue = $fieldsToUpdate[$fieldName];
+
+            try {
+                if ($valueId !== null) {
+                    // Existing value – update it
+                    $this->request(
+                        'PATCH',
+                        self::API_BASE . '/custom-field-values/' . $valueId,
+                        ['value' => $newValue]
+                    );
+                } else {
+                    // No value yet – create it
+                    $this->request(
+                        'POST',
+                        self::API_BASE . '/custom-field-values',
+                        [
+                            'customField'            => $customFieldDefId,
+                            'relatedInventoryObject' => $objectId,
+                            'value'                  => $newValue,
+                        ]
+                    );
+                }
+            } catch (Exception $e) {
+                error_log(sprintf(
+                    'EasyVereinInventory::updateInventoryCustomFields: failed to update field "%s" for object %d: %s',
+                    $fieldName, $objectId, $e->getMessage()
+                ));
+            }
+        }
     }
 
     /**
