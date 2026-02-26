@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../../src/Auth.php';
 require_once __DIR__ . '/../../includes/handlers/CSRFHandler.php';
 require_once __DIR__ . '/../../includes/models/Inventory.php';
+require_once __DIR__ . '/../../includes/services/MicrosoftGraphService.php';
 require_once __DIR__ . '/../../src/MailService.php';
 
 if (!Auth::check()) {
