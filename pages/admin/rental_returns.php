@@ -97,7 +97,14 @@ try {
     );
     $pendingReturnLoans = enrichWithUsers($stmt3->fetchAll(PDO::FETCH_ASSOC));
 
-    // Also load legacy inventory_rentals rows that are pending board confirmation.
+} catch (Exception $e) {
+    $dbError = 'Datenbankfehler: ' . $e->getMessage();
+    error_log('rental_returns: ' . $e->getMessage());
+}
+
+// Also load legacy inventory_rentals rows that are pending board confirmation.
+// The table may not exist in deployments running the new inventory_requests schema – silently ignore.
+try {
     $stmt4 = $db->query(
         "SELECT id, easyverein_item_id AS inventory_object_id, user_id,
                 rented_quantity AS quantity, rented_at AS created_at,
@@ -106,8 +113,7 @@ try {
     );
     $pendingRentalReturns = enrichWithUsers($stmt4->fetchAll(PDO::FETCH_ASSOC));
 } catch (Exception $e) {
-    $dbError = 'Datenbankfehler: ' . $e->getMessage();
-    error_log('rental_returns: ' . $e->getMessage());
+    // Legacy table may not exist – silently ignore
 }
 
 $itemNames = buildItemNameMap();
