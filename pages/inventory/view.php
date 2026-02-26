@@ -246,7 +246,7 @@ ob_start();
 
             <!-- Image -->
             <?php if ($item['image_path']): ?>
-            <div class="mb-8">
+            <div class="mb-8 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-slate-800 dark:to-slate-700 rounded-2xl flex items-center justify-center p-4">
                 <?php
                 // Check if image is from EasyVerein and needs proxy
                 $imageSrc = $item['image_path'];
@@ -258,7 +258,7 @@ ob_start();
                     $imageSrc = '/' . ltrim($imageSrc, '/');
                 }
                 ?>
-                <img src="<?php echo htmlspecialchars($imageSrc); ?>" alt="<?php echo htmlspecialchars($item['name']); ?>" class="w-full max-w-2xl rounded-2xl shadow-2xl border border-gray-200 dark:border-slate-700">
+                <img src="<?php echo htmlspecialchars($imageSrc); ?>" alt="<?php echo htmlspecialchars($item['name']); ?>" class="max-w-full max-h-96 object-contain rounded-2xl shadow-2xl border border-gray-200 dark:border-slate-700">
             </div>
             <?php endif; ?>
 
