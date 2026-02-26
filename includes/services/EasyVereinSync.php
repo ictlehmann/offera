@@ -141,18 +141,6 @@ class EasyVereinSync {
             $imageUrl = $evItem['image_url'];
         }
         
-        // Check in custom_fields if exists
-        if (!$imageUrl && isset($evItem['custom_fields']) && is_array($evItem['custom_fields'])) {
-            foreach ($evItem['custom_fields'] as $field) {
-                if (isset($field['name']) && in_array(strtolower($field['name']), ['picture', 'image', 'avatar', 'bild', 'foto'])) {
-                    if (isset($field['value']) && !empty($field['value'])) {
-                        $imageUrl = $field['value'];
-                        break;
-                    }
-                }
-            }
-        }
-        
         // Return the EasyVerein URL directly (not downloaded)
         return $imageUrl;
     }
@@ -201,7 +189,7 @@ class EasyVereinSync {
                     $easyvereinId = $evItem['id'] ?? $evItem['EasyVereinID'] ?? null;
                     $name = $evItem['name'] ?? $evItem['Name'] ?? 'Unnamed Item';
                     $description = $evItem['note'] ?? $evItem['description'] ?? $evItem['Description'] ?? '';
-                    $totalQuantity = $evItem['pieces'] ?? $evItem['quantity'] ?? $evItem['total_stock'] ?? $evItem['TotalQuantity'] ?? 0;
+                    $totalQuantity = (int)($evItem['pieces'] ?? $evItem['quantity'] ?? 0);
                     // Use acquisitionPrice as primary (original purchase price per requirements), fall back to price
                     $unitPrice = $evItem['acquisitionPrice'] ?? $evItem['price'] ?? $evItem['unit_price'] ?? 0;
                     $serialNumber = $evItem['serial_number'] ?? $evItem['SerialNumber'] ?? null;
