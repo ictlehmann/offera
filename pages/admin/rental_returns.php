@@ -106,7 +106,7 @@ $itemNames = buildItemNameMap();
 $conditionLabels = [
     'einwandfrei'              => 'Einwandfrei',
     'leichte_gebrauchsspuren'  => 'Leichte Gebrauchsspuren',
-    'beschaedigt'              => 'Beschädigt',
+    'beschädigt'              => 'Beschädigt',
     'defekt_verlust'           => 'Defekt/Verlust',
 ];
 
