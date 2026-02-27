@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS `invoices` (
   `paid_at` TIMESTAMP NULL DEFAULT NULL COMMENT 'Timestamp when invoice was marked as paid',
   `paid_by_user_id` INT UNSIGNED DEFAULT NULL COMMENT 'User ID who marked invoice as paid',
   `paypal_transaction_id` VARCHAR(64) DEFAULT NULL COMMENT 'PayPal capture/transaction ID for webhook lookup',
+  `payment_purpose` VARCHAR(255) DEFAULT NULL COMMENT 'Payment purpose / Verwendungszweck for Vorkasse',
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   INDEX `idx_user_id` (`user_id`),

@@ -38,10 +38,11 @@ function executeSql($pdo, $sql, $description) {
         $success_count++;
         return true;
     } catch (PDOException $e) {
-        // Ignore "Duplicate column", "Table already exists", and "Table doesn't exist" errors
+        // Ignore "Duplicate column", "Table already exists", "Table doesn't exist", and "Can't DROP" errors
         if (strpos($e->getMessage(), 'Duplicate column') !== false || 
             strpos($e->getMessage(), 'already exists') !== false ||
-            strpos($e->getMessage(), "doesn't exist") !== false) {
+            strpos($e->getMessage(), "doesn't exist") !== false ||
+            strpos($e->getMessage(), "Can't DROP") !== false) {
             echo "⚠ SKIPPED: $description (already applied or not applicable)\n\n";
             $success_count++;
             return true;
@@ -1221,6 +1222,20 @@ try {
         $rech_db,
         "ALTER TABLE `invoices` ADD COLUMN `paypal_transaction_id` VARCHAR(64) DEFAULT NULL COMMENT 'PayPal capture/transaction ID for webhook lookup' AFTER `paid_by_user_id`",
         "Add paypal_transaction_id column to invoices table"
+    );
+
+    // Add payment_purpose column for Vorkasse / bank transfer reference
+    executeSql(
+        $rech_db,
+        "ALTER TABLE `invoices` ADD COLUMN `payment_purpose` VARCHAR(255) DEFAULT NULL COMMENT 'Payment purpose / Verwendungszweck for Vorkasse'",
+        "Add payment_purpose column to invoices table"
+    );
+
+    // Drop stripe_session_id column if it exists (Stripe removed)
+    executeSql(
+        $rech_db,
+        "ALTER TABLE `invoices` DROP COLUMN `stripe_session_id`",
+        "Drop stripe_session_id column from invoices table"
     );
 
 

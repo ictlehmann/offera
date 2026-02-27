@@ -1,7 +1,7 @@
 <?php
 /**
  * ShopPaymentService
- * Handles PayPal (via PayPal Checkout SDK) and SEPA (via Stripe) payment processing.
+ * Handles PayPal (via PayPal Checkout SDK) and Vorkasse payment processing.
  */
 
 require_once __DIR__ . '/../vendor/autoload.php';
@@ -13,7 +13,7 @@ use PayPalCheckoutSdk\Core\SandboxEnvironment;
 use PayPalCheckoutSdk\Core\ProductionEnvironment;
 use PayPalCheckoutSdk\Orders\OrdersCreateRequest;
 use PayPalCheckoutSdk\Orders\OrdersCaptureRequest;
-use Stripe\StripeClient;
+
 
 class ShopPaymentService {
 
@@ -369,131 +369,6 @@ class ShopPaymentService {
     }
 
     // -------------------------------------------------------------------------
-    // Stripe SEPA
-    // -------------------------------------------------------------------------
-
-    /**
-     * Build a configured Stripe client using the secret key from .env.
-     *
-     * @return StripeClient
-     */
-    private static function buildStripeClient(): StripeClient {
-        $secretKey = $_ENV['STRIPE_SECRET_KEY'] ?? getenv('STRIPE_SECRET_KEY') ?? '';
-        return new StripeClient($secretKey);
-    }
-
-    /**
-     * Initiate a SEPA direct-debit payment via Stripe.
-     * Alias for processSepaPayment() for backward compatibility.
-     *
-     * @param int    $orderId     Internal order ID
-     * @param float  $amount      Amount in EUR
-     * @param string $iban        Customer IBAN
-     * @param string $holderName  Account holder name
-     * @return array ['success' => bool, 'mandate_id' => string|null, 'client_secret' => string|null, 'error' => string|null]
-     */
-    public static function initiateSepa(int $orderId, float $amount, string $iban, string $holderName): array {
-        return self::processSepaPayment($orderId, $amount, $iban, $holderName);
-    }
-
-    /**
-     * Process a SEPA direct-debit payment using Stripe.
-     * Uses STRIPE_SECRET_KEY from the .env file.
-     *
-     * Flow:
-     *  1. Create (or retrieve) a Stripe Customer.
-     *  2. Attach a sepa_debit PaymentMethod using the customer's IBAN.
-     *  3. Create and confirm a PaymentIntent.
-     *  4. On success (status = 'succeeded' or 'processing'): mark shop_orders.payment_status
-     *     as 'paid' and write an audit-log entry.
-     *
-     * Note: SEPA debit payments may be asynchronous. Stripe will send a
-     * payment_intent.succeeded webhook when the bank confirms the debit.
-     * You should also handle that webhook to guarantee the status update.
-     *
-     * @param int    $orderId    Internal order ID (shop_orders.id)
-     * @param float  $amount     Amount in EUR
-     * @param string $iban       Customer IBAN (e.g. "DE89370400440532013000")
-     * @param string $holderName Account holder full name
-     * @return array ['success' => bool, 'mandate_id' => string|null, 'client_secret' => string|null, 'error' => string|null]
-     */
-    public static function processSepaPayment(int $orderId, float $amount, string $iban, string $holderName): array {
-        try {
-            $stripe = self::buildStripeClient();
-
-            // 1. Create a Stripe customer so the mandate is attached to a named entity
-            $customer = $stripe->customers->create([
-                'name'     => $holderName,
-                'metadata' => ['shop_order_id' => $orderId],
-            ]);
-
-            // 2. Create the sepa_debit PaymentMethod with the provided IBAN
-            $paymentMethod = $stripe->paymentMethods->create([
-                'type'       => 'sepa_debit',
-                'sepa_debit' => ['iban' => $iban],
-                'billing_details' => [
-                    'name' => $holderName,
-                ],
-            ]);
-
-            // 3. Create and immediately confirm the PaymentIntent
-            $amountCents = (int) round($amount * 100);
-            $intent = $stripe->paymentIntents->create([
-                'amount'               => $amountCents,
-                'currency'             => 'eur',
-                'customer'             => $customer->id,
-                'payment_method'       => $paymentMethod->id,
-                'payment_method_types' => ['sepa_debit'],
-                'confirm'              => true,
-                'mandate_data'         => [
-                    'customer_acceptance' => [
-                        'type'   => 'online',
-                        'online' => [
-                            'ip_address' => $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1',
-                            'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? 'unknown',
-                        ],
-                    ],
-                ],
-                'metadata' => ['shop_order_id' => $orderId],
-            ]);
-
-            $mandateId = null;
-            if (!empty($intent->payment_method_options->sepa_debit->mandate_options)) {
-                $mandateId = $intent->payment_method_options->sepa_debit->mandate_options->reference ?? null;
-            }
-
-            // SEPA debit payments are often 'processing' (async bank confirmation)
-            if (in_array($intent->status, ['succeeded', 'processing'], true)) {
-                self::markOrderPaid($orderId);
-                self::writeAuditLog(0, 'shop_payment_completed', 'shop_order', $orderId,
-                    "SEPA-Lastschrift via Stripe eingeleitet: PaymentIntent {$intent->id}, Status: {$intent->status}");
-
-                return [
-                    'success'       => true,
-                    'mandate_id'    => $mandateId,
-                    'client_secret' => $intent->client_secret,
-                    'error'         => null,
-                ];
-            }
-
-            return [
-                'success'       => false,
-                'mandate_id'    => $mandateId,
-                'client_secret' => $intent->client_secret,
-                'error'         => "Stripe-Status unbekannt: {$intent->status}",
-            ];
-        } catch (\Exception $e) {
-            error_log("ShopPaymentService::processSepaPayment – Fehler bei Bestellung #{$orderId}: " . $e->getMessage());
-            return [
-                'success'       => false,
-                'mandate_id'    => null,
-                'client_secret' => null,
-                'error'         => 'SEPA-Zahlung konnte nicht verarbeitet werden: ' . $e->getMessage(),
-            ];
-        }
-    }
-
-    // -------------------------------------------------------------------------
     // Shared helpers
     // -------------------------------------------------------------------------
 
@@ -556,7 +431,7 @@ class ShopPaymentService {
     // -------------------------------------------------------------------------
 
     /**
-     * Handle an incoming webhook from PayPal or Stripe.
+     * Handle an incoming webhook from PayPal.
      *
      * Detects the payment provider from request headers, verifies the signature,
      * and updates the relevant records on payment events.
@@ -565,10 +440,6 @@ class ShopPaymentService {
      *          PAYMENT.CAPTURE.REFUNDED. Updates the invoices table (Rech DB).
      *          Verification via PayPal's verify-webhook-signature API.
      *          Requires PAYPAL_WEBHOOK_ID in .env. Returns 403 on invalid signature.
-     *
-     * Stripe:  listens for payment_intent.succeeded
-     *          Verification via Stripe\Webhook::constructEvent().
-     *          Requires STRIPE_WEBHOOK_SECRET in .env.
      *
      * @return void  Sends HTTP 200 / 400 / 403 and exits.
      */
@@ -579,11 +450,6 @@ class ShopPaymentService {
         // Normalise header names to lowercase for reliable lookup
         $headersLower = array_change_key_case($headers, CASE_LOWER);
 
-        if (isset($headersLower['stripe-signature'])) {
-            self::handleStripeWebhook($rawBody, $headersLower['stripe-signature']);
-            return;
-        }
-
         if (isset($headersLower['paypal-transmission-id'])) {
             self::handlePayPalWebhook($rawBody, $headersLower);
             return;
@@ -591,41 +457,6 @@ class ShopPaymentService {
 
         http_response_code(400);
         echo json_encode(['error' => 'Unknown webhook source']);
-        exit;
-    }
-
-    /**
-     * Process a verified Stripe webhook payload.
-     *
-     * @param string $rawBody     Raw request body
-     * @param string $sigHeader   Value of the Stripe-Signature header
-     * @return void
-     */
-    private static function handleStripeWebhook(string $rawBody, string $sigHeader): void {
-        $webhookSecret = $_ENV['STRIPE_WEBHOOK_SECRET'] ?? getenv('STRIPE_WEBHOOK_SECRET') ?? '';
-
-        try {
-            $event = \Stripe\Webhook::constructEvent($rawBody, $sigHeader, $webhookSecret);
-        } catch (\Stripe\Exception\SignatureVerificationException $e) {
-            error_log("ShopPaymentService::handleStripeWebhook – ungültige Signatur: " . $e->getMessage());
-            http_response_code(400);
-            echo json_encode(['error' => 'Invalid Stripe signature']);
-            exit;
-        }
-
-        if ($event->type === 'payment_intent.succeeded') {
-            $intent  = $event->data->object;
-            $orderId = (int) ($intent->metadata->shop_order_id ?? 0);
-
-            if ($orderId > 0) {
-                self::markOrderPaid($orderId);
-                self::writeAuditLog(0, 'shop_payment_completed', 'shop_order', $orderId,
-                    "Stripe Webhook: PaymentIntent {$intent->id} succeeded");
-            }
-        }
-
-        http_response_code(200);
-        echo json_encode(['received' => true]);
         exit;
     }
 
