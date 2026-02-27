@@ -22,6 +22,196 @@ class ShopPaymentService {
     // -------------------------------------------------------------------------
 
     /**
+     * Obtain a PayPal OAuth2 access token via Basic Auth using PAYPAL_CLIENT_ID and
+     * PAYPAL_SECRET from config/.env. The token is cached for the lifetime of the
+     * current request to avoid redundant round-trips.
+     *
+     * @return string  Bearer access token, or empty string on failure
+     */
+    private static function getAccessToken(): string {
+        static $cached    = '';
+        static $expiresAt = 0;
+
+        if ($cached !== '' && time() < $expiresAt) {
+            return $cached;
+        }
+
+        $cached    = '';
+        $expiresAt = 0;
+
+        try {
+            $clientId = defined('PAYPAL_CLIENT_ID') ? PAYPAL_CLIENT_ID : (getenv('PAYPAL_CLIENT_ID') ?: '');
+            $secret   = defined('PAYPAL_SECRET')    ? PAYPAL_SECRET    : (getenv('PAYPAL_SECRET')    ?: '');
+            $baseUrl  = defined('PAYPAL_BASE_URL')  ? PAYPAL_BASE_URL  : (getenv('PAYPAL_BASE_URL')  ?: 'https://api-m.sandbox.paypal.com');
+
+            $httpClient = new \GuzzleHttp\Client();
+            $response   = $httpClient->post($baseUrl . '/v1/oauth2/token', [
+                'auth'        => [$clientId, $secret],
+                'form_params' => ['grant_type' => 'client_credentials'],
+            ]);
+
+            $data = json_decode((string) $response->getBody(), true);
+
+            if (empty($data['access_token'])) {
+                error_log("ShopPaymentService::getAccessToken – access_token fehlt in der Antwort: " . json_encode($data));
+            } else {
+                $cached    = $data['access_token'];
+                $expiresAt = time() + max(0, (int) ($data['expires_in'] ?? 0) - 60);
+            }
+        } catch (\Exception $e) {
+            error_log("ShopPaymentService::getAccessToken – " . $e->getMessage());
+        }
+
+        return $cached;
+    }
+
+    /**
+     * Create a PayPal order via the REST API (/v2/checkout/orders) and return the
+     * PayPal Order ID. Use this as a lightweight alternative to the SDK-based
+     * processPaypalPayment() when you only need the order ID.
+     *
+     * @param float  $amount    Amount to charge
+     * @param string $currency  ISO 4217 currency code (default: 'EUR')
+     * @return string|null      PayPal Order ID on success, null on failure
+     */
+    public static function createPayPalOrder(float $amount, string $currency = 'EUR'): ?string {
+        try {
+            $accessToken = self::getAccessToken();
+            if ($accessToken === '') {
+                error_log("ShopPaymentService::createPayPalOrder – kein Access Token verfügbar");
+                return null;
+            }
+
+            $baseUrl    = defined('PAYPAL_BASE_URL') ? PAYPAL_BASE_URL : 'https://api-m.sandbox.paypal.com';
+            $httpClient = new \GuzzleHttp\Client();
+            $response   = $httpClient->post($baseUrl . '/v2/checkout/orders', [
+                'headers' => [
+                    'Authorization' => "Bearer {$accessToken}",
+                    'Content-Type'  => 'application/json',
+                ],
+                'json' => [
+                    'intent'         => 'CAPTURE',
+                    'purchase_units' => [[
+                        'amount' => [
+                            'currency_code' => $currency,
+                            'value'         => number_format($amount, 2, '.', ''),
+                        ],
+                    ]],
+                ],
+            ]);
+
+            $data = json_decode((string) $response->getBody(), true);
+            return $data['id'] ?? null;
+        } catch (\Exception $e) {
+            error_log("ShopPaymentService::createPayPalOrder – " . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Capture an approved PayPal order via the REST API
+     * (/v2/checkout/orders/{orderId}/capture). Call this after the buyer has
+     * approved the payment on PayPal's approval page.
+     *
+     * @param string $orderId  PayPal Order ID to capture
+     * @return array           ['success' => bool, 'status' => string, 'data' => array, 'error' => string|null]
+     */
+    public static function capturePayPalOrder(string $orderId): array {
+        try {
+            $accessToken = self::getAccessToken();
+            if ($accessToken === '') {
+                error_log("ShopPaymentService::capturePayPalOrder – kein Access Token verfügbar");
+                return ['success' => false, 'status' => '', 'data' => [], 'error' => 'Kein Access Token verfügbar'];
+            }
+
+            $baseUrl    = defined('PAYPAL_BASE_URL') ? PAYPAL_BASE_URL : 'https://api-m.sandbox.paypal.com';
+            $httpClient = new \GuzzleHttp\Client();
+            $response   = $httpClient->post($baseUrl . "/v2/checkout/orders/{$orderId}/capture", [
+                'headers' => [
+                    'Authorization' => "Bearer {$accessToken}",
+                    'Content-Type'  => 'application/json',
+                ],
+            ]);
+
+            $data   = json_decode((string) $response->getBody(), true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                error_log("ShopPaymentService::capturePayPalOrder – ungültiges JSON in der Antwort: " . json_last_error_msg());
+                $data = [];
+            }
+            $status = $data['status'] ?? '';
+
+            return [
+                'success' => $status === 'COMPLETED',
+                'status'  => $status,
+                'data'    => $data,
+                'error'   => $status !== 'COMPLETED' ? "PayPal-Status: {$status}" : null,
+            ];
+        } catch (\Exception $e) {
+            error_log("ShopPaymentService::capturePayPalOrder – " . $e->getMessage());
+            return ['success' => false, 'status' => '', 'data' => [], 'error' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * Verify a PayPal webhook signature by calling PayPal's
+     * /v1/notifications/verify-webhook-signature endpoint.
+     * Uses PAYPAL_WEBHOOK_ID from config/.env.
+     *
+     * @param array  $headers  Associative array of HTTP request headers (any case)
+     * @param string $body     Raw request body
+     * @return bool            True when PayPal confirms the signature is valid
+     */
+    public static function verifyWebhookSignature(array $headers, string $body): bool {
+        try {
+            $accessToken = self::getAccessToken();
+            if ($accessToken === '') {
+                error_log("ShopPaymentService::verifyWebhookSignature – kein Access Token verfügbar");
+                return false;
+            }
+
+            $webhookId = defined('PAYPAL_WEBHOOK_ID') ? PAYPAL_WEBHOOK_ID : (getenv('PAYPAL_WEBHOOK_ID') ?: '');
+            if ($webhookId === '') {
+                error_log("ShopPaymentService::verifyWebhookSignature – PAYPAL_WEBHOOK_ID nicht konfiguriert");
+                return false;
+            }
+
+            $headersLower = array_change_key_case($headers, CASE_LOWER);
+            $baseUrl      = defined('PAYPAL_BASE_URL') ? PAYPAL_BASE_URL : 'https://api-m.sandbox.paypal.com';
+
+            $webhookEvent = json_decode($body, true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                error_log("ShopPaymentService::verifyWebhookSignature – ungültiges Webhook-JSON: " . json_last_error_msg());
+                return false;
+            }
+
+            $payload = [
+                'auth_algo'         => $headersLower['paypal-auth-algo']         ?? '',
+                'cert_url'          => $headersLower['paypal-cert-url']          ?? '',
+                'transmission_id'   => $headersLower['paypal-transmission-id']   ?? '',
+                'transmission_sig'  => $headersLower['paypal-transmission-sig']  ?? '',
+                'transmission_time' => $headersLower['paypal-transmission-time'] ?? '',
+                'webhook_id'        => $webhookId,
+                'webhook_event'     => $webhookEvent ?? [],
+            ];
+
+            $httpClient = new \GuzzleHttp\Client();
+            $response   = $httpClient->post($baseUrl . '/v1/notifications/verify-webhook-signature', [
+                'headers' => [
+                    'Authorization' => "Bearer {$accessToken}",
+                    'Content-Type'  => 'application/json',
+                ],
+                'json' => $payload,
+            ]);
+
+            $data = json_decode((string) $response->getBody(), true);
+            return ($data['verification_status'] ?? '') === 'SUCCESS';
+        } catch (\Exception $e) {
+            error_log("ShopPaymentService::verifyWebhookSignature – " . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
      * Build a configured PayPal HTTP client using credentials from .env.
      *
      * @return PayPalHttpClient
@@ -487,29 +677,14 @@ class ShopPaymentService {
      */
     private static function verifyPayPalWebhookSignature(string $rawBody, array $headers, string $webhookId): bool {
         try {
-            $clientId     = $_ENV['PAYPAL_CLIENT_ID']     ?? getenv('PAYPAL_CLIENT_ID')     ?? '';
-            $clientSecret = $_ENV['PAYPAL_CLIENT_SECRET'] ?? getenv('PAYPAL_CLIENT_SECRET') ?? '';
-            $environment  = strtolower($_ENV['PAYPAL_ENVIRONMENT'] ?? getenv('PAYPAL_ENVIRONMENT') ?? 'sandbox');
-
-            $baseUrl  = ($environment === 'production')
-                ? 'https://api-m.paypal.com'
-                : 'https://api-m.sandbox.paypal.com';
-
-            // 1. Obtain an access token via GuzzleHTTP
-            $client = new \GuzzleHttp\Client();
-
-            $tokenRes = $client->post("{$baseUrl}/v1/oauth2/token", [
-                'auth'        => [$clientId, $clientSecret],
-                'form_params' => ['grant_type' => 'client_credentials'],
-            ]);
-            $tokenData   = json_decode((string) $tokenRes->getBody(), true);
-            $accessToken = $tokenData['access_token'] ?? '';
-
+            $accessToken = self::getAccessToken();
             if ($accessToken === '') {
                 return false;
             }
 
-            // 2. Call verify-webhook-signature
+            $baseUrl    = defined('PAYPAL_BASE_URL') ? PAYPAL_BASE_URL : 'https://api-m.sandbox.paypal.com';
+            $httpClient = new \GuzzleHttp\Client();
+
             $verifyPayload = [
                 'auth_algo'         => $headers['paypal-auth-algo']         ?? '',
                 'cert_url'          => $headers['paypal-cert-url']          ?? '',
@@ -520,7 +695,7 @@ class ShopPaymentService {
                 'webhook_event'     => json_decode($rawBody, true) ?? [],
             ];
 
-            $verifyRes = $client->post("{$baseUrl}/v1/notifications/verify-webhook-signature", [
+            $verifyRes  = $httpClient->post($baseUrl . '/v1/notifications/verify-webhook-signature', [
                 'headers' => [
                     'Authorization' => "Bearer {$accessToken}",
                     'Content-Type'  => 'application/json',
