@@ -559,18 +559,18 @@ class ShopPaymentService {
      * Handle an incoming webhook from PayPal or Stripe.
      *
      * Detects the payment provider from request headers, verifies the signature,
-     * and – on a successful payment event – sets payment_status = 'paid' in
-     * shop_orders via markOrderPaid().
+     * and updates the relevant records on payment events.
      *
-     * PayPal:  listens for PAYMENT.CAPTURE.COMPLETED
+     * PayPal:  listens for PAYMENT.CAPTURE.COMPLETED, PAYMENT.CAPTURE.DENIED,
+     *          PAYMENT.CAPTURE.REFUNDED. Updates the invoices table (Rech DB).
      *          Verification via PayPal's verify-webhook-signature API.
-     *          Requires PAYPAL_WEBHOOK_ID in .env.
+     *          Requires PAYPAL_WEBHOOK_ID in .env. Returns 403 on invalid signature.
      *
      * Stripe:  listens for payment_intent.succeeded
      *          Verification via Stripe\Webhook::constructEvent().
      *          Requires STRIPE_WEBHOOK_SECRET in .env.
      *
-     * @return void  Sends HTTP 200 / 400 and exits.
+     * @return void  Sends HTTP 200 / 400 / 403 and exits.
      */
     public static function handleWebhook(): void {
         $rawBody = (string) file_get_contents('php://input');
@@ -632,6 +632,10 @@ class ShopPaymentService {
     /**
      * Process a verified PayPal webhook payload.
      *
+     * Handles PAYMENT.CAPTURE.COMPLETED, PAYMENT.CAPTURE.DENIED and
+     * PAYMENT.CAPTURE.REFUNDED events. Updates the invoices table in the
+     * Rech DB accordingly.
+     *
      * @param string $rawBody      Raw request body
      * @param array  $headers      Lowercase-keyed request headers
      * @return void
@@ -641,29 +645,91 @@ class ShopPaymentService {
 
         if ($webhookId !== '' && !self::verifyPayPalWebhookSignature($rawBody, $headers, $webhookId)) {
             error_log("ShopPaymentService::handlePayPalWebhook – ungültige Signatur");
-            http_response_code(400);
+            http_response_code(403);
             echo json_encode(['error' => 'Invalid PayPal signature']);
             exit;
         }
 
         $event     = json_decode($rawBody, true) ?? [];
         $eventType = $event['event_type'] ?? '';
+        $resource  = $event['resource'] ?? [];
 
-        if ($eventType === 'PAYMENT.CAPTURE.COMPLETED') {
-            $resource = $event['resource'] ?? [];
-            // custom_id is set to the internal order ID when the PayPal order is created
-            $orderId  = (int) ($resource['custom_id'] ?? 0);
+        // Map PayPal event types to internal invoice statuses
+        $eventStatusMap = [
+            'PAYMENT.CAPTURE.COMPLETED' => 'paid',
+            'PAYMENT.CAPTURE.DENIED'    => 'failed',
+            'PAYMENT.CAPTURE.REFUNDED'  => 'refunded',
+        ];
 
-            if ($orderId > 0) {
-                self::markOrderPaid($orderId);
-                self::writeAuditLog(0, 'shop_payment_completed', 'shop_order', $orderId,
-                    "PayPal Webhook: Capture {$resource['id']} completed");
+        if (isset($eventStatusMap[$eventType])) {
+            $invoiceStatus = $eventStatusMap[$eventType];
+
+            // Extract the internal ID from custom_id (set when creating the PayPal order).
+            // Falls back to a lookup by capture/transaction ID when custom_id is absent.
+            $internalId = (int) ($resource['custom_id'] ?? 0);
+            if ($internalId <= 0) {
+                $transactionId = $resource['id'] ?? '';
+                if ($transactionId !== '') {
+                    $internalId = self::findInvoiceByTransaction($transactionId);
+                }
+            }
+
+            if ($internalId > 0) {
+                self::updateInvoiceStatus($internalId, $invoiceStatus);
+                self::writeAuditLog(0, 'invoice_payment_' . $invoiceStatus, 'invoice', $internalId,
+                    "PayPal Webhook: {$eventType} – Capture " . ($resource['id'] ?? ''));
             }
         }
 
+        // Always acknowledge receipt so PayPal does not retry the event.
         http_response_code(200);
         echo json_encode(['received' => true]);
         exit;
+    }
+
+    /**
+     * Look up an invoice ID by PayPal capture/transaction ID.
+     *
+     * @param string $transactionId  PayPal capture or transaction ID
+     * @return int                   Invoice ID, or 0 if not found
+     */
+    private static function findInvoiceByTransaction(string $transactionId): int {
+        try {
+            $db   = Database::getRechDB();
+            $stmt = $db->prepare("SELECT id FROM invoices WHERE paypal_transaction_id = ? LIMIT 1");
+            $stmt->execute([$transactionId]);
+            $row  = $stmt->fetch();
+            return $row ? (int) $row['id'] : 0;
+        } catch (\Exception $e) {
+            error_log("ShopPaymentService::findInvoiceByTransaction – " . $e->getMessage());
+            return 0;
+        }
+    }
+
+    /**
+     * Update the status of an invoice in the invoices table (Rech DB).
+     *
+     * @param int    $invoiceId  Internal invoice ID
+     * @param string $status     New status: 'paid', 'failed', or 'refunded'
+     * @return void
+     */
+    private static function updateInvoiceStatus(int $invoiceId, string $status): void {
+        try {
+            $db   = Database::getRechDB();
+            if ($status === 'paid') {
+                $stmt = $db->prepare(
+                    "UPDATE invoices SET status = ?, paid_at = ? WHERE id = ?"
+                );
+                $stmt->execute([$status, date('Y-m-d H:i:s'), $invoiceId]);
+            } else {
+                $stmt = $db->prepare(
+                    "UPDATE invoices SET status = ? WHERE id = ?"
+                );
+                $stmt->execute([$status, $invoiceId]);
+            }
+        } catch (\Exception $e) {
+            error_log("ShopPaymentService::updateInvoiceStatus – Fehler bei Rechnung #{$invoiceId}: " . $e->getMessage());
+        }
     }
 
     /**
