@@ -2894,10 +2894,12 @@ body.dark-mode .sidebar {
     }
     
     /* Button Optimizations - Larger touch targets */
-    /* Only make primary buttons and button links full-width on mobile */
-    .btn-primary,
-    a.btn {
-        min-height: 44px; /* iOS recommended touch target */
+    /* Only make standalone primary buttons and form action buttons full-width on mobile */
+    form .btn-primary,
+    .form-actions .btn-primary,
+    .btn-block,
+    .btn-mobile-full {
+        min-height: 44px;
         padding: 0.75rem 1.5rem !important;
         font-size: 1rem;
         width: 100%;
@@ -2906,8 +2908,22 @@ body.dark-mode .sidebar {
         margin-bottom: 0.5rem;
     }
 
+    /* Preserve inline/grouped buttons - keep them side-by-side on mobile */
+    .btn-group .btn-primary,
+    .flex .btn-primary,
+    .flex a.btn,
+    table .btn-primary,
+    table a.btn,
+    td .btn-primary,
+    td a.btn {
+        width: auto;
+        display: inline-flex;
+    }
+
     /* Ensure all interactive elements meet touch target minimum */
-    button {
+    button,
+    a.btn,
+    .btn-primary {
         min-height: 44px;
     }
     
@@ -2922,31 +2938,32 @@ body.dark-mode .sidebar {
         border-radius: var(--radius-sm) !important;
     }
     
-    /* Tables - Horizontal scroll with better visibility */
+    /* Tables - Horizontal scroll without forcing white-space */
     table {
         display: block;
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
-        white-space: nowrap;
         border-radius: var(--radius-md);
     }
     
     th, td {
         padding: 0.75rem 0.875rem !important;
         font-size: 0.875rem;
+        white-space: nowrap; /* Prevent cell content from wrapping in scrollable tables */
     }
     
-    /* Flex containers - Stack vertically on mobile */
-    .flex.space-x-2,
-    .flex.space-x-3,
-    .flex.space-x-4 {
+    /* Flex containers - Only stack action/button groups vertically on mobile */
+    /* Don't stack items-center flex containers (icon+text combos should stay horizontal) */
+    .flex.space-x-2:not(.items-center),
+    .flex.space-x-3:not(.items-center),
+    .flex.space-x-4:not(.items-center) {
         flex-direction: column;
         gap: 0.75rem;
     }
     
-    .flex.space-x-2 > *,
-    .flex.space-x-3 > *,
-    .flex.space-x-4 > * {
+    .flex.space-x-2:not(.items-center) > *,
+    .flex.space-x-3:not(.items-center) > *,
+    .flex.space-x-4:not(.items-center) > * {
         width: 100%;
         margin: 0 !important;
     }
@@ -2970,14 +2987,21 @@ body.dark-mode .sidebar {
         padding-top: 5rem !important; /* Space for mobile header */
     }
     
-    /* Modal/Dialog - Full screen on mobile */
-    .modal,
-    [role="dialog"] {
+    /* Custom dialogs (non-Bootstrap) - Full screen on mobile */
+    [role="dialog"]:not(.modal):not(.modal-dialog):not(.modal-content) {
         width: 100% !important;
-        height: 100vh !important;
         max-width: 100% !important;
         margin: 0 !important;
         border-radius: 0 !important;
+    }
+    
+    /* Bootstrap modals: full-width but keep natural height and centered */
+    .modal-dialog {
+        margin: 0.5rem auto !important;
+        max-width: calc(100% - 1rem) !important;
+    }
+    .modal-content {
+        border-radius: var(--radius-md) !important;
     }
     
     /* Stats Cards - Better mobile layout */
@@ -3161,6 +3185,8 @@ body.dark-mode .sidebar {
 @media print {
     /* Hide navigation and interactive elements */
     .sidebar,
+    .mobile-topbar,
+    .sidebar-overlay,
     #mobile-menu-btn,
     #sidebar-overlay,
     button,
@@ -3965,7 +3991,7 @@ body:not(.dark-mode) .hero-gradient .hero-date {
 }
 
 /* Ensure all buttons are touch-friendly on mobile 
-   Note: !important ensures accessibility standards are enforced */
+   Note: min-height ensures accessibility; padding/font-size only applied to non-icon buttons */
 @media (max-width: 768px) {
     button,
     .btn,
@@ -3973,6 +3999,12 @@ body:not(.dark-mode) .hero-gradient .hero-date {
     input[type="submit"],
     input[type="button"] {
         min-height: 44px !important;
+    }
+    /* Only override padding/font for standard text buttons, not icon-only buttons */
+    .btn:not(.btn-icon):not([class*="p-1"]):not([class*="p-2"]):not(.btn-sm-icon),
+    a.btn:not(.btn-icon):not([class*="p-1"]):not([class*="p-2"]):not(.btn-sm-icon),
+    input[type="submit"],
+    input[type="button"] {
         padding: 0.75rem 1rem !important;
         font-size: 1rem !important;
     }
@@ -4006,6 +4038,9 @@ body:not(.dark-mode) .hero-gradient .hero-date {
         max-width: 100%;
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
+        /* No white-space: nowrap here - cells get it individually so rows still wrap */
+    }
+    th, td {
         white-space: nowrap;
     }
 }
@@ -4935,4 +4970,228 @@ label,
 html, body {
     overflow-x: hidden;
     max-width: 100%;
+}
+
+/* ============================================================
+   FLEX OVERFLOW FIX
+   Prevents flex children from overflowing their container
+   when containing long text (truncate, word-break, etc.)
+   ============================================================ */
+
+/* Flex children that contain text should have min-width: 0 to allow truncation */
+.flex > .min-w-0,
+.flex > .flex-1,
+.flex > .flex-auto,
+.flex > .truncate {
+    min-width: 0;
+}
+
+/* ============================================================
+   VERY SMALL SCREEN ENHANCEMENTS (≤ 375px)
+   iPhone SE, older Android phones
+   ============================================================ */
+
+@media (max-width: 375px) {
+    /* Reduce card padding for very small screens */
+    .card {
+        padding: 0.875rem !important;
+    }
+
+    /* Slightly smaller font sizes */
+    body {
+        font-size: 0.9rem;
+    }
+
+    h1 {
+        font-size: 1.5rem !important;
+    }
+
+    h2 {
+        font-size: 1.25rem !important;
+    }
+
+    h3 {
+        font-size: 1.125rem !important;
+    }
+
+    /* Reduce main horizontal padding */
+    main {
+        padding-left: 0.75rem !important;
+        padding-right: 0.75rem !important;
+    }
+
+    /* Sidebar: slightly narrower on very small screens */
+    .sidebar {
+        width: 80% !important;
+        max-width: 280px !important;
+    }
+
+    /* Reduce badge padding */
+    .badge,
+    [class*="badge"],
+    .status-badge {
+        padding: 0.25rem 0.5rem !important;
+        font-size: 0.75rem !important;
+    }
+
+    /* Table cells: smaller padding */
+    th, td {
+        padding: 0.625rem 0.625rem !important;
+        font-size: 0.8125rem !important;
+    }
+
+    /* Reduce button padding slightly */
+    .btn-primary {
+        padding: 0.625rem 1.25rem !important;
+    }
+}
+
+/* ============================================================
+   FLUID TYPOGRAPHY - Smooth scaling between breakpoints
+   ============================================================ */
+
+/* Page-level headings scale smoothly from mobile to desktop */
+.page-title {
+    font-size: clamp(1.5rem, 4vw, 2.25rem);
+    line-height: 1.2;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+}
+
+.section-title {
+    font-size: clamp(1.25rem, 3vw, 1.75rem);
+    line-height: 1.3;
+    font-weight: 700;
+}
+
+/* Card title scales fluidly */
+.card-title {
+    font-size: clamp(1rem, 2.5vw, 1.375rem);
+    font-weight: 600;
+}
+
+/* ============================================================
+   IMPROVED MAIN CONTENT LAYOUT ON TABLETS (768px-1024px)
+   Ensures consistent sidebar offset when sidebar is visible
+   ============================================================ */
+
+@media (min-width: 768px) {
+    /* Main content: ensure top padding does not conflict with sidebar */
+    main {
+        padding-top: 1.5rem !important;
+    }
+}
+
+/* ============================================================
+   IMPROVED CARD GRID RESPONSIVENESS
+   Auto-fit grids that don't need the grid-no-stack override
+   ============================================================ */
+
+/* Auto-responsive grid: 1 col on mobile, 2 on tablet, 3+ on desktop */
+.grid-auto-responsive {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+    gap: 1.25rem;
+}
+
+@media (max-width: 640px) {
+    .grid-auto-responsive {
+        gap: 1rem;
+    }
+}
+
+/* ============================================================
+   IMPROVED TABLE OVERFLOW INDICATOR ON MOBILE
+   ============================================================ */
+
+/* Scrollable table hint - visible right-fade gradient */
+@media (max-width: 767px) {
+    .table-responsive {
+        position: relative;
+    }
+
+    .table-responsive::after {
+        content: '';
+        position: absolute;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        width: 32px;
+        background: linear-gradient(to right, transparent, rgba(0, 0, 0, 0.06));
+        pointer-events: none;
+        border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    }
+
+    .dark-mode .table-responsive::after {
+        background: linear-gradient(to right, transparent, rgba(0, 0, 0, 0.3));
+    }
+}
+
+/* ============================================================
+   BETTER MODAL BOTTOM SHEET ON MOBILE
+   Slides up from bottom on small screens (Bootstrap compatible)
+   ============================================================ */
+
+@media (max-width: 575px) {
+    /* Modals slide up from bottom on mobile for better UX */
+    .modal.slide-up .modal-dialog {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        margin: 0 !important;
+        max-width: 100% !important;
+    }
+
+    .modal.slide-up .modal-content {
+        border-radius: var(--radius-lg) var(--radius-lg) 0 0 !important;
+        border-bottom: none;
+    }
+}
+
+/* ============================================================
+   CONSISTENT MAIN CONTENT TOP OFFSET
+   Ensures no content is hidden under the mobile topbar
+   ============================================================ */
+
+@media (max-width: 767px) {
+    /* Use CSS variable for topbar height to keep things in sync */
+    :root {
+        --topbar-height: 60px;
+    }
+
+    main {
+        padding-top: calc(var(--topbar-height) + 1rem) !important;
+    }
+}
+
+/* ============================================================
+   IMPROVED SCROLLBAR ON MOBILE CONTENT AREAS
+   ============================================================ */
+
+/* Thin scrollbars on mobile content areas */
+@media (max-width: 767px) {
+    main {
+        scrollbar-width: thin;
+    }
+}
+
+/* ============================================================
+   CROSS-BROWSER INPUT DATE STYLING CONSISTENCY
+   ============================================================ */
+
+/* Ensure date/time inputs have consistent height on all browsers */
+input[type="date"],
+input[type="datetime-local"],
+input[type="time"],
+input[type="month"],
+input[type="week"] {
+    min-height: 44px;
+    box-sizing: border-box;
+}
+
+/* Edge/IE: fix date input alignment */
+input[type="date"]::-ms-clear,
+input[type="datetime-local"]::-ms-clear {
+    display: none;
 }
