@@ -1188,6 +1188,13 @@ try {
         "Add shipping_cost column to shop_orders"
     );
 
+    // Add shipping_address column to shop_orders
+    executeSql(
+        $content_db,
+        "ALTER TABLE `shop_orders` ADD COLUMN `shipping_address` TEXT DEFAULT NULL COMMENT 'Lieferadresse für Postversand'",
+        "Add shipping_address column to shop_orders"
+    );
+
     // ============================================
     // SUMMARY
     // ============================================
