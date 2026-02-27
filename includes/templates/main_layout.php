@@ -299,7 +299,7 @@ if (Auth::check() && isset($_SESSION['profile_incomplete']) && $_SESSION['profil
                 padding-left: 1rem !important;
                 padding-right: 1rem !important;
                 padding-bottom: 1rem !important;
-                padding-top: 5rem !important; /* Ensure content doesn't hide under topbar */
+                padding-top: calc(var(--topbar-height, 60px) + 1rem) !important; /* Ensure content doesn't hide under topbar */
                 margin-left: 0 !important;
             }
             
@@ -308,7 +308,6 @@ if (Auth::check() && isset($_SESSION['profile_incomplete']) && $_SESSION['profil
                 display: block;
                 overflow-x: auto;
                 -webkit-overflow-scrolling: touch;
-                white-space: nowrap;
                 border-radius: 8px;
             }
             
@@ -320,6 +319,11 @@ if (Auth::check() && isset($_SESSION['profile_incomplete']) && $_SESSION['profil
                 display: table-row-group;
             }
             
+            /* Table cells: no-wrap to keep scrollable tables readable */
+            th, td {
+                white-space: nowrap;
+            }
+            
             /* Better form spacing on mobile */
             form input, form select, form textarea {
                 font-size: 16px; /* Prevents zoom on iOS */
@@ -327,23 +331,23 @@ if (Auth::check() && isset($_SESSION['profile_incomplete']) && $_SESSION['profil
                 border-radius: 10px !important;
             }
             
-            /* Stack buttons vertically on mobile */
-            .flex.space-x-2,
-            .flex.space-x-3,
-            .flex.space-x-4,
-            .flex.gap-2,
-            .flex.gap-3,
-            .flex.gap-4 {
+            /* Stack action/button groups vertically on mobile - but NOT icon+text combos */
+            .flex.space-x-2:not(.items-center),
+            .flex.space-x-3:not(.items-center),
+            .flex.space-x-4:not(.items-center),
+            .flex.gap-2:not(.items-center),
+            .flex.gap-3:not(.items-center),
+            .flex.gap-4:not(.items-center) {
                 flex-direction: column !important;
                 gap: 0.75rem !important;
             }
             
-            .flex.space-x-2 > *,
-            .flex.space-x-3 > *,
-            .flex.space-x-4 > *,
-            .flex.gap-2 > *,
-            .flex.gap-3 > *,
-            .flex.gap-4 > * {
+            .flex.space-x-2:not(.items-center) > *,
+            .flex.space-x-3:not(.items-center) > *,
+            .flex.space-x-4:not(.items-center) > *,
+            .flex.gap-2:not(.items-center) > *,
+            .flex.gap-3:not(.items-center) > *,
+            .flex.gap-4:not(.items-center) > * {
                 width: 100% !important;
                 margin: 0 !important;
             }
