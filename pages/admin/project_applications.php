@@ -322,19 +322,18 @@ ob_start();
 <!-- Accept Modal -->
 <div id="acceptModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
     <div class="bg-white rounded-lg w-full max-w-lg max-h-[85vh] flex flex-col overflow-hidden">
-        <div class="p-6 overflow-y-auto flex-1">
-            <h3 class="text-xl font-bold text-gray-800 mb-4">
-                <i class="fas fa-check-circle text-green-600 mr-2"></i>
-                Bewerbung akzeptieren
-            </h3>
-            <p class="text-gray-600 mb-4">
-                Bewerbung von "<span id="acceptUserEmail" class="font-semibold"></span>" akzeptieren.
-            </p>
-            <form method="POST" id="acceptForm">
-                <input type="hidden" name="csrf_token" value="<?php echo CSRFHandler::getToken(); ?>">
-                <input type="hidden" name="application_id" id="acceptApplicationId" value="">
-                <input type="hidden" name="accept_application" value="1">
-
+        <form method="POST" id="acceptForm" class="flex flex-col flex-1 min-h-0">
+            <input type="hidden" name="csrf_token" value="<?php echo CSRFHandler::getToken(); ?>">
+            <input type="hidden" name="application_id" id="acceptApplicationId" value="">
+            <input type="hidden" name="accept_application" value="1">
+            <div class="p-6 overflow-y-auto flex-1">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">
+                    <i class="fas fa-check-circle text-green-600 mr-2"></i>
+                    Bewerbung akzeptieren
+                </h3>
+                <p class="text-gray-600 mb-4">
+                    Bewerbung von "<span id="acceptUserEmail" class="font-semibold"></span>" akzeptieren.
+                </p>
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Rolle auswählen <span class="text-red-500">*</span>
@@ -344,16 +343,16 @@ ob_start();
                         <option value="lead">Lead (Projektleitung)</option>
                     </select>
                 </div>
-            </form>
-        </div>
-        <div class="px-6 pb-6 flex space-x-4">
-            <button type="button" id="closeAcceptModalBtn" class="flex-1 px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
-                Abbrechen
-            </button>
-            <button type="submit" form="acceptForm" class="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
-                <i class="fas fa-check mr-2"></i>Akzeptieren
-            </button>
-        </div>
+            </div>
+            <div class="px-6 pb-6 flex space-x-4">
+                <button type="button" id="closeAcceptModalBtn" class="flex-1 px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
+                    Abbrechen
+                </button>
+                <button type="submit" class="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
+                    <i class="fas fa-check mr-2"></i>Akzeptieren
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
