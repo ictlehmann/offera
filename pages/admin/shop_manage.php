@@ -300,8 +300,13 @@ ob_start();
                     <?php foreach ($products as $product): ?>
                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
                         <td class="py-3 pr-3" data-label="Bild">
-                            <?php if (!empty($product['image_path'])): ?>
-                            <img src="<?php echo asset($product['image_path']); ?>"
+                            <?php
+                            $thumbSrc = !empty($product['image_path'])
+                                ? asset($product['image_path'])
+                                : (!empty($product['images'][0]['image_path']) ? asset($product['images'][0]['image_path']) : null);
+                            ?>
+                            <?php if ($thumbSrc): ?>
+                            <img src="<?php echo $thumbSrc; ?>"
                                  alt="" class="w-14 h-14 object-cover rounded-lg border border-gray-100 dark:border-gray-700">
                             <?php else: ?>
                             <div class="w-14 h-14 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">

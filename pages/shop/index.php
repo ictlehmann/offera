@@ -330,7 +330,7 @@ ob_start();
             }
             $sliderId = 'slider-grid-' . $product['id'];
         ?>
-        <div class="card rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col <?php echo $productOutOfStock ? 'opacity-60' : ''; ?>"
+        <div class="card rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col group <?php echo $productOutOfStock ? 'opacity-60' : ''; ?>"
              data-instock="<?php echo $productOutOfStock ? '0' : '1'; ?>">
             <!-- Product image / slider -->
             <div class="relative">
@@ -340,7 +340,7 @@ ob_start();
                     <img src="<?php echo asset($img['image_path']); ?>"
                          alt="<?php echo htmlspecialchars($product['name']); ?>"
                          data-slide="<?php echo $idx; ?>"
-                         class="slider-img absolute inset-0 w-full h-full object-cover transition-opacity duration-300 <?php echo $idx === 0 ? 'opacity-100' : 'opacity-0'; ?>">
+                         class="slider-img absolute inset-0 w-full h-full object-cover transition-all duration-500 group-hover:scale-105 <?php echo $idx === 0 ? 'opacity-100' : 'opacity-0'; ?>">
                     <?php endforeach; ?>
                     <?php if (count($allImages) > 1): ?>
                     <button type="button" onclick="slideImg('<?php echo $sliderId; ?>',-1)" aria-label="Vorheriges Bild"
@@ -438,12 +438,12 @@ ob_start();
             ?>
             <div>
                 <?php if (!empty($detailImages)): ?>
-                <div class="relative rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-700 max-h-96" id="<?php echo $detailSliderId; ?>">
+                <div class="relative rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-700" style="aspect-ratio:4/3" id="<?php echo $detailSliderId; ?>">
                     <?php foreach ($detailImages as $idx => $img): ?>
                     <img src="<?php echo asset($img['image_path']); ?>"
                          alt="<?php echo htmlspecialchars($currentProduct['name']); ?>"
                          data-slide="<?php echo $idx; ?>"
-                         class="slider-img w-full object-cover max-h-96 transition-opacity duration-300 <?php echo $idx === 0 ? 'opacity-100' : 'opacity-0 absolute inset-0 h-full'; ?>">
+                         class="slider-img absolute inset-0 w-full h-full object-cover transition-opacity duration-300 <?php echo $idx === 0 ? 'opacity-100' : 'opacity-0'; ?>">
                     <?php endforeach; ?>
                     <?php if (count($detailImages) > 1): ?>
                     <button type="button" onclick="slideImg('<?php echo $detailSliderId; ?>',-1)" aria-label="Vorheriges Bild"
@@ -463,6 +463,17 @@ ob_start();
                     </div>
                     <?php endif; ?>
                 </div>
+                <?php if (count($detailImages) > 1): ?>
+                <!-- Thumbnail strip -->
+                <div class="flex gap-2 mt-3 overflow-x-auto pb-1" id="<?php echo $detailSliderId; ?>-thumbs">
+                    <?php foreach ($detailImages as $thumbIdx => $thumbImgData): ?>
+                    <button type="button" onclick="goToSlide('<?php echo $detailSliderId; ?>', <?php echo $thumbIdx; ?>)"
+                            class="thumb-btn flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all <?php echo $thumbIdx === 0 ? 'border-blue-500' : 'border-gray-200 dark:border-gray-600 opacity-70 hover:opacity-100'; ?>">
+                        <img src="<?php echo asset($thumbImgData['image_path']); ?>" alt="" class="w-full h-full object-cover pointer-events-none">
+                    </button>
+                    <?php endforeach; ?>
+                </div>
+                <?php endif; ?>
                 <?php else: ?>
                 <div class="w-full h-72 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800 rounded-xl flex items-center justify-center">
                     <i class="fas fa-box text-blue-400 text-6xl opacity-50"></i>
@@ -580,8 +591,14 @@ ob_start();
                     <!-- Quantity -->
                     <div class="mb-6">
                         <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Anzahl</label>
-                        <input type="number" name="quantity" value="1" min="1" max="99"
-                               class="w-20 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500">
+                        <div class="inline-flex items-center rounded-lg overflow-hidden border border-gray-300 dark:border-gray-600">
+                            <button type="button" onclick="adjustQty(-1)"
+                                    class="px-3 h-10 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-xl font-bold select-none">−</button>
+                            <input type="number" name="quantity" id="qty-input" value="1" min="1" max="99"
+                                   class="w-14 h-10 text-center bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 border-x border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-inset focus:ring-blue-500">
+                            <button type="button" onclick="adjustQty(1)"
+                                    class="px-3 h-10 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-xl font-bold select-none">+</button>
+                        </div>
                     </div>
 
                     <?php
@@ -861,6 +878,35 @@ ob_start();
 
 <script>
 // ── Image Slider ──────────────────────────────────────────────────────────────
+function updateThumbs(sliderId, activeIndex) {
+    var thumbsContainer = document.getElementById(sliderId + '-thumbs');
+    if (!thumbsContainer) return;
+    thumbsContainer.querySelectorAll('.thumb-btn').forEach(function(btn, i) {
+        btn.classList.toggle('border-blue-500', i === activeIndex);
+        btn.classList.toggle('border-gray-200', i !== activeIndex);
+        btn.classList.toggle('dark:border-gray-600', i !== activeIndex);
+        btn.classList.toggle('opacity-70', i !== activeIndex);
+    });
+}
+
+function goToSlide(sliderId, index) {
+    var container = document.getElementById(sliderId);
+    if (!container) return;
+    var imgs = container.querySelectorAll('.slider-img');
+    var current = parseInt(container.dataset.slideIndex || '0', 10);
+    if (current === index) return;
+    imgs[current].classList.add('opacity-0');
+    imgs[current].classList.remove('opacity-100');
+    imgs[index].classList.remove('opacity-0');
+    imgs[index].classList.add('opacity-100');
+    container.dataset.slideIndex = index;
+    var dots = container.querySelectorAll('.slider-dot');
+    dots.forEach(function(dot, i) {
+        dot.className = 'slider-dot w-2 h-2 rounded-full transition-all ' + (i === index ? 'bg-white' : 'bg-white/50');
+    });
+    updateThumbs(sliderId, index);
+}
+
 function slideImg(sliderId, direction) {
     var container = document.getElementById(sliderId);
     if (!container) return;
@@ -878,6 +924,16 @@ function slideImg(sliderId, direction) {
     dots.forEach(function(dot, i) {
         dot.className = 'slider-dot w-2 h-2 rounded-full transition-all ' + (i === next ? 'bg-white' : 'bg-white/50');
     });
+    // Update thumbnail strip
+    updateThumbs(sliderId, next);
+}
+
+// ── Quantity stepper ──────────────────────────────────────────────────────────
+function adjustQty(delta) {
+    var input = document.getElementById('qty-input');
+    if (!input) return;
+    var val = (parseInt(input.value, 10) || 1) + delta;
+    input.value = Math.max(1, Math.min(99, val));
 }
 
 // ── Filter pills ─────────────────────────────────────────────────────────────
