@@ -208,7 +208,8 @@ ob_start();
             <?php endif; ?>
             <div class="flex items-center">
                 <i class="fas fa-box w-5 text-purple-600"></i>
-                <span>Bestand: <?php echo htmlspecialchars($item['quantity']); ?> <?php echo htmlspecialchars($item['unit'] ?? 'Stk'); ?></span>
+                <?php $loanedQty = (int)$item['quantity'] - (int)$item['available_quantity']; ?>
+                <span>Bestand: <?php echo (int)$item['quantity']; ?> | Ausgeliehen: <?php echo $loanedQty; ?> | Verfügbar: <?php echo (int)$item['available_quantity']; ?> <?php echo htmlspecialchars($item['unit'] ?? 'Stk'); ?></span>
             </div>
         </div>
 
