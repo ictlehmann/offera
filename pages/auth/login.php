@@ -382,8 +382,9 @@ try {
                 0 30px 90px rgba(0, 0, 0, 0.5),
                 0 0 0 1px rgba(108, 183, 62, 0.1),
                 inset 0 1px 0 rgba(255, 255, 255, 0.05);
-            width: 500px;
-            max-width: 90%;
+            width: 100%;
+            max-width: 450px;
+            margin: 0 20px;
             position: relative;
             z-index: 10;
             -webkit-animation: containerAppear 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -1188,7 +1189,7 @@ try {
         @media (min-width: 1600px) {
             .login-container {
                 padding: 70px;
-                width: 550px;
+                max-width: 550px;
             }
 
             .ibc-logo {
@@ -1210,11 +1211,11 @@ try {
             }
         }
 
-        /* Tablets & Medium screens (768px - 1024px) */
-        @media (max-width: 1024px) and (min-width: 769px) {
+        /* Tablets & Medium screens (up to 1024px) */
+        @media (max-width: 1024px) {
             .login-container {
                 padding: 50px 40px;
-                width: 480px;
+                max-width: 480px;
             }
 
             .ibc-logo {
@@ -1227,17 +1228,17 @@ try {
             }
         }
 
-        /* Tablets Portrait & Large Phones (481px - 768px) */
-        @media (max-width: 768px) and (min-width: 481px) {
+        /* Tablets Portrait & Large Phones (up to 768px) */
+        @media (max-width: 768px) {
             .login-container {
                 padding: 45px 35px;
-                width: 90%;
-                max-width: 450px;
                 border-radius: 25px;
             }
 
             .ibc-logo {
                 width: 130px;
+                max-width: 100%;
+                height: auto;
             }
 
             .logo-glow {
@@ -1263,11 +1264,10 @@ try {
             }
         }
 
-        /* Smartphones (361px - 480px) */
-        @media (max-width: 480px) and (min-width: 361px) {
+        /* Smartphones (up to 480px) */
+        @media (max-width: 480px) {
             .login-container {
                 padding: 40px 28px;
-                width: 92%;
                 border-radius: 22px;
             }
 
@@ -1293,6 +1293,7 @@ try {
                 padding: 17px;
                 font-size: 15px;
                 gap: 12px;
+                white-space: nowrap;
             }
 
             .microsoft-logo {
@@ -1321,7 +1322,6 @@ try {
         @media (max-width: 360px) {
             .login-container {
                 padding: 35px 22px;
-                width: 94%;
                 border-radius: 20px;
             }
 
@@ -1348,9 +1348,10 @@ try {
             }
 
             .microsoft-button {
-                padding: 15px;
-                font-size: 14px;
-                gap: 10px;
+                padding: 13px 10px;
+                font-size: 13px;
+                gap: 8px;
+                white-space: nowrap;
             }
 
             .microsoft-logo {
@@ -1384,7 +1385,6 @@ try {
         @media (max-width: 280px) {
             .login-container {
                 padding: 30px 18px;
-                width: 96%;
             }
 
             .ibc-logo {
@@ -1453,7 +1453,8 @@ try {
                 padding: env(safe-area-inset-top, 1rem) env(safe-area-inset-right, 0) env(safe-area-inset-bottom, 1rem) env(safe-area-inset-left, 0);
             }
             .login-container {
-                margin: auto;
+                margin-left: auto;
+                margin-right: auto;
                 margin-top: max(2rem, env(safe-area-inset-top, 2rem));
                 margin-bottom: max(2rem, env(safe-area-inset-bottom, 2rem));
             }
