@@ -657,7 +657,7 @@ ob_start();
                             <td class="py-4 text-right font-semibold text-gray-800 dark:text-gray-100" data-label="Gesamt">
                                 <?php echo number_format($item['price'] * $item['quantity'], 2, ',', '.'); ?> €
                             </td>
-                            <td class="py-4 text-right">
+                            <td class="py-4 text-right" data-label="Entfernen">
                                 <form method="POST" class="inline">
                                     <input type="hidden" name="post_action" value="remove_from_cart">
                                     <input type="hidden" name="cart_key" value="<?php echo htmlspecialchars($key); ?>">
