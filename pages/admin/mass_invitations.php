@@ -28,11 +28,65 @@ const ALUMNI_ENTRA_ROLES = ['Alumni', 'Alumni-Finanzprüfer', 'Ehrenmitglied', '
 // Mitglieder group: all users NOT in the alumni group (complementary selection)
 
 /**
+ * Apply system and custom-link placeholders to a body string.
+ * Results are cached within the request via static variables to avoid repeated DB calls.
+ *
+ * @param array $customLinks Optional custom link values (VoteTransferLink, MeetingLink, LinkToDocs, trainingLink).
+ */
+function applySharedPlaceholders(string $body, array $customLinks = []): string {
+    static $accountName = null;
+    static $vorstand3V  = null;
+
+    if ($accountName === null) {
+        $accountName = '';
+        $currentUser = Auth::user();
+        if ($currentUser) {
+            $accountName = trim(($currentUser['first_name'] ?? '') . ' ' . ($currentUser['last_name'] ?? ''));
+        }
+    }
+
+    if ($vorstand3V === null) {
+        $vorstand3V = '';
+        try {
+            $userDb = Database::getUserDB();
+            $stmt = $userDb->prepare("SELECT first_name, last_name FROM users WHERE role = ? LIMIT 1");
+            $stmt->execute([Auth::ROLE_BOARD_FINANCE]);
+            $row = $stmt->fetch();
+            if ($row) {
+                $vorstand3V = trim(($row['first_name'] ?? '') . ' ' . ($row['last_name'] ?? ''));
+            }
+        } catch (Exception $e) {
+            error_log('applySharedPlaceholders: board_finance lookup failed: ' . $e->getMessage());
+        }
+    }
+
+    $body = str_replace(
+        ['{currentYear}', '{accountName}', '{3V}'],
+        [date('Y'), $accountName, $vorstand3V],
+        $body
+    );
+
+    $body = str_replace(
+        ['{VoteTransferLink}', '{MeetingLink}', '{LinkToDocs}'],
+        [$customLinks['VoteTransferLink'] ?? '', $customLinks['MeetingLink'] ?? '', $customLinks['LinkToDocs'] ?? ''],
+        $body
+    );
+
+    // {trainingLink}: replace with provided value or remove entirely if empty/absent
+    $trainingLink = $customLinks['trainingLink'] ?? '';
+    $body = str_replace('{trainingLink}', $trainingLink, $body);
+
+    return $body;
+}
+
+/**
  * Apply placeholder substitution to a mail body for one recipient.
  *
- * @param array|null $event Optional event data for event-specific placeholders.
+ * @param array|null $event      Optional event data for event-specific placeholders.
+ * @param array      $customLinks Optional custom link values (VoteTransferLink, MeetingLink, LinkToDocs, trainingLink).
  */
-function applyMailPlaceholders(string $body, string $firstName, string $lastName, string $eventName, ?array $event = null): string {
+function applyMailPlaceholders(string $body, string $firstName, string $lastName, string $eventName, ?array $event = null, array $customLinks = []): string {
+    // Per-recipient placeholders
     $anrede = $firstName !== '' ? "Hallo $firstName" : 'Hallo';
     $body = str_replace(
         ['{Anrede}', '{Vorname}', '{Nachname}', '{Event_Name}'],
@@ -40,6 +94,7 @@ function applyMailPlaceholders(string $body, string $firstName, string $lastName
         $body
     );
 
+    // Event-specific placeholders
     if ($event !== null) {
         $startTime = !empty($event['start_time']) ? strtotime($event['start_time']) : null;
         $germanDays   = ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
@@ -50,18 +105,14 @@ function applyMailPlaceholders(string $body, string $firstName, string $lastName
         $hour     = $startTime ? date('H:i', $startTime) : '';
 
         $body = str_replace(
-            ['{eventDateDay}', '{eventDateDayOf}', '{eventDateMonth}', '{EventDateHour}', '{location}', '{trainingLink}'],
-            [
-                $dayName,
-                $dayOf,
-                $month,
-                $hour,
-                $event['location'] ?? '',
-                $event['registration_link'] ?? '',
-            ],
+            ['{eventDateDay}', '{eventDateDayOf}', '{eventDateMonth}', '{EventDateHour}', '{location}'],
+            [$dayName, $dayOf, $month, $hour, $event['location'] ?? ''],
             $body
         );
     }
+
+    // System and custom-link placeholders (shared across all recipients)
+    $body = applySharedPlaceholders($body, $customLinks);
 
     return $body;
 }
@@ -69,10 +120,10 @@ function applyMailPlaceholders(string $body, string $firstName, string $lastName
 /**
  * Send one personalised email and return true on success.
  */
-function sendPersonalisedMail(array $r, string $subject, string $rawBody, string $eventName, ?array $event = null): bool {
+function sendPersonalisedMail(array $r, string $subject, string $rawBody, string $eventName, ?array $event = null, array $customLinks = []): bool {
     $firstName = $r['first_name'] ?? '';
     $lastName  = $r['last_name']  ?? '';
-    $personalBody = applyMailPlaceholders($rawBody, $firstName, $lastName, $eventName, $event);
+    $personalBody = applyMailPlaceholders($rawBody, $firstName, $lastName, $eventName, $event, $customLinks);
     $sanitized = nl2br(htmlspecialchars($personalBody, ENT_QUOTES, 'UTF-8'));
     $entraNote = '<p style="margin-top:20px;padding:12px;background:#f0f4ff;border-left:4px solid #4f46e5;border-radius:4px;font-size:14px;">'
         . '<strong>Hinweis:</strong> Der Login ins IBC Intranet erfolgt ausschließlich über deinen Microsoft-Account (Entra ID). '
@@ -110,10 +161,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['send_bulk_invite'])) 
     $eventId   = (int)($_POST['event_id']    ?? 0);
     $selectedEvent = $eventId > 0 ? Event::getById($eventId, false) : null;
     $eventName = $selectedEvent ? ($selectedEvent['title'] ?? '') : '';
+    $customLinks = [
+        'VoteTransferLink' => trim($_POST['VoteTransferLink'] ?? ''),
+        'MeetingLink'      => trim($_POST['MeetingLink']      ?? ''),
+        'LinkToDocs'       => trim($_POST['LinkToDocs']       ?? ''),
+        'trainingLink'     => trim($_POST['trainingLink']     ?? ''),
+    ];
 
     if (empty($subject) || empty($body)) {
         $error = 'Betreff und Nachrichtentext dürfen nicht leer sein.';
     } else {
+        // Validate required link placeholders: if present in body, the value must be provided
+        $requiredLinkMap = [
+            '{VoteTransferLink}' => 'VoteTransferLink',
+            '{MeetingLink}'      => 'MeetingLink',
+            '{LinkToDocs}'       => 'LinkToDocs',
+        ];
+        foreach ($requiredLinkMap as $placeholder => $key) {
+            if (str_contains($body, $placeholder) && empty($customLinks[$key])) {
+                $error = 'Der Platzhalter ' . htmlspecialchars($placeholder, ENT_QUOTES, 'UTF-8') . ' ist im Text vorhanden, aber der entsprechende Link fehlt.';
+                break;
+            }
+        }
+    }
+
+    if (empty($error) && !empty($subject) && !empty($body)) {
+        // Pre-apply system and custom-link substitutions once before storing/sending.
+        // This ensures queued jobs (processed later without POST data) carry the correct values.
+        $body = applySharedPlaceholders($body, $customLinks);
+
         $recipients = [];
 
         // Option A: CSV upload
@@ -530,10 +606,71 @@ ob_start();
                     <code>{eventDateDayOf}</code>,
                     <code>{eventDateMonth}</code>,
                     <code>{EventDateHour}</code>,
-                    <code>{location}</code>,
-                    <code>{trainingLink}</code>.
-                    Die letzten sechs werden automatisch aus dem gewählten Event befüllt.
+                    <code>{location}</code>
+                    (die letzten fünf werden automatisch aus dem gewählten Event befüllt),
+                    <code>{currentYear}</code>,
+                    <code>{accountName}</code> (Name des eingeloggten Benutzers),
+                    <code>{3V}</code> (Vorstand Finanzen und Recht),
+                    <code>{VoteTransferLink}</code>,
+                    <code>{MeetingLink}</code>,
+                    <code>{LinkToDocs}</code>,
+                    <code>{trainingLink}</code> (wird entfernt wenn leer).
                 </p>
+            </div>
+            <!-- Custom link fields -->
+            <div class="mt-4 grid grid-cols-1 gap-4">
+                <div>
+                    <label for="voteTransferLink" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Link für <code>{VoteTransferLink}</code>
+                    </label>
+                    <input
+                        type="url"
+                        id="voteTransferLink"
+                        name="VoteTransferLink"
+                        class="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        placeholder="https://…"
+                        value="<?php echo htmlspecialchars($_POST['VoteTransferLink'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                    >
+                </div>
+                <div>
+                    <label for="meetingLink" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Link für <code>{MeetingLink}</code>
+                    </label>
+                    <input
+                        type="url"
+                        id="meetingLink"
+                        name="MeetingLink"
+                        class="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        placeholder="https://…"
+                        value="<?php echo htmlspecialchars($_POST['MeetingLink'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                    >
+                </div>
+                <div>
+                    <label for="linkToDocs" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Link für <code>{LinkToDocs}</code>
+                    </label>
+                    <input
+                        type="url"
+                        id="linkToDocs"
+                        name="LinkToDocs"
+                        class="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        placeholder="https://…"
+                        value="<?php echo htmlspecialchars($_POST['LinkToDocs'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                    >
+                </div>
+                <div>
+                    <label for="trainingLink" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                        Link für <code>{trainingLink}</code> <span class="text-gray-400 text-xs">(optional – wird entfernt wenn leer)</span>
+                    </label>
+                    <input
+                        type="url"
+                        id="trainingLink"
+                        name="trainingLink"
+                        class="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        placeholder="https://…"
+                        value="<?php echo htmlspecialchars($_POST['trainingLink'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
+                    >
+                </div>
             </div>
         </div>
     </div>
