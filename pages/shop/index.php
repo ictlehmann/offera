@@ -125,8 +125,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $action = 'cart';
     } elseif ($postAction === 'checkout') {
         $paymentMethod = in_array($_POST['payment_method'] ?? '', ['paypal', 'sepa']) ? $_POST['payment_method'] : 'paypal';
+        $shippingMethod  = in_array($_POST['shipping_method'] ?? '', ['pickup', 'mail']) ? $_POST['shipping_method'] : 'pickup';
+        $shippingCost    = ($shippingMethod === 'mail') ? 4.90 : 0.00;
+        $shippingAddress = trim($_POST['shipping_address'] ?? '');
 
-        if (empty($_SESSION['shop_cart'])) {
+        if ($shippingMethod === 'mail' && $shippingAddress === '') {
+            $errorMessage = 'Bitte gib eine Lieferadresse an.';
+            $action = 'checkout';
+        } elseif (empty($_SESSION['shop_cart'])) {
             $errorMessage = 'Ihr Warenkorb ist leer.';
             $action = 'cart';
         } else {
@@ -135,19 +141,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $errorMessage = implode(' ', $stockErrors);
                 $action = 'cart';
             } else {
-                $orderId = Shop::createOrder($userId, array_values($_SESSION['shop_cart']), $paymentMethod);
+                $orderId = Shop::createOrder($userId, array_values($_SESSION['shop_cart']), $paymentMethod, $shippingMethod, $shippingCost, $shippingAddress);
 
                 if ($orderId) {
                     if ($paymentMethod === 'paypal') {
                         $baseUrl   = defined('BASE_URL') ? BASE_URL : '';
                         $returnUrl = $baseUrl . '/pages/shop/index.php?action=payment_return&order=' . $orderId;
                         $cancelUrl = $baseUrl . '/pages/shop/index.php?action=cart';
-                        $payResult = ShopPaymentService::initiatePayPal($orderId, cartTotal(), $returnUrl, $cancelUrl);
+                        $grandTotal = cartTotal() + $shippingCost;
+                        $payResult = ShopPaymentService::initiatePayPal($orderId, $grandTotal, $returnUrl, $cancelUrl);
 
                         if ($payResult['success'] && !empty($payResult['redirect_url'])) {
                             Shop::decrementStock($orderId);
                             $cartForEmail = array_values($_SESSION['shop_cart']);
-                            $totalForEmail = array_sum(array_map(fn($i) => $i['price'] * $i['quantity'], $cartForEmail));
+                            $totalForEmail = array_sum(array_map(fn($i) => $i['price'] * $i['quantity'], $cartForEmail)) + $shippingCost;
                             $_SESSION['shop_cart'] = [];
                             try {
                                 MailService::sendNewOrderNotification(
@@ -170,12 +177,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     } elseif ($paymentMethod === 'sepa') {
                         $iban       = trim($_POST['sepa_iban'] ?? '');
                         $holder     = trim($_POST['sepa_holder'] ?? '');
-                        $payResult  = ShopPaymentService::initiateSepa($orderId, cartTotal(), $iban, $holder);
+                        $grandTotal = cartTotal() + $shippingCost;
+                        $payResult  = ShopPaymentService::initiateSepa($orderId, $grandTotal, $iban, $holder);
 
                         if ($payResult['success']) {
                             Shop::decrementStock($orderId);
                             $cartForEmail = array_values($_SESSION['shop_cart']);
-                            $totalForEmail = array_sum(array_map(fn($i) => $i['price'] * $i['quantity'], $cartForEmail));
+                            $totalForEmail = array_sum(array_map(fn($i) => $i['price'] * $i['quantity'], $cartForEmail)) + $shippingCost;
                             try {
                                 MailService::sendNewOrderNotification(
                                     $orderId,
@@ -313,16 +321,37 @@ ob_start();
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="product-grid">
         <?php foreach ($products as $product):
             $productOutOfStock = !empty($product['variants']) && array_sum(array_column($product['variants'], 'stock_quantity')) === 0;
+            $isBulk = !empty($product['is_bulk_order']);
+            $bulkProgress = $isBulk ? Shop::getBulkOrderProgress($product['id']) : 0;
+            $bulkGoal     = $isBulk ? (int) $product['bulk_min_goal'] : 0;
+            $allImages    = $product['images'] ?? [];
+            if (!empty($product['image_path']) && empty($allImages)) {
+                $allImages = [['image_path' => $product['image_path']]];
+            }
+            $sliderId = 'slider-grid-' . $product['id'];
         ?>
         <div class="card rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col <?php echo $productOutOfStock ? 'opacity-60' : ''; ?>"
              data-instock="<?php echo $productOutOfStock ? '0' : '1'; ?>">
-            <!-- Product image -->
+            <!-- Product image / slider -->
             <div class="relative">
-                <?php if (!empty($product['image_path'])): ?>
-                <div class="h-52 overflow-hidden bg-gray-100 dark:bg-gray-700">
-                    <img src="<?php echo asset($product['image_path']); ?>"
+                <?php if (!empty($allImages)): ?>
+                <div class="h-52 overflow-hidden bg-gray-100 dark:bg-gray-700 relative" id="<?php echo $sliderId; ?>">
+                    <?php foreach ($allImages as $idx => $img): ?>
+                    <img src="<?php echo asset($img['image_path']); ?>"
                          alt="<?php echo htmlspecialchars($product['name']); ?>"
-                         class="w-full h-full object-cover transition-transform duration-300 hover:scale-105">
+                         data-slide="<?php echo $idx; ?>"
+                         class="slider-img absolute inset-0 w-full h-full object-cover transition-opacity duration-300 <?php echo $idx === 0 ? 'opacity-100' : 'opacity-0'; ?>">
+                    <?php endforeach; ?>
+                    <?php if (count($allImages) > 1): ?>
+                    <button type="button" onclick="slideImg('<?php echo $sliderId; ?>',-1)" aria-label="Vorheriges Bild"
+                            class="absolute left-1 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white rounded-full w-7 h-7 flex items-center justify-center z-10 transition-colors">
+                        <i class="fas fa-chevron-left text-xs"></i>
+                    </button>
+                    <button type="button" onclick="slideImg('<?php echo $sliderId; ?>',1)" aria-label="Nächstes Bild"
+                            class="absolute right-1 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white rounded-full w-7 h-7 flex items-center justify-center z-10 transition-colors">
+                        <i class="fas fa-chevron-right text-xs"></i>
+                    </button>
+                    <?php endif; ?>
                 </div>
                 <?php else: ?>
                 <div class="h-52 bg-gradient-to-br from-purple-100 to-blue-200 dark:from-purple-900 dark:to-blue-800 flex items-center justify-center">
@@ -332,6 +361,11 @@ ob_start();
                 <?php if ($productOutOfStock): ?>
                 <span class="absolute top-3 left-3 px-3 py-1 bg-gray-800 bg-opacity-75 text-white text-xs font-bold rounded-full uppercase tracking-wide">
                     Ausverkauft
+                </span>
+                <?php endif; ?>
+                <?php if ($isBulk): ?>
+                <span class="absolute top-3 right-3 px-2 py-0.5 bg-purple-600 bg-opacity-90 text-white text-xs font-bold rounded-full">
+                    Sammelbestellung
                 </span>
                 <?php endif; ?>
             </div>
@@ -348,6 +382,28 @@ ob_start();
                 <?php else: ?>
                 <div class="flex-1"></div>
                 <?php endif; ?>
+
+                <?php if ($isBulk): ?>
+                <!-- Bulk order progress bar -->
+                <div class="mb-3">
+                    <?php if ($bulkGoal > 0): ?>
+                    <?php $pct = min(100, (int) round($bulkProgress / $bulkGoal * 100)); ?>
+                    <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-1">
+                        <span><?php echo $bulkProgress; ?>/<?php echo $bulkGoal; ?> bestellt, damit produziert wird</span>
+                        <span><?php echo $pct; ?>%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                        <div class="bg-purple-600 h-2 rounded-full transition-all" style="width:<?php echo $pct; ?>%"></div>
+                    </div>
+                    <?php endif; ?>
+                    <?php if (!empty($product['bulk_end_date'])): ?>
+                    <p class="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                        <i class="fas fa-clock mr-1"></i>Bestellbar bis: <?php echo date('d.m.Y', strtotime($product['bulk_end_date'])); ?>
+                    </p>
+                    <?php endif; ?>
+                </div>
+                <?php endif; ?>
+
                 <div class="flex items-center justify-between mt-3">
                     <span class="text-xl font-bold text-purple-600 dark:text-purple-400">
                         <?php echo number_format((float) $product['base_price'], 2, ',', '.'); ?> €
@@ -372,12 +428,41 @@ ob_start();
     </div>
     <div class="card rounded-xl shadow-lg p-6 lg:p-8">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <!-- Image -->
+            <!-- Image / Slider -->
+            <?php
+                $detailImages = $currentProduct['images'] ?? [];
+                if (!empty($currentProduct['image_path']) && empty($detailImages)) {
+                    $detailImages = [['image_path' => $currentProduct['image_path']]];
+                }
+                $detailSliderId = 'slider-detail-' . $currentProduct['id'];
+            ?>
             <div>
-                <?php if (!empty($currentProduct['image_path'])): ?>
-                <img src="<?php echo asset($currentProduct['image_path']); ?>"
-                     alt="<?php echo htmlspecialchars($currentProduct['name']); ?>"
-                     class="w-full rounded-xl object-cover max-h-96">
+                <?php if (!empty($detailImages)): ?>
+                <div class="relative rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-700 max-h-96" id="<?php echo $detailSliderId; ?>">
+                    <?php foreach ($detailImages as $idx => $img): ?>
+                    <img src="<?php echo asset($img['image_path']); ?>"
+                         alt="<?php echo htmlspecialchars($currentProduct['name']); ?>"
+                         data-slide="<?php echo $idx; ?>"
+                         class="slider-img w-full object-cover max-h-96 transition-opacity duration-300 <?php echo $idx === 0 ? 'opacity-100' : 'opacity-0 absolute inset-0 h-full'; ?>">
+                    <?php endforeach; ?>
+                    <?php if (count($detailImages) > 1): ?>
+                    <button type="button" onclick="slideImg('<?php echo $detailSliderId; ?>',-1)" aria-label="Vorheriges Bild"
+                            class="absolute left-2 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white rounded-full w-9 h-9 flex items-center justify-center z-10 transition-colors">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button type="button" onclick="slideImg('<?php echo $detailSliderId; ?>',1)" aria-label="Nächstes Bild"
+                            class="absolute right-2 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white rounded-full w-9 h-9 flex items-center justify-center z-10 transition-colors">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                    <!-- Dot indicators -->
+                    <div class="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5">
+                        <?php foreach ($detailImages as $idx => $img): ?>
+                        <span data-dot="<?php echo $idx; ?>"
+                              class="slider-dot w-2 h-2 rounded-full transition-all <?php echo $idx === 0 ? 'bg-white' : 'bg-white/50'; ?>"></span>
+                        <?php endforeach; ?>
+                    </div>
+                    <?php endif; ?>
+                </div>
                 <?php else: ?>
                 <div class="w-full h-72 bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900 dark:to-blue-800 rounded-xl flex items-center justify-center">
                     <i class="fas fa-box text-blue-400 text-6xl opacity-50"></i>
@@ -397,6 +482,34 @@ ob_start();
                 <p class="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
                     <?php echo nl2br(htmlspecialchars($currentProduct['description'])); ?>
                 </p>
+                <?php endif; ?>
+
+                <?php if (!empty($currentProduct['is_bulk_order'])): ?>
+                <!-- Bulk order progress & deadline -->
+                <div class="mb-6 p-4 bg-purple-50 dark:bg-purple-900/20 rounded-xl border border-purple-200 dark:border-purple-700">
+                    <p class="text-sm font-semibold text-purple-700 dark:text-purple-300 mb-2">
+                        <i class="fas fa-layer-group mr-1"></i>Sammelbestellung
+                    </p>
+                    <?php if (!empty($currentProduct['bulk_min_goal'])): ?>
+                    <?php
+                        $dBulkProgress = Shop::getBulkOrderProgress($currentProduct['id']);
+                        $dBulkGoal     = (int) $currentProduct['bulk_min_goal'];
+                        $dPct          = $dBulkGoal > 0 ? min(100, (int) round($dBulkProgress / $dBulkGoal * 100)) : 0;
+                    ?>
+                    <div class="flex justify-between text-xs text-gray-600 dark:text-gray-300 mb-1">
+                        <span><?php echo $dBulkProgress; ?>/<?php echo $dBulkGoal; ?> bestellt, damit produziert wird</span>
+                        <span><?php echo $dPct; ?>%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 mb-2">
+                        <div class="bg-purple-600 h-3 rounded-full transition-all" style="width:<?php echo $dPct; ?>%"></div>
+                    </div>
+                    <?php endif; ?>
+                    <?php if (!empty($currentProduct['bulk_end_date'])): ?>
+                    <p class="text-sm text-amber-600 dark:text-amber-400">
+                        <i class="fas fa-clock mr-1"></i>Bestellbar bis: <strong><?php echo date('d.m.Y', strtotime($currentProduct['bulk_end_date'])); ?></strong>
+                    </p>
+                    <?php endif; ?>
+                </div>
                 <?php endif; ?>
 
                 <form method="POST" action="<?php echo asset('pages/shop/index.php?action=detail&product_id=' . $currentProduct['id']); ?>">
@@ -603,12 +716,55 @@ ob_start();
         <div class="lg:col-span-2">
             <div class="card rounded-xl shadow-lg p-6 lg:p-8">
                 <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6">
-                    <i class="fas fa-credit-card mr-2 text-blue-600"></i>Zahlungsmethode
+                    <i class="fas fa-credit-card mr-2 text-blue-600"></i>Zahlungsmethode &amp; Versand
                 </h2>
                 <form method="POST" id="checkout-form">
                     <input type="hidden" name="post_action" value="checkout">
 
+                    <!-- Shipping method selection -->
+                    <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-3">Lieferart</h3>
+                    <div class="mb-6 space-y-3">
+                        <label class="flex items-center gap-4 p-4 border-2 rounded-xl cursor-pointer transition-all
+                                      border-gray-200 dark:border-gray-700 hover:border-green-400
+                                      has-[:checked]:border-green-500 has-[:checked]:bg-green-50 dark:has-[:checked]:bg-green-900/20">
+                            <input type="radio" name="shipping_method" value="pickup" checked id="shipping-pickup" class="sr-only peer">
+                            <div class="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-building text-green-600 dark:text-green-400 text-xl"></i>
+                            </div>
+                            <div class="flex-1">
+                                <p class="font-semibold text-gray-800 dark:text-gray-100">Abholung im Büro</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Kostenlos – 0,00 €</p>
+                            </div>
+                            <span class="text-green-600 dark:text-green-400 font-bold text-sm">0,00 €</span>
+                        </label>
+
+                        <label class="flex items-center gap-4 p-4 border-2 rounded-xl cursor-pointer transition-all
+                                      border-gray-200 dark:border-gray-700 hover:border-blue-400
+                                      has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50 dark:has-[:checked]:bg-blue-900/20">
+                            <input type="radio" name="shipping_method" value="mail" id="shipping-mail" class="sr-only peer">
+                            <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-truck text-blue-600 dark:text-blue-400 text-xl"></i>
+                            </div>
+                            <div class="flex-1">
+                                <p class="font-semibold text-gray-800 dark:text-gray-100">Postversand nach Hause</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Lieferung per Post</p>
+                            </div>
+                            <span class="text-blue-600 dark:text-blue-400 font-bold text-sm">4,90 €</span>
+                        </label>
+                    </div>
+
+                    <!-- Shipping address (shown when mail is selected) -->
+                    <div id="shipping-address-field" class="hidden mb-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                            Lieferadresse <span class="text-red-500">*</span>
+                        </label>
+                        <textarea name="shipping_address" id="shipping-address-input" rows="3"
+                                  placeholder="Straße und Hausnummer, PLZ Ort"
+                                  class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-shadow resize-none"></textarea>
+                    </div>
+
                     <!-- Payment method selection -->
+                    <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-3 mt-6">Zahlungsmethode</h3>
                     <div class="mb-6 space-y-3">
                         <label class="flex items-center gap-4 p-4 border-2 rounded-xl cursor-pointer transition-all
                                       border-gray-200 dark:border-gray-700 hover:border-blue-400
@@ -652,10 +808,10 @@ ob_start();
                         </div>
                     </div>
 
-                    <button type="submit" form="checkout-form"
+                    <button type="submit" form="checkout-form" id="checkout-submit-btn"
                             class="w-full py-4 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl hover:from-purple-700 hover:to-purple-800 font-bold text-lg transition-all shadow-lg">
                         <i class="fas fa-lock mr-2"></i>
-                        Kostenpflichtig bestellen – <?php echo number_format($cartTotalAmt, 2, ',', '.'); ?> €
+                        Kostenpflichtig bestellen – <span id="checkout-total-display"><?php echo number_format($cartTotalAmt, 2, ',', '.'); ?></span> €
                     </button>
                 </form>
             </div>
@@ -681,10 +837,14 @@ ob_start();
                     </div>
                     <?php endforeach; ?>
                 </div>
-                <div class="mt-4 pt-4 border-t-2 border-gray-300 dark:border-gray-600 flex justify-between items-center">
+                <div class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700 flex justify-between text-sm text-gray-600 dark:text-gray-300">
+                    <span>Versand</span>
+                    <span id="summary-shipping-cost">0,00 €</span>
+                </div>
+                <div class="mt-3 pt-3 border-t-2 border-gray-300 dark:border-gray-600 flex justify-between items-center">
                     <span class="font-bold text-gray-800 dark:text-gray-100">Gesamt</span>
                     <span class="text-xl font-bold text-blue-600 dark:text-blue-400">
-                        <?php echo number_format($cartTotalAmt, 2, ',', '.'); ?> €
+                        <span id="summary-total"><?php echo number_format($cartTotalAmt, 2, ',', '.'); ?></span> €
                     </span>
                 </div>
             </div>
@@ -696,15 +856,34 @@ ob_start();
 </div>
 
 <script>
+// ── Image Slider ──────────────────────────────────────────────────────────────
+function slideImg(sliderId, direction) {
+    var container = document.getElementById(sliderId);
+    if (!container) return;
+    var imgs = container.querySelectorAll('.slider-img');
+    if (imgs.length < 2) return;
+    var current = parseInt(container.dataset.slideIndex || '0', 10);
+    imgs[current].classList.add('opacity-0');
+    imgs[current].classList.remove('opacity-100');
+    var next = (current + direction + imgs.length) % imgs.length;
+    imgs[next].classList.remove('opacity-0');
+    imgs[next].classList.add('opacity-100');
+    container.dataset.slideIndex = next;
+    // Update dot indicators
+    var dots = container.querySelectorAll('.slider-dot');
+    dots.forEach(function(dot, i) {
+        dot.className = 'slider-dot w-2 h-2 rounded-full transition-all ' + (i === next ? 'bg-white' : 'bg-white/50');
+    });
+}
+
 // ── Filter pills ─────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', function() {
-    const pills = document.querySelectorAll('.filter-pill');
-    const grid  = document.getElementById('product-grid');
+    var pills = document.querySelectorAll('.filter-pill');
+    var grid  = document.getElementById('product-grid');
 
     if (pills.length && grid) {
         pills.forEach(function(pill) {
             pill.addEventListener('click', function() {
-                // Update active pill styles
                 pills.forEach(function(p) {
                     p.dataset.active = '0';
                     p.className = 'filter-pill px-4 py-1.5 rounded-full text-sm font-medium transition-all bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-purple-600 hover:text-white';
@@ -712,9 +891,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 this.dataset.active = '1';
                 this.className = 'filter-pill px-4 py-1.5 rounded-full text-sm font-medium transition-all bg-purple-600 text-white shadow-sm';
 
-                const filter = this.dataset.filter;
+                var filter = this.dataset.filter;
                 grid.querySelectorAll('[data-instock]').forEach(function(card) {
-                    const inStock = card.dataset.instock === '1';
+                    var inStock = card.dataset.instock === '1';
                     if (filter === 'all') {
                         card.style.display = '';
                     } else if (filter === 'available') {
@@ -727,22 +906,54 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
-</script>
 
-<script>
-// Show/hide SEPA fields based on payment selection
+// ── Checkout: shipping method & SEPA toggles + live total ────────────────────
 document.addEventListener('DOMContentLoaded', function() {
-    const radios = document.querySelectorAll('input[name="payment_method"]');
-    const sepaFields = document.getElementById('sepa-fields');
+    var CART_TOTAL = <?php echo json_encode((float) $cartTotalAmt); ?>;
+    var SHIPPING_COST_MAIL = 4.90;
+
+    var shippingRadios  = document.querySelectorAll('input[name="shipping_method"]');
+    var addressField    = document.getElementById('shipping-address-field');
+    var addressInput    = document.getElementById('shipping-address-input');
+    var summaryShipping = document.getElementById('summary-shipping-cost');
+    var summaryTotal    = document.getElementById('summary-total');
+    var checkoutDisplay = document.getElementById('checkout-total-display');
+
+    function formatMoney(val) {
+        return val.toFixed(2).replace('.', ',');
+    }
+
+    function updateTotals() {
+        var selected = document.querySelector('input[name="shipping_method"]:checked');
+        var isMail = selected && selected.value === 'mail';
+        var shippingCost = isMail ? SHIPPING_COST_MAIL : 0;
+        var grandTotal   = CART_TOTAL + shippingCost;
+
+        if (summaryShipping) summaryShipping.textContent = formatMoney(shippingCost) + ' €';
+        if (summaryTotal)    summaryTotal.textContent    = formatMoney(grandTotal);
+        if (checkoutDisplay) checkoutDisplay.textContent = formatMoney(grandTotal);
+
+        if (addressField) {
+            addressField.classList.toggle('hidden', !isMail);
+            if (addressInput) addressInput.required = isMail;
+        }
+    }
+
+    shippingRadios.forEach(function(r) { r.addEventListener('change', updateTotals); });
+    updateTotals();
+
+    // Show/hide SEPA fields
+    var paymentRadios = document.querySelectorAll('input[name="payment_method"]');
+    var sepaFields    = document.getElementById('sepa-fields');
 
     function toggleSepaFields() {
-        const selected = document.querySelector('input[name="payment_method"]:checked');
+        var selected = document.querySelector('input[name="payment_method"]:checked');
         if (sepaFields) {
             sepaFields.classList.toggle('hidden', !selected || selected.value !== 'sepa');
         }
     }
 
-    radios.forEach(function(r) { r.addEventListener('change', toggleSepaFields); });
+    paymentRadios.forEach(function(r) { r.addEventListener('change', toggleSepaFields); });
     toggleSepaFields();
 });
 </script>

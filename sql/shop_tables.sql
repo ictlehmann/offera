@@ -47,6 +47,7 @@ CREATE TABLE IF NOT EXISTS `shop_orders` (
     `shipping_status` VARCHAR(50)  NOT NULL DEFAULT 'pending'  COMMENT 'pending, shipped, delivered',
     `shipping_method` VARCHAR(50)  DEFAULT NULL                COMMENT 'pickup oder mail',
     `shipping_cost`   DECIMAL(10,2) NOT NULL DEFAULT 0.00      COMMENT 'Versandkosten',
+    `shipping_address` TEXT         DEFAULT NULL               COMMENT 'Lieferadresse für Postversand',
     `created_at`      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at`      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),

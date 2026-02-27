@@ -633,20 +633,24 @@ class Shop {
      * @param int    $userId
      * @param array  $cart    Keys: product_id, variant_id, quantity, price
      * @param string $paymentMethod  'paypal' or 'sepa'
+     * @param string $shippingMethod 'pickup' or 'mail'
+     * @param float  $shippingCost
+     * @param string $shippingAddress  Required when shippingMethod is 'mail'
      * @return int|null  New order ID or null on failure
      */
-    public static function createOrder(int $userId, array $cart, string $paymentMethod): ?int {
+    public static function createOrder(int $userId, array $cart, string $paymentMethod, string $shippingMethod = 'pickup', float $shippingCost = 0.0, string $shippingAddress = ''): ?int {
         try {
             $db = Database::getContentDB();
             $db->beginTransaction();
 
-            $total = array_sum(array_map(fn($i) => $i['price'] * $i['quantity'], $cart));
+            $itemsTotal = array_sum(array_map(fn($i) => $i['price'] * $i['quantity'], $cart));
+            $total = $itemsTotal + $shippingCost;
 
             $stmt = $db->prepare("
-                INSERT INTO shop_orders (user_id, total_amount, payment_method, payment_status, shipping_status)
-                VALUES (?, ?, ?, 'pending', 'pending')
+                INSERT INTO shop_orders (user_id, total_amount, payment_method, payment_status, shipping_status, shipping_method, shipping_cost, shipping_address)
+                VALUES (?, ?, ?, 'pending', 'pending', ?, ?, ?)
             ");
-            $stmt->execute([$userId, $total, $paymentMethod]);
+            $stmt->execute([$userId, $total, $paymentMethod, $shippingMethod, $shippingCost, ($shippingAddress !== '' ? $shippingAddress : null)]);
             $orderId = (int) $db->lastInsertId();
 
             $ins = $db->prepare("

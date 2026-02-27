@@ -36,6 +36,21 @@ $paymentMethod = in_array($input['payment_method'] ?? '', ['paypal', 'sepa'], tr
     ? $input['payment_method']
     : 'paypal';
 
+$shippingMethod = in_array($input['shipping_method'] ?? '', ['pickup', 'mail'], true)
+    ? $input['shipping_method']
+    : 'pickup';
+
+$shippingCost = ($shippingMethod === 'mail') ? 4.90 : 0.00;
+// Always use server-side shipping cost to prevent client manipulation
+
+$shippingAddress = trim($input['shipping_address'] ?? '');
+
+if ($shippingMethod === 'mail' && $shippingAddress === '') {
+    http_response_code(400);
+    echo json_encode(['success' => false, 'message' => 'Bitte gib eine Lieferadresse an.']);
+    exit;
+}
+
 try {
     // 3. Validate session cart
     $cart = isset($_SESSION['shop_cart']) ? array_values($_SESSION['shop_cart']) : [];
@@ -54,7 +69,7 @@ try {
     }
 
     // 5. Create order in shop_orders
-    $orderId = Shop::createOrder($userId, $cart, $paymentMethod);
+    $orderId = Shop::createOrder($userId, $cart, $paymentMethod, $shippingMethod, $shippingCost, $shippingAddress);
     if (!$orderId) {
         http_response_code(500);
         echo json_encode(['success' => false, 'message' => 'Fehler beim Erstellen der Bestellung.']);
@@ -64,7 +79,7 @@ try {
     // 5a. Immediately decrement stock after order is created
     Shop::decrementStock($orderId);
 
-    $total = array_sum(array_map(fn($i) => $i['price'] * $i['quantity'], $cart));
+    $total = array_sum(array_map(fn($i) => $i['price'] * $i['quantity'], $cart)) + $shippingCost;
 
     // 5b. Send order notification e-mail to merch team (non-blocking)
     try {
