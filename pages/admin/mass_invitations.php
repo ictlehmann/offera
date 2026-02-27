@@ -161,11 +161,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['send_bulk_invite'])) 
     $eventId   = (int)($_POST['event_id']    ?? 0);
     $selectedEvent = $eventId > 0 ? Event::getById($eventId, false) : null;
     $eventName = $selectedEvent ? ($selectedEvent['title'] ?? '') : '';
+    $customLinksPost = is_array($_POST['custom_links'] ?? null) ? $_POST['custom_links'] : [];
     $customLinks = [
-        'VoteTransferLink' => trim($_POST['VoteTransferLink'] ?? ''),
-        'MeetingLink'      => trim($_POST['MeetingLink']      ?? ''),
-        'LinkToDocs'       => trim($_POST['LinkToDocs']       ?? ''),
-        'trainingLink'     => trim($_POST['trainingLink']     ?? ''),
+        'VoteTransferLink' => trim($customLinksPost['VoteTransferLink'] ?? ''),
+        'MeetingLink'      => trim($customLinksPost['MeetingLink']      ?? ''),
+        'LinkToDocs'       => trim($customLinksPost['LinkToDocs']       ?? ''),
+        'trainingLink'     => trim($customLinksPost['trainingLink']     ?? ''),
     ];
 
     if (empty($subject) || empty($body)) {
@@ -617,61 +618,7 @@ ob_start();
                     <code>{trainingLink}</code> (wird entfernt wenn leer).
                 </p>
             </div>
-            <!-- Custom link fields -->
-            <div class="mt-4 grid grid-cols-1 gap-4">
-                <div>
-                    <label for="voteTransferLink" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Link für <code>{VoteTransferLink}</code>
-                    </label>
-                    <input
-                        type="url"
-                        id="voteTransferLink"
-                        name="VoteTransferLink"
-                        class="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                        placeholder="https://…"
-                        value="<?php echo htmlspecialchars($_POST['VoteTransferLink'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
-                    >
-                </div>
-                <div>
-                    <label for="meetingLink" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Link für <code>{MeetingLink}</code>
-                    </label>
-                    <input
-                        type="url"
-                        id="meetingLink"
-                        name="MeetingLink"
-                        class="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                        placeholder="https://…"
-                        value="<?php echo htmlspecialchars($_POST['MeetingLink'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
-                    >
-                </div>
-                <div>
-                    <label for="linkToDocs" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Link für <code>{LinkToDocs}</code>
-                    </label>
-                    <input
-                        type="url"
-                        id="linkToDocs"
-                        name="LinkToDocs"
-                        class="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                        placeholder="https://…"
-                        value="<?php echo htmlspecialchars($_POST['LinkToDocs'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
-                    >
-                </div>
-                <div>
-                    <label for="trainingLink" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                        Link für <code>{trainingLink}</code> <span class="text-gray-400 text-xs">(optional – wird entfernt wenn leer)</span>
-                    </label>
-                    <input
-                        type="url"
-                        id="trainingLink"
-                        name="trainingLink"
-                        class="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                        placeholder="https://…"
-                        value="<?php echo htmlspecialchars($_POST['trainingLink'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
-                    >
-                </div>
-            </div>
+            <div id="dynamicLinkInputs" class="mt-4 grid grid-cols-1 gap-4"></div>
         </div>
     </div>
 
@@ -832,6 +779,75 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const ALUMNI_ENTRA_ROLES = <?php echo json_encode(ALUMNI_ENTRA_ROLES); ?>;
 
+    // Preserved custom-link values from last POST (for re-populating after validation errors)
+    <?php $jsCustomLinks = is_array($_POST['custom_links'] ?? null) ? $_POST['custom_links'] : []; ?>
+    const serverCustomLinks = <?php echo json_encode([
+        'VoteTransferLink' => $jsCustomLinks['VoteTransferLink'] ?? '',
+        'MeetingLink'      => $jsCustomLinks['MeetingLink']      ?? '',
+        'LinkToDocs'       => $jsCustomLinks['LinkToDocs']       ?? '',
+        'trainingLink'     => $jsCustomLinks['trainingLink']     ?? '',
+    ]); ?>;
+
+    // Dynamic link input generation based on placeholders found in #bulkBody
+    const LINK_PLACEHOLDERS = [
+        { key: 'VoteTransferLink', required: true },
+        { key: 'MeetingLink',      required: true },
+        { key: 'LinkToDocs',       required: true },
+        { key: 'trainingLink',     required: false },
+    ];
+
+    function updateDynamicLinkInputs() {
+        const container = document.getElementById('dynamicLinkInputs');
+        if (!container) return;
+
+        const text = bodyTextarea ? bodyTextarea.value : '';
+
+        // Preserve any values the user has already typed
+        const currentValues = {};
+        container.querySelectorAll('input[type="url"]').forEach(function (input) {
+            const m = input.name.match(/^custom_links\[(.+)\]$/);
+            if (m) currentValues[m[1]] = input.value;
+        });
+
+        container.innerHTML = '';
+
+        LINK_PLACEHOLDERS.forEach(function (p) {
+            if (!new RegExp('\\{' + p.key + '\\}').test(text)) return;
+
+            const div = document.createElement('div');
+
+            const label = document.createElement('label');
+            label.htmlFor = 'dynInput_' + p.key;
+            label.className = 'block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1';
+            if (p.required) {
+                label.innerHTML = 'Link für <code>{' + p.key + '}</code>';
+            } else {
+                label.innerHTML = 'Link für <code>{' + p.key + '}</code> <span class="text-gray-400 text-xs">(optional – wird entfernt wenn leer)</span>';
+            }
+
+            const input = document.createElement('input');
+            input.type        = 'url';
+            input.id          = 'dynInput_' + p.key;
+            input.name        = 'custom_links[' + p.key + ']';
+            input.className   = 'w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500';
+            input.placeholder = 'https://\u2026';
+            if (p.required) input.required = true;
+            input.value = currentValues[p.key] !== undefined
+                ? currentValues[p.key]
+                : (serverCustomLinks[p.key] || '');
+
+            div.appendChild(label);
+            div.appendChild(input);
+            container.appendChild(div);
+        });
+    }
+
+    if (bodyTextarea) {
+        bodyTextarea.addEventListener('input', updateDynamicLinkInputs);
+        // Populate on page load (e.g. after a POST with validation errors)
+        updateDynamicLinkInputs();
+    }
+
     // Load template via AJAX
     if (templateSelect) {
         templateSelect.addEventListener('change', function () {
@@ -849,7 +865,10 @@ document.addEventListener('DOMContentLoaded', function () {
                         return;
                     }
                     if (subjectInput)  subjectInput.value  = data.subject || '';
-                    if (bodyTextarea)  bodyTextarea.value  = data.content || '';
+                    if (bodyTextarea) {
+                        bodyTextarea.value = data.content || '';
+                        updateDynamicLinkInputs();
+                    }
                 })
                 .catch(() => {
                     if (loadStatus) loadStatus.classList.add('hidden');
