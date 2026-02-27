@@ -41,11 +41,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($postAction === 'save_product') {
         $pid  = isset($_POST['product_id']) ? (int) $_POST['product_id'] : 0;
         $data = [
-            'name'        => trim($_POST['name'] ?? ''),
-            'description' => trim($_POST['description'] ?? ''),
-            'base_price'  => (float) ($_POST['base_price'] ?? 0),
-            'active'      => isset($_POST['active']) ? 1 : 0,
-            'image_path'  => null,
+            'name'          => trim($_POST['name'] ?? ''),
+            'description'   => trim($_POST['description'] ?? ''),
+            'base_price'    => (float) ($_POST['base_price'] ?? 0),
+            'active'        => isset($_POST['active']) ? 1 : 0,
+            'is_bulk_order' => isset($_POST['is_bulk_order']) ? 1 : 0,
+            'bulk_end_date' => !empty($_POST['bulk_end_date']) ? $_POST['bulk_end_date'] : null,
+            'bulk_min_goal' => !empty($_POST['bulk_min_goal']) ? (int) $_POST['bulk_min_goal'] : null,
+            'image_path'    => null,
         ];
 
         if (empty($data['name'])) {
@@ -56,22 +59,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $editProduct = Shop::getProductById($pid);
             }
         } else {
-            // Handle image upload
-            if (isset($_FILES['product_image']) && $_FILES['product_image']['error'] === UPLOAD_ERR_OK) {
-                $uploadDir    = __DIR__ . '/../../uploads/shop_products/';
-                $uploadResult = SecureImageUpload::uploadImage($_FILES['product_image'], $uploadDir, false);
-                if ($uploadResult['success']) {
-                    $data['image_path'] = $uploadResult['path'];
-                } else {
-                    $errorMessage  = 'Bild-Upload fehlgeschlagen: ' . $uploadResult['error'];
-                    $openModal     = true;
-                    $editProductId = $pid;
-                    if ($pid) {
-                        $editProduct = Shop::getProductById($pid);
-                    }
-                }
-            } elseif ($pid) {
-                // Keep existing image if no new one was uploaded
+            // Keep existing image_path for backwards compatibility
+            if ($pid) {
                 $existing = Shop::getProductById($pid);
                 $data['image_path'] = $existing['image_path'] ?? null;
             }
@@ -89,13 +78,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
                 }
 
-                // Save variants if product was saved successfully
+                // Save variants and images if product was saved successfully
                 if ($ok && $pid) {
+                    // Handle multiple image uploads
+                    if (!empty($_FILES['product_images']['name'][0])) {
+                        $uploadDir     = __DIR__ . '/../../uploads/shop_products/';
+                        $files         = $_FILES['product_images'];
+                        $existingImgs  = Shop::getProductImages($pid);
+                        $nextSortOrder = count($existingImgs);
+                        for ($i = 0; $i < count($files['name']); $i++) {
+                            if ($files['error'][$i] !== UPLOAD_ERR_OK) {
+                                continue;
+                            }
+                            $singleFile = [
+                                'name'     => $files['name'][$i],
+                                'type'     => $files['type'][$i],
+                                'tmp_name' => $files['tmp_name'][$i],
+                                'error'    => $files['error'][$i],
+                                'size'     => $files['size'][$i],
+                            ];
+                            $uploadResult = SecureImageUpload::uploadImage($singleFile, $uploadDir, false);
+                            if ($uploadResult['success']) {
+                                Shop::addProductImage($pid, $uploadResult['path'], $nextSortOrder++);
+                            }
+                        }
+                    }
+
                     $hasVariants = isset($_POST['has_variants']);
                     if (!$hasVariants) {
-                        // No named variants – store a single default variant with empty type/value
-                        $stockQty = (int) ($_POST['stock_quantity'] ?? 0);
-                        $variants = [['type' => '', 'value' => '', 'stock_quantity' => $stockQty]];
+                        // No named variants – store a single default variant.
+                        // Stock tracking is handled via bulk_min_goal for bulk orders;
+                        // stock_quantity is set to 0 as it is not used in this system.
+                        $variants = [['type' => '', 'value' => '', 'stock_quantity' => 0]];
                     } else {
                         $variantGroups = $_POST['variants'] ?? [];
                         $variants      = [];
@@ -171,6 +185,13 @@ $orders   = [];
 
 if ($section === 'products') {
     $products = Shop::getAllProducts();
+    // Pre-process image asset URLs for JS
+    foreach ($products as &$p) {
+        foreach ($p['images'] as &$img) {
+            $img['url'] = !empty($img['image_path']) ? asset($img['image_path']) : '';
+        }
+    }
+    unset($p, $img);
 } elseif ($section === 'orders') {
     $orders = Shop::getAllOrders();
 
@@ -577,64 +598,57 @@ ob_start();
                         </div>
                     </div>
 
-                    <!-- Section: Produktbild -->
+                    <!-- Section: Sammelbestellung -->
                     <div>
                         <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 flex items-center gap-2 mb-3">
-                            <i class="fas fa-image text-blue-400"></i> Produktbild
+                            <i class="fas fa-users text-blue-400"></i> Sammelbestellung
                             <span class="flex-1 border-t border-gray-200 dark:border-gray-700"></span>
                         </h3>
-                        <div id="image-preview-area" class="mb-3 hidden">
-                            <div class="relative inline-block">
-                                <img id="image-preview" src="" alt="Vorschau"
-                                     class="w-32 h-32 object-cover rounded-xl border-2 border-blue-200 dark:border-blue-700 shadow">
-                                <button type="button" onclick="clearImagePreview()"
-                                        class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition shadow text-xs">
-                                    <i class="fas fa-times"></i>
-                                </button>
+                        <div class="space-y-3">
+                            <label class="flex items-start gap-3 cursor-pointer p-3 rounded-lg bg-gray-50 dark:bg-gray-700/40 border border-gray-200 dark:border-gray-600">
+                                <input type="checkbox" id="modal-is-bulk-order" name="is_bulk_order" value="1"
+                                       onchange="toggleBulkOrderFields(this.checked)"
+                                       class="w-4 h-4 mt-0.5 text-blue-600 rounded border-gray-300 dark:border-gray-600 focus:ring-blue-500">
+                                <div>
+                                    <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">Ist Sammelbestellung?</span>
+                                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
+                                        Aktivieren für Produkte, die erst bei Erreichen einer Mindestmenge produziert werden.
+                                    </p>
+                                </div>
+                            </label>
+                            <div id="modal-bulk-fields" class="hidden space-y-3">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                                        Deadline der Bestellung
+                                    </label>
+                                    <input type="date" name="bulk_end_date" id="modal-bulk-end-date"
+                                           class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                                        Ziel-Menge für Produktion
+                                    </label>
+                                    <div class="flex items-center gap-2">
+                                        <input type="number" name="bulk_min_goal" id="modal-bulk-min-goal"
+                                               value="" min="1"
+                                               class="w-32 px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 transition">
+                                        <span class="text-sm text-gray-500 dark:text-gray-400">Stück Minimum</span>
+                                    </div>
+                                </div>
                             </div>
-                            <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Neue Bildvorschau</p>
                         </div>
-                        <div id="current-image-area" class="mb-3 hidden">
-                            <div class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-700/40 rounded-lg border border-gray-200 dark:border-gray-600">
-                                <img id="current-image" src="" alt="Aktuelles Bild"
-                                     class="w-16 h-16 object-cover rounded-lg shrink-0">
-                                <p class="text-xs text-gray-500 dark:text-gray-400">
-                                    Aktuelles Bild.<br>Neues Bild hochladen, um es zu ersetzen.
-                                </p>
-                            </div>
-                        </div>
-                        <label for="modal-product-image"
-                               class="flex flex-col items-center justify-center w-full h-28 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl cursor-pointer bg-gray-50 dark:bg-gray-700/30 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:border-blue-400 dark:hover:border-blue-500 transition-colors group">
-                            <div class="flex flex-col items-center justify-center py-4">
-                                <i class="fas fa-cloud-upload-alt text-2xl text-gray-400 group-hover:text-blue-500 dark:group-hover:text-blue-400 mb-1 transition-colors"></i>
-                                <p class="text-sm text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors font-medium">Bild auswählen</p>
-                                <p class="text-xs text-gray-400 dark:text-gray-500">JPG, PNG oder WebP · max. 5 MB</p>
-                            </div>
-                            <input id="modal-product-image" type="file" name="product_image"
-                                   accept="image/jpeg,image/png,image/webp" class="hidden"
-                                   onchange="previewProductImage(event)">
-                        </label>
                     </div>
                 </div>
 
                 <!-- ── Right column ── -->
                 <div class="space-y-5">
 
-                    <!-- Section: Lagerbestand & Varianten -->
+                    <!-- Section: Varianten -->
                     <div>
                         <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 flex items-center gap-2 mb-3">
-                            <i class="fas fa-warehouse text-blue-400"></i> Lagerbestand &amp; Varianten
+                            <i class="fas fa-warehouse text-blue-400"></i> Varianten
                             <span class="flex-1 border-t border-gray-200 dark:border-gray-700"></span>
                         </h3>
-                        <div id="modal-section-simple-stock" class="mb-3">
-                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Lagerbestand</label>
-                            <div class="flex items-center gap-2">
-                                <input type="number" name="stock_quantity" id="modal-stock-quantity"
-                                       value="0" min="0"
-                                       class="w-32 px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 transition">
-                                <span class="text-sm text-gray-500 dark:text-gray-400">Stück verfügbar</span>
-                            </div>
-                        </div>
                         <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/40 border border-gray-200 dark:border-gray-600 mb-3">
                             <label class="flex items-start gap-3 cursor-pointer">
                                 <input type="checkbox" id="modal-has-variants" name="has_variants" value="1"
@@ -670,6 +684,34 @@ ob_start();
                         </ul>
                     </div>
                 </div>
+            </div>
+
+            <!-- ── Full-width: Produktbilder ── -->
+            <div class="mt-6 pt-5 border-t border-gray-200 dark:border-gray-700">
+                <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 flex items-center gap-2 mb-3">
+                    <i class="fas fa-images text-blue-400"></i> Produktbilder
+                    <span class="flex-1 border-t border-gray-200 dark:border-gray-700"></span>
+                </h3>
+
+                <!-- Existing images grid (drag-and-drop sortable) -->
+                <p id="modal-no-images-hint" class="text-xs text-gray-400 dark:text-gray-500 mb-2 hidden">Noch keine Bilder vorhanden.</p>
+                <div id="modal-images-grid" class="grid grid-cols-4 sm:grid-cols-6 gap-2 mb-3"></div>
+
+                <!-- New images upload -->
+                <label for="modal-product-images"
+                       class="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl cursor-pointer bg-gray-50 dark:bg-gray-700/30 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:border-blue-400 dark:hover:border-blue-500 transition-colors group">
+                    <div class="flex flex-col items-center justify-center py-3">
+                        <i class="fas fa-cloud-upload-alt text-2xl text-gray-400 group-hover:text-blue-500 dark:group-hover:text-blue-400 mb-1 transition-colors"></i>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors font-medium">Bilder auswählen</p>
+                        <p class="text-xs text-gray-400 dark:text-gray-500">JPG, PNG oder WebP · max. 5 MB pro Bild · Mehrfachauswahl möglich</p>
+                    </div>
+                    <input id="modal-product-images" type="file" name="product_images[]"
+                           accept="image/jpeg,image/png,image/webp" multiple class="hidden"
+                           onchange="previewNewImages(event)">
+                </label>
+
+                <!-- Preview of newly selected (not yet uploaded) images -->
+                <div id="new-images-preview" class="mt-2 grid grid-cols-4 sm:grid-cols-6 gap-2 hidden"></div>
             </div>
 
             <!-- Modal footer -->
@@ -728,14 +770,19 @@ ob_start();
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
 <script>
-// ── Product Modal ─────────────────────────────────────────────────────────────
+// ── Constants ─────────────────────────────────────────────────────────────────
 
-const INPUT_CLASS = 'border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 text-sm focus:ring-2';
+const INPUT_CLASS       = 'border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 text-sm focus:ring-2';
+const IMAGE_ORDER_URL   = '<?php echo asset('api/shop/update_image_order.php'); ?>';
 
 let variantCount       = 0;
 let currentProductId   = null;
 let currentProductName = '';
+let sortableInstance   = null;
+
+// ── Product Modal ─────────────────────────────────────────────────────────────
 
 function openProductModal(product) {
     const isEdit = product && product.id;
@@ -747,6 +794,13 @@ function openProductModal(product) {
     document.getElementById('modal-description').value = isEdit ? (product.description || '') : '';
     document.getElementById('modal-base-price').value  = isEdit ? parseFloat(product.base_price || 0).toFixed(2) : '0.00';
     document.getElementById('modal-active').checked    = isEdit ? (product.active == 1) : true;
+
+    // Bulk order fields
+    const isBulk = isEdit && product.is_bulk_order == 1;
+    document.getElementById('modal-is-bulk-order').checked = isBulk;
+    document.getElementById('modal-bulk-end-date').value   = isEdit ? (product.bulk_end_date || '') : '';
+    document.getElementById('modal-bulk-min-goal').value   = isEdit ? (product.bulk_min_goal || '') : '';
+    toggleBulkOrderFields(isBulk);
 
     // Header
     document.getElementById('modal-title').textContent        = isEdit ? 'Produkt bearbeiten' : 'Neues Produkt anlegen';
@@ -765,18 +819,14 @@ function openProductModal(product) {
         currentProductName = '';
     }
 
-    // Current image
-    const currentImageArea = document.getElementById('current-image-area');
-    if (isEdit && product.image_path) {
-        document.getElementById('current-image').src = product.image_path;
-        currentImageArea.classList.remove('hidden');
-    } else {
-        currentImageArea.classList.add('hidden');
-    }
+    // Reset new-images preview
+    const newPreview = document.getElementById('new-images-preview');
+    newPreview.innerHTML = '';
+    newPreview.classList.add('hidden');
+    document.getElementById('modal-product-images').value = '';
 
-    // Reset new image preview
-    document.getElementById('image-preview-area').classList.add('hidden');
-    document.getElementById('image-preview').src = '';
+    // Build existing images grid
+    buildImagesGrid(isEdit ? (product.images || []) : []);
 
     // Build variant UI
     buildVariantUI(isEdit ? (product.variants || []) : []);
@@ -789,6 +839,126 @@ function openProductModal(product) {
 function closeProductModal() {
     document.getElementById('product-modal').classList.add('hidden');
     document.body.style.overflow = '';
+}
+
+// ── Bulk order fields toggle ──────────────────────────────────────────────────
+
+function toggleBulkOrderFields(show) {
+    document.getElementById('modal-bulk-fields').classList.toggle('hidden', !show);
+}
+
+// ── Existing images grid ──────────────────────────────────────────────────────
+
+function buildImagesGrid(images) {
+    const grid = document.getElementById('modal-images-grid');
+    const hint = document.getElementById('modal-no-images-hint');
+    grid.innerHTML = '';
+
+    if (sortableInstance) {
+        sortableInstance.destroy();
+        sortableInstance = null;
+    }
+
+    if (!images || images.length === 0) {
+        hint.classList.remove('hidden');
+        return;
+    }
+    hint.classList.add('hidden');
+
+    images.forEach(img => {
+        const item = document.createElement('div');
+        item.className = 'relative group cursor-grab active:cursor-grabbing';
+        item.dataset.id = img.id;
+        item.innerHTML = `
+            <img src="${escapeHtml(img.url || img.image_path)}" alt=""
+                 class="w-full aspect-square object-cover rounded-lg border border-gray-200 dark:border-gray-600 shadow-sm">
+            <button type="button"
+                    onclick="deleteProductImage(${parseInt(img.id)}, this.closest('[data-id]'))"
+                    class="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition shadow text-xs opacity-0 group-hover:opacity-100">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="absolute bottom-1 left-1 w-5 h-5 bg-black/30 rounded flex items-center justify-center opacity-0 group-hover:opacity-100 transition pointer-events-none">
+                <i class="fas fa-grip-vertical text-white text-xs"></i>
+            </div>`;
+        grid.appendChild(item);
+    });
+
+    sortableInstance = new Sortable(grid, {
+        animation: 150,
+        ghostClass: 'opacity-40',
+        onEnd: saveImageOrder,
+    });
+}
+
+function saveImageOrder() {
+    const grid  = document.getElementById('modal-images-grid');
+    const items = grid.querySelectorAll('[data-id]');
+    const orders = Array.from(items).map((el, index) => ({
+        id:         parseInt(el.dataset.id),
+        sort_order: index,
+    }));
+
+    fetch(IMAGE_ORDER_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'reorder', orders }),
+    })
+    .then(r => r.json())
+    .catch(err => console.error('Reihenfolge konnte nicht gespeichert werden:', err));
+}
+
+function deleteProductImage(imageId, element) {
+    if (!confirm('Bild löschen?')) return;
+    fetch(IMAGE_ORDER_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'delete', id: imageId }),
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success && element) {
+            element.remove();
+            const grid = document.getElementById('modal-images-grid');
+            if (grid.children.length === 0) {
+                document.getElementById('modal-no-images-hint').classList.remove('hidden');
+            }
+            saveImageOrder();
+        } else if (!data.success) {
+            alert('Bild konnte nicht gelöscht werden.');
+        }
+    })
+    .catch(err => {
+        console.error('Bild-Löschen fehlgeschlagen:', err);
+        alert('Bild konnte nicht gelöscht werden.');
+    });
+}
+
+// ── New images preview ────────────────────────────────────────────────────────
+
+function previewNewImages(event) {
+    const files   = event.target.files;
+    const preview = document.getElementById('new-images-preview');
+    preview.innerHTML = '';
+
+    if (!files || files.length === 0) {
+        preview.classList.add('hidden');
+        return;
+    }
+
+    preview.classList.remove('hidden');
+    Array.from(files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'relative';
+            wrapper.innerHTML = `
+                <img src="${e.target.result}" alt=""
+                     class="w-full aspect-square object-cover rounded-lg border-2 border-blue-300 dark:border-blue-600 shadow-sm">
+                <span class="absolute bottom-1 left-1 text-xs bg-blue-500 text-white rounded px-1">Neu</span>`;
+            preview.appendChild(wrapper);
+        };
+        reader.readAsDataURL(file);
+    });
 }
 
 // ── Variant UI ────────────────────────────────────────────────────────────────
@@ -813,15 +983,10 @@ function buildVariantUI(variants) {
             container.appendChild(createVariantBlock(variantCount++, typeName, groups[typeName]));
         });
         document.getElementById('modal-has-variants').checked = true;
-        document.getElementById('modal-section-simple-stock').classList.add('hidden');
         document.getElementById('modal-section-variants').classList.remove('hidden');
-        document.getElementById('modal-stock-quantity').value = 0;
     } else {
         document.getElementById('modal-has-variants').checked = false;
-        document.getElementById('modal-section-simple-stock').classList.remove('hidden');
         document.getElementById('modal-section-variants').classList.add('hidden');
-        const simpleStock = variants.length > 0 ? (parseInt(variants[0].stock_quantity) || 0) : 0;
-        document.getElementById('modal-stock-quantity').value = simpleStock;
     }
 }
 
@@ -888,36 +1053,11 @@ function addValueRow(btn, vIdx) {
 }
 
 function toggleVariantMode(hasVariants) {
-    document.getElementById('modal-section-simple-stock').classList.toggle('hidden', hasVariants);
     document.getElementById('modal-section-variants').classList.toggle('hidden', !hasVariants);
     if (hasVariants && document.getElementById('variants-container').children.length === 0) {
         document.getElementById('variants-container').appendChild(
             createVariantBlock(variantCount++, '', [{value:'',stock_quantity:0}])
         );
-    }
-}
-
-// ── Image preview ─────────────────────────────────────────────────────────────
-
-function previewProductImage(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = function (e) {
-        document.getElementById('image-preview').src = e.target.result;
-        document.getElementById('image-preview-area').classList.remove('hidden');
-        document.getElementById('current-image-area').classList.add('hidden');
-    };
-    reader.readAsDataURL(file);
-}
-
-function clearImagePreview() {
-    document.getElementById('modal-product-image').value = '';
-    document.getElementById('image-preview').src = '';
-    document.getElementById('image-preview-area').classList.add('hidden');
-    const currentSrc = document.getElementById('current-image').src;
-    if (currentSrc && currentSrc !== window.location.href) {
-        document.getElementById('current-image-area').classList.remove('hidden');
     }
 }
 
@@ -969,15 +1109,28 @@ document.addEventListener('keydown', function (e) {
 // ── Auto-open on page load ────────────────────────────────────────────────────
 
 <?php if ($openModal && $editProduct): ?>
-openProductModal(<?php echo json_encode([
-    'id'          => $editProduct['id'],
-    'name'        => $editProduct['name'],
-    'description' => $editProduct['description'],
-    'base_price'  => $editProduct['base_price'],
-    'active'      => $editProduct['active'],
-    'image_path'  => !empty($editProduct['image_path']) ? asset($editProduct['image_path']) : '',
-    'variants'    => $editProduct['variants'],
-]); ?>);
+openProductModal(<?php
+    $imagesForJs = array_map(function($img) {
+        return [
+            'id'         => $img['id'],
+            'sort_order' => $img['sort_order'],
+            'url'        => !empty($img['image_path']) ? asset($img['image_path']) : '',
+        ];
+    }, $editProduct['images'] ?? []);
+    echo json_encode([
+        'id'            => $editProduct['id'],
+        'name'          => $editProduct['name'],
+        'description'   => $editProduct['description'],
+        'base_price'    => $editProduct['base_price'],
+        'active'        => $editProduct['active'],
+        'is_bulk_order' => $editProduct['is_bulk_order'],
+        'bulk_end_date' => $editProduct['bulk_end_date'],
+        'bulk_min_goal' => $editProduct['bulk_min_goal'],
+        'image_path'    => !empty($editProduct['image_path']) ? asset($editProduct['image_path']) : '',
+        'images'        => $imagesForJs,
+        'variants'      => $editProduct['variants'],
+    ]);
+?>);
 <?php elseif ($openModal): ?>
 openProductModal();
 <?php endif; ?>
