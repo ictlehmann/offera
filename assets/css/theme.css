@@ -5239,3 +5239,38 @@ input[type="date"]::-ms-clear,
 input[type="datetime-local"]::-ms-clear {
     display: none;
 }
+
+/* ============================================================
+   GLOBAL FORM INPUT RULES
+   ============================================================ */
+
+/* Global CSS rules for standard form inputs */
+input[type="text"],
+input[type="email"],
+textarea,
+select {
+    box-sizing: border-box;
+    max-width: 100%;
+}
+
+/* Prevent iOS zoom on focus: font-size must be >= 16px on screens under 768px */
+@media (max-width: 767px) {
+    input[type="text"],
+    input[type="email"],
+    textarea,
+    select {
+        font-size: 16px !important;
+    }
+}
+
+/* Form grids collapse to single column on mobile (under 768px),
+   so all inputs are stacked and have full width */
+@media (max-width: 767px) {
+    form .grid:not(.grid-cols-1) {
+        grid-template-columns: 1fr !important;
+    }
+
+    form .grid > * {
+        width: 100%;
+    }
+}
