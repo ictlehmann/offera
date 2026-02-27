@@ -513,6 +513,28 @@ CREATE TABLE IF NOT EXISTS `inventory_history` (
 COMMENT='Audit trail for inventory changes';
 
 -- ================================================
+-- TABLE: inventory_requests
+-- Board approval workflow for inventory loans.
+-- Item master data comes live from the EasyVerein API.
+-- ================================================
+CREATE TABLE IF NOT EXISTS `inventory_requests` (
+  `id`                  INT UNSIGNED        AUTO_INCREMENT PRIMARY KEY,
+  `inventory_object_id` VARCHAR(64)         NOT NULL    COMMENT 'easyVerein inventory-object ID',
+  `user_id`             INT UNSIGNED        NOT NULL    COMMENT 'Applicant (Antragsteller) local user ID',
+  `start_date`          DATE                NOT NULL    COMMENT 'Requested start date of the loan',
+  `end_date`            DATE                NOT NULL    COMMENT 'Requested end date of the loan',
+  `quantity`            INT UNSIGNED        NOT NULL DEFAULT 1 COMMENT 'Number of units requested',
+  `status`              ENUM('pending','approved','rejected','returned','pending_return') NOT NULL DEFAULT 'pending' COMMENT 'Approval workflow status',
+  `return_notes`        TEXT                DEFAULT NULL COMMENT 'Optional remarks at return',
+  `returned_at`         DATETIME            DEFAULT NULL COMMENT 'When the return was verified',
+  `created_at`          DATETIME            NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'When the request was created',
+  INDEX `idx_ir_inventory_object_id` (`inventory_object_id`),
+  INDEX `idx_ir_user_id`             (`user_id`),
+  INDEX `idx_ir_status`              (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+COMMENT='Inventory loan requests with board approval workflow';
+
+-- ================================================
 -- TABLE: poll_options
 -- ================================================
 CREATE TABLE IF NOT EXISTS `poll_options` (
