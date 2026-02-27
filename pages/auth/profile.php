@@ -1013,12 +1013,14 @@ ob_start();
 
 <!-- Cropper.js Modal -->
 <div id="cropperModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
-    <div class="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md p-6">
-        <h3 class="text-lg font-bold mb-4 dark:text-white">Profilbild zuschneiden</h3>
-        <div class="w-full max-h-96 mb-4 overflow-hidden flex justify-center">
-            <img id="cropperImage" class="max-w-full">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-lg max-h-[85vh] flex flex-col overflow-hidden">
+        <div class="p-6 overflow-y-auto flex-1">
+            <h3 class="text-lg font-bold mb-4 dark:text-white">Profilbild zuschneiden</h3>
+            <div class="w-full max-h-96 mb-4 overflow-hidden flex justify-center">
+                <img id="cropperImage" class="max-w-full">
+            </div>
         </div>
-        <div class="flex justify-end gap-3">
+        <div class="flex justify-end gap-3 px-6 pb-6 pt-2">
             <button type="button" id="closeCropperBtn" class="px-4 py-2 rounded-xl bg-gray-200 text-gray-800 hover:bg-gray-300">Abbrechen</button>
             <button type="button" id="saveCropperBtn" class="px-4 py-2 rounded-xl bg-ibc-green text-white hover:bg-green-600">Speichern</button>
         </div>

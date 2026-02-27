@@ -250,7 +250,7 @@ ob_start();
 
 <!-- Rental Request Modal -->
 <div id="rentalModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4" style="background: rgba(15,23,42,0.70); backdrop-filter: blur(4px);" role="dialog" aria-modal="true" aria-labelledby="rentalModalTitle">
-    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-modal-in">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-lg max-h-[85vh] flex flex-col overflow-hidden animate-modal-in">
 
         <!-- Modal Header -->
         <div class="bg-gradient-to-r from-purple-600 to-blue-600 px-6 py-5 flex items-center justify-between">
@@ -268,8 +268,8 @@ ob_start();
             </button>
         </div>
 
-        <!-- Form -->
-        <div class="px-6 py-5 space-y-5">
+        <!-- Form Body (scrollable) -->
+        <div class="px-6 py-5 space-y-5 overflow-y-auto flex-1">
 
             <!-- Availability indicator -->
             <div id="availabilityInfo" class="hidden items-center gap-3 p-3 rounded-xl border text-sm">
@@ -337,15 +337,16 @@ ob_start();
             <!-- Error / Success message inside modal -->
             <div id="rentalModalMsg" class="hidden rounded-xl px-4 py-3 text-sm font-medium"></div>
 
-            <!-- Buttons -->
-            <div class="flex gap-3 pt-1">
-                <button type="button" onclick="closeRentalModal()" class="flex-1 px-4 py-2.5 bg-gray-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors font-semibold text-sm border border-gray-200 dark:border-slate-700">
-                    <i class="fas fa-times mr-1.5"></i>Abbrechen
-                </button>
-                <button type="button" id="rentalSubmitBtn" onclick="submitRentalRequest()" class="flex-1 px-4 py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-xl transition-all font-semibold text-sm shadow-md hover:shadow-lg transform hover:scale-[1.02] flex items-center justify-center gap-2">
-                    <i class="fas fa-paper-plane"></i>Anfrage senden
-                </button>
-            </div>
+        </div>
+
+        <!-- Footer (fixed buttons) -->
+        <div class="px-6 pb-5 pt-3 flex gap-3">
+            <button type="button" onclick="closeRentalModal()" class="flex-1 px-4 py-2.5 bg-gray-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors font-semibold text-sm border border-gray-200 dark:border-slate-700">
+                <i class="fas fa-times mr-1.5"></i>Abbrechen
+            </button>
+            <button type="button" id="rentalSubmitBtn" onclick="submitRentalRequest()" class="flex-1 px-4 py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-xl transition-all font-semibold text-sm shadow-md hover:shadow-lg transform hover:scale-[1.02] flex items-center justify-center gap-2">
+                <i class="fas fa-paper-plane"></i>Anfrage senden
+            </button>
         </div>
     </div>
 </div>

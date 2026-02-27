@@ -537,7 +537,7 @@ ob_start();
 
 <!-- Invoice Detail Modal -->
 <div id="invoiceDetailModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-2xl w-full max-h-[85vh] flex flex-col overflow-hidden">
         <!-- Header -->
         <div class="p-5 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
             <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">
@@ -549,7 +549,7 @@ ob_start();
             </button>
         </div>
         <!-- Body -->
-        <div class="p-5 space-y-4">
+        <div class="p-5 space-y-4 overflow-y-auto flex-1">
             <!-- Submitter + Date row -->
             <div class="flex items-center gap-4">
                 <div id="detail-avatar" class="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-300 font-bold text-lg flex-shrink-0"></div>
@@ -634,13 +634,13 @@ ob_start();
 
 <!-- Rejection Reason Modal -->
 <div id="rejectModal" class="fixed inset-0 bg-black bg-opacity-50 z-[60] hidden flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-md w-full">
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-lg max-h-[85vh] flex flex-col overflow-hidden">
         <div class="p-5 border-b border-gray-200 dark:border-gray-700">
             <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100">
                 <i class="fas fa-times-circle mr-2 text-red-500"></i>Rechnung ablehnen
             </h3>
         </div>
-        <div class="p-5">
+        <div class="p-5 overflow-y-auto flex-1">
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Ablehnungsgrund <span class="text-gray-400 dark:text-gray-500 font-normal">(optional)</span></label>
             <textarea id="rejectReasonInput" rows="3"
                 class="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
@@ -661,7 +661,7 @@ ob_start();
 
 <!-- Submission Modal -->
 <div id="submissionModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[85vh] flex flex-col overflow-hidden">
         <div class="p-6 border-b border-gray-200 dark:border-gray-700">
             <div class="flex items-center justify-between">
                 <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">
@@ -674,97 +674,99 @@ ob_start();
             </div>
         </div>
         
-        <form id="submissionForm" action="<?php echo asset('api/submit_invoice.php'); ?>" method="POST" enctype="multipart/form-data" class="p-6">
-            <!-- Betrag -->
-            <div class="mb-6">
-                <label for="amount" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Betrag (€) <span class="text-red-500 dark:text-red-400">*</span>
-                </label>
-                <input 
-                    type="number" 
-                    id="amount" 
-                    name="amount" 
-                    step="0.01"
-                    min="0"
-                    required
-                    class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="0.00"
-                >
-            </div>
-
-            <!-- Belegdatum -->
-            <div class="mb-6">
-                <label for="date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Belegdatum <span class="text-red-500 dark:text-red-400">*</span>
-                </label>
-                <input 
-                    type="date" 
-                    id="date" 
-                    name="date" 
-                    required
-                    max="<?php echo date('Y-m-d'); ?>"
-                    class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-            </div>
-
-            <!-- Zweck/Beschreibung -->
-            <div class="mb-6">
-                <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Zweck <span class="text-red-500 dark:text-red-400">*</span>
-                </label>
-                <textarea 
-                    id="description" 
-                    name="description" 
-                    rows="3"
-                    required
-                    class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Beschreiben Sie den Zweck der Rechnung..."
-                ></textarea>
-            </div>
-
-            <!-- File Upload (Drag & Drop Zone) -->
-            <div class="mb-6">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Beleg hochladen <span class="text-red-500 dark:text-red-400">*</span>
-                </label>
-                <div 
-                    id="dropZone"
-                    class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center hover:border-blue-500 dark:hover:border-blue-400 transition-colors cursor-pointer bg-gray-50 dark:bg-gray-700"
-                >
+        <form id="submissionForm" action="<?php echo asset('api/submit_invoice.php'); ?>" method="POST" enctype="multipart/form-data" class="flex flex-col flex-1 min-h-0">
+            <div class="p-6 overflow-y-auto flex-1">
+                <!-- Betrag -->
+                <div class="mb-6">
+                    <label for="amount" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Betrag (€) <span class="text-red-500 dark:text-red-400">*</span>
+                    </label>
                     <input 
-                        type="file" 
-                        id="file" 
-                        name="file" 
-                        accept=".pdf,.jpg,.jpeg,.png"
+                        type="number" 
+                        id="amount" 
+                        name="amount" 
+                        step="0.01"
+                        min="0"
                         required
-                        class="hidden"
+                        class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="0.00"
                     >
-                    <div id="dropZoneContent">
-                        <i class="fas fa-cloud-upload-alt text-5xl text-gray-400 dark:text-gray-500 mb-4"></i>
-                        <p class="text-gray-600 dark:text-gray-300 mb-2">
-                            <span class="text-blue-600 dark:text-blue-400 font-semibold">Klicken Sie hier</span> oder ziehen Sie eine Datei hierher
-                        </p>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">
-                            Unterstützt: PDF, JPG, PNG (Max. 10MB)
-                        </p>
-                    </div>
-                    <div id="fileInfo" class="hidden">
-                        <i class="fas fa-file-check text-5xl text-green-500 dark:text-green-400 mb-4"></i>
-                        <p id="fileName" class="text-gray-700 dark:text-gray-300 font-semibold mb-2"></p>
-                        <button 
-                            type="button"
-                            id="removeFile"
-                            class="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300"
+                </div>
+
+                <!-- Belegdatum -->
+                <div class="mb-6">
+                    <label for="date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Belegdatum <span class="text-red-500 dark:text-red-400">*</span>
+                    </label>
+                    <input 
+                        type="date" 
+                        id="date" 
+                        name="date" 
+                        required
+                        max="<?php echo date('Y-m-d'); ?>"
+                        class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                </div>
+
+                <!-- Zweck/Beschreibung -->
+                <div class="mb-6">
+                    <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Zweck <span class="text-red-500 dark:text-red-400">*</span>
+                    </label>
+                    <textarea 
+                        id="description" 
+                        name="description" 
+                        rows="3"
+                        required
+                        class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Beschreiben Sie den Zweck der Rechnung..."
+                    ></textarea>
+                </div>
+
+                <!-- File Upload (Drag & Drop Zone) -->
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Beleg hochladen <span class="text-red-500 dark:text-red-400">*</span>
+                    </label>
+                    <div 
+                        id="dropZone"
+                        class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center hover:border-blue-500 dark:hover:border-blue-400 transition-colors cursor-pointer bg-gray-50 dark:bg-gray-700"
+                    >
+                        <input 
+                            type="file" 
+                            id="file" 
+                            name="file" 
+                            accept=".pdf,.jpg,.jpeg,.png"
+                            required
+                            class="hidden"
                         >
-                            <i class="fas fa-times mr-1"></i>
-                            Datei entfernen
-                        </button>
+                        <div id="dropZoneContent">
+                            <i class="fas fa-cloud-upload-alt text-5xl text-gray-400 dark:text-gray-500 mb-4"></i>
+                            <p class="text-gray-600 dark:text-gray-300 mb-2">
+                                <span class="text-blue-600 dark:text-blue-400 font-semibold">Klicken Sie hier</span> oder ziehen Sie eine Datei hierher
+                            </p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">
+                                Unterstützt: PDF, JPG, PNG (Max. 10MB)
+                            </p>
+                        </div>
+                        <div id="fileInfo" class="hidden">
+                            <i class="fas fa-file-check text-5xl text-green-500 dark:text-green-400 mb-4"></i>
+                            <p id="fileName" class="text-gray-700 dark:text-gray-300 font-semibold mb-2"></p>
+                            <button 
+                                type="button"
+                                id="removeFile"
+                                class="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300"
+                            >
+                                <i class="fas fa-times mr-1"></i>
+                                Datei entfernen
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Submit Button -->
-            <div class="flex gap-4">
+            <!-- Submit Buttons (fixed footer) -->
+            <div class="flex gap-4 px-6 pb-6 pt-2">
                 <button 
                     type="submit"
                     class="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg"

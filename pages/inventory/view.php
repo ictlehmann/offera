@@ -578,83 +578,87 @@ if (!empty($logbookNote)):
 
 <!-- Combined Checkout/Rental Modal -->
 <div id="checkoutModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6">
-        <div class="flex justify-between items-center mb-4">
-            <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">
-                <i class="fas fa-hand-holding-box text-green-600 mr-2"></i>
-                Entnehmen / Ausleihen
-            </h2>
-            <button onclick="closeCheckoutModal()" class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
-                <i class="fas fa-times text-xl"></i>
-            </button>
-        </div>
-
-        <div class="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg mb-4">
-            <p class="font-semibold text-gray-800 dark:text-gray-100"><?php echo htmlspecialchars($item['name']); ?></p>
-            <p class="text-sm text-gray-600 dark:text-gray-300">Verfügbar: <?php echo htmlspecialchars(max(0, $item['available_quantity'])); ?> <?php echo htmlspecialchars($item['unit']); ?></p>
-        </div>
-
-        <form id="combinedCheckoutForm" method="POST" action="checkout.php?id=<?php echo htmlspecialchars($item['id']); ?>" class="space-y-4">
+    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-lg max-h-[85vh] flex flex-col overflow-hidden">
+        <form id="combinedCheckoutForm" method="POST" action="checkout.php?id=<?php echo htmlspecialchars($item['id']); ?>" class="flex flex-col flex-1 min-h-0">
             <input type="hidden" name="csrf_token" value="<?php echo CSRFHandler::getToken(); ?>">
             <input type="hidden" name="checkout" value="1">
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Startdatum der Ausleihe <span class="text-red-500">*</span>
-                </label>
-                <input
-                    type="date"
-                    name="start_date"
-                    required
-                    value="<?php echo date('Y-m-d'); ?>"
-                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:text-gray-100"
-                >
+            <div class="p-6 overflow-y-auto flex-1">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">
+                        <i class="fas fa-hand-holding-box text-green-600 mr-2"></i>
+                        Entnehmen / Ausleihen
+                    </h2>
+                    <button type="button" onclick="closeCheckoutModal()" class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+
+                <div class="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg mb-4">
+                    <p class="font-semibold text-gray-800 dark:text-gray-100"><?php echo htmlspecialchars($item['name']); ?></p>
+                    <p class="text-sm text-gray-600 dark:text-gray-300">Verfügbar: <?php echo htmlspecialchars(max(0, $item['available_quantity'])); ?> <?php echo htmlspecialchars($item['unit']); ?></p>
+                </div>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Startdatum der Ausleihe <span class="text-red-500">*</span>
+                        </label>
+                        <input
+                            type="date"
+                            name="start_date"
+                            required
+                            value="<?php echo date('Y-m-d'); ?>"
+                            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:text-gray-100"
+                        >
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Menge <span class="text-red-500">*</span>
+                        </label>
+                        <input
+                            type="number"
+                            id="checkoutQuantity"
+                            name="quantity"
+                            required
+                            min="1"
+                            max="<?php echo htmlspecialchars(max(0, $item['available_quantity'])); ?>"
+                            value="1"
+                            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:text-gray-100"
+                            placeholder="Anzahl eingeben"
+                        >
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Zweck / Notiz
+                        </label>
+                        <textarea
+                            name="purpose"
+                            rows="3"
+                            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:text-gray-100"
+                            placeholder="Optionale Angabe zum Verwendungszweck"
+                        ></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Voraussichtliches Rückgabedatum
+                        </label>
+                        <input
+                            type="date"
+                            id="checkoutReturnDate"
+                            name="expected_return_at"
+                            min="<?php echo date('Y-m-d', strtotime('+1 day')); ?>"
+                            class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:text-gray-100"
+                        >
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Leer lassen, falls es sich um eine dauerhafte Entnahme handelt.</p>
+                    </div>
+                </div>
             </div>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Menge <span class="text-red-500">*</span>
-                </label>
-                <input
-                    type="number"
-                    id="checkoutQuantity"
-                    name="quantity"
-                    required
-                    min="1"
-                    max="<?php echo htmlspecialchars(max(0, $item['available_quantity'])); ?>"
-                    value="1"
-                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:text-gray-100"
-                    placeholder="Anzahl eingeben"
-                >
-            </div>
-
-            <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Zweck / Notiz
-                </label>
-                <textarea
-                    name="purpose"
-                    rows="3"
-                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:text-gray-100"
-                    placeholder="Optionale Angabe zum Verwendungszweck"
-                ></textarea>
-            </div>
-
-            <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Voraussichtliches Rückgabedatum
-                </label>
-                <input
-                    type="date"
-                    id="checkoutReturnDate"
-                    name="expected_return_at"
-                    min="<?php echo date('Y-m-d', strtotime('+1 day')); ?>"
-                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:text-gray-100"
-                >
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Leer lassen, falls es sich um eine dauerhafte Entnahme handelt.</p>
-            </div>
-
-            <div class="flex gap-3 pt-4">
+            <div class="flex gap-3 px-6 pb-6 pt-2">
                 <button type="button" onclick="closeCheckoutModal()" class="flex-1 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition">
                     Abbrechen
                 </button>

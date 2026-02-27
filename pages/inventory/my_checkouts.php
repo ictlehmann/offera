@@ -147,55 +147,59 @@ ob_start();
 
 <!-- Return Modal -->
 <div id="returnModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-        <div class="flex justify-between items-center mb-4">
-            <h2 class="text-2xl font-bold text-gray-800">
-                <i class="fas fa-undo text-green-600 mr-2"></i>
-                Artikel zurückgeben
-            </h2>
-            <button onclick="closeReturnModal()" class="text-gray-500 hover:text-gray-700">
-                <i class="fas fa-times text-xl"></i>
-            </button>
-        </div>
-
-        <form method="POST" action="rental.php" class="space-y-4">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[85vh] flex flex-col overflow-hidden">
+        <form method="POST" action="rental.php" class="flex flex-col flex-1 min-h-0">
             <input type="hidden" name="rental_id" id="return_rental_id" value="">
             <input type="hidden" name="return_rental" value="1">
             <input type="hidden" name="return_quantity" id="return_quantity" value="">
 
-            <div class="bg-gray-50 p-3 rounded-lg mb-4">
-                <p class="font-semibold text-gray-800" id="return_item_name"></p>
-                <p class="text-sm text-gray-600">Menge: <span id="return_amount"></span> <span id="return_unit"></span></p>
+            <div class="p-6 overflow-y-auto flex-1">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-2xl font-bold text-gray-800">
+                        <i class="fas fa-undo text-green-600 mr-2"></i>
+                        Artikel zurückgeben
+                    </h2>
+                    <button type="button" onclick="closeReturnModal()" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+
+                <div class="bg-gray-50 p-3 rounded-lg mb-4">
+                    <p class="font-semibold text-gray-800" id="return_item_name"></p>
+                    <p class="text-sm text-gray-600">Menge: <span id="return_amount"></span> <span id="return_unit"></span></p>
+                </div>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1" for="return_location">
+                            Ort der Rückgabe <span class="text-red-500">*</span>
+                        </label>
+                        <input
+                            type="text"
+                            name="return_location"
+                            id="return_location"
+                            required
+                            class="w-full px-4 py-2 bg-white border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="z.B. Lager, Büro, ..."
+                        >
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1" for="return_comment">
+                            Kommentar
+                        </label>
+                        <textarea
+                            name="return_comment"
+                            id="return_comment"
+                            rows="3"
+                            class="w-full px-4 py-2 bg-white border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                            placeholder="Optionale Anmerkungen zur Rückgabe..."
+                        ></textarea>
+                    </div>
+                </div>
             </div>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1" for="return_location">
-                    Ort der Rückgabe <span class="text-red-500">*</span>
-                </label>
-                <input
-                    type="text"
-                    name="return_location"
-                    id="return_location"
-                    required
-                    class="w-full px-4 py-2 bg-white border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="z.B. Lager, Büro, ..."
-                >
-            </div>
-
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1" for="return_comment">
-                    Kommentar
-                </label>
-                <textarea
-                    name="return_comment"
-                    id="return_comment"
-                    rows="3"
-                    class="w-full px-4 py-2 bg-white border border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Optionale Anmerkungen zur Rückgabe..."
-                ></textarea>
-            </div>
-
-            <div class="flex gap-3 pt-4">
+            <div class="flex gap-3 px-6 pb-6 pt-2">
                 <button type="button" onclick="closeReturnModal()" class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
                     Abbrechen
                 </button>
