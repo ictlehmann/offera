@@ -501,7 +501,7 @@ class ShopPaymentService {
 
             // 4. Send bank-transfer instruction e-mail to the user
             try {
-                self::sendBankTransferEmail($userEmail, $total, $paymentPurpose);
+                self::sendBankTransferEmail($userEmail, $total, $paymentPurpose, $orderId);
             } catch (\Exception $mailEx) {
                 error_log("ShopPaymentService::initiateBankTransfer – E-Mail an {$userEmail} fehlgeschlagen: " . $mailEx->getMessage());
             }
@@ -543,10 +543,15 @@ class ShopPaymentService {
      * @param string $toEmail        Recipient e-mail address (Entra e-mail of the user)
      * @param float  $total          Total amount in EUR
      * @param string $paymentPurpose Generated Verwendungszweck (e.g. "TOMLEHMA00001")
+     * @param int    $orderId        Internal shop order ID (used in the e-mail subject)
      * @return bool
      */
-    private static function sendBankTransferEmail(string $toEmail, float $total, string $paymentPurpose): bool {
+    private static function sendBankTransferEmail(string $toEmail, float $total, string $paymentPurpose, int $orderId): bool {
         $vereinsIban = defined('VEREINS_IBAN') ? VEREINS_IBAN : (getenv('VEREINS_IBAN') ?: '');
+
+        if ($vereinsIban === '') {
+            error_log("ShopPaymentService::sendBankTransferEmail – VEREINS_IBAN ist nicht konfiguriert. E-Mail wird ohne IBAN gesendet.");
+        }
 
         $amountFormatted = number_format($total, 2, ',', '.') . ' €';
 
@@ -564,7 +569,7 @@ class ShopPaymentService {
 
         $htmlBody = MailService::getTemplate('Zahlungsinformationen für deine Bestellung', $bodyContent);
 
-        return MailService::sendEmail($toEmail, 'Zahlungsinformationen für deine Bestellung #' . explode('00', $paymentPurpose)[0], $htmlBody);
+        return MailService::sendEmail($toEmail, 'Zahlungsinformationen für deine Bestellung #' . $orderId, $htmlBody);
     }
 
     /**
@@ -604,8 +609,8 @@ class ShopPaymentService {
                 'Content-Type: application/json',
             ],
             CURLOPT_POSTFIELDS     => json_encode($payload),
-            CURLOPT_TIMEOUT        => 30,
-            CURLOPT_CONNECTTIMEOUT => 10,
+            CURLOPT_TIMEOUT        => 10,
+            CURLOPT_CONNECTTIMEOUT => 5,
             CURLOPT_SSL_VERIFYPEER => true,
             CURLOPT_SSL_VERIFYHOST => 2,
         ]);
