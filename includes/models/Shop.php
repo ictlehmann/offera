@@ -20,7 +20,7 @@ class Shop {
     // -------------------------------------------------------------------------
 
     /**
-     * Return all active products (with their variants).
+     * Return all active products (with their variants and images).
      *
      * @return array
      */
@@ -28,7 +28,7 @@ class Shop {
         try {
             $db = Database::getContentDB();
             $stmt = $db->query("
-                SELECT id, name, description, base_price, image_path
+                SELECT id, name, description, base_price, image_path, is_bulk_order, bulk_end_date, bulk_min_goal
                 FROM shop_products
                 WHERE active = 1
                 ORDER BY name ASC
@@ -37,6 +37,7 @@ class Shop {
 
             foreach ($products as &$product) {
                 $product['variants'] = self::getVariantsByProduct($product['id']);
+                $product['images']   = self::getProductImages($product['id']);
             }
 
             return $products;
@@ -55,7 +56,7 @@ class Shop {
         try {
             $db = Database::getContentDB();
             $stmt = $db->query("
-                SELECT id, name, description, base_price, image_path, active
+                SELECT id, name, description, base_price, image_path, active, is_bulk_order, bulk_end_date, bulk_min_goal
                 FROM shop_products
                 ORDER BY name ASC
             ");
@@ -63,6 +64,7 @@ class Shop {
 
             foreach ($products as &$product) {
                 $product['variants'] = self::getVariantsByProduct($product['id']);
+                $product['images']   = self::getProductImages($product['id']);
             }
 
             return $products;
@@ -82,7 +84,7 @@ class Shop {
         try {
             $db   = Database::getContentDB();
             $stmt = $db->prepare("
-                SELECT id, name, description, base_price, image_path, active
+                SELECT id, name, description, base_price, image_path, active, is_bulk_order, bulk_end_date, bulk_min_goal
                 FROM shop_products
                 WHERE id = ?
             ");
@@ -92,6 +94,7 @@ class Shop {
                 return null;
             }
             $product['variants'] = self::getVariantsByProduct($id);
+            $product['images']   = self::getProductImages($id);
             return $product;
         } catch (Exception $e) {
             error_log('Shop::getProductById – ' . $e->getMessage());
@@ -102,15 +105,15 @@ class Shop {
     /**
      * Create a new product.
      *
-     * @param array $data  Keys: name, description, base_price, image_path, active
+     * @param array $data  Keys: name, description, base_price, image_path, active, is_bulk_order, bulk_end_date, bulk_min_goal
      * @return int|null  New product ID or null on failure
      */
     public static function createProduct(array $data): ?int {
         try {
             $db   = Database::getContentDB();
             $stmt = $db->prepare("
-                INSERT INTO shop_products (name, description, base_price, image_path, active)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO shop_products (name, description, base_price, image_path, active, is_bulk_order, bulk_end_date, bulk_min_goal)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             ");
             $stmt->execute([
                 $data['name'],
@@ -118,6 +121,9 @@ class Shop {
                 $data['base_price'] ?? 0,
                 $data['image_path'] ?? null,
                 isset($data['active']) ? (int) $data['active'] : 1,
+                isset($data['is_bulk_order']) ? (int) $data['is_bulk_order'] : 1,
+                $data['bulk_end_date'] ?? null,
+                isset($data['bulk_min_goal']) ? (int) $data['bulk_min_goal'] : null,
             ]);
             return (int) $db->lastInsertId();
         } catch (Exception $e) {
@@ -130,7 +136,7 @@ class Shop {
      * Update an existing product.
      *
      * @param int   $id
-     * @param array $data  Keys: name, description, base_price, image_path, active
+     * @param array $data  Keys: name, description, base_price, image_path, active, is_bulk_order, bulk_end_date, bulk_min_goal
      * @return bool
      */
     public static function updateProduct(int $id, array $data): bool {
@@ -138,7 +144,8 @@ class Shop {
             $db   = Database::getContentDB();
             $stmt = $db->prepare("
                 UPDATE shop_products
-                SET name = ?, description = ?, base_price = ?, image_path = ?, active = ?
+                SET name = ?, description = ?, base_price = ?, image_path = ?, active = ?,
+                    is_bulk_order = ?, bulk_end_date = ?, bulk_min_goal = ?
                 WHERE id = ?
             ");
             $stmt->execute([
@@ -147,12 +154,133 @@ class Shop {
                 $data['base_price'] ?? 0,
                 $data['image_path'] ?? null,
                 isset($data['active']) ? (int) $data['active'] : 1,
+                isset($data['is_bulk_order']) ? (int) $data['is_bulk_order'] : 1,
+                $data['bulk_end_date'] ?? null,
+                isset($data['bulk_min_goal']) ? (int) $data['bulk_min_goal'] : null,
                 $id,
             ]);
             return true;
         } catch (Exception $e) {
             error_log('Shop::updateProduct – ' . $e->getMessage());
             return false;
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Product Images
+    // -------------------------------------------------------------------------
+
+    /**
+     * Return all images for a product, sorted by sort_order ASC.
+     *
+     * @param int $productId
+     * @return array
+     */
+    public static function getProductImages(int $productId): array {
+        try {
+            $db   = Database::getContentDB();
+            $stmt = $db->prepare("
+                SELECT id, product_id, image_path, sort_order
+                FROM shop_product_images
+                WHERE product_id = ?
+                ORDER BY sort_order ASC
+            ");
+            $stmt->execute([$productId]);
+            return $stmt->fetchAll();
+        } catch (Exception $e) {
+            error_log('Shop::getProductImages – ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /**
+     * Add an image to a product.
+     *
+     * @param int    $productId
+     * @param string $imagePath
+     * @param int    $sortOrder
+     * @return int|null  New image ID or null on failure
+     */
+    public static function addProductImage(int $productId, string $imagePath, int $sortOrder = 0): ?int {
+        try {
+            $db   = Database::getContentDB();
+            $stmt = $db->prepare("
+                INSERT INTO shop_product_images (product_id, image_path, sort_order)
+                VALUES (?, ?, ?)
+            ");
+            $stmt->execute([$productId, $imagePath, $sortOrder]);
+            return (int) $db->lastInsertId();
+        } catch (Exception $e) {
+            error_log('Shop::addProductImage – ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Delete a product image by image ID.
+     *
+     * @param int $imageId
+     * @return bool
+     */
+    public static function deleteProductImage(int $imageId): bool {
+        try {
+            $db   = Database::getContentDB();
+            $stmt = $db->prepare("DELETE FROM shop_product_images WHERE id = ?");
+            $stmt->execute([$imageId]);
+            return $stmt->rowCount() > 0;
+        } catch (Exception $e) {
+            error_log('Shop::deleteProductImage – ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Update the sort order of a product image.
+     *
+     * @param int $imageId
+     * @param int $sortOrder
+     * @return bool
+     */
+    public static function updateImageSortOrder(int $imageId, int $sortOrder): bool {
+        try {
+            $db   = Database::getContentDB();
+            $stmt = $db->prepare("
+                UPDATE shop_product_images SET sort_order = ? WHERE id = ?
+            ");
+            $stmt->execute([$sortOrder, $imageId]);
+            return $stmt->rowCount() > 0;
+        } catch (Exception $e) {
+            error_log('Shop::updateImageSortOrder – ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Bulk Order
+    // -------------------------------------------------------------------------
+
+    /**
+     * Return the total number of units already ordered for a product,
+     * to compare against bulk_min_goal.
+     *
+     * @param int $productId
+     * @return int
+     */
+    public static function getBulkOrderProgress(int $productId): int {
+        try {
+            $db   = Database::getContentDB();
+            $stmt = $db->prepare("
+                SELECT COALESCE(SUM(oi.quantity), 0)
+                FROM shop_order_items oi
+                JOIN shop_orders o ON o.id = oi.order_id
+                WHERE oi.product_id = ?
+                  AND o.payment_status != 'failed'
+            ");
+            $stmt->execute([$productId]);
+            return (int) $stmt->fetchColumn();
+        } catch (Exception $e) {
+            error_log('Shop::getBulkOrderProgress – ' . $e->getMessage());
+            return 0;
         }
     }
 
