@@ -600,7 +600,7 @@ if (Auth::check() && isset($_SESSION['profile_incomplete']) && $_SESSION['profil
     </nav>
 
     <!-- Sidebar -->
-    <aside id="sidebar" class="sidebar fixed left-0 top-0 h-screen w-64 md:w-72 transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-40 text-white shadow-2xl flex flex-col" style="height: 100vh; height: 100dvh; height: -webkit-fill-available;">
+    <aside id="sidebar" class="sidebar fixed left-0 top-0 h-screen w-64 md:w-72 transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-40 text-white shadow-2xl flex flex-col">
         <?php 
         $currentUser = Auth::user();
         $userRole = $currentUser['role'] ?? '';
