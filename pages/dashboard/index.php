@@ -1,7 +1,6 @@
 <?php
 require_once __DIR__ . '/../../src/Auth.php';
 require_once __DIR__ . '/../../src/Database.php';
-require_once __DIR__ . '/../../includes/models/Inventory.php';
 require_once __DIR__ . '/../../includes/models/Event.php';
 require_once __DIR__ . '/../../includes/helpers.php';
 require_once __DIR__ . '/../../includes/poll_helpers.php';
@@ -33,7 +32,6 @@ if (in_array($currentUser['role'], $rolesRequiringProfile) && isset($currentUser
 
 $user = $currentUser;
 $userRole = $user['role'] ?? '';
-$stats = Inventory::getDashboardStats();
 
 // Get user's name for personalized greeting
 $displayName = 'Benutzer'; // Default fallback
