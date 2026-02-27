@@ -191,7 +191,7 @@ ob_start();
             </div>
             <?php else: ?>
             <div class="overflow-x-auto">
-                <table class="w-full">
+                <table class="w-full card-table">
                     <thead class="bg-gray-50">
                         <tr>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Artikel</th>
@@ -205,7 +205,7 @@ ob_start();
                     <tbody class="divide-y divide-gray-200" id="pending-tbody">
                         <?php foreach ($pendingRequests as $req): ?>
                         <tr id="pending-row-<?php echo (int)$req['id']; ?>" class="hover:bg-yellow-50">
-                            <td class="px-4 py-3 text-sm font-semibold text-gray-800">
+                            <td class="px-4 py-3 text-sm font-semibold text-gray-800" data-label="Artikel">
                                 <?php
                                 $itemName = $itemNames[(string)$req['inventory_object_id']] ?? '';
                                 echo $itemName !== ''
@@ -213,24 +213,24 @@ ob_start();
                                     : '<span class="text-gray-400">#' . htmlspecialchars($req['inventory_object_id']) . '</span>';
                                 ?>
                             </td>
-                            <td class="px-4 py-3 text-sm text-gray-700"><?php echo (int)$req['quantity']; ?></td>
-                            <td class="px-4 py-3 text-sm text-gray-700">
+                            <td class="px-4 py-3 text-sm text-gray-700" data-label="Menge"><?php echo (int)$req['quantity']; ?></td>
+                            <td class="px-4 py-3 text-sm text-gray-700" data-label="Mitglied">
                                 <i class="fas fa-user text-gray-400 mr-1"></i>
                                 <?php echo htmlspecialchars($req['user_name'] ?? $req['user_email'] ?? 'Unbekannt'); ?>
                                 <?php if (!empty($req['user_email']) && $req['user_name'] !== $req['user_email']): ?>
                                     <span class="block text-xs text-gray-400"><?php echo htmlspecialchars($req['user_email']); ?></span>
                                 <?php endif; ?>
                             </td>
-                            <td class="px-4 py-3 text-sm text-gray-600">
+                            <td class="px-4 py-3 text-sm text-gray-600" data-label="Zeitraum">
                                 <?php echo htmlspecialchars(date('d.m.Y', strtotime($req['start_date']))); ?>
                                 &ndash;
                                 <?php echo htmlspecialchars(date('d.m.Y', strtotime($req['end_date']))); ?>
                             </td>
-                            <td class="px-4 py-3 text-sm text-gray-600">
+                            <td class="px-4 py-3 text-sm text-gray-600" data-label="Eingereicht">
                                 <?php echo htmlspecialchars(date('d.m.Y H:i', strtotime($req['created_at']))); ?>
                             </td>
                             <?php if (!$readOnly): ?>
-                            <td class="px-4 py-3 text-sm">
+                            <td class="px-4 py-3 text-sm" data-label="Aktionen">
                                 <div class="flex items-center gap-2">
                                     <button
                                         onclick="handleRequestAction(<?php echo (int)$req['id']; ?>, 'approve')"
@@ -275,7 +275,7 @@ ob_start();
             </div>
             <?php else: ?>
             <div class="overflow-x-auto">
-                <table class="w-full">
+                <table class="w-full card-table">
                     <thead class="bg-orange-50">
                         <tr>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Artikel</th>
@@ -288,7 +288,7 @@ ob_start();
                     <tbody class="divide-y divide-gray-200" id="pending-return-tbody">
                         <?php foreach ($pendingReturnLoans as $loan): ?>
                         <tr id="pending-return-row-<?php echo (int)$loan['id']; ?>" class="hover:bg-orange-50">
-                            <td class="px-4 py-3 text-sm font-semibold text-gray-800">
+                            <td class="px-4 py-3 text-sm font-semibold text-gray-800" data-label="Artikel">
                                 <?php
                                 $itemName = $itemNames[(string)$loan['inventory_object_id']] ?? '';
                                 echo $itemName !== ''
@@ -296,22 +296,22 @@ ob_start();
                                     : '<span class="text-gray-400">#' . htmlspecialchars($loan['inventory_object_id']) . '</span>';
                                 ?>
                             </td>
-                            <td class="px-4 py-3 text-sm text-gray-700"><?php echo (int)$loan['quantity']; ?></td>
-                            <td class="px-4 py-3 text-sm text-gray-700">
+                            <td class="px-4 py-3 text-sm text-gray-700" data-label="Menge"><?php echo (int)$loan['quantity']; ?></td>
+                            <td class="px-4 py-3 text-sm text-gray-700" data-label="Ausgeliehen von">
                                 <i class="fas fa-user text-gray-400 mr-1"></i>
                                 <?php echo htmlspecialchars($loan['user_name'] ?? $loan['user_email'] ?? 'Unbekannt'); ?>
                                 <?php if (!empty($loan['user_email']) && $loan['user_name'] !== $loan['user_email']): ?>
                                     <span class="block text-xs text-gray-400"><?php echo htmlspecialchars($loan['user_email']); ?></span>
                                 <?php endif; ?>
                             </td>
-                            <td class="px-4 py-3 text-sm text-gray-600">
+                            <td class="px-4 py-3 text-sm text-gray-600" data-label="Zeitraum">
                                 <?php echo htmlspecialchars(date('d.m.Y', strtotime($loan['start_date']))); ?>
                                 &ndash;
                                 <?php echo htmlspecialchars(date('d.m.Y', strtotime($loan['end_date']))); ?>
                                 <span class="block text-xs text-orange-600 font-medium mt-0.5">Vorzeitige Rückgabe gemeldet</span>
                             </td>
                             <?php if (!$readOnly): ?>
-                            <td class="px-4 py-3 text-sm">
+                            <td class="px-4 py-3 text-sm" data-label="Aktion">
                                 <button
                                     onclick="confirmReturn(<?php echo (int)$loan['id']; ?>, 'pending-return')"
                                     class="inline-flex items-center px-3 py-1.5 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition font-medium text-sm">
@@ -323,7 +323,7 @@ ob_start();
                         <?php endforeach; ?>
                         <?php foreach ($pendingRentalReturns as $rental): ?>
                         <tr id="rental-return-row-<?php echo (int)$rental['id']; ?>" class="hover:bg-orange-50">
-                            <td class="px-4 py-3 text-sm font-semibold text-gray-800">
+                            <td class="px-4 py-3 text-sm font-semibold text-gray-800" data-label="Artikel">
                                 <?php
                                 $itemName = $itemNames[(string)$rental['inventory_object_id']] ?? '';
                                 echo $itemName !== ''
@@ -331,15 +331,15 @@ ob_start();
                                     : '<span class="text-gray-400">#' . htmlspecialchars($rental['inventory_object_id']) . '</span>';
                                 ?>
                             </td>
-                            <td class="px-4 py-3 text-sm text-gray-700"><?php echo (int)$rental['quantity']; ?></td>
-                            <td class="px-4 py-3 text-sm text-gray-700">
+                            <td class="px-4 py-3 text-sm text-gray-700" data-label="Menge"><?php echo (int)$rental['quantity']; ?></td>
+                            <td class="px-4 py-3 text-sm text-gray-700" data-label="Ausgeliehen von">
                                 <i class="fas fa-user text-gray-400 mr-1"></i>
                                 <?php echo htmlspecialchars($rental['user_name'] ?? $rental['user_email'] ?? 'Unbekannt'); ?>
                                 <?php if (!empty($rental['user_email']) && $rental['user_name'] !== $rental['user_email']): ?>
                                     <span class="block text-xs text-gray-400"><?php echo htmlspecialchars($rental['user_email']); ?></span>
                                 <?php endif; ?>
                             </td>
-                            <td class="px-4 py-3 text-sm text-gray-600">
+                            <td class="px-4 py-3 text-sm text-gray-600" data-label="Zeitraum">
                                 <?php if (!empty($rental['end_date'])): ?>
                                     <?php echo htmlspecialchars(date('d.m.Y', strtotime($rental['end_date']))); ?>
                                 <?php else: ?>
@@ -348,7 +348,7 @@ ob_start();
                                 <span class="block text-xs text-orange-600 font-medium mt-0.5">Rückgabe gemeldet</span>
                             </td>
                             <?php if (!$readOnly): ?>
-                            <td class="px-4 py-3 text-sm">
+                            <td class="px-4 py-3 text-sm" data-label="Aktion">
                                 <button
                                     onclick="confirmRentalReturn(<?php echo (int)$rental['id']; ?>)"
                                     class="inline-flex items-center px-3 py-1.5 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition font-medium text-sm">
@@ -380,7 +380,7 @@ ob_start();
             </div>
             <?php else: ?>
             <div class="overflow-x-auto">
-                <table class="w-full">
+                <table class="w-full card-table">
                     <thead class="bg-gray-50">
                         <tr>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Artikel</th>
@@ -393,7 +393,7 @@ ob_start();
                     <tbody class="divide-y divide-gray-200" id="active-tbody">
                         <?php foreach ($activeLoans as $loan): ?>
                         <tr id="active-row-<?php echo (int)$loan['id']; ?>" class="hover:bg-green-50">
-                            <td class="px-4 py-3 text-sm font-semibold text-gray-800">
+                            <td class="px-4 py-3 text-sm font-semibold text-gray-800" data-label="Artikel">
                                 <?php
                                 $itemName = $itemNames[(string)$loan['inventory_object_id']] ?? '';
                                 echo $itemName !== ''
@@ -401,21 +401,21 @@ ob_start();
                                     : '<span class="text-gray-400">#' . htmlspecialchars($loan['inventory_object_id']) . '</span>';
                                 ?>
                             </td>
-                            <td class="px-4 py-3 text-sm text-gray-700"><?php echo (int)$loan['quantity']; ?></td>
-                            <td class="px-4 py-3 text-sm text-gray-700">
+                            <td class="px-4 py-3 text-sm text-gray-700" data-label="Menge"><?php echo (int)$loan['quantity']; ?></td>
+                            <td class="px-4 py-3 text-sm text-gray-700" data-label="Ausgeliehen von">
                                 <i class="fas fa-user text-gray-400 mr-1"></i>
                                 <?php echo htmlspecialchars($loan['user_name'] ?? $loan['user_email'] ?? 'Unbekannt'); ?>
                                 <?php if (!empty($loan['user_email']) && $loan['user_name'] !== $loan['user_email']): ?>
                                     <span class="block text-xs text-gray-400"><?php echo htmlspecialchars($loan['user_email']); ?></span>
                                 <?php endif; ?>
                             </td>
-                            <td class="px-4 py-3 text-sm text-gray-600">
+                            <td class="px-4 py-3 text-sm text-gray-600" data-label="Zeitraum">
                                 <?php echo htmlspecialchars(date('d.m.Y', strtotime($loan['start_date']))); ?>
                                 &ndash;
                                 <?php echo htmlspecialchars(date('d.m.Y', strtotime($loan['end_date']))); ?>
                             </td>
                             <?php if (!$readOnly): ?>
-                            <td class="px-4 py-3 text-sm">
+                            <td class="px-4 py-3 text-sm" data-label="Aktion">
                                 <button
                                     onclick="confirmReturn(<?php echo (int)$loan['id']; ?>)"
                                     class="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium text-sm">

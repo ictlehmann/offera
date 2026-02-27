@@ -106,7 +106,7 @@ ob_start();
     </div>
     <?php else: ?>
     <div class="overflow-x-auto">
-        <table class="w-full">
+        <table class="w-full card-table">
             <thead class="bg-gray-50">
                 <tr>
                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Zeit</th>
@@ -120,17 +120,17 @@ ob_start();
             <tbody class="bg-white divide-y divide-gray-200">
                 <?php foreach ($logs as $log): ?>
                 <tr class="hover:bg-gray-50">
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600" data-label="Zeit">
                         <?php echo date('d.m.Y H:i:s', strtotime($log['timestamp'])); ?>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm" data-label="Benutzer">
                         <?php if ($log['user_id']): ?>
                         <span class="font-medium text-gray-900">ID: <?php echo $log['user_id']; ?></span>
                         <?php else: ?>
                         <span class="text-gray-400">System</span>
                         <?php endif; ?>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
+                    <td class="px-6 py-4 whitespace-nowrap" data-label="Aktion">
                         <?php
                         $actionColors = [
                             'login' => 'green',
@@ -154,7 +154,7 @@ ob_start();
                             <?php echo htmlspecialchars($log['action']); ?>
                         </span>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600" data-label="Entität">
                         <?php if ($log['entity_type']): ?>
                         <?php echo htmlspecialchars($log['entity_type']); ?>
                         <?php if ($log['entity_id']): ?>
@@ -164,10 +164,10 @@ ob_start();
                         <span class="text-gray-400">-</span>
                         <?php endif; ?>
                     </td>
-                    <td class="px-6 py-4 text-sm text-gray-600 max-w-md truncate">
+                    <td class="px-6 py-4 text-sm text-gray-600 max-w-md truncate" data-label="Details">
                         <?php echo htmlspecialchars($log['details'] ?? '-'); ?>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" data-label="IP">
                         <?php echo htmlspecialchars($log['ip_address'] ?? '-'); ?>
                     </td>
                 </tr>

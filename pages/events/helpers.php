@@ -176,7 +176,7 @@ ob_start();
                                     
                                     <!-- Slots Table -->
                                     <div class="overflow-x-auto">
-                                        <table class="w-full text-sm">
+                                        <table class="w-full text-sm card-table">
                                             <thead class="bg-gray-200 dark:bg-gray-700">
                                                 <tr>
                                                     <th class="px-4 py-2 text-left text-gray-800 dark:text-gray-100">Zeitslot</th>
@@ -196,17 +196,17 @@ ob_start();
                                                     $isUserSignedUp = in_array($slot['id'], $mySlotIds);
                                                     ?>
                                                     <tr class="border-b border-gray-200 dark:border-gray-700">
-                                                        <td class="px-4 py-3 text-gray-800 dark:text-gray-100">
+                                                        <td class="px-4 py-3 text-gray-800 dark:text-gray-100" data-label="Zeitslot">
                                                             <i class="fas fa-clock mr-2 text-gray-500"></i>
                                                             <?php echo $slotTimeRange; ?>
                                                         </td>
-                                                        <td class="px-4 py-3 text-center text-gray-800 dark:text-gray-100">
+                                                        <td class="px-4 py-3 text-center text-gray-800 dark:text-gray-100" data-label="Benötigt">
                                                             <?php echo $slot['quantity_needed']; ?>
                                                         </td>
-                                                        <td class="px-4 py-3 text-center text-gray-800 dark:text-gray-100">
+                                                        <td class="px-4 py-3 text-center text-gray-800 dark:text-gray-100" data-label="Besetzt">
                                                             <?php echo $slot['signups_count']; ?>
                                                         </td>
-                                                        <td class="px-4 py-3 text-center">
+                                                        <td class="px-4 py-3 text-center" data-label="Status">
                                                             <?php if ($isUserSignedUp): ?>
                                                                 <span class="px-3 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded-full text-xs font-semibold">
                                                                     <i class="fas fa-check mr-1"></i>

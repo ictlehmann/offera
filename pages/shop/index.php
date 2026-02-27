@@ -624,7 +624,7 @@ ob_start();
         <form method="POST" id="cart-form">
             <input type="hidden" name="post_action" value="update_cart">
             <div class="overflow-x-auto mb-6">
-                <table class="w-full text-sm">
+                <table class="w-full text-sm card-table">
                     <thead>
                         <tr class="border-b border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 text-left">
                             <th class="pb-3 font-semibold">Produkt</th>
@@ -638,26 +638,26 @@ ob_start();
                     <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                         <?php foreach ($cartItems as $key => $item): ?>
                         <tr class="py-4">
-                            <td class="py-4 font-medium text-gray-800 dark:text-gray-100">
+                            <td class="py-4 font-medium text-gray-800 dark:text-gray-100" data-label="Produkt">
                                 <?php echo htmlspecialchars($item['product_name']); ?>
                             </td>
-                            <td class="py-4 text-center text-gray-500 dark:text-gray-400">
+                            <td class="py-4 text-center text-gray-500 dark:text-gray-400" data-label="Variante">
                                 <?php echo $item['variant_name'] ? htmlspecialchars($item['variant_name']) : '–'; ?>
                             </td>
-                            <td class="py-4 text-center text-gray-700 dark:text-gray-300">
+                            <td class="py-4 text-center text-gray-700 dark:text-gray-300" data-label="Preis">
                                 <?php echo number_format($item['price'], 2, ',', '.'); ?> €
                             </td>
-                            <td class="py-4 text-center">
+                            <td class="py-4 text-center" data-label="Anzahl">
                                 <input type="number"
                                        name="quantities[<?php echo htmlspecialchars($key); ?>]"
                                        value="<?php echo $item['quantity']; ?>"
                                        min="0" max="99"
                                        class="w-16 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-center bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100">
                             </td>
-                            <td class="py-4 text-right font-semibold text-gray-800 dark:text-gray-100">
+                            <td class="py-4 text-right font-semibold text-gray-800 dark:text-gray-100" data-label="Gesamt">
                                 <?php echo number_format($item['price'] * $item['quantity'], 2, ',', '.'); ?> €
                             </td>
-                            <td class="py-4 text-right">
+                            <td class="py-4 text-right" data-label="Entfernen">
                                 <form method="POST" class="inline">
                                     <input type="hidden" name="post_action" value="remove_from_cart">
                                     <input type="hidden" name="cart_key" value="<?php echo htmlspecialchars($key); ?>">

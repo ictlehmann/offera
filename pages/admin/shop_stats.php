@@ -146,7 +146,7 @@ ob_start();
             <i class="fas fa-table mr-2 text-gray-500"></i>Detailübersicht
         </h2>
         <div class="overflow-x-auto">
-            <table class="w-full text-sm">
+            <table class="w-full text-sm card-table">
                 <thead>
                     <tr class="border-b border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 text-left">
                         <th class="pb-3 font-semibold">Monat</th>
@@ -163,10 +163,10 @@ ob_start();
                         $avg    = $row['count'] > 0 ? $row['revenue'] / $row['count'] : 0;
                     ?>
                     <tr>
-                        <td class="py-3 font-medium text-gray-800 dark:text-gray-100"><?php echo htmlspecialchars($label); ?></td>
-                        <td class="py-3 text-right text-gray-700 dark:text-gray-300"><?php echo number_format((int) $row['count']); ?></td>
-                        <td class="py-3 text-right text-gray-700 dark:text-gray-300"><?php echo number_format((float) $row['revenue'], 2, ',', '.'); ?> €</td>
-                        <td class="py-3 text-right text-gray-500 dark:text-gray-400"><?php echo number_format($avg, 2, ',', '.'); ?> €</td>
+                        <td class="py-3 font-medium text-gray-800 dark:text-gray-100" data-label="Monat"><?php echo htmlspecialchars($label); ?></td>
+                        <td class="py-3 text-right text-gray-700 dark:text-gray-300" data-label="Bestellungen"><?php echo number_format((int) $row['count']); ?></td>
+                        <td class="py-3 text-right text-gray-700 dark:text-gray-300" data-label="Umsatz"><?php echo number_format((float) $row['revenue'], 2, ',', '.'); ?> €</td>
+                        <td class="py-3 text-right text-gray-500 dark:text-gray-400" data-label="Ø Bestellwert"><?php echo number_format($avg, 2, ',', '.'); ?> €</td>
                     </tr>
                     <?php endforeach; ?>
                 </tbody>

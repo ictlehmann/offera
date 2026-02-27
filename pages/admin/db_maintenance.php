@@ -435,7 +435,7 @@ ob_start();
         <div>
             <h3 class="text-lg font-semibold text-gray-700 mb-3">User Database Tabellen</h3>
             <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
+                <table class="min-w-full divide-y divide-gray-200 card-table">
                     <thead class="bg-gray-50">
                         <tr>
                             <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Tabelle</th>
@@ -446,9 +446,9 @@ ob_start();
                     <tbody class="bg-white divide-y divide-gray-200">
                         <?php foreach ($tableSizes['user'] as $table): ?>
                         <tr>
-                            <td class="px-4 py-2 text-sm text-gray-900"><?php echo htmlspecialchars($table['table']); ?></td>
-                            <td class="px-4 py-2 text-sm text-gray-600 text-right"><?php echo number_format($table['rows']); ?></td>
-                            <td class="px-4 py-2 text-sm text-gray-600 text-right"><?php echo number_format($table['size_mb'], 2); ?> MB</td>
+                            <td class="px-4 py-2 text-sm text-gray-900" data-label="Tabelle"><?php echo htmlspecialchars($table['table']); ?></td>
+                            <td class="px-4 py-2 text-sm text-gray-600 text-right" data-label="Zeilen"><?php echo number_format($table['rows']); ?></td>
+                            <td class="px-4 py-2 text-sm text-gray-600 text-right" data-label="Größe"><?php echo number_format($table['size_mb'], 2); ?> MB</td>
                         </tr>
                         <?php endforeach; ?>
                     </tbody>
@@ -460,7 +460,7 @@ ob_start();
         <div>
             <h3 class="text-lg font-semibold text-gray-700 mb-3">Content Database Tabellen</h3>
             <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
+                <table class="min-w-full divide-y divide-gray-200 card-table">
                     <thead class="bg-gray-50">
                         <tr>
                             <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Tabelle</th>
@@ -471,9 +471,9 @@ ob_start();
                     <tbody class="bg-white divide-y divide-gray-200">
                         <?php foreach ($tableSizes['content'] as $table): ?>
                         <tr>
-                            <td class="px-4 py-2 text-sm text-gray-900"><?php echo htmlspecialchars($table['table']); ?></td>
-                            <td class="px-4 py-2 text-sm text-gray-600 text-right"><?php echo number_format($table['rows']); ?></td>
-                            <td class="px-4 py-2 text-sm text-gray-600 text-right"><?php echo number_format($table['size_mb'], 2); ?> MB</td>
+                            <td class="px-4 py-2 text-sm text-gray-900" data-label="Tabelle"><?php echo htmlspecialchars($table['table']); ?></td>
+                            <td class="px-4 py-2 text-sm text-gray-600 text-right" data-label="Zeilen"><?php echo number_format($table['rows']); ?></td>
+                            <td class="px-4 py-2 text-sm text-gray-600 text-right" data-label="Größe"><?php echo number_format($table['size_mb'], 2); ?> MB</td>
                         </tr>
                         <?php endforeach; ?>
                     </tbody>

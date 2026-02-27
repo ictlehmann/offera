@@ -4045,6 +4045,47 @@ body:not(.dark-mode) .hero-gradient .hero-date {
     }
 }
 
+/* Card-based responsive table: stacked cards on mobile, normal table on desktop */
+@media (max-width: 768px) {
+    .card-table {
+        overflow-x: visible;
+    }
+    .card-table thead {
+        display: none;
+    }
+    .card-table tr {
+        display: block;
+        margin-bottom: 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: 0.5rem;
+        overflow: hidden;
+        background: var(--bg-card);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    }
+    .card-table td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.5rem 1rem;
+        border-bottom: 1px solid var(--ibc-gray-100);
+        text-align: right;
+        white-space: normal;
+    }
+    .card-table td:last-child {
+        border-bottom: none;
+    }
+    .card-table td[data-label]::before {
+        content: attr(data-label);
+        font-weight: 600;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        margin-right: 1rem;
+        flex-shrink: 0;
+        text-align: left;
+    }
+}
+
 /* Responsive iframe container (for embedded content like Microsoft Forms) */
 .iframe-container {
     position: relative;
