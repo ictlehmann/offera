@@ -967,6 +967,13 @@ try {
         "Drop returned_condition column from inventory_requests table"
     );
 
+    // Add return_notes column to inventory_requests (stores optional remarks at return)
+    executeSql(
+        $content_db,
+        "ALTER TABLE inventory_requests ADD COLUMN return_notes TEXT DEFAULT NULL COMMENT 'Optional remarks at return'",
+        "Add return_notes column to inventory_requests table"
+    );
+
     // ============================================
     // INVENTORY RENTALS: QUANTITY AND EASYVEREIN COLUMNS
     // ============================================
