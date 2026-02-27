@@ -1,16 +1,29 @@
 -- Shop Module Tables
--- Creates tables for products, variants, orders, order items and restock notifications
+-- Creates tables for products, variants, orders, order items, product images and restock notifications
 
 CREATE TABLE IF NOT EXISTS `shop_products` (
-    `id`          INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `name`        VARCHAR(255)   NOT NULL,
-    `description` TEXT,
-    `base_price`  DECIMAL(10,2)  NOT NULL DEFAULT 0.00,
-    `image_path`  VARCHAR(500),
-    `active`      TINYINT(1)     NOT NULL DEFAULT 1,
-    `created_at`  DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `updated_at`  DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `id`            INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `name`          VARCHAR(255)   NOT NULL,
+    `description`   TEXT,
+    `base_price`    DECIMAL(10,2)  NOT NULL DEFAULT 0.00,
+    `image_path`    VARCHAR(500),
+    `active`        TINYINT(1)     NOT NULL DEFAULT 1,
+    `is_bulk_order` TINYINT(1)     NOT NULL DEFAULT 1 COMMENT 'Sammelbestellung aktiv',
+    `bulk_end_date` DATETIME       DEFAULT NULL COMMENT 'Ende der Sammelbestellfrist',
+    `bulk_min_goal` INT            DEFAULT NULL COMMENT 'Mindestanzahl an Vorbestellungen für Produktion',
+    `created_at`    DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at`    DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `shop_product_images` (
+    `id`         INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `product_id` INT UNSIGNED NOT NULL,
+    `image_path` VARCHAR(500) NOT NULL,
+    `sort_order` INT NOT NULL DEFAULT 0,
+    PRIMARY KEY (`id`),
+    KEY `fk_img_product` (`product_id`),
+    CONSTRAINT `fk_img_product` FOREIGN KEY (`product_id`) REFERENCES `shop_products` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS `shop_variants` (
@@ -18,7 +31,7 @@ CREATE TABLE IF NOT EXISTS `shop_variants` (
     `product_id`     INT UNSIGNED NOT NULL,
     `type`           VARCHAR(100) NOT NULL COMMENT 'z.B. Größe, Farbe',
     `value`          VARCHAR(100) NOT NULL COMMENT 'z.B. XL, Blau',
-    `stock_quantity` INT          NOT NULL DEFAULT 0,
+    `stock_quantity` INT          DEFAULT NULL COMMENT 'NULL = kein Lagerbestand verwaltet (Sammelbestellung)',
     `created_at`     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
     KEY `fk_variant_product` (`product_id`),
@@ -32,6 +45,8 @@ CREATE TABLE IF NOT EXISTS `shop_orders` (
     `payment_method`  ENUM('paypal','sepa') NOT NULL DEFAULT 'paypal',
     `payment_status`  VARCHAR(50)  NOT NULL DEFAULT 'pending'  COMMENT 'pending, paid, failed',
     `shipping_status` VARCHAR(50)  NOT NULL DEFAULT 'pending'  COMMENT 'pending, shipped, delivered',
+    `shipping_method` VARCHAR(50)  DEFAULT NULL                COMMENT 'pickup oder mail',
+    `shipping_cost`   DECIMAL(10,2) NOT NULL DEFAULT 0.00      COMMENT 'Versandkosten',
     `created_at`      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at`      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),

@@ -1127,6 +1127,68 @@ try {
     );
 
     // ============================================
+    // SHOP MODULE: BULK ORDER & IMAGE UPDATES
+    // ============================================
+    echo "\n--- SHOP MODULE: BULK ORDER & IMAGE UPDATES ---\n";
+
+    // Create shop_product_images table
+    executeSql(
+        $content_db,
+        "CREATE TABLE IF NOT EXISTS `shop_product_images` (
+            `id`         INT UNSIGNED NOT NULL AUTO_INCREMENT,
+            `product_id` INT UNSIGNED NOT NULL,
+            `image_path` VARCHAR(500) NOT NULL,
+            `sort_order` INT NOT NULL DEFAULT 0,
+            PRIMARY KEY (`id`),
+            KEY `fk_img_product` (`product_id`),
+            CONSTRAINT `fk_img_product` FOREIGN KEY (`product_id`) REFERENCES `shop_products` (`id`) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci",
+        "Create shop_product_images table"
+    );
+
+    // Make stock_quantity nullable in shop_variants (switching to bulk orders)
+    executeSql(
+        $content_db,
+        "ALTER TABLE `shop_variants` MODIFY COLUMN `stock_quantity` INT DEFAULT NULL COMMENT 'NULL = kein Lagerbestand verwaltet (Sammelbestellung)'",
+        "Make stock_quantity nullable in shop_variants"
+    );
+
+    // Add is_bulk_order column to shop_products
+    executeSql(
+        $content_db,
+        "ALTER TABLE `shop_products` ADD COLUMN `is_bulk_order` TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Sammelbestellung aktiv'",
+        "Add is_bulk_order column to shop_products"
+    );
+
+    // Add bulk_end_date column to shop_products
+    executeSql(
+        $content_db,
+        "ALTER TABLE `shop_products` ADD COLUMN `bulk_end_date` DATETIME DEFAULT NULL COMMENT 'Ende der Sammelbestellfrist'",
+        "Add bulk_end_date column to shop_products"
+    );
+
+    // Add bulk_min_goal column to shop_products
+    executeSql(
+        $content_db,
+        "ALTER TABLE `shop_products` ADD COLUMN `bulk_min_goal` INT DEFAULT NULL COMMENT 'Mindestanzahl an Vorbestellungen für Produktion'",
+        "Add bulk_min_goal column to shop_products"
+    );
+
+    // Add shipping_method column to shop_orders
+    executeSql(
+        $content_db,
+        "ALTER TABLE `shop_orders` ADD COLUMN `shipping_method` VARCHAR(50) DEFAULT NULL COMMENT 'pickup oder mail'",
+        "Add shipping_method column to shop_orders"
+    );
+
+    // Add shipping_cost column to shop_orders
+    executeSql(
+        $content_db,
+        "ALTER TABLE `shop_orders` ADD COLUMN `shipping_cost` DECIMAL(10,2) NOT NULL DEFAULT 0.00 COMMENT 'Versandkosten'",
+        "Add shipping_cost column to shop_orders"
+    );
+
+    // ============================================
     // SUMMARY
     // ============================================
     echo "==============================================\n";
