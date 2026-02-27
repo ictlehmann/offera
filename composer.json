@@ -2,7 +2,6 @@
     "require": {
         "phpmailer/phpmailer": "^7.0",
         "thenetworg/oauth2-azure": "^2.2",
-        "stripe/stripe-php": "^19.3",
         "paypal/paypal-checkout-sdk": "^1.0",
         "ralouphie/getallheaders": "^3.0",
         "guzzlehttp/guzzle": "^7.10"
