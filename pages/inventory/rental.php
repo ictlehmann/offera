@@ -145,6 +145,50 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['request_return_approv
             $_SESSION['rental_error'] = 'Anfrage nicht gefunden, nicht berechtigt oder bereits in Bearbeitung';
         } else {
             $_SESSION['rental_success'] = 'Rückgabe gemeldet – wartet auf Bestätigung durch den Vorstand.';
+
+            // Notify the board about the pending return
+            try {
+                $reqStmt = $db->prepare(
+                    "SELECT inventory_object_id, quantity, end_date FROM inventory_requests WHERE id = ?"
+                );
+                $reqStmt->execute([$requestId]);
+                $reqData = $reqStmt->fetch(PDO::FETCH_ASSOC);
+
+                if ($reqData) {
+                    $itemName = '#' . $reqData['inventory_object_id'];
+                    try {
+                        $item = Inventory::getById($reqData['inventory_object_id']);
+                        if ($item) {
+                            $itemName = $item['name'] ?? $itemName;
+                        }
+                    } catch (Exception $ex) {
+                        // Use fallback item name
+                    }
+
+                    $borrowerEmail = $_SESSION['user_email'] ?? 'Unbekannt';
+                    $safeItemName  = str_replace(["\r", "\n"], '', $itemName);
+                    $endDate       = $reqData['end_date'] ?? '';
+
+                    $emailBody = MailService::getTemplate(
+                        'Rückgabe gemeldet',
+                        '<p class="email-text">Ein Mitglied hat die Rückgabe eines Inventarartikels gemeldet und wartet auf Ihre Bestätigung.</p>
+                        <table class="info-table">
+                            <tr><td>Artikel</td><td>' . htmlspecialchars($itemName) . '</td></tr>
+                            <tr><td>Menge</td><td>' . htmlspecialchars((string)$reqData['quantity']) . '</td></tr>
+                            <tr><td>Zurückgegeben von</td><td>' . htmlspecialchars($borrowerEmail) . '</td></tr>
+                            <tr><td>Ursprüngliches Rückgabedatum</td><td>' . htmlspecialchars($endDate ? date('d.m.Y', strtotime($endDate)) : '-') . '</td></tr>
+                            <tr><td>Gemeldet am</td><td>' . date('d.m.Y H:i') . '</td></tr>
+                        </table>'
+                    );
+                    MailService::sendEmail(
+                        INVENTORY_BOARD_EMAIL,
+                        'Rückgabe gemeldet: ' . $safeItemName,
+                        $emailBody
+                    );
+                }
+            } catch (Exception $mailEx) {
+                error_log('rental.php: Fehler beim Senden der Rückgabe-Benachrichtigung: ' . $mailEx->getMessage());
+            }
         }
     } catch (Exception $e) {
         $_SESSION['rental_error'] = 'Datenbankfehler: ' . $e->getMessage();

@@ -974,6 +974,13 @@ try {
         "Add return_notes column to inventory_requests table"
     );
 
+    // Add returned_at column to inventory_requests (timestamp when the return was verified by board)
+    executeSql(
+        $content_db,
+        "ALTER TABLE inventory_requests ADD COLUMN returned_at DATETIME DEFAULT NULL COMMENT 'When the return was verified'",
+        "Add returned_at column to inventory_requests table"
+    );
+
     // ============================================
     // INVENTORY RENTALS: QUANTITY AND EASYVEREIN COLUMNS
     // ============================================

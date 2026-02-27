@@ -146,6 +146,9 @@ try {
     // CRITICAL: Check inventory_requests.return_notes column
     $hasReturnNotes = checkColumn($content_db, 'inventory_requests', 'return_notes', 'inventory_requests.return_notes column');
 
+    // CRITICAL: Check inventory_requests.returned_at column
+    $hasReturnedAt = checkColumn($content_db, 'inventory_requests', 'returned_at', 'inventory_requests.returned_at column');
+
     // CRITICAL: Check blog_comments.updated_at column
     $hasBlogCommentsUpdatedAt = checkColumn($content_db, 'blog_comments', 'updated_at', 'blog_comments.updated_at column');
     checkTable($content_db, 'blog_comment_reactions', 'blog_comment_reactions table');
@@ -199,6 +202,14 @@ try {
         if (!$hasReturnNotes) {
             echo "⚠️  CRITICAL: The 'return_notes' column is missing from 'inventory_requests'!\n";
             echo "This will cause a PDOException (SQLSTATE[42S22]) when verifying a rental return.\n";
+            echo "Run 'php update_database_schema.php' immediately.\n";
+            echo "\n";
+        }
+
+        // Special message for inventory_requests.returned_at column
+        if (!$hasReturnedAt) {
+            echo "⚠️  CRITICAL: The 'returned_at' column is missing from 'inventory_requests'!\n";
+            echo "This will cause a PDOException (SQLSTATE[42S22]) when verifying a rental return (Gemeldete Rückgaben).\n";
             echo "Run 'php update_database_schema.php' immediately.\n";
             echo "\n";
         }

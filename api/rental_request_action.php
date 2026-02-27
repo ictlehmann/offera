@@ -13,6 +13,7 @@
 
 require_once __DIR__ . '/../src/Auth.php';
 require_once __DIR__ . '/../src/Database.php';
+require_once __DIR__ . '/../src/MailService.php';
 require_once __DIR__ . '/../includes/helpers.php';
 require_once __DIR__ . '/../includes/services/EasyVereinInventory.php';
 require_once __DIR__ . '/../includes/services/MicrosoftGraphService.php';
@@ -141,6 +142,62 @@ try {
 
         $inventory = new EasyVereinInventory();
         $inventory->verifyReturn($requestId, $adminName, '', $notes);
+
+        // Notify the user that their return has been confirmed
+        try {
+            $reqStmt = $db->prepare(
+                "SELECT user_id, inventory_object_id, quantity FROM inventory_requests WHERE id = ?"
+            );
+            $reqStmt->execute([$requestId]);
+            $reqData = $reqStmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($reqData) {
+                $userEmail = '';
+                try {
+                    $userDb = Database::getUserDB();
+                    $uStmt  = $userDb->prepare(
+                        "SELECT email FROM users WHERE id = ? LIMIT 1"
+                    );
+                    $uStmt->execute([(int)$reqData['user_id']]);
+                    $uRow = $uStmt->fetch(PDO::FETCH_ASSOC);
+                    if ($uRow) {
+                        $userEmail = $uRow['email'] ?? '';
+                    }
+                } catch (Exception $userEx) {
+                    // Continue without user email
+                }
+
+                if ($userEmail !== '') {
+                    $itemName = '#' . $reqData['inventory_object_id'];
+                    try {
+                        $item = Inventory::getById($reqData['inventory_object_id']);
+                        if ($item) {
+                            $itemName = $item['name'] ?? $itemName;
+                        }
+                    } catch (Exception $itemEx) {
+                        // Use fallback item name
+                    }
+
+                    $safeItemName = str_replace(["\r", "\n"], '', $itemName);
+                    $emailBody    = MailService::getTemplate(
+                        'Rückgabe bestätigt',
+                        '<p class="email-text">Deine Rückgabe wurde vom Vorstand bestätigt. Vielen Dank!</p>
+                        <table class="info-table">
+                            <tr><td>Artikel</td><td>' . htmlspecialchars($itemName) . '</td></tr>
+                            <tr><td>Menge</td><td>' . htmlspecialchars((string)$reqData['quantity']) . '</td></tr>
+                            <tr><td>Bestätigt am</td><td>' . date('d.m.Y H:i') . '</td></tr>
+                        </table>'
+                    );
+                    MailService::sendEmail(
+                        $userEmail,
+                        'Rückgabe bestätigt: ' . $safeItemName,
+                        $emailBody
+                    );
+                }
+            }
+        } catch (Exception $mailEx) {
+            error_log('rental_request_action: Fehler beim Senden der Rückgabe-Bestätigung: ' . $mailEx->getMessage());
+        }
 
         echo json_encode(['success' => true, 'message' => 'Rückgabe erfolgreich verifiziert']);
         exit;
