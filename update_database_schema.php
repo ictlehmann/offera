@@ -1196,8 +1196,27 @@ try {
     );
 
     // ============================================
-    // SUMMARY
+    // INVOICE DATABASE UPDATES (dbs15251284)
     // ============================================
+    echo "\n--- INVOICE DATABASE UPDATES ---\n";
+
+    $rech_db = Database::getRechDB();
+
+    // Extend invoices.status ENUM to include PayPal webhook statuses 'failed' and 'refunded'
+    executeSql(
+        $rech_db,
+        "ALTER TABLE `invoices` MODIFY COLUMN `status` ENUM('pending','approved','rejected','paid','failed','refunded') NOT NULL DEFAULT 'pending' COMMENT 'Invoice processing status'",
+        "Add 'failed' and 'refunded' to invoices status ENUM"
+    );
+
+    // Add paypal_transaction_id column for fallback lookup by capture ID
+    executeSql(
+        $rech_db,
+        "ALTER TABLE `invoices` ADD COLUMN `paypal_transaction_id` VARCHAR(64) DEFAULT NULL COMMENT 'PayPal capture/transaction ID for webhook lookup' AFTER `paid_by_user_id`",
+        "Add paypal_transaction_id column to invoices table"
+    );
+
+
     echo "==============================================\n";
     echo "SUMMARY\n";
     echo "==============================================\n";
