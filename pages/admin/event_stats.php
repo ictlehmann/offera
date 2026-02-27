@@ -131,7 +131,7 @@ ob_start();
                                 Verkäufer
                             </h3>
                             <div class="overflow-x-auto">
-                                <table class="w-full text-sm">
+                                <table class="w-full text-sm card-table">
                                     <thead class="bg-gray-100 dark:bg-gray-700">
                                         <tr>
                                             <th class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-200">Verkäufer/Stand</th>
@@ -143,16 +143,16 @@ ob_start();
                                     <tbody class="divide-y divide-gray-200 dark:divide-gray-600">
                                         <?php foreach ($doc['sellers_data'] as $seller): ?>
                                             <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
-                                                <td class="px-4 py-3 font-medium text-gray-800 dark:text-gray-200">
+                                                <td class="px-4 py-3 font-medium text-gray-800 dark:text-gray-200" data-label="Verkäufer/Stand">
                                                     <?php echo htmlspecialchars($seller['seller_name'] ?? '-'); ?>
                                                 </td>
-                                                <td class="px-4 py-3 text-gray-700 dark:text-gray-300">
+                                                <td class="px-4 py-3 text-gray-700 dark:text-gray-300" data-label="Artikel">
                                                     <?php echo htmlspecialchars($seller['items'] ?? '-'); ?>
                                                 </td>
-                                                <td class="px-4 py-3 text-gray-700 dark:text-gray-300">
+                                                <td class="px-4 py-3 text-gray-700 dark:text-gray-300" data-label="Menge">
                                                     <?php echo htmlspecialchars($seller['quantity'] ?? '-'); ?>
                                                 </td>
-                                                <td class="px-4 py-3 text-gray-700 dark:text-gray-300">
+                                                <td class="px-4 py-3 text-gray-700 dark:text-gray-300" data-label="Umsatz">
                                                     <?php echo htmlspecialchars($seller['revenue'] ?? '-'); ?>
                                                 </td>
                                             </tr>

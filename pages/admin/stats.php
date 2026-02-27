@@ -375,7 +375,7 @@ ob_start();
         </h2>
         <div class="card overflow-hidden">
             <div class="overflow-x-auto">
-                <table class="w-full">
+                <table class="w-full card-table">
                     <thead class="bg-gray-50 dark:bg-gray-700">
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Benutzer</th>
@@ -387,7 +387,7 @@ ob_start();
                     <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                         <?php foreach ($recentActivity as $activity): ?>
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700">
-                            <td class="px-6 py-4 whitespace-nowrap">
+                            <td class="px-6 py-4 whitespace-nowrap" data-label="Benutzer">
                                 <div class="flex items-center">
                                     <div class="flex-shrink-0 h-10 w-10 bg-purple-100 dark:bg-purple-900/50 rounded-full flex items-center justify-center">
                                         <i class="fas fa-user text-purple-600 dark:text-purple-400"></i>
@@ -408,10 +408,10 @@ ob_start();
                                     </div>
                                 </div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300" data-label="E-Mail">
                                 <?php echo htmlspecialchars($activity['email']); ?>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
+                            <td class="px-6 py-4 whitespace-nowrap" data-label="Letzter Login">
                                 <?php 
                                 $loginTime = strtotime($activity['last_login']);
                                 $now = time();
@@ -435,7 +435,7 @@ ob_start();
                                     <?php echo date('d.m.Y H:i', $loginTime); ?>
                                 </div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300" data-label="Mitglied seit">
                                 <?php echo date('d.m.Y', strtotime($activity['created_at'])); ?>
                             </td>
                         </tr>

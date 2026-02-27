@@ -84,7 +84,7 @@ ob_start();
     </div>
     <?php else: ?>
     <div class="overflow-x-auto">
-        <table class="w-full">
+        <table class="w-full card-table">
             <thead class="bg-gray-50">
                 <tr>
                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Artikel</th>
@@ -103,23 +103,23 @@ ob_start();
                 $unit     = $item['unit'] ?? 'Stück';
                 ?>
                 <tr class="hover:bg-gray-50">
-                    <td class="px-4 py-3">
+                    <td class="px-4 py-3" data-label="Artikel">
                         <a href="view.php?id=<?php echo (int)$item['id']; ?>" class="font-semibold text-purple-600 hover:text-purple-800">
                             <?php echo htmlspecialchars($item['name'] ?? ''); ?>
                         </a>
                     </td>
-                    <td class="px-4 py-3 text-sm text-gray-600">
+                    <td class="px-4 py-3 text-sm text-gray-600" data-label="Menge">
                         <span class="font-semibold"><?php echo $quantity; ?></span> <?php echo htmlspecialchars($unit); ?>
                     </td>
-                    <td class="px-4 py-3 text-sm text-gray-600">
+                    <td class="px-4 py-3 text-sm text-gray-600" data-label="Ausgeliehen am">
                         <?php echo $rentedAt ? htmlspecialchars($rentedAt) : '-'; ?>
                     </td>
-                    <td class="px-4 py-3">
+                    <td class="px-4 py-3" data-label="Status">
                         <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
                             Aktiv
                         </span>
                     </td>
-                    <td class="px-4 py-3">
+                    <td class="px-4 py-3" data-label="Aktion">
                         <button onclick="openReturnModal(<?php echo (int)$item['id']; ?>, '<?php echo htmlspecialchars($item['name'] ?? '', ENT_QUOTES); ?>', <?php echo $quantity; ?>, '<?php echo htmlspecialchars($unit, ENT_QUOTES); ?>')"
                                 class="inline-flex items-center px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition text-sm">
                             <i class="fas fa-undo mr-1"></i>Zurückgeben

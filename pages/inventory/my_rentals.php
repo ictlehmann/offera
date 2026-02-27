@@ -115,7 +115,7 @@ ob_start();
     </div>
     <?php else: ?>
     <div class="overflow-x-auto">
-        <table class="w-full">
+        <table class="w-full card-table">
             <thead class="bg-gray-50">
                 <tr>
                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Artikel</th>
@@ -145,21 +145,21 @@ ob_start();
                 $isEarlyReturn = $isActive && !empty($rental['end_date']) && strtotime($rental['end_date']) > strtotime('today');
                 ?>
                 <tr class="hover:bg-gray-50">
-                    <td class="px-4 py-3">
+                    <td class="px-4 py-3" data-label="Artikel">
                         <span class="font-semibold text-gray-800">
                             <?php echo htmlspecialchars($itemName); ?>
                         </span>
                     </td>
-                    <td class="px-4 py-3 text-sm text-gray-600">
+                    <td class="px-4 py-3 text-sm text-gray-600" data-label="Menge">
                         <span class="font-semibold"><?php echo $quantity; ?></span> Stück
                     </td>
-                    <td class="px-4 py-3 text-sm text-gray-600">
+                    <td class="px-4 py-3 text-sm text-gray-600" data-label="Ausgeliehen am">
                         <?php echo htmlspecialchars($rentedAt); ?>
                         <?php if ($endDate): ?>
                         <span class="text-gray-400"> – <?php echo htmlspecialchars($endDate); ?></span>
                         <?php endif; ?>
                     </td>
-                    <td class="px-4 py-3">
+                    <td class="px-4 py-3" data-label="Status">
                         <?php if ($isAwaitingApproval): ?>
                         <span class="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded-full">
                             Ausstehend
@@ -174,7 +174,7 @@ ob_start();
                         </span>
                         <?php endif; ?>
                     </td>
-                    <td class="px-4 py-3">
+                    <td class="px-4 py-3" data-label="Aktion">
                         <?php if ($isAwaitingApproval): ?>
                         <span class="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-800 rounded text-sm font-medium">
                             <i class="fas fa-clock mr-1"></i>Wartet auf Genehmigung

@@ -175,7 +175,7 @@ document.addEventListener('DOMContentLoaded', function () {
     </div>
     <?php else: ?>
     <div class="overflow-x-auto">
-        <table class="w-full">
+        <table class="w-full card-table">
             <thead class="bg-gray-50">
                 <tr>
                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Benutzer</th>
@@ -192,25 +192,25 @@ document.addEventListener('DOMContentLoaded', function () {
                 $isOverdue = !empty($rental['expected_return']) && strtotime($rental['expected_return']) < time();
                 ?>
                 <tr class="hover:bg-gray-50 <?php echo $isOverdue ? 'bg-red-50' : ''; ?>">
-                    <td class="px-4 py-3 text-sm text-gray-800">
+                    <td class="px-4 py-3 text-sm text-gray-800" data-label="Benutzer">
                         <i class="fas fa-user text-gray-400 mr-1"></i>
                         <?php echo htmlspecialchars($rental['borrower_name'] ?? $rental['borrower_email'] ?? 'Unbekannt'); ?>
                         <?php if (!empty($rental['borrower_name']) && $rental['borrower_name'] !== $rental['borrower_email'] && $rental['borrower_name'] !== 'Unbekannt'): ?>
                         <span class="block text-xs text-gray-400"><?php echo htmlspecialchars($rental['borrower_email']); ?></span>
                         <?php endif; ?>
                     </td>
-                    <td class="px-4 py-3 text-sm">
+                    <td class="px-4 py-3 text-sm" data-label="Artikel">
                         <a href="../inventory/view.php?id=<?php echo $rental['item_id']; ?>" class="font-semibold text-purple-600 hover:text-purple-800">
                             <?php echo htmlspecialchars($rental['item_name']); ?>
                         </a>
                     </td>
-                    <td class="px-4 py-3 text-sm text-gray-600">
+                    <td class="px-4 py-3 text-sm text-gray-600" data-label="Menge">
                         <span class="font-semibold"><?php echo $rental['amount']; ?></span> <?php echo htmlspecialchars($rental['unit']); ?>
                     </td>
-                    <td class="px-4 py-3 text-sm text-gray-600">
+                    <td class="px-4 py-3 text-sm text-gray-600" data-label="Ausgeliehen am">
                         <?php echo date('d.m.Y H:i', strtotime($rental['rented_at'])); ?>
                     </td>
-                    <td class="px-4 py-3 text-sm">
+                    <td class="px-4 py-3 text-sm" data-label="Rückgabe bis">
                         <?php if (!empty($rental['expected_return'])): ?>
                             <span class="<?php echo $isOverdue ? 'text-red-600 font-semibold' : 'text-gray-600'; ?>">
                                 <?php echo date('d.m.Y', strtotime($rental['expected_return'])); ?>
@@ -222,7 +222,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             <span class="text-gray-400">-</span>
                         <?php endif; ?>
                     </td>
-                    <td class="px-4 py-3 text-sm">
+                    <td class="px-4 py-3 text-sm" data-label="Status">
                         <?php if ($isOverdue): ?>
                             <span class="px-2 py-1 text-xs bg-red-100 text-red-700 rounded-full">Überfällig</span>
                         <?php else: ?>
@@ -250,7 +250,7 @@ document.addEventListener('DOMContentLoaded', function () {
     </div>
     <?php else: ?>
     <div class="overflow-x-auto">
-        <table class="w-full">
+        <table class="w-full card-table">
             <thead class="bg-gray-50">
                 <tr>
                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Artikel</th>
@@ -264,12 +264,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 <?php foreach ($inventoryItems as $item): ?>
                 <?php $available = (int)$item['available_quantity']; ?>
                 <tr class="hover:bg-gray-50">
-                    <td class="px-4 py-3 text-sm">
+                    <td class="px-4 py-3 text-sm" data-label="Artikel">
                         <a href="../inventory/view.php?id=<?php echo $item['id']; ?>" class="font-semibold text-purple-600 hover:text-purple-800">
                             <?php echo htmlspecialchars($item['name']); ?>
                         </a>
                     </td>
-                    <td class="px-4 py-3 text-sm text-gray-600">
+                    <td class="px-4 py-3 text-sm text-gray-600" data-label="Kategorie">
                         <?php if (!empty($item['category_name'])): ?>
                             <span class="px-2 py-1 text-xs rounded-full" style="background-color:<?php echo htmlspecialchars($item['category_color'] ?? '#e5e7eb'); ?>20;color:<?php echo htmlspecialchars($item['category_color'] ?? '#374151'); ?>">
                                 <?php echo htmlspecialchars($item['category_name']); ?>
@@ -278,13 +278,13 @@ document.addEventListener('DOMContentLoaded', function () {
                             <span class="text-gray-400">-</span>
                         <?php endif; ?>
                     </td>
-                    <td class="px-4 py-3 text-sm text-gray-800 font-semibold">
+                    <td class="px-4 py-3 text-sm text-gray-800 font-semibold" data-label="Gesamtbestand">
                         <?php echo $item['quantity']; ?> <?php echo htmlspecialchars($item['unit']); ?>
                     </td>
-                    <td class="px-4 py-3 text-sm text-gray-600">
+                    <td class="px-4 py-3 text-sm text-gray-600" data-label="Verliehen">
                         <?php echo (int)$item['quantity'] - (int)$item['available_quantity']; ?>
                     </td>
-                    <td class="px-4 py-3 text-sm font-semibold <?php echo $available <= 0 ? 'text-red-600' : ($available <= ($item['min_stock'] ?? 0) ? 'text-yellow-600' : 'text-green-700'); ?>">
+                    <td class="px-4 py-3 text-sm font-semibold <?php echo $available <= 0 ? 'text-red-600' : ($available <= ($item['min_stock'] ?? 0) ? 'text-yellow-600' : 'text-green-700'); ?>" data-label="Verfügbar">
                         <?php echo $available; ?> <?php echo htmlspecialchars($item['unit']); ?>
                     </td>
                 </tr>

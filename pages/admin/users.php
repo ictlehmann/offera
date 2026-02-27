@@ -389,7 +389,7 @@ ob_start();
         </div>
         
         <div class="overflow-x-auto">
-            <table class="w-full" id="usersTable">
+            <table class="w-full card-table" id="usersTable">
                 <thead class="bg-gradient-to-r from-gray-100 to-slate-100 dark:from-gray-700 dark:to-gray-600 border-b-2 border-purple-200 dark:border-purple-900">
                     <tr>
                         <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">Profil</th>
@@ -411,7 +411,7 @@ ob_start();
                     data-role="<?php echo htmlspecialchars($user['role']); ?>"
                     data-id="<?php echo $user['id']; ?>"
                     data-login="<?php echo $user['last_login'] ? strtotime($user['last_login']) : 0; ?>">
-                    <td class="px-6 py-4 whitespace-nowrap">
+                    <td class="px-6 py-4 whitespace-nowrap" data-label="Profil">
                         <?php 
                         // Validate user ID is a positive integer to prevent path traversal
                         $userId = intval($user['id']);
@@ -442,7 +442,7 @@ ob_start();
                             </div>
                         <?php } ?>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
+                    <td class="px-6 py-4 whitespace-nowrap" data-label="Benutzer">
                         <div class="flex items-center">
                             <div>
                                 <div class="text-sm font-semibold text-gray-900 dark:text-gray-100 flex items-center">
@@ -455,7 +455,7 @@ ob_start();
                             </div>
                         </div>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
+                    <td class="px-6 py-4 whitespace-nowrap" data-label="Entra-Status">
                         <?php $userType = strtolower($user['user_type'] ?? 'member'); ?>
                         <?php if ($userType === 'guest'): ?>
                         <span class="inline-flex items-center px-2.5 py-1 text-xs bg-gradient-to-r from-orange-100 to-amber-100 dark:from-orange-900/50 dark:to-amber-900/50 text-orange-700 dark:text-orange-300 rounded-lg font-semibold shadow-sm">
@@ -467,7 +467,7 @@ ob_start();
                         </span>
                         <?php endif; ?>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
+                    <td class="px-6 py-4 whitespace-nowrap" data-label="Intranet-Rolle">
                         <?php if ($user['id'] != $_SESSION['user_id']): ?>
                         <?php if (!empty($user['azure_oid'])): ?>
                         <div class="flex flex-col gap-1">
@@ -496,7 +496,7 @@ ob_start();
                         </span>
                         <?php endif; ?>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
+                    <td class="px-6 py-4 whitespace-nowrap" data-label="Status">
                         <div class="flex flex-col space-y-2">
                             <?php if (!empty($user['azure_oid'])): ?>
                             <span class="inline-flex items-center px-2.5 py-1 text-xs bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-900/50 dark:to-emerald-900/50 text-green-700 dark:text-green-300 rounded-lg font-semibold shadow-sm">
@@ -533,7 +533,7 @@ ob_start();
                             <?php endif; ?>
                         </div>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
+                    <td class="px-6 py-4 whitespace-nowrap" data-label="Letzter Login">
                         <div class="text-sm">
                             <?php if ($user['last_login']): ?>
                             <div class="flex items-center text-gray-700 dark:text-gray-300 font-medium">
@@ -548,7 +548,7 @@ ob_start();
                             <?php endif; ?>
                         </div>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-center">
+                    <td class="px-6 py-4 whitespace-nowrap text-center" data-label="Aktionen">
                         <?php if ($user['id'] != $_SESSION['user_id']): ?>
                         <form method="POST" class="inline" onsubmit="return confirm('Bist Du sicher, dass Du diesen Benutzer löschen möchtest? Das Profil in alumni_profiles wird ebenfalls entfernt.');">
                             <input type="hidden" name="user_id" value="<?php echo $user['id']; ?>">

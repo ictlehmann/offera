@@ -368,7 +368,7 @@ ob_start();
     <p class="text-gray-500 dark:text-gray-400 text-center py-8">Keine aktiven Ausleihen vorhanden</p>
     <?php else: ?>
     <div class="overflow-x-auto rounded-xl border border-green-200 dark:border-green-700">
-        <table class="w-full">
+        <table class="w-full card-table">
             <thead class="bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-900/40 dark:to-emerald-900/40">
                 <tr>
                     <th class="px-6 py-4 text-left text-xs font-bold text-green-700 dark:text-green-300 uppercase tracking-wider">Ausgeliehen</th>
@@ -381,18 +381,18 @@ ob_start();
             <tbody class="divide-y divide-green-200 dark:divide-green-700 bg-white dark:bg-slate-800">
                 <?php foreach ($activeRentals as $rental): ?>
                 <tr class="hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors">
-                    <td class="px-6 py-4 text-sm">
+                    <td class="px-6 py-4 text-sm" data-label="Ausgeliehen">
                         <span class="font-bold text-lg text-gray-800 dark:text-gray-100"><?php echo (int)$rental['quantity']; ?></span>
                         <span class="text-gray-500 dark:text-gray-400 ml-1"><?php echo htmlspecialchars($item['unit']); ?></span>
                     </td>
-                    <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300 font-medium">
+                    <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300 font-medium" data-label="Ausgeliehen von">
                         <?php echo htmlspecialchars($rental['user_email'] ?? ('User #' . $rental['user_id'])); ?>
                     </td>
-                    <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300 font-medium">
+                    <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300 font-medium" data-label="Ausleihe Start">
                         <?php echo !empty($rental['rented_at']) ? date('d.m.Y H:i', strtotime($rental['rented_at'])) : '-'; ?>
                     </td>
-                    <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300 font-medium">-</td>
-                    <td class="px-6 py-4 text-sm">
+                    <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300 font-medium" data-label="Rückgabe Ende">-</td>
+                    <td class="px-6 py-4 text-sm" data-label="Aktionen">
                         <?php if ($rental['status'] === 'pending_return'): ?>
                         <span class="px-3 py-1.5 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300">
                             Wird vom Vorstand geprüft
@@ -426,7 +426,7 @@ ob_start();
     <p class="text-gray-500 dark:text-gray-400 text-center py-8">Keine abgeschlossenen Ausleihen vorhanden</p>
     <?php else: ?>
     <div class="overflow-x-auto rounded-xl border border-gray-200 dark:border-slate-700">
-        <table class="w-full">
+        <table class="w-full card-table">
             <thead class="bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600">
                 <tr>
                     <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Ausgeliehen</th>
@@ -438,17 +438,17 @@ ob_start();
             <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-slate-800">
                 <?php foreach ($returnedRentals as $rental): ?>
                 <tr class="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                    <td class="px-6 py-4 text-sm">
+                    <td class="px-6 py-4 text-sm" data-label="Ausgeliehen">
                         <span class="font-bold text-lg text-gray-800 dark:text-gray-100"><?php echo (int)$rental['quantity']; ?></span>
                         <span class="text-gray-500 dark:text-gray-400 ml-1"><?php echo htmlspecialchars($item['unit']); ?></span>
                     </td>
-                    <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300 font-medium">
+                    <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300 font-medium" data-label="Ausgeliehen von">
                         <?php echo htmlspecialchars($rental['user_email'] ?? ('User #' . $rental['user_id'])); ?>
                     </td>
-                    <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300 font-medium">
+                    <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300 font-medium" data-label="Ausleihe Start">
                         <?php echo !empty($rental['rented_at']) ? date('d.m.Y H:i', strtotime($rental['rented_at'])) : '-'; ?>
                     </td>
-                    <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300 font-medium">
+                    <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300 font-medium" data-label="Rückgabe Ende">
                         <?php echo !empty($rental['returned_at']) ? date('d.m.Y H:i', strtotime($rental['returned_at'])) : '-'; ?>
                     </td>
                 </tr>
