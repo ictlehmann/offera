@@ -124,7 +124,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         unset($_SESSION['shop_cart'][$key]);
         $action = 'cart';
     } elseif ($postAction === 'checkout') {
-        $paymentMethod = in_array($_POST['payment_method'] ?? '', ['paypal', 'sepa']) ? $_POST['payment_method'] : 'paypal';
+        $paymentMethod = in_array($_POST['payment_method'] ?? '', ['paypal', 'bank_transfer']) ? $_POST['payment_method'] : 'paypal';
         $shippingMethod  = in_array($_POST['shipping_method'] ?? '', ['pickup', 'mail']) ? $_POST['shipping_method'] : 'pickup';
         $shippingCost    = ($shippingMethod === 'mail') ? 4.90 : 0.00;
         $shippingAddress = trim($_POST['shipping_address'] ?? '');
@@ -174,11 +174,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         }
                         $errorMessage = $payResult['error'] ?? 'PayPal-Weiterleitung fehlgeschlagen.';
                         $action = 'cart';
-                    } elseif ($paymentMethod === 'sepa') {
-                        $iban       = trim($_POST['sepa_iban'] ?? '');
-                        $holder     = trim($_POST['sepa_holder'] ?? '');
+                    } elseif ($paymentMethod === 'bank_transfer') {
                         $grandTotal = cartTotal() + $shippingCost;
-                        $payResult  = ShopPaymentService::initiateSepa($orderId, $grandTotal, $iban, $holder);
+                        $payResult  = ShopPaymentService::initiateBankTransfer(
+                            $orderId,
+                            $grandTotal,
+                            $userId,
+                            $user['first_name'] ?? '',
+                            $user['last_name']  ?? '',
+                            $user['email']      ?? ''
+                        );
 
                         if ($payResult['success']) {
                             Shop::decrementStock($orderId);
@@ -197,9 +202,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             } catch (Exception $e) {
                                 error_log('pages/shop/index.php – order notification email failed: ' . $e->getMessage());
                             }
-                            $successMessage = 'Bestellung #' . $orderId . ' aufgegeben! Ihre SEPA-Lastschrift wurde bei der Bank eingereicht.';
+                            $successMessage = 'Bestellung #' . $orderId . ' aufgegeben! Du erhältst eine E-Mail mit den Überweisungsdaten.';
                         } else {
-                            $errorMessage = $payResult['error'] ?? 'SEPA-Zahlung fehlgeschlagen.';
+                            $errorMessage = $payResult['error'] ?? 'Banküberweisung konnte nicht initiiert werden.';
                         }
                         $_SESSION['shop_cart'] = [];
                         $action = 'list';
@@ -799,30 +804,24 @@ ob_start();
                         <label class="flex items-center gap-4 p-4 border-2 rounded-xl cursor-pointer transition-all
                                       border-gray-200 dark:border-gray-700 hover:border-blue-400
                                       has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50 dark:has-[:checked]:bg-blue-900/20"
-                               id="sepa-label">
-                            <input type="radio" name="payment_method" value="sepa" id="sepa-radio" class="sr-only peer">
+                               id="bank-transfer-label">
+                            <input type="radio" name="payment_method" value="bank_transfer" id="bank-transfer-radio" class="sr-only peer">
                             <div class="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center flex-shrink-0">
                                 <i class="fas fa-university text-green-600 dark:text-green-400 text-xl"></i>
                             </div>
                             <div>
-                                <p class="font-semibold text-gray-800 dark:text-gray-100">SEPA-Lastschrift</p>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Per Bankeinzug bezahlen</p>
+                                <p class="font-semibold text-gray-800 dark:text-gray-100">Banküberweisung</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Überweise bequem per Bank – du erhältst alle Daten per E-Mail</p>
                             </div>
                         </label>
                     </div>
 
-                    <!-- SEPA fields (shown when SEPA is selected) -->
-                    <div id="sepa-fields" class="hidden mb-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 space-y-4">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Kontoinhaber</label>
-                            <input type="text" name="sepa_holder" placeholder="Max Mustermann"
-                                   class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-shadow">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">IBAN</label>
-                            <input type="text" name="sepa_iban" placeholder="DE89 3704 0044 0532 0130 00"
-                                   class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none transition-shadow">
-                        </div>
+                    <!-- Bank transfer info (shown when bank_transfer is selected) -->
+                    <div id="bank-transfer-info" class="hidden mb-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl border border-yellow-300 dark:border-yellow-700">
+                        <p class="text-sm text-gray-700 dark:text-gray-300">
+                            <i class="fas fa-info-circle text-yellow-600 mr-2"></i>
+                            Nach der Bestellung erhältst du eine E-Mail mit dem Gesamtbetrag, der Vereins-IBAN und einem persönlichen <strong>Verwendungszweck</strong>, den du bei der Überweisung angeben musst.
+                        </p>
                     </div>
 
                     <button type="submit" form="checkout-form" id="checkout-submit-btn"
@@ -831,7 +830,7 @@ ob_start();
                         Kostenpflichtig bestellen – <span id="checkout-total-display"><?php echo number_format($cartTotalAmt, 2, ',', '.'); ?></span> €
                     </button>
 
-                    <!-- PayPal JS SDK button container (shown only for PayPal, hidden for SEPA) -->
+                    <!-- PayPal JS SDK button container (shown only for PayPal, hidden for bank transfer) -->
                     <div id="paypal-notice" class="hidden mb-4 p-4 rounded-lg border"></div>
                     <div id="paypal-button-container" class="mt-2"></div>
                 </form>
@@ -967,7 +966,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// ── Checkout: shipping method & SEPA toggles + live total ────────────────────
+// ── Checkout: shipping method & payment toggles + live total ─────────────────
 document.addEventListener('DOMContentLoaded', function() {
     var CART_TOTAL = <?php echo json_encode((float) $cartTotalAmt); ?>;
     var SHIPPING_COST_MAIL = 4.90;
@@ -1002,16 +1001,16 @@ document.addEventListener('DOMContentLoaded', function() {
     shippingRadios.forEach(function(r) { r.addEventListener('change', updateTotals); });
     updateTotals();
 
-    // Show/hide SEPA fields and toggle PayPal button vs submit button
-    var paymentRadios = document.querySelectorAll('input[name="payment_method"]');
-    var sepaFields    = document.getElementById('sepa-fields');
+    // Show/hide bank transfer info and toggle PayPal button vs submit button
+    var paymentRadios     = document.querySelectorAll('input[name="payment_method"]');
+    var bankTransferInfo  = document.getElementById('bank-transfer-info');
 
     function togglePaymentUI() {
         var selected = document.querySelector('input[name="payment_method"]:checked');
         var isPayPal = !selected || selected.value === 'paypal';
 
-        if (sepaFields) {
-            sepaFields.classList.toggle('hidden', isPayPal);
+        if (bankTransferInfo) {
+            bankTransferInfo.classList.toggle('hidden', isPayPal);
         }
 
         var submitBtn        = document.getElementById('checkout-submit-btn');

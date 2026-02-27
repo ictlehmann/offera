@@ -173,7 +173,7 @@ if ($routeAction === 'capture') {
     exit;
 }
 
-// ─── Legacy / SEPA checkout (POST only) ──────────────────────────────────────
+// ─── Legacy checkout: bank transfer / Banküberweisung (POST only) ────────────
 
 // 2. Only accept POST requests
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -183,7 +183,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 $input         = json_decode(file_get_contents('php://input'), true) ?? [];
-$paymentMethod = in_array($input['payment_method'] ?? '', ['paypal', 'sepa'], true)
+$paymentMethod = in_array($input['payment_method'] ?? '', ['paypal', 'bank_transfer'], true)
     ? $input['payment_method']
     : 'paypal';
 
@@ -270,30 +270,33 @@ try {
                 'message' => $payResult['error'] ?? 'PayPal-Weiterleitung fehlgeschlagen.',
             ]);
         }
-    } elseif ($paymentMethod === 'sepa') {
-        $iban   = trim($input['sepa_iban']   ?? '');
-        $holder = trim($input['sepa_holder'] ?? '');
+    } elseif ($paymentMethod === 'bank_transfer') {
+        $fullUser  = User::getByEmail($user['email'] ?? '');
+        $firstName = $fullUser['first_name'] ?? '';
+        $lastName  = $fullUser['last_name']  ?? '';
 
-        if ($iban === '' || $holder === '') {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'message' => 'IBAN und Kontoinhaber sind erforderlich.']);
-            exit;
-        }
-
-        $payResult = ShopPaymentService::initiateSepa($orderId, $total, $iban, $holder);
+        $payResult = ShopPaymentService::initiateBankTransfer(
+            $orderId,
+            $total,
+            $userId,
+            $firstName,
+            $lastName,
+            $user['email'] ?? ''
+        );
 
         if ($payResult['success']) {
             $_SESSION['shop_cart'] = [];
             echo json_encode([
-                'success'  => true,
-                'order_id' => $orderId,
-                'message'  => 'Bestellung #' . $orderId . ' aufgegeben! Ihre SEPA-Lastschrift wurde bei der Bank eingereicht.',
+                'success'          => true,
+                'order_id'         => $orderId,
+                'payment_purpose'  => $payResult['payment_purpose'],
+                'message'          => 'Bestellung #' . $orderId . ' aufgegeben! Du erhältst eine E-Mail mit den Überweisungsdaten.',
             ]);
         } else {
             http_response_code(500);
             echo json_encode([
                 'success' => false,
-                'message' => $payResult['error'] ?? 'SEPA-Zahlung fehlgeschlagen.',
+                'message' => $payResult['error'] ?? 'Banküberweisung konnte nicht initiiert werden.',
             ]);
         }
     }

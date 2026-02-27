@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS `shop_orders` (
     `id`              INT UNSIGNED NOT NULL AUTO_INCREMENT,
     `user_id`         INT UNSIGNED NOT NULL,
     `total_amount`    DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-    `payment_method`  ENUM('paypal','sepa') NOT NULL DEFAULT 'paypal',
+    `payment_method`  ENUM('paypal','bank_transfer') NOT NULL DEFAULT 'paypal',
     `payment_status`  VARCHAR(50)  NOT NULL DEFAULT 'pending'  COMMENT 'pending, paid, failed',
     `shipping_status` VARCHAR(50)  NOT NULL DEFAULT 'pending'  COMMENT 'pending, shipped, delivered',
     `shipping_method` VARCHAR(50)  DEFAULT NULL                COMMENT 'pickup oder mail',

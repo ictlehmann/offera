@@ -110,6 +110,9 @@ define('INVENTORY_BOARD_EMAIL', _env('INVENTORY_BOARD_EMAIL', 'vorstand@business
 // EasyVerein API
 define('EASYVEREIN_API_TOKEN', _env('EASYVEREIN_API_TOKEN', ''));
 
+// Bank Transfer Settings
+define('VEREINS_IBAN', _env('VEREINS_IBAN', ''));
+
 // PayPal Settings
 define('PAYPAL_MODE',       _env('PAYPAL_MODE', 'live'));
 define('PAYPAL_CLIENT_ID',  _env('PAYPAL_CLIENT_ID', 'BAAwoaMI_T_AOk8NElgiCw6BzdvAKmHkdbqR12PgkXHtkU5N22TnlsPoOU4qPAE8ba1GuOoNO443v3AjEM'));

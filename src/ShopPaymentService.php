@@ -427,6 +427,208 @@ class ShopPaymentService {
     }
 
     // -------------------------------------------------------------------------
+    // Bank Transfer (Vorkasse / Banküberweisung)
+    // -------------------------------------------------------------------------
+
+    /**
+     * Generate a structured payment purpose (Verwendungszweck) for bank transfers.
+     *
+     * Rule: Take the first 4 letters of the first name; if the first name is shorter
+     * than 4 letters, fill up with letters from the last name so the alphabetic prefix
+     * is exactly 8 characters long. Append the invoice ID zero-padded to 5 digits.
+     * Everything is converted to uppercase.
+     *
+     * Example: "Tom" + "Lehmann" + invoiceId 1 → "TOMLEHMA00001"
+     *
+     * @param string $firstName  User's first name
+     * @param string $lastName   User's last name
+     * @param int    $invoiceId  Invoice ID from the invoices table
+     * @return string            Payment purpose string (e.g. "TOMLEHMA00001")
+     */
+    public static function generatePaymentPurpose(string $firstName, string $lastName, int $invoiceId): string {
+        $fn = strtoupper(preg_replace('/[^A-Za-z]/', '', $firstName));
+        $ln = strtoupper(preg_replace('/[^A-Za-z]/', '', $lastName));
+
+        $fromFirst = min(4, mb_strlen($fn));
+        $fromLast  = 8 - $fromFirst;
+
+        $prefix = mb_substr($fn, 0, $fromFirst) . mb_substr($ln, 0, $fromLast);
+
+        return $prefix . str_pad((string) $invoiceId, 5, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * Initiate a bank-transfer (Vorkasse) checkout for the given shop order.
+     *
+     * Actions performed:
+     *  1. Creates an open invoice record in the invoices table (Rech DB)
+     *  2. Generates the payment purpose (Verwendungszweck)
+     *  3. Updates the invoice with the generated payment purpose
+     *  4. Sends a bank-transfer instruction e-mail to the user's Entra e-mail address
+     *  5. Creates an open bill (offener Beleg) in EasyVerein
+     *
+     * @param int    $orderId   Internal shop order ID
+     * @param float  $total     Total amount in EUR
+     * @param int    $userId    User ID
+     * @param string $firstName User's first name
+     * @param string $lastName  User's last name
+     * @param string $userEmail User's Entra e-mail address
+     * @return array ['success' => bool, 'payment_purpose' => string|null, 'invoice_id' => int|null, 'error' => string|null]
+     */
+    public static function initiateBankTransfer(int $orderId, float $total, int $userId, string $firstName, string $lastName, string $userEmail): array {
+        try {
+            $db = Database::getRechDB();
+
+            // 1. Create open invoice record (file_path uses a placeholder for shop orders)
+            $stmt = $db->prepare(
+                "INSERT INTO invoices (user_id, description, amount, file_path, status)
+                 VALUES (?, ?, ?, ?, 'pending')"
+            );
+            $stmt->execute([
+                $userId,
+                'Shop-Bestellung #' . $orderId,
+                $total,
+                'shop_order_' . $orderId,
+            ]);
+            $invoiceId = (int) $db->lastInsertId();
+
+            // 2. Generate payment purpose
+            $paymentPurpose = self::generatePaymentPurpose($firstName, $lastName, $invoiceId);
+
+            // 3. Save payment_purpose back to the invoice
+            $stmt = $db->prepare("UPDATE invoices SET payment_purpose = ? WHERE id = ?");
+            $stmt->execute([$paymentPurpose, $invoiceId]);
+
+            // 4. Send bank-transfer instruction e-mail to the user
+            try {
+                self::sendBankTransferEmail($userEmail, $total, $paymentPurpose);
+            } catch (\Exception $mailEx) {
+                error_log("ShopPaymentService::initiateBankTransfer – E-Mail an {$userEmail} fehlgeschlagen: " . $mailEx->getMessage());
+            }
+
+            // 5. Create open bill in EasyVerein (non-blocking – failures are only logged)
+            try {
+                self::createEasyVereinBill($orderId, $total, 'Shop-Bestellung #' . $orderId, $paymentPurpose);
+            } catch (\Exception $evEx) {
+                error_log("ShopPaymentService::initiateBankTransfer – EasyVerein-Beleg fehlgeschlagen: " . $evEx->getMessage());
+            }
+
+            self::writeAuditLog($userId, 'shop_bank_transfer_initiated', 'shop_order', $orderId,
+                "Banküberweisung initiiert: Verwendungszweck {$paymentPurpose}, Betrag {$total} EUR");
+
+            return [
+                'success'         => true,
+                'payment_purpose' => $paymentPurpose,
+                'invoice_id'      => $invoiceId,
+                'error'           => null,
+            ];
+        } catch (\Exception $e) {
+            error_log("ShopPaymentService::initiateBankTransfer – " . $e->getMessage());
+            return [
+                'success'         => false,
+                'payment_purpose' => null,
+                'invoice_id'      => null,
+                'error'           => $e->getMessage(),
+            ];
+        }
+    }
+
+    /**
+     * Send bank-transfer payment instructions to the user.
+     *
+     * The e-mail contains the total amount, the club's IBAN and the payment purpose
+     * (Verwendungszweck) displayed very prominently, together with the mandatory
+     * note asking the user to use the exact payment purpose when transferring.
+     *
+     * @param string $toEmail        Recipient e-mail address (Entra e-mail of the user)
+     * @param float  $total          Total amount in EUR
+     * @param string $paymentPurpose Generated Verwendungszweck (e.g. "TOMLEHMA00001")
+     * @return bool
+     */
+    private static function sendBankTransferEmail(string $toEmail, float $total, string $paymentPurpose): bool {
+        $vereinsIban = defined('VEREINS_IBAN') ? VEREINS_IBAN : (getenv('VEREINS_IBAN') ?: '');
+
+        $amountFormatted = number_format($total, 2, ',', '.') . ' €';
+
+        $bodyContent  = '<p class="email-text">Vielen Dank für deine Bestellung! Bitte überweise den fälligen Betrag auf das folgende Vereinskonto.</p>';
+        $bodyContent .= '<table class="info-table">';
+        $bodyContent .= '<tr><td><strong>Betrag</strong></td><td>' . htmlspecialchars($amountFormatted) . '</td></tr>';
+        $bodyContent .= '<tr><td><strong>IBAN</strong></td><td>' . htmlspecialchars($vereinsIban) . '</td></tr>';
+        $bodyContent .= '</table>';
+        $bodyContent .= '<div style="background-color:#fff8e1;border:2px solid #f59e0b;border-radius:8px;padding:24px;margin:24px 0;text-align:center;">';
+        $bodyContent .= '<p style="font-size:15px;font-weight:bold;color:#555;margin:0 0 8px 0;">Verwendungszweck – bitte exakt so angeben:</p>';
+        $bodyContent .= '<p style="font-size:30px;font-weight:bold;color:#20234A;letter-spacing:3px;margin:0 0 16px 0;">' . htmlspecialchars($paymentPurpose) . '</p>';
+        $bodyContent .= '<p style="font-size:14px;color:#333;margin:0;"><strong>Bitte gib bei der Überweisung EXAKT diesen Verwendungszweck an, da wir deine Zahlung sonst nicht automatisch zuordnen können.</strong></p>';
+        $bodyContent .= '</div>';
+        $bodyContent .= '<p class="email-text">Sobald deine Zahlung eingegangen ist, wird deine Bestellung bearbeitet.</p>';
+
+        $htmlBody = MailService::getTemplate('Zahlungsinformationen für deine Bestellung', $bodyContent);
+
+        return MailService::sendEmail($toEmail, 'Zahlungsinformationen für deine Bestellung #' . explode('00', $paymentPurpose)[0], $htmlBody);
+    }
+
+    /**
+     * Create an open bill (offener Beleg) in EasyVerein via the REST API.
+     *
+     * Failures are non-fatal: the caller catches exceptions and only logs them so
+     * that the checkout is not blocked when EasyVerein is temporarily unavailable.
+     *
+     * @param int    $orderId          Internal shop order ID
+     * @param float  $amount           Total amount in EUR
+     * @param string $description      Bill description (e.g. "Shop-Bestellung #42")
+     * @param string $paymentPurpose   Payment purpose / Verwendungszweck
+     * @return bool                    True when the bill was created successfully
+     */
+    private static function createEasyVereinBill(int $orderId, float $amount, string $description, string $paymentPurpose): bool {
+        $apiToken = defined('EASYVEREIN_API_TOKEN') ? EASYVEREIN_API_TOKEN : (getenv('EASYVEREIN_API_TOKEN') ?: '');
+
+        if ($apiToken === '') {
+            error_log("ShopPaymentService::createEasyVereinBill – EASYVEREIN_API_TOKEN nicht konfiguriert");
+            return false;
+        }
+
+        $payload = [
+            'name'             => $description,
+            'amount'           => round($amount, 2),
+            'dateOfInvoice'    => date('Y-m-d'),
+            'paymentReference' => $paymentPurpose,
+            'isPaid'           => false,
+        ];
+
+        $ch = curl_init('https://easyverein.com/api/v2.0/bill');
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST           => true,
+            CURLOPT_HTTPHEADER     => [
+                'Authorization: Bearer ' . $apiToken,
+                'Content-Type: application/json',
+            ],
+            CURLOPT_POSTFIELDS     => json_encode($payload),
+            CURLOPT_TIMEOUT        => 30,
+            CURLOPT_CONNECTTIMEOUT => 10,
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_SSL_VERIFYHOST => 2,
+        ]);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlErr  = curl_error($ch);
+        curl_close($ch);
+
+        if ($response === false) {
+            error_log("ShopPaymentService::createEasyVereinBill – cURL-Fehler: {$curlErr}");
+            return false;
+        }
+
+        if ($httpCode !== 200 && $httpCode !== 201) {
+            error_log("ShopPaymentService::createEasyVereinBill – API HTTP {$httpCode} für Bestellung #{$orderId}: {$response}");
+            return false;
+        }
+
+        return true;
+    }
+
+    // -------------------------------------------------------------------------
     // Webhook handling
     // -------------------------------------------------------------------------
 
