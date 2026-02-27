@@ -110,6 +110,16 @@ define('INVENTORY_BOARD_EMAIL', _env('INVENTORY_BOARD_EMAIL', 'vorstand@business
 // EasyVerein API
 define('EASYVEREIN_API_TOKEN', _env('EASYVEREIN_API_TOKEN', ''));
 
+// PayPal Settings
+define('PAYPAL_MODE',       _env('PAYPAL_MODE', 'live'));
+define('PAYPAL_CLIENT_ID',  _env('PAYPAL_CLIENT_ID', 'BAAwoaMI_T_AOk8NElgiCw6BzdvAKmHkdbqR12PgkXHtkU5N22TnlsPoOU4qPAE8ba1GuOoNO443v3AjEM'));
+define('PAYPAL_SECRET',     _env('PAYPAL_SECRET', ''));
+define('PAYPAL_WEBHOOK_ID', _env('PAYPAL_WEBHOOK_ID', '34085732682525935'));
+define('PAYPAL_BASE_URL',   PAYPAL_MODE === 'live'
+    ? 'https://api-m.paypal.com'
+    : 'https://api-m.sandbox.paypal.com'
+);
+
 // Role Mapping (IDs aus Entra -> Interne Rollen)
 define('ROLE_MAPPING', [
     'board_finance'   => '3ad43a76-75af-48a7-9974-7a2cf350f349',
