@@ -466,55 +466,56 @@ ob_start();
 
     <!-- Order status modal -->
     <div id="order-modal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 w-full max-w-md border border-gray-100 dark:border-gray-700">
-            <div class="flex items-center justify-between mb-5">
-                <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100">
-                    <i class="fas fa-edit mr-2 text-blue-500"></i>Bestellstatus aktualisieren
-                </h3>
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg max-h-[85vh] flex flex-col overflow-hidden border border-gray-100 dark:border-gray-700">
+            <div class="p-6 overflow-y-auto flex-1">
+                <div class="flex items-center justify-between mb-5">
+                    <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100">
+                        <i class="fas fa-edit mr-2 text-blue-500"></i>Bestellstatus aktualisieren
+                    </h3>
+                    <button type="button" onclick="closeOrderModal()"
+                            class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
+                        <i class="fas fa-times text-lg"></i>
+                    </button>
+                </div>
+                <form method="POST" id="order-status-form" class="space-y-4">
+                    <input type="hidden" name="post_action" value="update_order">
+                    <input type="hidden" name="order_id" id="modal-order-id">
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                            <i class="fas fa-credit-card mr-1 text-emerald-500"></i>Zahlungsstatus
+                        </label>
+                        <select name="payment_status" id="modal-payment-status"
+                                class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500">
+                            <option value="pending">⏳ Ausstehend</option>
+                            <option value="paid">✅ Bezahlt</option>
+                            <option value="failed">❌ Fehlgeschlagen</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                            <i class="fas fa-truck mr-1 text-blue-500"></i>Versandstatus
+                        </label>
+                        <select name="shipping_status" id="modal-shipping-status"
+                                class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500">
+                            <option value="pending">⏳ Ausstehend</option>
+                            <option value="shipped">🚚 Versendet</option>
+                            <option value="delivered">📦 Geliefert</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="flex gap-3 px-6 pb-6 pt-2">
+                <button type="submit" form="order-status-form"
+                        class="flex-1 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 font-semibold shadow transition-all">
+                    <i class="fas fa-save mr-2"></i>Speichern
+                </button>
                 <button type="button" onclick="closeOrderModal()"
-                        class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
-                    <i class="fas fa-times text-lg"></i>
+                        class="px-4 py-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 font-medium transition-colors">
+                    Abbrechen
                 </button>
             </div>
-            <form method="POST" id="order-status-form" class="space-y-4">
-                <input type="hidden" name="post_action" value="update_order">
-                <input type="hidden" name="order_id" id="modal-order-id">
-
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                        <i class="fas fa-credit-card mr-1 text-emerald-500"></i>Zahlungsstatus
-                    </label>
-                    <select name="payment_status" id="modal-payment-status"
-                            class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500">
-                        <option value="pending">⏳ Ausstehend</option>
-                        <option value="paid">✅ Bezahlt</option>
-                        <option value="failed">❌ Fehlgeschlagen</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                        <i class="fas fa-truck mr-1 text-blue-500"></i>Versandstatus
-                    </label>
-                    <select name="shipping_status" id="modal-shipping-status"
-                            class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500">
-                        <option value="pending">⏳ Ausstehend</option>
-                        <option value="shipped">🚚 Versendet</option>
-                        <option value="delivered">📦 Geliefert</option>
-                    </select>
-                </div>
-
-                <div class="flex gap-3 pt-2">
-                    <button type="submit" form="order-status-form"
-                            class="flex-1 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 font-semibold shadow transition-all">
-                        <i class="fas fa-save mr-2"></i>Speichern
-                    </button>
-                    <button type="button" onclick="closeOrderModal()"
-                            class="px-4 py-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 font-medium transition-colors">
-                        Abbrechen
-                    </button>
-                </div>
-            </form>
         </div>
     </div>
     <?php endif; ?>
@@ -523,8 +524,8 @@ ob_start();
 <!-- ══════════════════════════════════════════════════════════════════════════════
      PRODUCT MODAL (create / edit)
 ══════════════════════════════════════════════════════════════════════════════ -->
-<div id="product-modal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-start justify-center p-4 overflow-y-auto">
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-3xl my-6 border border-gray-100 dark:border-gray-700">
+<div id="product-modal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[85vh] flex flex-col overflow-hidden border border-gray-100 dark:border-gray-700">
 
         <!-- Modal header -->
         <div class="px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-700 rounded-t-2xl flex items-center gap-3">
@@ -542,10 +543,11 @@ ob_start();
         </div>
 
         <!-- Modal body -->
-        <form method="POST" enctype="multipart/form-data" id="product-form" class="p-6">
+        <form method="POST" enctype="multipart/form-data" id="product-form" class="flex flex-col flex-1 min-h-0">
             <input type="hidden" name="post_action" value="save_product">
             <input type="hidden" name="product_id" id="modal-product-id" value="">
 
+            <div class="p-6 overflow-y-auto flex-1">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
 
                 <!-- ── Left column ── -->
@@ -714,8 +716,10 @@ ob_start();
                 <div id="new-images-preview" class="mt-2 grid grid-cols-4 sm:grid-cols-6 gap-2 hidden"></div>
             </div>
 
+            </div><!-- end scrollable body -->
+
             <!-- Modal footer -->
-            <div class="flex items-center justify-between mt-6 pt-5 border-t border-gray-200 dark:border-gray-700 gap-3 flex-wrap">
+            <div class="flex items-center justify-between px-6 py-4 border-t border-gray-200 dark:border-gray-700 gap-3 flex-wrap">
                 <div id="modal-delete-area" class="hidden">
                     <button type="button" onclick="confirmDeleteProduct()"
                             class="inline-flex items-center gap-2 px-4 py-2.5 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/40 font-medium text-sm transition-colors">
@@ -740,20 +744,22 @@ ob_start();
 
 <!-- Delete confirmation modal -->
 <div id="delete-confirm-modal" class="hidden fixed inset-0 bg-black/70 z-[60] flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 w-full max-w-sm border border-gray-100 dark:border-gray-700">
-        <div class="flex items-center gap-3 mb-4">
-            <div class="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/40 flex items-center justify-center shrink-0">
-                <i class="fas fa-exclamation-triangle text-red-500 text-xl"></i>
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg max-h-[85vh] flex flex-col overflow-hidden border border-gray-100 dark:border-gray-700">
+        <div class="p-6 overflow-y-auto flex-1">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900/40 flex items-center justify-center shrink-0">
+                    <i class="fas fa-exclamation-triangle text-red-500 text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100">Produkt löschen?</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Diese Aktion kann nicht rückgängig gemacht werden.</p>
+                </div>
             </div>
-            <div>
-                <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100">Produkt löschen?</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Diese Aktion kann nicht rückgängig gemacht werden.</p>
-            </div>
+            <p class="text-sm text-gray-600 dark:text-gray-300">
+                Soll <strong id="delete-product-name" class="text-gray-800 dark:text-gray-100"></strong> wirklich gelöscht werden? Alle Varianten werden ebenfalls entfernt.
+            </p>
         </div>
-        <p class="text-sm text-gray-600 dark:text-gray-300 mb-5">
-            Soll <strong id="delete-product-name" class="text-gray-800 dark:text-gray-100"></strong> wirklich gelöscht werden? Alle Varianten werden ebenfalls entfernt.
-        </p>
-        <form method="POST" id="delete-product-form">
+        <form method="POST" id="delete-product-form" class="px-6 pb-6">
             <input type="hidden" name="post_action" value="delete_product">
             <input type="hidden" name="product_id" id="delete-product-id">
             <div class="flex gap-3">

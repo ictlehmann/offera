@@ -149,8 +149,8 @@ ob_start();
 
 <?php if (!empty($user['prompt_profile_review']) && $user['prompt_profile_review'] == 1): ?>
 <!-- Profile Review Prompt Modal -->
-<div id="profile-review-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div class="rounded-2xl shadow-2xl max-w-md w-full mx-4 overflow-hidden transform transition-all" style="background-color: var(--bg-card)">
+<div id="profile-review-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div class="rounded-2xl shadow-2xl w-full max-w-lg max-h-[85vh] flex flex-col overflow-hidden transform transition-all" style="background-color: var(--bg-card)">
         <!-- Modal Header -->
         <div class="bg-gradient-to-r from-purple-600 to-blue-600 px-6 py-4">
             <div class="flex items-center">
@@ -162,12 +162,12 @@ ob_start();
         </div>
         
         <!-- Modal Body -->
-        <div class="px-6 py-6">
+        <div class="px-6 py-6 overflow-y-auto flex-1">
             <p class="text-lg mb-6" style="color: var(--text-main)">
                 Bitte überprüfe deine Daten (besonders E-Mail und Job-Daten), damit wir in Kontakt bleiben können.
             </p>
             
-            <div class="rounded-lg p-4 mb-6" style="background-color: var(--bg-body); border: 1px solid var(--border-color)">
+            <div class="rounded-lg p-4" style="background-color: var(--bg-body); border: 1px solid var(--border-color)">
                 <div class="flex items-start">
                     <i class="fas fa-info-circle text-purple-600 mt-1 mr-3"></i>
                     <p class="text-sm" style="color: var(--text-main)">

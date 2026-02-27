@@ -290,7 +290,7 @@ ob_start();
 
 <!-- Delete Confirmation Modal -->
 <div id="deleteModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4" style="background: rgba(15,23,42,0.70); backdrop-filter: blur(4px);" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
-    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-modal-in">
+    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-lg max-h-[85vh] flex flex-col overflow-hidden animate-modal-in">
         <div class="bg-gradient-to-r from-red-500 to-red-600 px-6 py-5 flex items-center gap-3">
             <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
                 <i class="fas fa-trash text-white text-lg"></i>
@@ -300,24 +300,24 @@ ob_start();
                 <p class="text-red-100 text-xs mt-0.5">Diese Aktion kann nicht rückgängig gemacht werden</p>
             </div>
         </div>
-        <div class="px-6 py-5">
-            <p class="text-slate-600 dark:text-slate-300 mb-6">
+        <div class="px-6 py-5 overflow-y-auto flex-1">
+            <p class="text-slate-600 dark:text-slate-300">
                 Möchtest Du den Artikel "<span id="deleteItemName" class="font-bold text-slate-800 dark:text-slate-100"></span>" wirklich löschen?
             </p>
-            <form method="POST" id="deleteForm">
-                <input type="hidden" name="csrf_token" value="<?php echo CSRFHandler::getToken(); ?>">
-                <input type="hidden" name="item_id" id="deleteItemId" value="">
-                <input type="hidden" name="delete_item" value="1">
-                <div class="flex gap-3">
-                    <button type="button" id="closeDeleteModalBtn" class="flex-1 px-4 py-2.5 bg-gray-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl hover:bg-gray-200 dark:hover:bg-slate-700 transition font-semibold text-sm border border-gray-200 dark:border-slate-700">
-                        <i class="fas fa-times mr-1.5"></i>Abbrechen
-                    </button>
-                    <button type="submit" class="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl transition font-semibold text-sm shadow-md">
-                        <i class="fas fa-trash mr-1.5"></i>Löschen
-                    </button>
-                </div>
-            </form>
         </div>
+        <form method="POST" id="deleteForm" class="px-6 pb-5">
+            <input type="hidden" name="csrf_token" value="<?php echo CSRFHandler::getToken(); ?>">
+            <input type="hidden" name="item_id" id="deleteItemId" value="">
+            <input type="hidden" name="delete_item" value="1">
+            <div class="flex gap-3">
+                <button type="button" id="closeDeleteModalBtn" class="flex-1 px-4 py-2.5 bg-gray-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl hover:bg-gray-200 dark:hover:bg-slate-700 transition font-semibold text-sm border border-gray-200 dark:border-slate-700">
+                    <i class="fas fa-times mr-1.5"></i>Abbrechen
+                </button>
+                <button type="submit" class="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl transition font-semibold text-sm shadow-md">
+                    <i class="fas fa-trash mr-1.5"></i>Löschen
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 

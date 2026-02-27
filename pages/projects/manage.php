@@ -347,16 +347,18 @@ ob_start();
 
 <!-- Delete Confirmation Modal -->
 <div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full">
-        <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
-            <i class="fas fa-exclamation-triangle text-red-600 mr-2"></i>
-            Projekt löschen
-        </h3>
-        <p class="text-gray-600 dark:text-gray-300 mb-6">
-            Möchtest Du das Projekt "<span id="deleteProjectName" class="font-semibold"></span>" wirklich löschen? 
-            Diese Aktion kann nicht rückgängig gemacht werden.
-        </p>
-        <form method="POST" id="deleteForm">
+    <div class="bg-white dark:bg-gray-800 rounded-lg w-full max-w-lg max-h-[85vh] flex flex-col overflow-hidden">
+        <div class="p-6 overflow-y-auto flex-1">
+            <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
+                <i class="fas fa-exclamation-triangle text-red-600 mr-2"></i>
+                Projekt löschen
+            </h3>
+            <p class="text-gray-600 dark:text-gray-300">
+                Möchtest Du das Projekt "<span id="deleteProjectName" class="font-semibold"></span>" wirklich löschen? 
+                Diese Aktion kann nicht rückgängig gemacht werden.
+            </p>
+        </div>
+        <form method="POST" id="deleteForm" class="px-6 pb-6">
             <input type="hidden" name="csrf_token" value="<?php echo CSRFHandler::getToken(); ?>">
             <input type="hidden" name="project_id" id="deleteProjectId" value="">
             <input type="hidden" name="delete_project" value="1">

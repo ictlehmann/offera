@@ -1062,8 +1062,8 @@ if (Auth::check() && isset($_SESSION['profile_incomplete']) && $_SESSION['profil
     <main id="main-content" role="main" class="md:ml-64 lg:ml-72 min-h-screen p-4 pt-20 md:p-6 lg:p-10" style="padding-bottom: max(1rem, env(safe-area-inset-bottom, 0))">
         <?php if (isset($_SESSION['show_2fa_nudge']) && $_SESSION['show_2fa_nudge']): ?>
         <!-- 2FA Nudge Modal -->
-        <div id="tfa-nudge-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-md w-full mx-4 overflow-hidden transform transition-all">
+        <div id="tfa-nudge-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-lg max-h-[85vh] flex flex-col overflow-hidden transform transition-all">
                 <!-- Modal Header -->
                 <div class="bg-gradient-to-r from-blue-600 to-green-600 px-6 py-4">
                     <div class="flex items-center">
@@ -1075,7 +1075,7 @@ if (Auth::check() && isset($_SESSION['profile_incomplete']) && $_SESSION['profil
                 </div>
                 
                 <!-- Modal Body -->
-                <div class="px-6 py-6">
+                <div class="px-6 py-6 overflow-y-auto flex-1">
                     <p class="text-slate-800 dark:text-slate-200 text-lg mb-2 font-semibold">
                         Erhöhe deine Sicherheit!
                     </p>
@@ -1083,7 +1083,7 @@ if (Auth::check() && isset($_SESSION['profile_incomplete']) && $_SESSION['profil
                         Aktiviere jetzt die 2-Faktor-Authentifizierung für zusätzlichen Schutz deines Kontos.
                     </p>
                     
-                    <div class="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 rounded-lg p-4 mb-6">
+                    <div class="bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
                         <div class="flex items-start">
                             <i class="fas fa-info-circle text-blue-600 dark:text-blue-400 mt-1 mr-3"></i>
                             <p class="text-sm text-slate-800 dark:text-slate-200">
