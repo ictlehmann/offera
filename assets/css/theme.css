@@ -1944,6 +1944,12 @@ body.dark-mode button:hover:not(.btn-primary):not(.btn-secondary) {
     background-color: #374151;
 }
 
+body.dark-mode button:active:not(.btn-primary):not(.btn-secondary) {
+    background-color: #1f2937;
+    transform: scale(0.97);
+    transition: transform 0.1s ease, background-color 0.1s ease;
+}
+
 /* Dark Mode: Improve icon visibility */
 body.dark-mode .fa,
 body.dark-mode .fas,
@@ -2101,6 +2107,12 @@ body:not(.dark-mode) .card:hover::after {
     transform: translateX(4px);
 }
 
+.sidebar nav a:active {
+    background: rgba(255, 255, 255, 0.15) !important;
+    transform: translateX(2px) scale(0.98);
+    transition: transform 0.1s ease, background 0.1s ease;
+}
+
 .sidebar nav a.active,
 .sidebar nav a[class*="bg-white/20"] {
     background: rgba(255, 255, 255, 0.12) !important;
@@ -2149,6 +2161,12 @@ a.btn-secondary {
 .sidebar .nav-link:hover {
     background: rgba(255, 255, 255, 0.08) !important;
     backdrop-filter: blur(4px);
+}
+
+.sidebar .nav-link:active {
+    background: rgba(255, 255, 255, 0.14) !important;
+    opacity: 0.85;
+    transition: background 0.1s ease, opacity 0.1s ease;
 }
 
 .sidebar .nav-link i,
@@ -2222,6 +2240,13 @@ body:not(.dark-mode) .btn-primary:active::after {
     box-shadow: 0 8px 25px rgba(0, 102, 179, 0.45);
     background-size: 200% 200%;
     filter: brightness(1.05);
+}
+
+.btn-primary:active {
+    transform: translateY(0) scale(0.97);
+    filter: brightness(0.9);
+    box-shadow: 0 2px 8px rgba(0, 102, 179, 0.3);
+    transition: transform 0.1s ease, filter 0.1s ease, box-shadow 0.1s ease;
 }
 
 @keyframes gradientShift {
@@ -2926,8 +2951,14 @@ body.dark-mode .sidebar {
     /* Ensure all interactive elements meet touch target minimum */
     button,
     a.btn,
+    .btn,
     .btn-primary {
         min-height: 44px;
+    }
+
+    /* Ensure .btn has adequate padding (at least py-3 px-4) on mobile */
+    .btn {
+        padding: 0.75rem 1rem;
     }
     
     /* Form Elements - Better mobile UX */
@@ -3166,10 +3197,30 @@ body.dark-mode .sidebar {
         transform: none;
     }
     
-    /* Better tap feedback */
-    a:active, button:active {
+    /* Better tap feedback for all interactive elements */
+    a:active, button:active, .btn:active {
         opacity: 0.7;
         transform: scale(0.98);
+    }
+
+    /* Enhanced active state for primary buttons on touch */
+    .btn-primary:active {
+        opacity: 1;
+        transform: scale(0.96);
+        filter: brightness(0.88);
+    }
+
+    /* Active state for sidebar nav links on touch */
+    .sidebar nav a:active,
+    .sidebar .nav-link:active {
+        background: rgba(255, 255, 255, 0.15) !important;
+        opacity: 0.85;
+        transform: none;
+    }
+
+    /* Active state for list links on touch */
+    li a:active {
+        opacity: 0.7;
     }
 }
 
