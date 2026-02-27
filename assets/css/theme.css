@@ -198,6 +198,9 @@ body {
     display: flex;
     flex-direction: column;
     overflow-x: hidden;
+    height: 100vh;
+    height: 100dvh;
+    height: -webkit-fill-available;
 }
 
 /* Sidebar Text - Always White on Blue Background */
@@ -4205,8 +4208,8 @@ body.dark-mode {
         position: fixed;
         top: 60px; /* Start below mobile topbar */
         left: 0;
-        height: calc(100vh - 60px);
-        height: calc(100dvh - 60px);
+        height: calc(100vh - 60px) !important;
+        height: calc(100dvh - 60px) !important;
         width: 85%;
         max-width: 320px;
         z-index: 1050 !important; /* Must be above overlay (1040); !important overrides Tailwind z-40 */
@@ -4406,9 +4409,9 @@ main {
 /* Mobile full-height sidebar fix for iOS */
 @media (max-width: 767px) {
     .sidebar {
-        height: calc(100vh - 60px); /* fallback */
-        height: calc(100dvh - 60px); /* modern browsers */
-        height: calc(100svh - 60px); /* iOS Safari small viewport */
+        height: calc(100vh - 60px) !important; /* fallback */
+        height: calc(100dvh - 60px) !important; /* modern browsers */
+        height: calc(100svh - 60px) !important; /* iOS Safari small viewport */
     }
 }
 
