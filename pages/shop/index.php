@@ -813,6 +813,10 @@ ob_start();
                         <i class="fas fa-lock mr-2"></i>
                         Kostenpflichtig bestellen – <span id="checkout-total-display"><?php echo number_format($cartTotalAmt, 2, ',', '.'); ?></span> €
                     </button>
+
+                    <!-- PayPal JS SDK button container (shown only for PayPal, hidden for SEPA) -->
+                    <div id="paypal-notice" class="hidden mb-4 p-4 rounded-lg border"></div>
+                    <div id="paypal-button-container" class="mt-2"></div>
                 </form>
             </div>
         </div>
@@ -942,21 +946,139 @@ document.addEventListener('DOMContentLoaded', function() {
     shippingRadios.forEach(function(r) { r.addEventListener('change', updateTotals); });
     updateTotals();
 
-    // Show/hide SEPA fields
+    // Show/hide SEPA fields and toggle PayPal button vs submit button
     var paymentRadios = document.querySelectorAll('input[name="payment_method"]');
     var sepaFields    = document.getElementById('sepa-fields');
 
-    function toggleSepaFields() {
+    function togglePaymentUI() {
         var selected = document.querySelector('input[name="payment_method"]:checked');
+        var isPayPal = !selected || selected.value === 'paypal';
+
         if (sepaFields) {
-            sepaFields.classList.toggle('hidden', !selected || selected.value !== 'sepa');
+            sepaFields.classList.toggle('hidden', isPayPal);
         }
+
+        var submitBtn        = document.getElementById('checkout-submit-btn');
+        var paypalContainer  = document.getElementById('paypal-button-container');
+        if (submitBtn)       submitBtn.classList.toggle('hidden', isPayPal);
+        if (paypalContainer) paypalContainer.classList.toggle('hidden', !isPayPal);
     }
 
-    paymentRadios.forEach(function(r) { r.addEventListener('change', toggleSepaFields); });
-    toggleSepaFields();
+    paymentRadios.forEach(function(r) { r.addEventListener('change', togglePaymentUI); });
+    togglePaymentUI();
 });
 </script>
+
+<?php if ($action === 'checkout' && !empty($cartItems) && defined('PAYPAL_CLIENT_ID') && PAYPAL_CLIENT_ID !== ''): ?>
+<script>
+(function () {
+    var PAYPAL_CLIENT_ID = <?php echo json_encode(defined('PAYPAL_CLIENT_ID') ? PAYPAL_CLIENT_ID : ''); ?>;
+    var CREATE_URL  = <?php echo json_encode(asset('api/shop/checkout.php') . '?action=create'); ?>;
+    var CAPTURE_URL = <?php echo json_encode(asset('api/shop/checkout.php') . '?action=capture'); ?>;
+    var SHOP_URL    = <?php echo json_encode(asset('pages/shop/index.php')); ?>;
+
+    if (!PAYPAL_CLIENT_ID) return;
+
+    // Dynamically load PayPal JS SDK v6
+    var sdkScript = document.createElement('script');
+    sdkScript.src = 'https://www.paypal.com/sdk/js?client-id=' + encodeURIComponent(PAYPAL_CLIENT_ID) + '&currency=EUR';
+    sdkScript.onload = initPayPalButtons;
+    document.head.appendChild(sdkScript);
+
+    function showPaypalNotice(msg, type) {
+        var el = document.getElementById('paypal-notice');
+        if (!el) return;
+        var isError = (type === 'error');
+        el.className = 'mb-4 p-4 rounded-lg border ' + (isError
+            ? 'bg-red-100 dark:bg-red-900 border-red-400 text-red-700 dark:text-red-300'
+            : 'bg-yellow-100 dark:bg-yellow-900 border-yellow-400 text-yellow-700 dark:text-yellow-300');
+        el.innerHTML = '<i class="fas fa-' + (isError ? 'exclamation-circle' : 'info-circle') + ' mr-2"></i>'
+            + msg;
+        el.classList.remove('hidden');
+    }
+
+    function hidePaypalNotice() {
+        var el = document.getElementById('paypal-notice');
+        if (el) el.classList.add('hidden');
+    }
+
+    function initPayPalButtons() {
+        var buttonsConfig = {
+            createOrder: function () {
+                hidePaypalNotice();
+                var shippingMethodEl  = document.querySelector('input[name="shipping_method"]:checked');
+                var shippingAddressEl = document.getElementById('shipping-address-input');
+                return fetch(CREATE_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        payment_method:   'paypal',
+                        shipping_method:  shippingMethodEl  ? shippingMethodEl.value  : 'pickup',
+                        shipping_address: shippingAddressEl ? shippingAddressEl.value : ''
+                    })
+                })
+                .then(function (res) { return res.json(); })
+                .then(function (data) {
+                    if (data.success) return data.paypal_order_id;
+                    throw new Error(data.message || 'Fehler beim Erstellen der Bestellung.');
+                });
+            },
+
+            onApprove: function (data) {
+                var container = document.getElementById('paypal-button-container');
+                if (container) {
+                    container.innerHTML = '<div class="text-center py-4">'
+                        + '<i class="fas fa-spinner fa-spin text-2xl text-blue-500"></i>'
+                        + '</div>';
+                }
+                return fetch(CAPTURE_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ paypal_order_id: data.orderID })
+                })
+                .then(function (res) { return res.json(); })
+                .then(function (result) {
+                    if (result.success) {
+                        var grid = document.querySelector('.grid.grid-cols-1.lg\\:grid-cols-3');
+                        if (grid) {
+                            grid.innerHTML = '<div class="col-span-full text-center py-16">'
+                                + '<div class="inline-flex flex-col items-center gap-4">'
+                                + '<div class="w-20 h-20 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">'
+                                + '<i class="fas fa-check text-green-500 text-4xl"></i></div>'
+                                + '<h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Zahlung erfolgreich!</h2>'
+                                + '<p class="text-gray-600 dark:text-gray-300">Bestellung #' + result.order_id
+                                + ' wurde abgeschlossen. Du erhältst eine Bestätigungs-E-Mail.</p>'
+                                + '<a href="' + SHOP_URL + '" class="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-medium no-underline">'
+                                + '<i class="fas fa-arrow-left mr-2"></i>Zurück zum Shop</a>'
+                                + '</div></div>';
+                        }
+                    } else {
+                        // Close the current instance, clear the container, then re-render
+                        if (renderedButtons) renderedButtons.close();
+                        if (container) container.innerHTML = '';
+                        renderedButtons = paypal.Buttons(buttonsConfig);
+                        renderedButtons.render('#paypal-button-container');
+                        showPaypalNotice(result.message || 'Zahlung fehlgeschlagen.', 'error');
+                    }
+                });
+            },
+
+            onCancel: function () {
+                showPaypalNotice('Zahlung abgebrochen. Du kannst es jederzeit erneut versuchen.', 'info');
+            },
+
+            onError: function (err) {
+                showPaypalNotice('Fehler bei der PayPal-Zahlung. Bitte versuche es erneut.', 'error');
+                console.error('PayPal Fehler:', err);
+            }
+        };
+
+        var renderedButtons = paypal.Buttons(buttonsConfig);
+        renderedButtons.render('#paypal-button-container');
+    }
+}());
+</script>
+<?php endif; ?>
 
 <?php
 $content = ob_get_clean();
