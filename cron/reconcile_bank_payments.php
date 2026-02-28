@@ -56,12 +56,12 @@ try {
     $transactions = EasyVereinSync::getBankTransactions(30);
     echo "Fetched " . count($transactions) . " bank transaction(s).\n\n";
 
-    // 4. Load all pending bank-transfer invoices (identified by payment_purpose IS NOT NULL)
+    // 4. Load all pending bank-transfer invoices
     $stmt = $rechDb->prepare("
         SELECT id, description, amount, payment_purpose, easyverein_document_id, created_at
         FROM invoices
         WHERE status = 'pending'
-          AND payment_purpose IS NOT NULL
+          AND payment_method = 'bank_transfer'
         ORDER BY created_at ASC
     ");
     $stmt->execute();
@@ -90,10 +90,12 @@ try {
         foreach ($transactions as $tx) {
             $txPurpose   = (string) ($tx['purpose']   ?? '');
             $txReference = (string) ($tx['reference'] ?? '');
+            $txInfo      = (string) ($tx['info']      ?? '');
 
             if (
-                ($txPurpose   !== '' && stripos($txPurpose, $paymentPurpose) !== false) ||
-                ($txReference !== '' && stripos($txReference, $paymentPurpose) !== false)
+                ($txPurpose   !== '' && stripos($txPurpose,   $paymentPurpose) !== false) ||
+                ($txReference !== '' && stripos($txReference, $paymentPurpose) !== false) ||
+                ($txInfo      !== '' && stripos($txInfo,      $paymentPurpose) !== false)
             ) {
                 $paymentFound = true;
                 break;
