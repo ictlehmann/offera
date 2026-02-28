@@ -44,9 +44,14 @@ php cron/send_birthday_wishes.php
 ```
 
 ### Automated Execution (Cron Job)
-Add to your crontab to run daily at 9:00 AM:
+Add to your crontab to run daily at 8:00 AM:
 ```
-0 9 * * * /usr/bin/php /path/to/offer/cron/send_birthday_wishes.php >> /var/log/birthday_wishes.log 2>&1
+0 8 * * * /usr/bin/php /path/to/offer/cron/send_birthday_wishes.php >> /var/log/birthday_wishes.log 2>&1
+```
+
+To edit the crontab, run:
+```bash
+crontab -e
 ```
 
 ## Dependencies
