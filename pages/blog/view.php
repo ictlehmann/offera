@@ -12,7 +12,7 @@ if (!Auth::check()) {
 
 // Get current user info
 $user = Auth::user();
-$userId = $_SESSION['user_id'];
+$userId = $user['id'];
 $userRole = $_SESSION['user_role'] ?? 'member';
 
 // Get post ID from query parameter
