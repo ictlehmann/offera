@@ -48,11 +48,18 @@ Options -Indexes
 # 4. Sicherheits-Header (Nur wenn Modul aktiv ist!)
 # ----------------------------------------------------------------------
 <IfModule mod_headers.c>
-    Header always set X-Frame-Options "SAMEORIGIN"
+    # HSTS: enforce HTTPS for 1 year – only sent over HTTPS (preload-ready)
+    <If "%{HTTPS} == 'on'">
+        Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+    </If>
+    Header always set X-Frame-Options "DENY"
     Header always set X-Content-Type-Options "nosniff"
     Header always set X-XSS-Protection "1; mode=block"
+    Header always set X-Permitted-Cross-Domain-Policies "none"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
     # Remove X-Powered-By to hide PHP version
     Header always unset X-Powered-By
+    Header always unset Server
 </IfModule>
 
 # ----------------------------------------------------------------------
