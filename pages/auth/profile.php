@@ -658,12 +658,13 @@ ob_start();
                     </div>
                     
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Geburtstag</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Geburtstag *</label>
                         <input 
                             type="date" 
                             name="birthday" 
                             value="<?php echo htmlspecialchars($profile['birthday'] ?? ''); ?>"
                             max="<?php echo date('Y-m-d'); ?>"
+                            required
                             class="w-full px-4 py-2 bg-white border border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 rounded-lg"
                         >
                         <div class="mt-2">
