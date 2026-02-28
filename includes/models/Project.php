@@ -19,6 +19,13 @@ class Project {
     ];
     
     /**
+     * Allowed file extensions for documentation uploads (whitelist)
+     */
+    private const ALLOWED_DOC_EXTENSIONS = [
+        'pdf'
+    ];
+    
+    /**
      * Maximum file size for documentation (10MB)
      */
     private const MAX_DOC_FILE_SIZE = 10485760;
@@ -45,6 +52,16 @@ class Project {
                 'success' => false,
                 'path' => null,
                 'error' => 'Datei ist zu groß. Maximum: 10MB'
+            ];
+        }
+        
+        // Validate file extension using strict whitelist (use basename() to prevent path traversal)
+        $originalExtension = strtolower(pathinfo(basename($file['name']), PATHINFO_EXTENSION));
+        if (!in_array($originalExtension, self::ALLOWED_DOC_EXTENSIONS)) {
+            return [
+                'success' => false,
+                'path' => null,
+                'error' => 'Ungültige Dateiendung. Nur PDF-Dateien sind erlaubt.'
             ];
         }
         

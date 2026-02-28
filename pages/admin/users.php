@@ -113,16 +113,54 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 // --- Option A: CSV upload ---
                 if (!empty($_FILES['bulk_csv']['tmp_name'])) {
-                    $csvPath = $_FILES['bulk_csv']['tmp_name'];
-                    if (($handle = fopen($csvPath, 'r')) !== false) {
-                        while (($row = fgetcsv($handle)) !== false) {
-                            $email = trim($row[0]);
-                            if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                                $name = isset($row[1]) ? trim($row[1]) : '';
-                                $recipients[] = ['email' => $email, 'name' => $name];
-                            }
+                    $csvFile = $_FILES['bulk_csv'];
+                    $csvValid = true;
+
+                    // Check for upload errors
+                    if ($csvFile['error'] !== UPLOAD_ERR_OK) {
+                        $error = 'Fehler beim Hochladen der CSV-Datei (Code: ' . $csvFile['error'] . ')';
+                        $csvValid = false;
+                    }
+
+                    // Check file size (max 5MB)
+                    if ($csvValid && $csvFile['size'] > 5242880) {
+                        $error = 'CSV-Datei ist zu groß. Maximum: 5MB.';
+                        $csvValid = false;
+                    }
+
+                    // Validate file extension using strict whitelist (basename() prevents path traversal)
+                    if ($csvValid) {
+                        $csvExtension = strtolower(pathinfo(basename($csvFile['name']), PATHINFO_EXTENSION));
+                        if ($csvExtension !== 'csv') {
+                            $error = 'Ungültige Dateiendung. Nur CSV-Dateien sind erlaubt.';
+                            $csvValid = false;
                         }
-                        fclose($handle);
+                    }
+
+                    // Validate MIME type using finfo_file() - NOT $_FILES['type'] which can be faked
+                    if ($csvValid) {
+                        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+                        $csvMimeType = finfo_file($finfo, $csvFile['tmp_name']);
+                        finfo_close($finfo);
+                        $allowedCsvMimes = ['text/plain', 'text/csv', 'application/csv', 'application/vnd.ms-excel'];
+                        if (!in_array($csvMimeType, $allowedCsvMimes)) {
+                            $error = 'Ungültiger Dateityp. Nur CSV-Dateien sind erlaubt. Erkannt: ' . $csvMimeType;
+                            $csvValid = false;
+                        }
+                    }
+
+                    if ($csvValid) {
+                        $csvPath = $csvFile['tmp_name'];
+                        if (($handle = fopen($csvPath, 'r')) !== false) {
+                            while (($row = fgetcsv($handle)) !== false) {
+                                $email = trim($row[0]);
+                                if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                                    $name = isset($row[1]) ? trim($row[1]) : '';
+                                    $recipients[] = ['email' => $email, 'name' => $name];
+                                }
+                            }
+                            fclose($handle);
+                        }
                     }
                 }
 
