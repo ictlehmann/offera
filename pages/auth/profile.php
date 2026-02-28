@@ -7,6 +7,7 @@ require_once __DIR__ . '/../../includes/models/Alumni.php';
 require_once __DIR__ . '/../../includes/models/Member.php';
 require_once __DIR__ . '/../../includes/utils/SecureImageUpload.php';
 require_once __DIR__ . '/../../src/MailService.php';
+require_once __DIR__ . '/../../includes/handlers/CSRFHandler.php';
 
 if (!Auth::check()) {
     header('Location: login.php');
@@ -1165,7 +1166,7 @@ document.addEventListener('DOMContentLoaded', function() {
         fetch('/api/upload_avatar.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ image: dataUrl }),
+            body: JSON.stringify({ image: dataUrl, csrf_token: <?php echo json_encode(CSRFHandler::getToken()); ?> }),
         })
         .then(function (res) { return res.json(); })
         .then(function (data) {

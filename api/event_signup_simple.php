@@ -9,6 +9,7 @@ require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../src/Auth.php';
 require_once __DIR__ . '/../src/MailService.php';
 require_once __DIR__ . '/../src/Database.php';
+require_once __DIR__ . '/../includes/handlers/CSRFHandler.php';
 
 // Set response header
 header('Content-Type: application/json');
@@ -40,7 +41,10 @@ try {
     if (json_last_error() !== JSON_ERROR_NONE) {
         throw new Exception('Ungültiges JSON-Format');
     }
-    
+
+    // CSRF protection
+    CSRFHandler::verifyToken($input['csrf_token'] ?? '');
+
     // Get event ID from input
     $eventId = $input['event_id'] ?? null;
     

@@ -4,6 +4,7 @@ require_once __DIR__ . '/../../includes/models/Invoice.php';
 require_once __DIR__ . '/../../includes/models/User.php';
 require_once __DIR__ . '/../../includes/models/Member.php';
 require_once __DIR__ . '/../../includes/helpers.php';
+require_once __DIR__ . '/../../includes/handlers/CSRFHandler.php';
 
 // Access Control: Allow 'board', 'alumni_board', 'head', 'alumni' (read-only)
 if (!Auth::check()) {
@@ -675,6 +676,7 @@ ob_start();
         </div>
         
         <form id="submissionForm" action="<?php echo asset('api/submit_invoice.php'); ?>" method="POST" enctype="multipart/form-data" class="flex flex-col flex-1 min-h-0">
+            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(CSRFHandler::getToken(), ENT_QUOTES, 'UTF-8'); ?>">
             <div class="p-6 overflow-y-auto flex-1">
                 <!-- Betrag -->
                 <div class="mb-6">
@@ -1010,6 +1012,7 @@ filterByStatus('all');
 
 // ── Update invoice status ───────────────────────────────────────────────────
 let pendingRejectInvoiceId = null;
+const csrfToken = <?php echo json_encode(CSRFHandler::getToken()); ?>;
 
 function updateInvoiceStatus(invoiceId, status) {
     if (status === 'rejected') {
@@ -1025,6 +1028,7 @@ function _doUpdateStatus(invoiceId, status, reason) {
     formData.append('invoice_id', invoiceId);
     formData.append('status', status);
     if (reason) formData.append('reason', reason);
+    formData.append('csrf_token', csrfToken);
     
     fetch('<?php echo asset('api/update_invoice_status.php'); ?>', {
         method: 'POST',
@@ -1052,6 +1056,7 @@ function markInvoiceAsPaid(invoiceId) {
     
     const formData = new FormData();
     formData.append('invoice_id', invoiceId);
+    formData.append('csrf_token', csrfToken);
     
     fetch('<?php echo asset('api/mark_invoice_paid.php'); ?>', {
         method: 'POST',

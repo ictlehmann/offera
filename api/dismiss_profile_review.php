@@ -12,6 +12,7 @@ ini_set('display_errors', 0);
 
 require_once __DIR__ . '/../src/Auth.php';
 require_once __DIR__ . '/../src/Database.php';
+require_once __DIR__ . '/../includes/handlers/CSRFHandler.php';
 
 try {
     // Check authentication
@@ -31,6 +32,10 @@ try {
         ]);
         exit;
     }
+
+    // Read JSON body for CSRF token
+    $input = json_decode(file_get_contents('php://input'), true) ?? [];
+    CSRFHandler::verifyToken($input['csrf_token'] ?? '');
 
     // Get current user ID from session
     if (!isset($_SESSION['user_id'])) {

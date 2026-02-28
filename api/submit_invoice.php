@@ -9,6 +9,7 @@ require_once __DIR__ . '/../includes/models/Invoice.php';
 require_once __DIR__ . '/../includes/helpers.php';
 require_once __DIR__ . '/../src/MailService.php';
 require_once __DIR__ . '/../src/Database.php';
+require_once __DIR__ . '/../includes/handlers/CSRFHandler.php';
 
 // Check authentication
 if (!Auth::check()) {
@@ -29,6 +30,9 @@ if (!$hasInvoiceSubmitAccess) {
 }
 
 $userRole = $user['role'] ?? '';
+
+// CSRF protection
+CSRFHandler::verifyToken($_POST['csrf_token'] ?? '');
 
 // Validate POST request
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {

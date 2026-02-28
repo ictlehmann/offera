@@ -18,6 +18,7 @@ require_once __DIR__ . '/../includes/helpers.php';
 require_once __DIR__ . '/../includes/services/EasyVereinInventory.php';
 require_once __DIR__ . '/../includes/services/MicrosoftGraphService.php';
 require_once __DIR__ . '/../includes/models/Inventory.php';
+require_once __DIR__ . '/../includes/handlers/CSRFHandler.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -47,6 +48,9 @@ if (json_last_error() !== JSON_ERROR_NONE || !is_array($input)) {
 }
 $action    = $input['action']     ?? '';
 $requestId = (int)($input['request_id'] ?? 0);
+
+// CSRF protection
+CSRFHandler::verifyToken($input['csrf_token'] ?? '');
 
 if ($requestId <= 0) {
     http_response_code(400);
