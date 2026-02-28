@@ -28,7 +28,8 @@ class Shop {
         try {
             $db = Database::getContentDB();
             $stmt = $db->query("
-                SELECT id, name, description, base_price, image_path, is_bulk_order, bulk_end_date, bulk_min_goal
+                SELECT id, name, description, base_price, image_path, is_bulk_order, bulk_end_date, bulk_min_goal,
+                       variants AS variants_csv
                 FROM shop_products
                 WHERE active = 1
                 ORDER BY name ASC
@@ -56,7 +57,8 @@ class Shop {
         try {
             $db = Database::getContentDB();
             $stmt = $db->query("
-                SELECT id, name, description, base_price, image_path, active, is_bulk_order, bulk_end_date, bulk_min_goal
+                SELECT id, name, description, base_price, image_path, active, is_bulk_order, bulk_end_date, bulk_min_goal,
+                       variants AS variants_csv
                 FROM shop_products
                 ORDER BY name ASC
             ");
@@ -84,7 +86,8 @@ class Shop {
         try {
             $db   = Database::getContentDB();
             $stmt = $db->prepare("
-                SELECT id, name, description, base_price, image_path, active, is_bulk_order, bulk_end_date, bulk_min_goal
+                SELECT id, name, description, base_price, image_path, active, is_bulk_order, bulk_end_date, bulk_min_goal,
+                       variants AS variants_csv
                 FROM shop_products
                 WHERE id = ?
             ");
@@ -645,7 +648,7 @@ class Shop {
      * @param string $shippingAddress  Required when shippingMethod is 'mail'
      * @return int|null  New order ID or null on failure
      */
-    public static function createOrder(int $userId, array $cart, string $paymentMethod, string $shippingMethod = 'pickup', float $shippingCost = 0.0, string $shippingAddress = ''): ?int {
+    public static function createOrder(int $userId, array $cart, string $paymentMethod, string $shippingMethod = 'pickup', float $shippingCost = 0.0, string $shippingAddress = '', string $selectedVariant = ''): ?int {
         try {
             $db = Database::getContentDB();
             $db->beginTransaction();
@@ -654,10 +657,10 @@ class Shop {
             $total = $itemsTotal + $shippingCost;
 
             $stmt = $db->prepare("
-                INSERT INTO shop_orders (user_id, total_amount, payment_method, payment_status, shipping_status, shipping_method, shipping_cost, shipping_address)
-                VALUES (?, ?, ?, 'pending', 'pending', ?, ?, ?)
+                INSERT INTO shop_orders (user_id, total_amount, payment_method, payment_status, shipping_status, shipping_method, shipping_cost, shipping_address, selected_variant)
+                VALUES (?, ?, ?, 'pending', 'pending', ?, ?, ?, ?)
             ");
-            $stmt->execute([$userId, $total, $paymentMethod, $shippingMethod, $shippingCost, ($shippingAddress !== '' ? $shippingAddress : null)]);
+            $stmt->execute([$userId, $total, $paymentMethod, $shippingMethod, $shippingCost, ($shippingAddress !== '' ? $shippingAddress : null), ($selectedVariant !== '' ? $selectedVariant : null)]);
             $orderId = (int) $db->lastInsertId();
 
             $ins = $db->prepare("

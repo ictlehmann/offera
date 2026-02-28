@@ -73,14 +73,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $postAction = $_POST['post_action'] ?? '';
 
     if ($postAction === 'add_to_cart') {
-        $pid       = (int) ($_POST['product_id'] ?? 0);
-        $vid       = isset($_POST['variant_id']) && $_POST['variant_id'] !== '' ? (int) $_POST['variant_id'] : null;
-        $qty       = max(1, (int) ($_POST['quantity'] ?? 1));
-        $product   = Shop::getProductById($pid);
+        $pid             = (int) ($_POST['product_id'] ?? 0);
+        $vid             = isset($_POST['variant_id']) && $_POST['variant_id'] !== '' ? (int) $_POST['variant_id'] : null;
+        $qty             = max(1, (int) ($_POST['quantity'] ?? 1));
+        $selectedVariant = trim($_POST['selected_variant'] ?? '');
+        $product         = Shop::getProductById($pid);
 
         if ($product) {
+            // Validate that a variant was selected if the product requires one
+            if (!empty($product['variants_csv']) && $selectedVariant === '') {
+                $errorMessage = 'Bitte wähle eine Variante aus.';
+                $action = 'detail';
+                $productId = $pid;
+                $currentProduct = $product;
+            } else {
             $price = (float) $product['base_price'];
-            $key   = cartKey($pid, $vid);
+            $key   = cartKey($pid, $vid) . ($selectedVariant !== '' ? '_' . preg_replace('/[^a-zA-Z0-9_-]/', '_', $selectedVariant) : '');
             $variantName = '';
 
             if ($vid) {
@@ -96,15 +104,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['shop_cart'][$key]['quantity'] += $qty;
             } else {
                 $_SESSION['shop_cart'][$key] = [
-                    'product_id'   => $pid,
-                    'variant_id'   => $vid,
-                    'product_name' => $product['name'],
-                    'variant_name' => $variantName,
-                    'price'        => $price,
-                    'quantity'     => $qty,
+                    'product_id'      => $pid,
+                    'variant_id'      => $vid,
+                    'product_name'    => $product['name'],
+                    'variant_name'    => $variantName,
+                    'selected_variant' => $selectedVariant,
+                    'price'           => $price,
+                    'quantity'        => $qty,
                 ];
             }
             $successMessage = htmlspecialchars($product['name']) . ' wurde zum Warenkorb hinzugefügt.';
+            }
         } else {
             $errorMessage = 'Produkt nicht gefunden.';
         }
@@ -141,7 +151,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $errorMessage = implode(' ', $stockErrors);
                 $action = 'cart';
             } else {
-                $orderId = Shop::createOrder($userId, array_values($_SESSION['shop_cart']), $paymentMethod, $shippingMethod, $shippingCost, $shippingAddress);
+                // Collect selected variants from all cart items
+                $variantParts = [];
+                foreach ($_SESSION['shop_cart'] as $item) {
+                    if (!empty($item['selected_variant'])) {
+                        $variantParts[] = $item['selected_variant'];
+                    }
+                }
+                $selectedVariant = implode(', ', array_unique($variantParts));
+
+                $orderId = Shop::createOrder($userId, array_values($_SESSION['shop_cart']), $paymentMethod, $shippingMethod, $shippingCost, $shippingAddress, $selectedVariant);
 
                 if ($orderId) {
                     if ($paymentMethod === 'paypal') {
@@ -403,7 +422,7 @@ ob_start();
                         class="w-full py-2.5 bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 text-sm font-semibold rounded-lg cursor-not-allowed select-none">
                     <i class="fas fa-ban mr-1"></i>Ausverkauft
                 </button>
-                <?php elseif (empty($product['variants'])): ?>
+                <?php elseif (empty($product['variants']) && empty($product['variants_csv'])): ?>
                 <form method="POST" action="<?php echo asset('pages/shop/index.php'); ?>">
                     <input type="hidden" name="post_action" value="add_to_cart">
                     <input type="hidden" name="product_id" value="<?php echo $product['id']; ?>">
@@ -594,6 +613,23 @@ ob_start();
                     <?php endforeach; ?>
                     <?php endif; ?>
 
+                    <!-- Simple text variants (comma-separated from variants_csv field) -->
+                    <?php if (!empty($currentProduct['variants_csv'])): ?>
+                    <?php $variantOptions = array_filter(array_map('trim', explode(',', $currentProduct['variants_csv']))); ?>
+                    <div class="mb-4">
+                        <label for="selected-variant" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                            Bitte Größe/Variante wählen <span class="text-red-500">*</span>
+                        </label>
+                        <select name="selected_variant" id="selected-variant" required
+                                class="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-shadow">
+                            <option value="">– Bitte wählen –</option>
+                            <?php foreach ($variantOptions as $opt): ?>
+                            <option value="<?php echo htmlspecialchars($opt); ?>"><?php echo htmlspecialchars($opt); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <?php endif; ?>
+
                     <!-- Quantity -->
                     <div class="mb-6">
                         <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Anzahl</label>
@@ -665,7 +701,15 @@ ob_start();
                                 <?php echo htmlspecialchars($item['product_name']); ?>
                             </td>
                             <td class="py-4 text-center text-gray-500 dark:text-gray-400" data-label="Variante">
-                                <?php echo $item['variant_name'] ? htmlspecialchars($item['variant_name']) : '–'; ?>
+                                <?php
+                                    $displayVariant = '';
+                                    if (!empty($item['variant_name'])) {
+                                        $displayVariant = $item['variant_name'];
+                                    } elseif (!empty($item['selected_variant'])) {
+                                        $displayVariant = $item['selected_variant'];
+                                    }
+                                ?>
+                                <?php echo $displayVariant !== '' ? htmlspecialchars($displayVariant) : '–'; ?>
                             </td>
                             <td class="py-4 text-center text-gray-700 dark:text-gray-300" data-label="Preis">
                                 <?php echo number_format($item['price'], 2, ',', '.'); ?> €
@@ -843,6 +887,8 @@ ob_start();
                             <p class="text-sm font-medium text-gray-800 dark:text-gray-100"><?php echo htmlspecialchars($item['product_name']); ?></p>
                             <?php if ($item['variant_name']): ?>
                             <p class="text-xs text-gray-500 dark:text-gray-400"><?php echo htmlspecialchars($item['variant_name']); ?></p>
+                            <?php elseif (!empty($item['selected_variant'])): ?>
+                            <p class="text-xs text-gray-500 dark:text-gray-400"><?php echo htmlspecialchars($item['selected_variant']); ?></p>
                             <?php endif; ?>
                             <p class="text-xs text-gray-500 dark:text-gray-400">× <?php echo $item['quantity']; ?></p>
                         </div>

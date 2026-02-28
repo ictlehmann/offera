@@ -81,6 +81,7 @@ try {
             o.payment_status,
             o.shipping_status,
             o.created_at,
+            o.selected_variant,
             oi.id                  AS item_id,
             p.name                 AS product_name,
             p.pickup_location,
@@ -213,6 +214,8 @@ ob_start();
                     $variantText = '';
                     if (!empty($row['variant_type']) && !empty($row['variant_value'])) {
                         $variantText = htmlspecialchars($row['variant_type']) . ': ' . htmlspecialchars($row['variant_value']);
+                    } elseif (!empty($row['selected_variant'])) {
+                        $variantText = htmlspecialchars($row['selected_variant']);
                     }
                 ?>
                 <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
