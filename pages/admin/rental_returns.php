@@ -533,7 +533,8 @@ ob_start();
         const count  = tbody.querySelectorAll('tr').length;
         const badge  = tab.querySelector('.badge');
         if (badge) badge.textContent = count;
-    }}());
+    }
+}());
 </script>
 
 <?php
