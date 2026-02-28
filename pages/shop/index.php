@@ -321,7 +321,7 @@ ob_start();
         </button>
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="product-grid">
+    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6" id="product-grid">
         <?php foreach ($products as $product):
             $productOutOfStock = !empty($product['variants']) && array_sum(array_column($product['variants'], 'stock_quantity')) === 0;
             $isBulk = !empty($product['is_bulk_order']);
@@ -333,12 +333,11 @@ ob_start();
             }
             $sliderId = 'slider-grid-' . $product['id'];
         ?>
-        <div class="card rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col group <?php echo $productOutOfStock ? 'opacity-60' : ''; ?>"
+        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col group <?php echo $productOutOfStock ? 'opacity-60' : ''; ?>"
              data-instock="<?php echo $productOutOfStock ? '0' : '1'; ?>">
-            <!-- Product image / slider -->
-            <div class="relative">
+            <!-- Product image (square) -->
+            <div class="relative aspect-square overflow-hidden bg-gray-100 dark:bg-gray-700" id="<?php echo $sliderId; ?>">
                 <?php if (!empty($allImages)): ?>
-                <div class="h-52 overflow-hidden bg-gray-100 dark:bg-gray-700 relative" id="<?php echo $sliderId; ?>">
                     <?php foreach ($allImages as $idx => $img): ?>
                     <img src="<?php echo asset($img['image_path']); ?>"
                          alt="<?php echo htmlspecialchars($product['name']); ?>"
@@ -355,10 +354,9 @@ ob_start();
                         <i class="fas fa-chevron-right text-xs"></i>
                     </button>
                     <?php endif; ?>
-                </div>
                 <?php else: ?>
-                <div class="h-52 bg-gradient-to-br from-purple-100 to-blue-200 dark:from-purple-900 dark:to-blue-800 flex items-center justify-center">
-                    <i class="fas fa-box text-purple-400 text-5xl opacity-50"></i>
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <i class="fas fa-box text-gray-300 dark:text-gray-600 text-5xl"></i>
                 </div>
                 <?php endif; ?>
                 <?php if ($productOutOfStock): ?>
@@ -375,47 +373,52 @@ ob_start();
 
             <!-- Product info -->
             <div class="p-4 flex flex-col flex-1">
-                <h3 class="font-bold text-gray-800 dark:text-gray-100 text-lg mb-1 line-clamp-2">
-                    <?php echo htmlspecialchars($product['name']); ?>
+                <h3 class="font-bold text-gray-900 dark:text-gray-100 text-base mb-1 line-clamp-2">
+                    <a href="<?php echo asset('pages/shop/index.php?action=detail&product_id=' . $product['id']); ?>" class="no-underline text-inherit hover:underline">
+                        <?php echo htmlspecialchars($product['name']); ?>
+                    </a>
                 </h3>
-                <?php if (!empty($product['description'])): ?>
-                <p class="text-sm text-gray-500 dark:text-gray-400 mb-3 line-clamp-3 flex-1">
-                    <?php echo htmlspecialchars($product['description']); ?>
+                <p class="text-gray-500 dark:text-gray-400 text-sm mb-3 flex-1">
+                    <?php echo number_format((float) $product['base_price'], 2, ',', '.'); ?> €
                 </p>
-                <?php else: ?>
-                <div class="flex-1"></div>
-                <?php endif; ?>
 
-                <?php if ($isBulk): ?>
+                <?php if ($isBulk && $bulkGoal > 0): ?>
                 <!-- Bulk order progress bar -->
                 <div class="mb-3">
-                    <?php if ($bulkGoal > 0): ?>
                     <?php $pct = min(100, (int) round($bulkProgress / $bulkGoal * 100)); ?>
-                    <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400 mb-1">
-                        <span><?php echo $bulkProgress; ?>/<?php echo $bulkGoal; ?> bestellt, damit produziert wird</span>
-                        <span><?php echo $pct; ?>%</span>
+                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 mb-1">
+                        <div class="bg-purple-500 h-1.5 rounded-full transition-all" style="width:<?php echo $pct; ?>%"></div>
                     </div>
-                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                        <div class="bg-purple-600 h-2 rounded-full transition-all" style="width:<?php echo $pct; ?>%"></div>
-                    </div>
-                    <?php endif; ?>
+                    <p class="text-xs text-gray-400 dark:text-gray-500"><?php echo $bulkProgress; ?>/<?php echo $bulkGoal; ?> (<?php echo $pct; ?>%)</p>
                     <?php if (!empty($product['bulk_end_date'])): ?>
                     <p class="text-xs text-amber-600 dark:text-amber-400 mt-1">
-                        <i class="fas fa-clock mr-1"></i>Bestellbar bis: <?php echo date('d.m.Y', strtotime($product['bulk_end_date'])); ?>
+                        <i class="fas fa-clock mr-1"></i>Bis: <?php echo date('d.m.Y', strtotime($product['bulk_end_date'])); ?>
                     </p>
                     <?php endif; ?>
                 </div>
                 <?php endif; ?>
 
-                <div class="flex items-center justify-between mt-3">
-                    <span class="text-xl font-bold text-purple-600 dark:text-purple-400">
-                        <?php echo number_format((float) $product['base_price'], 2, ',', '.'); ?> €
-                    </span>
-                    <a href="<?php echo asset('pages/shop/index.php?action=detail&product_id=' . $product['id']); ?>"
-                       class="px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg hover:from-purple-700 hover:to-purple-800 transition-all text-sm font-semibold no-underline shadow-sm">
-                        <?php echo $productOutOfStock ? 'Details' : 'Kaufen'; ?>
-                    </a>
-                </div>
+                <?php if ($productOutOfStock): ?>
+                <button type="button" disabled
+                        class="w-full py-2.5 bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 text-sm font-semibold rounded-lg cursor-not-allowed select-none">
+                    <i class="fas fa-ban mr-1"></i>Ausverkauft
+                </button>
+                <?php elseif (empty($product['variants'])): ?>
+                <form method="POST" action="<?php echo asset('pages/shop/index.php'); ?>">
+                    <input type="hidden" name="post_action" value="add_to_cart">
+                    <input type="hidden" name="product_id" value="<?php echo $product['id']; ?>">
+                    <input type="hidden" name="quantity" value="1">
+                    <button type="submit"
+                            class="w-full py-2.5 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-sm font-semibold rounded-lg hover:bg-gray-700 dark:hover:bg-gray-300 transition-colors">
+                        <i class="fas fa-cart-plus mr-1"></i>In den Warenkorb
+                    </button>
+                </form>
+                <?php else: ?>
+                <a href="<?php echo asset('pages/shop/index.php?action=detail&product_id=' . $product['id']); ?>"
+                   class="w-full block text-center py-2.5 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-sm font-semibold rounded-lg hover:bg-gray-700 dark:hover:bg-gray-300 transition-colors no-underline">
+                    <i class="fas fa-cart-plus mr-1"></i>In den Warenkorb
+                </a>
+                <?php endif; ?>
             </div>
         </div>
         <?php endforeach; ?>
