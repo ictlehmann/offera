@@ -450,7 +450,7 @@ ob_start();
                 <button id="joinProjectBtn"
                         class="inline-flex items-center px-6 py-3 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 transition shadow-md">
                     <i class="fas fa-user-plus mr-2"></i>
-                    Teilnehmen
+                    Jetzt Teilnehmen
                 </button>
                 <?php endif; ?>
 
