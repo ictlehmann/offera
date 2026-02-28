@@ -1,5 +1,12 @@
 <?php
 require_once __DIR__ . '/../config/config.php';
+require_once __DIR__ . '/../src/Auth.php';
+
+// Authentication check
+if (!Auth::check()) {
+    http_response_code(401);
+    exit;
+}
 
 // Security check: Only allow EasyVerein URLs
 $url = $_GET['url'] ?? '';

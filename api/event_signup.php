@@ -5,6 +5,7 @@
  */
 
 require_once __DIR__ . '/../includes/handlers/AuthHandler.php';
+require_once __DIR__ . '/../includes/handlers/CSRFHandler.php';
 require_once __DIR__ . '/../includes/models/Event.php';
 require_once __DIR__ . '/../includes/models/User.php';
 require_once __DIR__ . '/../includes/database.php';
@@ -38,6 +39,9 @@ if (json_last_error() !== JSON_ERROR_NONE) {
     exit;
 }
 $action = $input['action'] ?? null;
+
+// CSRF protection
+CSRFHandler::verifyToken($input['csrf_token'] ?? '');
 
 $user = AuthHandler::getCurrentUser();
 $userId = $user['id'];

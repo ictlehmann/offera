@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../../src/Auth.php';
 require_once __DIR__ . '/../../includes/models/Event.php';
 require_once __DIR__ . '/../../src/CalendarService.php';
+require_once __DIR__ . '/../../includes/handlers/CSRFHandler.php';
 
 // Check authentication
 if (!Auth::check()) {
@@ -418,6 +419,8 @@ ob_start();
 </div>
 
 <script>
+const csrfToken = <?php echo json_encode(CSRFHandler::getToken()); ?>;
+
 // Show message helper
 function showMessage(message, type = 'success') {
     const container = document.getElementById('message-container');
@@ -445,7 +448,8 @@ function signupForEvent(eventId) {
         },
         body: JSON.stringify({
             action: 'signup',
-            event_id: eventId
+            event_id: eventId,
+            csrf_token: csrfToken
         })
     })
     .then(response => response.json())
@@ -474,7 +478,8 @@ function signupForSlot(eventId, slotId, slotStart, slotEnd) {
             event_id: eventId,
             slot_id: slotId,
             slot_start: slotStart,
-            slot_end: slotEnd
+            slot_end: slotEnd,
+            csrf_token: csrfToken
         })
     })
     .then(response => response.json())
@@ -508,7 +513,8 @@ function cancelSignup(signupId, message = 'Möchtest Du Deine Anmeldung wirklich
         },
         body: JSON.stringify({
             action: 'cancel',
-            signup_id: signupId
+            signup_id: signupId,
+            csrf_token: csrfToken
         })
     })
     .then(response => response.json())

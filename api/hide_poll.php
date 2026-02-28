@@ -6,6 +6,7 @@
 
 require_once __DIR__ . '/../src/Auth.php';
 require_once __DIR__ . '/../includes/database.php';
+require_once __DIR__ . '/../includes/handlers/CSRFHandler.php';
 
 header('Content-Type: application/json');
 
@@ -26,6 +27,9 @@ if (json_last_error() !== JSON_ERROR_NONE) {
     exit;
 }
 $pollId = isset($input['poll_id']) ? (int)$input['poll_id'] : null;
+
+// CSRF protection
+CSRFHandler::verifyToken($input['csrf_token'] ?? '');
 
 if (!$pollId) {
     http_response_code(400);

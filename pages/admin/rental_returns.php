@@ -8,6 +8,7 @@
 require_once __DIR__ . '/../../src/Auth.php';
 require_once __DIR__ . '/../../src/Database.php';
 require_once __DIR__ . '/../../includes/models/Inventory.php';
+require_once __DIR__ . '/../../includes/handlers/CSRFHandler.php';
 require_once __DIR__ . '/../../includes/helpers.php';
 
 if (!Auth::check() || (!Auth::isBoard() && !Auth::hasRole(['alumni_auditor', 'alumni_board']))) {
@@ -438,6 +439,8 @@ ob_start();
 (function () {
     'use strict';
 
+    const csrfToken = <?php echo json_encode(CSRFHandler::getToken()); ?>;
+
     // ── Show Bootstrap alert ──────────────────────────────────────────────────
     function showAlert(message, type) {
         const alertEl = document.getElementById('ajax-alert');
@@ -454,6 +457,7 @@ ob_start();
 
     // ── AJAX helper ───────────────────────────────────────────────────────────
     function postAction(payload, onSuccess, onError) {
+        payload.csrf_token = csrfToken;
         fetch('<?php echo htmlspecialchars(url('/api/rental_request_action.php'), ENT_QUOTES); ?>', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

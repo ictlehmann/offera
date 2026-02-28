@@ -4,6 +4,7 @@ require_once __DIR__ . '/../../src/Database.php';
 require_once __DIR__ . '/../../includes/models/Event.php';
 require_once __DIR__ . '/../../includes/helpers.php';
 require_once __DIR__ . '/../../includes/poll_helpers.php';
+require_once __DIR__ . '/../../includes/handlers/CSRFHandler.php';
 
 // Update event statuses (pseudo-cron)
 require_once __DIR__ . '/../../includes/pseudo_cron.php';
@@ -202,7 +203,8 @@ function dismissProfileReviewPrompt() {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-        }
+        },
+        body: JSON.stringify({ csrf_token: <?php echo json_encode(CSRFHandler::getToken()); ?> })
     })
     .then(response => response.json())
     .then(data => {
@@ -491,7 +493,7 @@ function hidePollFromDashboard(pollId) {
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ poll_id: pollId })
+        body: JSON.stringify({ poll_id: pollId, csrf_token: <?php echo json_encode(CSRFHandler::getToken()); ?> })
     })
     .then(response => response.json())
     .then(data => {

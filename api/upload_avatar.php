@@ -14,6 +14,7 @@ require_once __DIR__ . '/../includes/helpers.php';
 require_once __DIR__ . '/../includes/models/Member.php';
 require_once __DIR__ . '/../includes/models/Alumni.php';
 require_once __DIR__ . '/../includes/utils/SecureImageUpload.php';
+require_once __DIR__ . '/../includes/handlers/CSRFHandler.php';
 
 try {
     // Authentication check
@@ -33,6 +34,10 @@ try {
         echo json_encode(['success' => false, 'message' => 'Ungültiges JSON-Format']);
         exit;
     }
+
+    // CSRF protection
+    CSRFHandler::verifyToken($body['csrf_token'] ?? '');
+
     $base64Data = $body['image'] ?? '';
 
     if (empty($base64Data)) {

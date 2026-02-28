@@ -6,6 +6,7 @@
 
 require_once __DIR__ . '/../src/Auth.php';
 require_once __DIR__ . '/../includes/models/EventFinancialStats.php';
+require_once __DIR__ . '/../includes/handlers/CSRFHandler.php';
 
 header('Content-Type: application/json');
 
@@ -40,6 +41,9 @@ if (!$data) {
     echo json_encode(['success' => false, 'message' => 'Ungültige Daten']);
     exit;
 }
+
+// CSRF protection
+CSRFHandler::verifyToken($data['csrf_token'] ?? '');
 
 $eventId = isset($data['event_id']) ? (int)$data['event_id'] : null;
 

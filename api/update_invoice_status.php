@@ -7,6 +7,7 @@
 require_once __DIR__ . '/../src/Auth.php';
 require_once __DIR__ . '/../includes/models/Invoice.php';
 require_once __DIR__ . '/../includes/helpers.php';
+require_once __DIR__ . '/../includes/handlers/CSRFHandler.php';
 
 header('Content-Type: application/json');
 
@@ -33,6 +34,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo json_encode(['success' => false, 'error' => 'Methode nicht erlaubt']);
     exit;
 }
+
+// CSRF protection
+CSRFHandler::verifyToken($_POST['csrf_token'] ?? '');
 
 // Get and validate parameters
 $invoiceId = isset($_POST['invoice_id']) ? (int)$_POST['invoice_id'] : null;

@@ -8,6 +8,7 @@ require_once __DIR__ . '/../../src/Auth.php';
 require_once __DIR__ . '/../../includes/database.php';
 require_once __DIR__ . '/../../includes/helpers.php';
 require_once __DIR__ . '/../../includes/poll_helpers.php';
+require_once __DIR__ . '/../../includes/handlers/CSRFHandler.php';
 
 // Check authentication
 if (!Auth::check()) {
@@ -185,7 +186,7 @@ function hidePoll(pollId) {
         headers: {
             'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ poll_id: pollId })
+        body: JSON.stringify({ poll_id: pollId, csrf_token: <?php echo json_encode(CSRFHandler::getToken()); ?> })
     })
     .then(response => response.json())
     .then(data => {
