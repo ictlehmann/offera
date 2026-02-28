@@ -61,20 +61,20 @@ if ($hour >= 5 && $hour < 12) {
     $greeting = 'Guten Abend';
 }
 
-// Get user's upcoming events
+// Get user's upcoming events (next 3)
 $userUpcomingEvents = Event::getUserSignups($user['id']);
-$nextEvent = null;
+$nextEvents = [];
 if (!empty($userUpcomingEvents)) {
-    // Filter for upcoming events only and get the next one
+    // Filter for upcoming events only
     $upcomingEvents = array_filter($userUpcomingEvents, function($signup) {
         return !empty($signup['start_time']) && strtotime($signup['start_time']) > time();
     });
     if (!empty($upcomingEvents)) {
-        // Sort by start_time
+        // Sort by start_time ascending (nearest first)
         usort($upcomingEvents, function($a, $b) {
             return strtotime($a['start_time']) - strtotime($b['start_time']);
         });
-        $nextEvent = $upcomingEvents[0];
+        $nextEvents = array_slice($upcomingEvents, 0, 3);
     }
 }
 
@@ -298,24 +298,26 @@ function dismissProfileReviewPrompt() {
             </div>
         </a>
 
-        <!-- Next Event Widget -->
+        <!-- Next Events Widget -->
         <div class="card p-7 rounded-2xl hover:shadow-2xl transition-all duration-300 border border-blue-100/50" style="background-color: var(--bg-card)">
             <div class="mb-5">
                 <p class="text-xs font-semibold uppercase tracking-wider text-blue-500 mb-3">Events</p>
-                <h3 class="text-xl font-bold mb-4" style="color: var(--text-main)">Nächstes Event</h3>
+                <h3 class="text-xl font-bold mb-4" style="color: var(--text-main)">Nächste Events</h3>
             </div>
-            <?php if ($nextEvent): ?>
-            <div class="space-y-3">
-                <h4 class="font-semibold text-lg" style="color: var(--text-main)"><?php echo htmlspecialchars($nextEvent['title']); ?></h4>
-                <p style="color: var(--text-muted)">
-                    <i class="fas fa-clock mr-2 text-blue-400"></i>
-                    <?php echo date('d.m.Y H:i', strtotime($nextEvent['start_time'])); ?> Uhr
-                </p>
-                <div class="pt-3">
+            <?php if (!empty($nextEvents)): ?>
+            <div class="space-y-4">
+                <?php foreach ($nextEvents as $nextEvent): ?>
+                <div class="flex flex-col gap-1 pb-3 border-b last:border-b-0 last:pb-0" style="border-color: var(--border-color)">
+                    <h4 class="font-semibold" style="color: var(--text-main)"><?php echo htmlspecialchars($nextEvent['title']); ?></h4>
+                    <p class="text-sm" style="color: var(--text-muted)">
+                        <i class="fas fa-clock mr-1 text-blue-400"></i>
+                        <?php echo date('d.m.Y H:i', strtotime($nextEvent['start_time'])); ?> Uhr
+                    </p>
                     <a href="../events/view.php?id=<?php echo $nextEvent['event_id']; ?>" class="inline-flex items-center text-blue-600 hover:text-blue-700 font-semibold text-sm hover:translate-x-1 transition-transform">
                         Details ansehen <i class="fas fa-arrow-right ml-2"></i>
                     </a>
                 </div>
+                <?php endforeach; ?>
             </div>
             <?php else: ?>
             <div class="space-y-4">
@@ -527,6 +529,11 @@ function hidePollFromDashboard(pollId) {
             'status' => ['upcoming', 'registration_open'],
             'start_date' => date('Y-m-d H:i:s')
         ], $user['role']);
+        
+        // Sort by start_time ascending (nearest first)
+        usort($upcomingEventsForAllUsers, function($a, $b) {
+            return strtotime($a['start_time']) - strtotime($b['start_time']);
+        });
         
         // Limit to 5 events
         $upcomingEventsForAllUsers = array_slice($upcomingEventsForAllUsers, 0, 5);
