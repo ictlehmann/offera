@@ -632,7 +632,7 @@ class Shop {
      *
      * @param int    $userId
      * @param array  $cart    Keys: product_id, variant_id, quantity, price
-     * @param string $paymentMethod  'paypal' or 'sepa'
+     * @param string $paymentMethod  'paypal' or 'bank_transfer'
      * @param string $shippingMethod 'pickup' or 'mail'
      * @param float  $shippingCost
      * @param string $shippingAddress  Required when shippingMethod is 'mail'

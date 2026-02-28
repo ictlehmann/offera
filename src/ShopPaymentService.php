@@ -369,8 +369,145 @@ class ShopPaymentService {
     }
 
     // -------------------------------------------------------------------------
-    // Shared helpers
+    // Bank Transfer (Überweisung)
     // -------------------------------------------------------------------------
+
+    /**
+     * Generate an 8-character name code + zero-padded order ID as payment purpose.
+     *
+     * Rule: Take up to 4 characters from first name; fill the remainder to reach
+     * 8 characters with characters from the last name.  Pad with 'X' for very
+     * short names.  Append the order ID zero-padded to 5 digits.
+     *
+     * Example: first='Tom', last='Lehmann', orderId=1 → 'TOMLEHMA00001'
+     *
+     * @param string $firstName  User's first name
+     * @param string $lastName   User's last name
+     * @param int    $orderId    Internal shop order ID used as reference number
+     * @return string            Uppercase payment purpose, e.g. 'TOMLEHMA00001'
+     */
+    public static function generatePaymentPurpose(string $firstName, string $lastName, int $orderId): string {
+        $first = strtoupper(preg_replace('/[^A-Za-z]/', '', $firstName));
+        $last  = strtoupper(preg_replace('/[^A-Za-z]/', '', $lastName));
+
+        $prefix    = substr($first, 0, 4);
+        $remaining = 8 - strlen($prefix);
+        $suffix    = substr($last, 0, $remaining);
+
+        $nameCode = str_pad($prefix . $suffix, 8, 'X');
+
+        return $nameCode . str_pad((string) $orderId, 5, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * Initiate a bank-transfer payment for a shop order:
+     *  1. Generate a payment purpose (Verwendungszweck).
+     *  2. Save an invoice record in the Rech DB with the payment purpose.
+     *  3. Send bank-transfer instructions via e-mail to the user.
+     *  4. Create an open document (offener Beleg) in EasyVerein (non-blocking).
+     *
+     * @param int    $orderId    Internal shop order ID
+     * @param float  $total      Grand total in EUR
+     * @param string $firstName  Buyer's first name
+     * @param string $lastName   Buyer's last name
+     * @param int    $userId     Buyer's user ID
+     * @param string $userEmail  Buyer's Entra e-mail address
+     * @return array ['success' => bool, 'payment_purpose' => string|null, 'error' => string|null]
+     */
+    public static function initiateBankTransfer(int $orderId, float $total, string $firstName, string $lastName, int $userId, string $userEmail): array {
+        try {
+            $paymentPurpose = self::generatePaymentPurpose($firstName, $lastName, $orderId);
+
+            // 1. Save invoice entry in Rech DB with payment_purpose
+            self::saveOrderInvoice($orderId, $userId, $total, $paymentPurpose);
+
+            // 2. Send bank-transfer instructions to the buyer (non-blocking)
+            try {
+                MailService::sendBankTransferInstructions($userEmail, $firstName, $total, $paymentPurpose);
+            } catch (\Exception $mailEx) {
+                error_log("ShopPaymentService::initiateBankTransfer – e-mail failed for order #{$orderId}: " . $mailEx->getMessage());
+            }
+
+            // 3. Create open document in EasyVerein (non-blocking)
+            try {
+                self::createEasyVereinDocument($orderId, $total, $paymentPurpose);
+            } catch (\Exception $evEx) {
+                error_log("ShopPaymentService::initiateBankTransfer – EasyVerein document failed for order #{$orderId}: " . $evEx->getMessage());
+            }
+
+            return ['success' => true, 'payment_purpose' => $paymentPurpose, 'error' => null];
+        } catch (\Exception $e) {
+            error_log("ShopPaymentService::initiateBankTransfer – Fehler bei Bestellung #{$orderId}: " . $e->getMessage());
+            return ['success' => false, 'payment_purpose' => null, 'error' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * Persist an invoice record for a shop order in the Rech DB.
+     *
+     * @param int    $orderId        Shop order ID (used as reference)
+     * @param int    $userId         User ID
+     * @param float  $total          Order total in EUR
+     * @param string $paymentPurpose Generated Verwendungszweck
+     * @return void
+     */
+    private static function saveOrderInvoice(int $orderId, int $userId, float $total, string $paymentPurpose): void {
+        $db   = Database::getRechDB();
+        $stmt = $db->prepare(
+            "INSERT INTO invoices (user_id, description, amount, file_path, status, payment_purpose)
+             VALUES (?, ?, ?, NULL, 'pending', ?)"
+        );
+        $stmt->execute([
+            $userId,
+            'Shop-Bestellung #' . str_pad((string) $orderId, 5, '0', STR_PAD_LEFT),
+            $total,
+            $paymentPurpose,
+        ]);
+    }
+
+    /**
+     * Create an open billing document (offener Beleg) in EasyVerein for the order.
+     * This call is non-blocking – errors are logged but not propagated.
+     *
+     * @param int    $orderId        Shop order ID
+     * @param float  $total          Order total in EUR
+     * @param string $paymentPurpose Verwendungszweck
+     * @return void
+     */
+    private static function createEasyVereinDocument(int $orderId, float $total, string $paymentPurpose): void {
+        $apiToken = defined('EASYVEREIN_API_TOKEN') ? EASYVEREIN_API_TOKEN : '';
+        if ($apiToken === '') {
+            error_log("ShopPaymentService::createEasyVereinDocument – EASYVEREIN_API_TOKEN not configured");
+            return;
+        }
+
+        $payload = [
+            'name'        => 'Shop-Bestellung #' . str_pad((string) $orderId, 5, '0', STR_PAD_LEFT),
+            'totalPrice'  => $total,
+            'date'        => date('Y-m-d'),
+            'isDone'      => false,
+            'description' => 'Verwendungszweck: ' . $paymentPurpose,
+        ];
+
+        $httpClient = new \GuzzleHttp\Client();
+        $response   = $httpClient->post('https://easyverein.com/api/v2.0/billing-document/', [
+            'headers' => [
+                'Authorization' => 'Token ' . $apiToken,
+                'Content-Type'  => 'application/json',
+            ],
+            'json'            => $payload,
+            'timeout'         => 15,
+            'connect_timeout' => 10,
+            'http_errors'     => false,
+        ]);
+
+        $statusCode = $response->getStatusCode();
+        if ($statusCode < 200 || $statusCode >= 300) {
+            error_log("ShopPaymentService::createEasyVereinDocument – EasyVerein API returned HTTP {$statusCode} for order #{$orderId}: " . (string) $response->getBody());
+        }
+    }
+
+
 
     /**
      * Set payment_status = 'paid' for the given order in shop_orders (Content DB).
