@@ -105,15 +105,15 @@ class Shop {
     /**
      * Create a new product.
      *
-     * @param array $data  Keys: name, description, base_price, image_path, active, is_bulk_order, bulk_end_date, bulk_min_goal
+     * @param array $data  Keys: name, description, base_price, image_path, active, is_bulk_order, bulk_end_date, bulk_min_goal, category, pickup_location, variants
      * @return int|null  New product ID or null on failure
      */
     public static function createProduct(array $data): ?int {
         try {
             $db   = Database::getContentDB();
             $stmt = $db->prepare("
-                INSERT INTO shop_products (name, description, base_price, image_path, active, is_bulk_order, bulk_end_date, bulk_min_goal)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO shop_products (name, description, base_price, image_path, active, is_bulk_order, bulk_end_date, bulk_min_goal, category, pickup_location, variants)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ");
             $stmt->execute([
                 $data['name'],
@@ -124,6 +124,9 @@ class Shop {
                 isset($data['is_bulk_order']) ? (int) $data['is_bulk_order'] : 1,
                 $data['bulk_end_date'] ?? null,
                 isset($data['bulk_min_goal']) ? (int) $data['bulk_min_goal'] : null,
+                !empty($data['category']) ? $data['category'] : null,
+                !empty($data['pickup_location']) ? $data['pickup_location'] : null,
+                !empty($data['variants']) ? $data['variants'] : null,
             ]);
             return (int) $db->lastInsertId();
         } catch (Exception $e) {
@@ -136,7 +139,7 @@ class Shop {
      * Update an existing product.
      *
      * @param int   $id
-     * @param array $data  Keys: name, description, base_price, image_path, active, is_bulk_order, bulk_end_date, bulk_min_goal
+     * @param array $data  Keys: name, description, base_price, image_path, active, is_bulk_order, bulk_end_date, bulk_min_goal, category, pickup_location, variants
      * @return bool
      */
     public static function updateProduct(int $id, array $data): bool {
@@ -145,7 +148,8 @@ class Shop {
             $stmt = $db->prepare("
                 UPDATE shop_products
                 SET name = ?, description = ?, base_price = ?, image_path = ?, active = ?,
-                    is_bulk_order = ?, bulk_end_date = ?, bulk_min_goal = ?
+                    is_bulk_order = ?, bulk_end_date = ?, bulk_min_goal = ?,
+                    category = ?, pickup_location = ?, variants = ?
                 WHERE id = ?
             ");
             $stmt->execute([
@@ -157,6 +161,9 @@ class Shop {
                 isset($data['is_bulk_order']) ? (int) $data['is_bulk_order'] : 1,
                 $data['bulk_end_date'] ?? null,
                 isset($data['bulk_min_goal']) ? (int) $data['bulk_min_goal'] : null,
+                !empty($data['category']) ? $data['category'] : null,
+                !empty($data['pickup_location']) ? $data['pickup_location'] : null,
+                !empty($data['variants']) ? $data['variants'] : null,
                 $id,
             ]);
             return true;

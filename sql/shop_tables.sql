@@ -10,8 +10,11 @@ CREATE TABLE IF NOT EXISTS `shop_products` (
     `active`        TINYINT(1)     NOT NULL DEFAULT 1,
     `is_bulk_order` TINYINT(1)     NOT NULL DEFAULT 1 COMMENT 'Sammelbestellung aktiv',
     `bulk_end_date` DATETIME       DEFAULT NULL COMMENT 'Ende der Sammelbestellfrist',
-    `bulk_min_goal` INT            DEFAULT NULL COMMENT 'Mindestanzahl an Vorbestellungen für Produktion',
-    `created_at`    DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `bulk_min_goal`    INT            DEFAULT NULL COMMENT 'Mindestanzahl an Vorbestellungen für Produktion',
+    `category`         VARCHAR(100)   DEFAULT NULL COMMENT 'Kategorie (z.B. Merchandise, Tickets, Sonstiges)',
+    `pickup_location`  VARCHAR(255)   DEFAULT NULL COMMENT 'Abholort und Zeitpunkt',
+    `variants`         VARCHAR(255)   DEFAULT NULL COMMENT 'Kommagetrennte Varianten (z.B. S, M, L, XL)',
+    `created_at`       DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at`    DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -47,8 +50,9 @@ CREATE TABLE IF NOT EXISTS `shop_orders` (
     `shipping_status` VARCHAR(50)  NOT NULL DEFAULT 'pending'  COMMENT 'pending, shipped, delivered',
     `shipping_method` VARCHAR(50)  DEFAULT NULL                COMMENT 'pickup oder mail',
     `shipping_cost`   DECIMAL(10,2) NOT NULL DEFAULT 0.00      COMMENT 'Versandkosten',
-    `shipping_address` TEXT         DEFAULT NULL               COMMENT 'Lieferadresse für Postversand',
-    `created_at`      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `shipping_address`  TEXT         DEFAULT NULL               COMMENT 'Lieferadresse für Postversand',
+    `delivery_status`   ENUM('open','delivered') NOT NULL DEFAULT 'open' COMMENT 'Lieferstatus',
+    `created_at`       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at`      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
     KEY `idx_order_user` (`user_id`)

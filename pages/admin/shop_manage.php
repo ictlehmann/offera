@@ -48,8 +48,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'is_bulk_order' => isset($_POST['is_bulk_order']) ? 1 : 0,
             'bulk_end_date' => !empty($_POST['bulk_end_date']) ? $_POST['bulk_end_date'] : null,
             'bulk_min_goal' => !empty($_POST['bulk_min_goal']) ? (int) $_POST['bulk_min_goal'] : null,
+            'category'         => trim($_POST['category'] ?? ''),
+            'pickup_location'  => trim($_POST['pickup_location'] ?? ''),
+            'variants'         => trim($_POST['variants_text'] ?? ''),
             'image_path'    => null,
         ];
+
+        $allowedCategories = ['Merchandise', 'Tickets', 'Sonstiges'];
+        if (!empty($data['category']) && !in_array($data['category'], $allowedCategories, true)) {
+            $data['category'] = '';
+        }
 
         if (empty($data['name'])) {
             $errorMessage  = 'Produktname darf nicht leer sein.';
@@ -581,6 +589,34 @@ ob_start();
                                           placeholder="Kurze Produktbeschreibung, z.B. Material, Verwendungszweck, ..."
                                           class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition resize-none"></textarea>
                             </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                                    Kategorie
+                                </label>
+                                <select name="category" id="modal-category"
+                                        class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+                                    <option value="">– bitte wählen –</option>
+                                    <option value="Merchandise">Merchandise</option>
+                                    <option value="Tickets">Tickets</option>
+                                    <option value="Sonstiges">Sonstiges</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                                    Abholort &amp; Zeitpunkt <span class="font-normal text-gray-400 dark:text-gray-500">(optional)</span>
+                                </label>
+                                <input type="text" name="pickup_location" id="modal-pickup-location"
+                                       placeholder="z.B. Nächstes Mittwochs-Meeting"
+                                       class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                                    Varianten <span class="font-normal text-gray-400 dark:text-gray-500">(optional, kommagetrennt)</span>
+                                </label>
+                                <input type="text" name="variants_text" id="modal-variants-text"
+                                       placeholder="z.B. S, M, L, XL, 2XL, 3XL"
+                                       class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+                            </div>
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
@@ -812,6 +848,11 @@ function openProductModal(product) {
     document.getElementById('modal-bulk-end-date').value   = isEdit ? (product.bulk_end_date || '') : '';
     document.getElementById('modal-bulk-min-goal').value   = isEdit ? (product.bulk_min_goal || '') : '';
     toggleBulkOrderFields(isBulk);
+
+    // New fields
+    document.getElementById('modal-category').value        = isEdit ? (product.category || '') : '';
+    document.getElementById('modal-pickup-location').value = isEdit ? (product.pickup_location || '') : '';
+    document.getElementById('modal-variants-text').value   = isEdit ? (product.variants || '') : '';
 
     // Header
     document.getElementById('modal-title').textContent        = isEdit ? 'Produkt bearbeiten' : 'Neues Produkt anlegen';
