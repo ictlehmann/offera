@@ -1394,7 +1394,7 @@ if (Auth::check() && isset($_SESSION['profile_incomplete']) && $_SESSION['profil
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button>
                 </div>
-                <form id="support-form" method="POST" action="<?php echo asset('api/submit_support.php'); ?>">
+                <form id="support-modal-form" method="POST" action="<?php echo asset('api/submit_support.php'); ?>">
                     <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(CSRFHandler::getToken(), ENT_QUOTES, 'UTF-8'); ?>">
                     <div class="modal-body">
                         <div class="mb-3">
@@ -1426,7 +1426,7 @@ if (Auth::check() && isset($_SESSION['profile_incomplete']) && $_SESSION['profil
     document.addEventListener('DOMContentLoaded', function() {
         const supportType = document.getElementById('support-type');
         const supportSubmitBtn = document.getElementById('support-submit-btn');
-        const supportForm = document.getElementById('support-form');
+        const supportForm = document.getElementById('support-modal-form');
         const supportFeedback = document.getElementById('support-feedback');
 
         if (supportType && supportSubmitBtn) {
