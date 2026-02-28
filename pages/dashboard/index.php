@@ -61,7 +61,7 @@ if ($hour >= 5 && $hour < 12) {
     $greeting = 'Guten Abend';
 }
 
-// Get upcoming events from database (next 3 for Schnellübersicht)
+// Get upcoming events from database
 $upcomingEvents = Event::getEvents([
     'status' => ['planned', 'open', 'closed'],
     'start_date' => date('Y-m-d H:i:s')
@@ -70,6 +70,7 @@ usort($upcomingEvents, function($a, $b) {
     return strtotime($a['start_time']) - strtotime($b['start_time']);
 });
 $nextEvents = array_slice($upcomingEvents, 0, 3);
+$events = array_slice($upcomingEvents, 0, 5);
 
 // Get user's open tasks from inventory_requests and inventory_rentals tables
 $openTasksCount = 0;
@@ -517,14 +518,11 @@ function hidePollFromDashboard(pollId) {
     
     <div class="grid grid-cols-1 gap-6">
         <?php 
-        // Reuse pre-fetched upcoming events (already sorted by start_time ASC), limited to 5
-        $upcomingEventsForAllUsers = array_slice($upcomingEvents, 0, 5);
-        
-        if (!empty($upcomingEventsForAllUsers)): 
+        if (!empty($events)): 
         ?>
         <div class="card p-6 rounded-xl shadow-lg" style="background-color: var(--bg-card)">
             <div class="space-y-4">
-                <?php foreach ($upcomingEventsForAllUsers as $event): ?>
+                <?php foreach ($events as $event): ?>
                 <div class="flex flex-col sm:flex-row sm:items-center gap-3 p-4 rounded-lg shadow-sm hover:shadow-md transition-all" style="background-color: var(--bg-card); border: 1px solid var(--border-color)">
                     <div class="flex-1 min-w-0">
                         <h3 class="font-bold mb-1 truncate" style="color: var(--text-main)"><?php echo htmlspecialchars($event['title']); ?></h3>
