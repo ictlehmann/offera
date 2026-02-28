@@ -177,7 +177,7 @@ if (!empty($userName)) {
                 <p class="text-sm font-bold leading-tight truncate"><?= htmlspecialchars($userName) ?></p>
                 <span class="text-[10px] text-gray-500 truncate block"><?= htmlspecialchars($userEmail) ?></span>
                 <span aria-label="Rolle: <?= htmlspecialchars($userRole) ?>"
-                      class="inline-flex items-center mt-0.5 px-1.5 py-px rounded-full text-[9px] font-bold tracking-wider uppercase bg-gradient-to-r from-violet-500/20 to-indigo-500/20 border border-violet-400/30 text-violet-300 max-w-full truncate"
+                      class="inline-flex items-center mt-0.5 px-1.5 py-px rounded-full text-[9px] font-bold tracking-wider uppercase bg-gradient-to-r from-violet-700 to-indigo-700 text-white max-w-full truncate"
                 ><?= htmlspecialchars($userRole) ?></span>
             </div>
         </div>
