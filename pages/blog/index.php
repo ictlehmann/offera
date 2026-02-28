@@ -11,6 +11,7 @@ if (!Auth::check()) {
 
 $user = Auth::user();
 $userRole = $_SESSION['user_role'] ?? 'member';
+$userId = $user['id'];
 
 // Get filter from query parameters
 $filterCategory = $_GET['category'] ?? null;
@@ -27,11 +28,27 @@ $posts = array_slice($allPosts, 0, $perPage);
 
 // Get like and comment counts for each post
 $contentDb = Database::getContentDB();
+
+// Batch-fetch which posts the current user has liked in a single query
+$postIds = array_column($posts, 'id');
+$likedPostIds = [];
+if (!empty($postIds)) {
+    $placeholders = implode(',', array_fill(0, count($postIds), '?'));
+    $userLikesStmt = $contentDb->prepare(
+        "SELECT post_id FROM blog_likes WHERE post_id IN ($placeholders) AND user_id = ?"
+    );
+    $userLikesStmt->execute(array_merge($postIds, [$userId]));
+    $likedPostIds = array_flip($userLikesStmt->fetchAll(PDO::FETCH_COLUMN));
+}
+
 foreach ($posts as &$post) {
     // Get like count
     $likeStmt = $contentDb->prepare("SELECT COUNT(*) FROM blog_likes WHERE post_id = ?");
     $likeStmt->execute([$post['id']]);
     $post['like_count'] = $likeStmt->fetchColumn();
+    
+    // Check if current user has liked this post (resolved from batch result above)
+    $post['user_has_liked'] = isset($likedPostIds[$post['id']]);
     
     // Get comment count
     $commentStmt = $contentDb->prepare("SELECT COUNT(*) FROM blog_comments WHERE post_id = ?");
@@ -179,7 +196,7 @@ ob_start();
                             </div>
                             <div class="flex items-center gap-4">
                                 <span class="flex items-center">
-                                    <i class="fas fa-heart mr-1 text-red-500"></i>
+                                    <i class="fas fa-heart mr-1 <?php echo $post['user_has_liked'] ? 'text-red-500' : 'text-gray-400 dark:text-gray-500'; ?>"></i>
                                     <?php echo $post['like_count']; ?>
                                 </span>
                                 <span class="flex items-center">
