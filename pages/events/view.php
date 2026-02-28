@@ -50,6 +50,9 @@ foreach ($userSignups as $signup) {
 // Get registration count
 $registrationCount = Event::getRegistrationCount($eventId);
 
+// Get participants list (visible to all logged-in users)
+$participants = Event::getEventAttendees($eventId);
+
 // Get helper types and slots if needed
 $helperTypes = [];
 if ($event['needs_helpers'] && $userRole !== 'alumni') {
@@ -236,6 +239,20 @@ ob_start();
                         </div>
                     </div>
                 </div>
+            </div>
+        <?php endif; ?>
+
+        <!-- Participants List -->
+        <?php if (!$event['is_external'] && !empty($participants)): ?>
+            <div class="mt-6 pt-6 border-t border-gray-200">
+                <h2 class="text-xl font-bold text-gray-800 mb-3">Angemeldete Teilnehmer</h2>
+                <ul class="divide-y divide-gray-100">
+                    <?php foreach ($participants as $participant): ?>
+                        <li class="py-2 text-gray-700">
+                            <?php echo htmlspecialchars(trim($participant['first_name'] . ' ' . $participant['last_name'])); ?>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
             </div>
         <?php endif; ?>
 
