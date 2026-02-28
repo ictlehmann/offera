@@ -271,30 +271,71 @@ try {
             ]);
         }
     } elseif ($paymentMethod === 'bank_transfer') {
-        $payResult = ShopPaymentService::initiateBankTransfer(
-            $orderId,
-            $total,
-            $user['first_name'] ?? '',
-            $user['last_name']  ?? '',
-            $userId,
-            $user['email']      ?? ''
-        );
+        // Generate payment purpose (Verwendungszweck):
+        // first 4 chars of first name + fill from last name to reach 8 chars + 5-digit order ID
+        $firstName   = ($fullUser ?? [])['first_name'] ?? '';
+        $lastName    = ($fullUser ?? [])['last_name']  ?? '';
+        $orderIdPad  = str_pad((string) $orderId, 5, '0', STR_PAD_LEFT);
 
-        if ($payResult['success']) {
-            $_SESSION['shop_cart'] = [];
-            echo json_encode([
-                'success'         => true,
-                'order_id'        => $orderId,
-                'payment_purpose' => $payResult['payment_purpose'],
-                'message'         => 'Bestellung #' . $orderId . ' aufgegeben! Die Überweisungsdetails wurden an deine E-Mail-Adresse gesendet.',
-            ]);
-        } else {
-            http_response_code(500);
-            echo json_encode([
-                'success' => false,
-                'message' => $payResult['error'] ?? 'Banküberweisung konnte nicht initiiert werden.',
-            ]);
+        $nameFirst = strtoupper(preg_replace('/[^A-Za-z]/', '', $firstName));
+        $nameLast  = strtoupper(preg_replace('/[^A-Za-z]/', '', $lastName));
+
+        $prefix         = substr($nameFirst, 0, 4);
+        $remaining      = 8 - strlen($prefix);
+        $paymentPurpose = str_pad($prefix . substr($nameLast, 0, $remaining), 8, 'X') . $orderIdPad;
+
+        // DB update on invoices table: save payment_purpose and set status to 'pending'
+        $rechDb  = Database::getRechDB();
+        $invStmt = $rechDb->prepare(
+            "INSERT INTO invoices (user_id, description, amount, file_path, status, payment_purpose)
+             VALUES (?, ?, ?, NULL, 'pending', ?)"
+        );
+        $invStmt->execute([
+            $userId,
+            'Shop-Bestellung #' . $orderIdPad,
+            $total,
+            $paymentPurpose,
+        ]);
+
+        // Send bank transfer instructions to the buyer
+        try {
+            if (!defined('VEREIN_IBAN') || VEREIN_IBAN === '') {
+                error_log('api/shop/checkout.php – VEREIN_IBAN is not configured; using placeholder in bank transfer email for order #' . $orderId);
+            }
+            $iban         = (defined('VEREIN_IBAN') && VEREIN_IBAN !== '') ? VEREIN_IBAN : 'DEXX...';
+            $emailSubject = 'Deine Bestellung – Überweisungsdetails';
+            $bodyContent  = '
+        <p class="email-text">Hallo ' . htmlspecialchars($firstName) . ',</p>
+        <p class="email-text">vielen Dank für deine Bestellung! Bitte überweise den folgenden Betrag auf unser Vereinskonto.</p>
+
+        <table class="info-table">
+            <tr><td><strong>Gesamtbetrag</strong></td><td><strong>' . number_format($total, 2, ',', '.') . ' €</strong></td></tr>
+            <tr><td><strong>IBAN</strong></td><td><strong>' . htmlspecialchars($iban) . '</strong></td></tr>
+        </table>
+
+        <div style="margin:24px 0;padding:20px;background:#fff3cd;border:2px solid #f0ad4e;border-radius:8px;text-align:center;">
+            <p style="margin:0 0 8px 0;font-size:13px;color:#856404;">Verwendungszweck</p>
+            <p style="margin:0 0 16px 0;font-size:28px;font-weight:900;letter-spacing:3px;color:#1a1a1a;font-family:monospace;">'
+                . htmlspecialchars($paymentPurpose) . '</p>
+            <p style="margin:0;font-size:13px;"><strong style="color:#cc0000;">Bitte gib bei der Überweisung EXAKT diesen Verwendungszweck an!</strong></p>
+        </div>
+
+        <p class="email-text">Sobald deine Zahlung bei uns eingegangen ist, wird deine Bestellung bearbeitet.</p>
+        <p class="email-text">Viele Grüße,<br>dein IBC-Team</p>';
+
+            $htmlBody = MailService::getTemplate($emailSubject, $bodyContent);
+            MailService::sendEmail($user['email'] ?? '', $emailSubject, $htmlBody);
+        } catch (Exception $mailEx) {
+            error_log('api/shop/checkout.php – bank transfer email failed for order #' . $orderId . ': ' . $mailEx->getMessage());
         }
+
+        $_SESSION['shop_cart'] = [];
+        echo json_encode([
+            'success'         => true,
+            'order_id'        => $orderId,
+            'payment_purpose' => $paymentPurpose,
+            'message'         => 'Bestellung #' . $orderId . ' aufgegeben! Die Überweisungsdetails wurden an deine E-Mail-Adresse gesendet.',
+        ]);
     }
 } catch (Exception $e) {
     error_log('api/shop/checkout.php – ' . $e->getMessage());
