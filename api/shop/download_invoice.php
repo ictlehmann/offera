@@ -139,12 +139,14 @@ try {
 <head>
 <meta charset="UTF-8">
 <style>
+    @page {
+        margin: 100px 50px 80px 50px;
+    }
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-        font-family: Arial, Helvetica, sans-serif;
-        font-size: 10pt;
-        color: #1a1a1a;
-        padding: 20mm 20mm 30mm 25mm;
+        font-family: Helvetica, Arial, sans-serif;
+        font-size: 12px;
+        color: #333;
     }
 
     /* ── Header ─────────────────────────────── */
@@ -154,24 +156,22 @@ try {
     }
     .header-logo {
         float: right;
-        max-width: 50mm;
-        max-height: 20mm;
+        max-width: 150px;
+        text-align: right;
     }
     .header-left {
         float: left;
-        width: 80mm;
+        width: 85mm;
     }
     .sender-line {
-        font-size: 7pt;
+        font-size: 8pt;
         color: #888;
         border-bottom: 1px solid #ccc;
         padding-bottom: 1mm;
         margin-bottom: 3mm;
-        white-space: nowrap;
-        overflow: hidden;
     }
     .recipient-address {
-        font-size: 10pt;
+        font-size: 11pt;
         line-height: 1.6;
     }
     .clearfix::after { content: ""; display: table; clear: both; }
@@ -179,17 +179,17 @@ try {
     /* ── Invoice meta ────────────────────────── */
     .invoice-meta {
         clear: both;
-        margin-top: 10mm;
+        margin-top: 50px;
         margin-bottom: 8mm;
     }
     .invoice-meta h1 {
-        font-size: 14pt;
+        font-size: 16px;
         font-weight: bold;
         margin-bottom: 2mm;
     }
     .invoice-meta p {
-        font-size: 10pt;
-        color: #444;
+        font-size: 12px;
+        color: #333;
     }
 
     /* ── Items table ─────────────────────────── */
@@ -199,18 +199,18 @@ try {
         margin-bottom: 6mm;
     }
     table.items th {
-        background: #f0f0f0;
-        border-bottom: 2px solid #333;
-        padding: 3mm 2mm;
-        font-size: 9pt;
+        background-color: #f9f9f9;
+        padding: 8px;
+        font-size: 12px;
         text-align: left;
+        border-bottom: 1px solid #ddd;
     }
     table.items td {
-        padding: 2.5mm 2mm;
+        padding: 8px;
         border-bottom: 1px solid #ddd;
-        font-size: 9pt;
+        font-size: 12px;
     }
-    table.items .pos  { width: 8mm;  text-align: center; }
+    table.items .pos  { width: 8mm; text-align: center; }
     table.items .right { text-align: right; }
     table.items th.right { text-align: right; }
 
@@ -221,13 +221,13 @@ try {
     }
     .totals td {
         padding: 1.5mm 2mm;
-        font-size: 10pt;
+        font-size: 12px;
     }
     .totals .label { text-align: right; width: 70%; color: #444; }
     .totals .amount { text-align: right; width: 30%; }
     .totals .total-row td {
         font-weight: bold;
-        font-size: 11pt;
+        font-size: 13px;
         border-top: 2px solid #333;
         padding-top: 2mm;
     }
@@ -235,13 +235,11 @@ try {
     /* ── Footer ──────────────────────────────── */
     .footer {
         position: fixed;
-        bottom: 10mm;
-        left: 25mm;
-        right: 20mm;
-        border-top: 1px solid #ccc;
-        padding-top: 2mm;
+        bottom: -50px;
+        left: 0px;
+        right: 0px;
         text-align: center;
-        font-size: 7.5pt;
+        font-size: 9px;
         color: #777;
     }
 </style>
@@ -252,7 +250,7 @@ try {
 <div class="header clearfix">
     <div class="header-left">
         <div class="sender-line">
-            Institut f&uuml;r Business Consulting e.&nbsp;V. &middot; ' . htmlspecialchars($instituteAddress) . '
+            Institut f&uuml;r Business Consulting e.&nbsp;V. | Robert-Gerwig-Platz 1 | 78120 Furtwangen im Schwarzwald
         </div>
         <div class="recipient-address">
             ' . $recipientName . '<br>
