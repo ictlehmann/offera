@@ -303,16 +303,34 @@ function dismissProfileReviewPrompt() {
                 <h3 class="text-xl font-bold mb-4" style="color: var(--text-main)">Nächste Events</h3>
             </div>
             <?php if (!empty($nextEvents)): ?>
-            <div class="space-y-4">
+            <?php $monthAbbrs = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez']; ?>
+            <div class="space-y-3">
                 <?php foreach ($nextEvents as $nextEvent): ?>
-                <div class="flex flex-col gap-1 pb-3 border-b last:border-b-0 last:pb-0" style="border-color: var(--border-color)">
-                    <h4 class="font-semibold" style="color: var(--text-main)"><?php echo htmlspecialchars($nextEvent['title']); ?></h4>
-                    <p class="text-sm" style="color: var(--text-muted)">
-                        <i class="fas fa-clock mr-1 text-blue-400"></i>
-                        <?php echo date('d.m.Y H:i', strtotime($nextEvent['start_time'])); ?> Uhr
-                    </p>
-                    <a href="../events/view.php?id=<?php echo $nextEvent['id']; ?>" class="inline-flex items-center text-blue-600 hover:text-blue-700 font-semibold text-sm hover:translate-x-1 transition-transform">
-                        Details ansehen <i class="fas fa-arrow-right ml-2"></i>
+                <?php
+                    $ts = strtotime($nextEvent['start_time']);
+                    $monthAbbr = $monthAbbrs[(int)date('n', $ts) - 1];
+                ?>
+                <div class="flex items-center gap-4 pb-3 border-b last:border-b-0 last:pb-0" style="border-color: var(--border-color)">
+                    <!-- Calendar-leaf date badge -->
+                    <div class="flex-shrink-0 w-14 rounded-xl overflow-hidden shadow-md text-center select-none">
+                        <div class="bg-blue-600 text-white text-xs font-bold uppercase tracking-widest py-1">
+                            <?php echo $monthAbbr; ?>
+                        </div>
+                        <div class="text-blue-600 text-2xl font-extrabold leading-tight py-1" style="background-color: var(--bg-card)">
+                            <?php echo date('d', $ts); ?>
+                        </div>
+                    </div>
+                    <!-- Event info -->
+                    <div class="flex-1 min-w-0">
+                        <h4 class="font-semibold truncate" style="color: var(--text-main)"><?php echo htmlspecialchars($nextEvent['title']); ?></h4>
+                        <p class="text-xs mt-0.5" style="color: var(--text-muted)">
+                            <i class="fas fa-clock mr-1 text-blue-400"></i>
+                            <?php echo date('H:i', $ts); ?> Uhr
+                        </p>
+                    </div>
+                    <!-- Details button -->
+                    <a href="../events/view.php?id=<?php echo $nextEvent['id']; ?>" class="flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 font-semibold text-xs transition-colors shadow-sm">
+                        Details <i class="fas fa-arrow-right"></i>
                     </a>
                 </div>
                 <?php endforeach; ?>
