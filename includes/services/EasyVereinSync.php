@@ -493,7 +493,7 @@ class EasyVereinSync {
      * @return array Array of bank transaction objects returned by the API
      * @throws Exception If the API call fails
      */
-    public function getBankTransactions($days = 7) {
+    public static function getBankTransactions($days = 7) {
         $apiToken = defined('EASYVEREIN_API_TOKEN') ? EASYVEREIN_API_TOKEN : '';
 
         if (empty($apiToken)) {
@@ -504,7 +504,7 @@ class EasyVereinSync {
         $dateFrom = date('Y-m-d', strtotime("-{$days} days"));
 
         // Build URL with date filter; EasyVerein uses `date_gte` query param for this endpoint
-        $apiUrl = 'https://easyverein.com/api/v1.6/bank-transactions/?date_gte=' . urlencode($dateFrom) . '&limit=100';
+        $apiUrl = 'https://live.easyverein.com/api/v1.6/bank-transactions/?date_gte=' . urlencode($dateFrom) . '&limit=100';
 
         try {
             $transactions = [];
@@ -516,7 +516,7 @@ class EasyVereinSync {
                 curl_setopt($ch, CURLOPT_URL, $apiUrl);
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
                 curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                    'Authorization: Bearer ' . $apiToken,
+                    'Authorization: Token ' . $apiToken,
                     'Content-Type: application/json'
                 ]);
                 curl_setopt($ch, CURLOPT_TIMEOUT, 30);
