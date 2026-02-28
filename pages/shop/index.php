@@ -126,7 +126,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($postAction === 'checkout') {
         $paymentMethod = in_array($_POST['payment_method'] ?? '', ['paypal', 'bank_transfer']) ? $_POST['payment_method'] : 'paypal';
         $shippingMethod  = in_array($_POST['shipping_method'] ?? '', ['pickup', 'mail']) ? $_POST['shipping_method'] : 'pickup';
-        $shippingCost    = ($shippingMethod === 'mail') ? 4.90 : 0.00;
+        $shippingCost    = ($shippingMethod === 'mail') ? 7.99 : 0.00;
         $shippingAddress = trim($_POST['shipping_address'] ?? '');
 
         if ($shippingMethod === 'mail' && $shippingAddress === '') {
@@ -745,7 +745,7 @@ ob_start();
                     <input type="hidden" name="post_action" value="checkout">
 
                     <!-- Shipping method selection -->
-                    <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-3">Lieferart</h3>
+                    <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-3">Liefermethode</h3>
                     <div class="mb-6 space-y-3">
                         <label class="flex items-center gap-4 p-4 border-2 rounded-xl cursor-pointer transition-all
                                       border-gray-200 dark:border-gray-700 hover:border-green-400
@@ -755,8 +755,8 @@ ob_start();
                                 <i class="fas fa-building text-green-600 dark:text-green-400 text-xl"></i>
                             </div>
                             <div class="flex-1">
-                                <p class="font-semibold text-gray-800 dark:text-gray-100">Abholung im Büro</p>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Kostenlos – 0,00 €</p>
+                                <p class="font-semibold text-gray-800 dark:text-gray-100">Selbstabholung im MiMe</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">kostenlos, nach Benachrichtigung</p>
                             </div>
                             <span class="text-green-600 dark:text-green-400 font-bold text-sm">0,00 €</span>
                         </label>
@@ -769,12 +769,14 @@ ob_start();
                                 <i class="fas fa-truck text-blue-600 dark:text-blue-400 text-xl"></i>
                             </div>
                             <div class="flex-1">
-                                <p class="font-semibold text-gray-800 dark:text-gray-100">Postversand nach Hause</p>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Lieferung per Post</p>
+                                <p class="font-semibold text-gray-800 dark:text-gray-100">Postversand</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">zzgl. 7,99 €</p>
                             </div>
-                            <span class="text-blue-600 dark:text-blue-400 font-bold text-sm">4,90 €</span>
+                            <span class="text-blue-600 dark:text-blue-400 font-bold text-sm">7,99 €</span>
                         </label>
                     </div>
+
+                    <input type="hidden" name="selected_delivery_method" id="selected-delivery-method" value="pickup">
 
                     <!-- Shipping address (shown when mail is selected) -->
                     <div id="shipping-address-field" class="hidden mb-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
@@ -962,7 +964,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // ── Checkout: shipping method toggle + live total ────────────────────────────
 document.addEventListener('DOMContentLoaded', function() {
     var CART_TOTAL = <?php echo json_encode((float) $cartTotalAmt); ?>;
-    var SHIPPING_COST_MAIL = 4.90;
+    var SHIPPING_COST_MAIL = 7.99;
 
     var shippingRadios  = document.querySelectorAll('input[name="shipping_method"]');
     var addressField    = document.getElementById('shipping-address-field');
@@ -970,6 +972,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var summaryShipping = document.getElementById('summary-shipping-cost');
     var summaryTotal    = document.getElementById('summary-total');
     var checkoutDisplay = document.getElementById('checkout-total-display');
+    var deliveryMethodField = document.getElementById('selected-delivery-method');
 
     function formatMoney(val) {
         return val.toFixed(2).replace('.', ',');
@@ -984,6 +987,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (summaryShipping) summaryShipping.textContent = formatMoney(shippingCost) + ' €';
         if (summaryTotal)    summaryTotal.textContent    = formatMoney(grandTotal);
         if (checkoutDisplay) checkoutDisplay.textContent = formatMoney(grandTotal);
+        if (deliveryMethodField) deliveryMethodField.value = selected ? selected.value : 'pickup';
 
         if (addressField) {
             addressField.classList.toggle('hidden', !isMail);
