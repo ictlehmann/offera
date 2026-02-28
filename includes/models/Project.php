@@ -147,12 +147,13 @@ class Project {
                 type,
                 status, 
                 max_consultants,
+                requires_application,
                 start_date, 
                 end_date, 
                 image_path,
                 documentation,
                 created_by
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ");
         
         $stmt->execute([
@@ -163,7 +164,8 @@ class Project {
             $data['priority'] ?? 'medium',
             $data['type'] ?? 'internal',
             $data['status'] ?? 'draft',
-            $data['max_consultants'] ?? 1,
+            $data['max_consultants'] ?? null,
+            $data['requires_application'] ?? 1,
             $data['start_date'] ?? null,
             $data['end_date'] ?? null,
             $data['image_path'] ?? null,
@@ -279,7 +281,8 @@ class Project {
         
         $allowedFields = [
             'title', 'description', 'client_name', 'client_contact_details',
-            'priority', 'type', 'status', 'max_consultants', 'start_date', 'end_date', 'image_path', 'documentation'
+            'priority', 'type', 'status', 'max_consultants', 'requires_application',
+            'start_date', 'end_date', 'image_path', 'documentation'
         ];
         
         foreach ($data as $key => $value) {

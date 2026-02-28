@@ -151,6 +151,20 @@ try {
     
     $content_db = Database::getContentDB();
     
+    // Change max_consultants to allow NULL (internal projects have no fixed cap)
+    executeSql(
+        $content_db,
+        "ALTER TABLE projects MODIFY COLUMN max_consultants INT UNSIGNED DEFAULT NULL",
+        "Allow NULL for max_consultants in projects table"
+    );
+
+    // Add requires_application column to projects
+    executeSql(
+        $content_db,
+        "ALTER TABLE projects ADD COLUMN requires_application TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Whether applicants must submit an application (0 = direct join, 1 = application required)' AFTER max_consultants",
+        "Add requires_application column to projects table"
+    );
+
     // Add first_name column to alumni_profiles
     executeSql(
         $content_db,

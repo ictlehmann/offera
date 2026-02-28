@@ -39,15 +39,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_project'])) {
             $status = $isDraft ? 'draft' : 'open';
         }
         
+        $isInternal = isset($_POST['is_internal']);
         $projectData = [
             'title' => trim($_POST['title'] ?? ''),
             'description' => trim($_POST['description'] ?? ''),
             'client_name' => trim($_POST['client_name'] ?? ''),
             'client_contact_details' => trim($_POST['client_contact_details'] ?? ''),
             'priority' => $_POST['priority'] ?? 'medium',
-            'type' => isset($_POST['is_internal']) ? 'internal' : 'external',
+            'type' => $isInternal ? 'internal' : 'external',
             'status' => $status,
-            'max_consultants' => max(1, intval($_POST['max_consultants'] ?? 1)),
+            'max_consultants' => $isInternal ? null : max(1, intval($_POST['max_consultants'] ?? 1)),
+            'requires_application' => $isInternal ? 0 : intval($_POST['requires_application'] ?? 1),
             'start_date' => !empty($_POST['start_date']) ? $_POST['start_date'] : null,
             'end_date' => !empty($_POST['end_date']) ? $_POST['end_date'] : null,
             'created_by' => Auth::user()['id'] ?? null,
@@ -606,6 +608,28 @@ document.getElementById('deleteModal')?.addEventListener('click', (e) => {
             >
         </div>
 
+        <!-- Bewerbung nötig -->
+        <?php
+        $requiresAppValue = isset($_POST['save_project'])
+            ? intval($_POST['requires_application'] ?? 0)
+            : intval($project['requires_application'] ?? 1);
+        ?>
+        <div id="requires_application_row" class="flex items-center pt-2">
+            <input
+                type="checkbox"
+                id="requires_application_checkbox"
+                value="1"
+                <?php echo $requiresAppValue === 1 ? 'checked' : ''; ?>
+                class="h-5 w-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+            >
+            <label for="requires_application_checkbox" class="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                <i class="fas fa-file-signature text-orange-500 mr-1"></i>
+                Bewerbung nötig
+                <span class="block text-xs text-gray-500 dark:text-gray-400 mt-0.5">Bewerber müssen eine Bewerbung einreichen</span>
+            </label>
+        </div>
+        <input type="hidden" id="requires_application_hidden" name="requires_application" value="<?php echo $requiresAppValue; ?>">
+
         <!-- Image Upload -->
         <div>
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -691,12 +715,27 @@ document.getElementById('deleteModal')?.addEventListener('click', (e) => {
     const checkbox = document.getElementById('is_internal_checkbox');
     const consultantsRow = document.getElementById('max_consultants_row');
     const consultantsInput = document.getElementById('max_consultants_input');
+    const requiresAppRow = document.getElementById('requires_application_row');
+    const requiresAppCheckbox = document.getElementById('requires_application_checkbox');
+    const requiresAppHidden = document.getElementById('requires_application_hidden');
 
     if (!checkbox) return;
+
+    // Keep hidden input in sync with the visible checkbox
+    if (requiresAppCheckbox && requiresAppHidden) {
+        requiresAppCheckbox.addEventListener('change', function () {
+            requiresAppHidden.value = this.checked ? '1' : '0';
+        });
+    }
 
     function applyInternalState(isInternal) {
         if (consultantsRow) consultantsRow.style.display = isInternal ? 'none' : '';
         if (consultantsInput) consultantsInput.required = !isInternal;
+        if (requiresAppRow) requiresAppRow.style.display = isInternal ? 'none' : '';
+        if (isInternal) {
+            if (requiresAppCheckbox) requiresAppCheckbox.checked = false;
+            if (requiresAppHidden) requiresAppHidden.value = '0';
+        }
     }
 
     // Apply on page load
