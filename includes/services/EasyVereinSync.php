@@ -412,6 +412,235 @@ class EasyVereinSync {
     }
     
     /**
+     * Trigger bank account synchronization via EasyVerein / FinAPI
+     *
+     * Sends a request to the EasyVerein API to initiate a manual refresh of
+     * connected bank accounts (FinAPI). EasyVerein processes this asynchronously,
+     * so a successful response only confirms that the trigger was accepted.
+     *
+     * @return array Result with success status and any error or info messages
+     */
+    public function triggerBankSync() {
+        $apiToken = defined('EASYVEREIN_API_TOKEN') ? EASYVEREIN_API_TOKEN : '';
+
+        if (empty($apiToken)) {
+            error_log('EasyVerein triggerBankSync: API token not configured');
+            return ['success' => false, 'error' => 'EasyVerein API token not configured'];
+        }
+
+        // EasyVerein exposes bank connections under v1.6; triggering a refresh
+        // is done by POSTing to the bank-connections update endpoint.
+        // The operation is asynchronous – a 2xx response means it was accepted.
+        $apiUrl = 'https://easyverein.com/api/v1.6/bank-connections/refresh/';
+
+        try {
+            $ch = curl_init();
+
+            curl_setopt($ch, CURLOPT_URL, $apiUrl);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([]));
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Authorization: Bearer ' . $apiToken,
+                'Content-Type: application/json'
+            ]);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $curlError = curl_error($ch);
+            curl_close($ch);
+
+            if ($response === false) {
+                throw new Exception('cURL error: ' . $curlError);
+            }
+
+            // 2xx codes indicate the trigger was accepted (processing is async)
+            if ($httpCode >= 200 && $httpCode < 300) {
+                error_log('EasyVerein triggerBankSync: Bank sync triggered successfully (HTTP ' . $httpCode . '). Processing is asynchronous.');
+                return [
+                    'success' => true,
+                    'message' => 'Bank sync triggered successfully. Processing is asynchronous.',
+                    'http_code' => $httpCode
+                ];
+            }
+
+            $errorMsg = "API returned HTTP {$httpCode}";
+            if ($httpCode === 401) {
+                $errorMsg .= ' - Unauthorized: Invalid API token';
+            } elseif ($httpCode === 404) {
+                $errorMsg .= ' - Endpoint not found; bank-connection refresh may not be supported by this API version';
+                error_log('EasyVerein triggerBankSync: ' . $errorMsg . '. EasyVerein may only allow asynchronous bank sync via scheduled jobs.');
+            }
+            throw new Exception($errorMsg);
+
+        } catch (Exception $e) {
+            error_log('EasyVerein triggerBankSync Error: ' . $e->getMessage());
+            return ['success' => false, 'error' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * Fetch bank transactions from EasyVerein for the last X days
+     *
+     * Retrieves all bank transactions via /api/v1.6/bank-transactions/ filtered
+     * to the given number of days back from today.
+     *
+     * @param int $days Number of days to look back (default: 7)
+     * @return array Array of bank transaction objects returned by the API
+     * @throws Exception If the API call fails
+     */
+    public function getBankTransactions($days = 7) {
+        $apiToken = defined('EASYVEREIN_API_TOKEN') ? EASYVEREIN_API_TOKEN : '';
+
+        if (empty($apiToken)) {
+            throw new Exception('EasyVerein API token not configured');
+        }
+
+        $days = max(1, (int)$days);
+        $dateFrom = date('Y-m-d', strtotime("-{$days} days"));
+
+        // Build URL with date filter; EasyVerein uses `date_gte` query param for this endpoint
+        $apiUrl = 'https://easyverein.com/api/v1.6/bank-transactions/?date_gte=' . urlencode($dateFrom) . '&limit=100';
+
+        try {
+            $transactions = [];
+
+            // Paginate through all results
+            while ($apiUrl !== null) {
+                $ch = curl_init();
+
+                curl_setopt($ch, CURLOPT_URL, $apiUrl);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                    'Authorization: Bearer ' . $apiToken,
+                    'Content-Type: application/json'
+                ]);
+                curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+                curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+
+                $response = curl_exec($ch);
+                $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                $curlError = curl_error($ch);
+                curl_close($ch);
+
+                if ($response === false) {
+                    throw new Exception('cURL error: ' . $curlError);
+                }
+
+                if ($httpCode !== 200) {
+                    $errorMsg = "API returned HTTP {$httpCode}";
+                    if ($httpCode === 401) {
+                        $errorMsg .= ' - Unauthorized: Invalid API token';
+                    }
+                    throw new Exception($errorMsg);
+                }
+
+                $data = json_decode($response, true);
+
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    throw new Exception('Failed to parse JSON response: ' . json_last_error_msg());
+                }
+
+                if (!is_array($data)) {
+                    throw new Exception('Invalid API response format: expected JSON object or array');
+                }
+
+                $page = $data['results'] ?? $data['data'] ?? $data;
+
+                if (!is_array($page)) {
+                    throw new Exception('Invalid API response format: expected array of transactions');
+                }
+
+                $transactions = array_merge($transactions, $page);
+
+                // Follow pagination if a next URL is provided
+                $apiUrl = isset($data['next']) && is_string($data['next']) ? $data['next'] : null;
+            }
+
+            return $transactions;
+
+        } catch (Exception $e) {
+            error_log('EasyVerein getBankTransactions Error: ' . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    /**
+     * Mark an invoice as paid in EasyVerein
+     *
+     * Sends a PATCH request to EasyVerein to set the payment status of the
+     * given invoice document to "paid".
+     *
+     * @param int|string $easyvereinInvoiceId EasyVerein invoice / billing document ID
+     * @return array Result with success status and any error messages
+     */
+    public function markInvoiceAsPaidInEV($easyvereinInvoiceId) {
+        $apiToken = defined('EASYVEREIN_API_TOKEN') ? EASYVEREIN_API_TOKEN : '';
+
+        if (empty($apiToken)) {
+            return ['success' => false, 'error' => 'EasyVerein API token not configured'];
+        }
+
+        if (empty($easyvereinInvoiceId)) {
+            return ['success' => false, 'error' => 'Invalid invoice ID'];
+        }
+
+        $apiUrl = 'https://easyverein.com/api/v1.6/invoices/' . urlencode($easyvereinInvoiceId) . '/';
+
+        try {
+            $ch = curl_init();
+
+            curl_setopt($ch, CURLOPT_URL, $apiUrl);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PATCH');
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['isPaid' => true]));
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Authorization: Bearer ' . $apiToken,
+                'Content-Type: application/json'
+            ]);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $curlError = curl_error($ch);
+            curl_close($ch);
+
+            if ($response === false) {
+                throw new Exception('cURL error: ' . $curlError);
+            }
+
+            // 200 or 204 indicate a successful PATCH
+            if ($httpCode === 200 || $httpCode === 204) {
+                return [
+                    'success' => true,
+                    'message' => 'Invoice ' . $easyvereinInvoiceId . ' marked as paid in EasyVerein'
+                ];
+            }
+
+            $errorMsg = "API returned HTTP {$httpCode}";
+            if ($httpCode === 401) {
+                $errorMsg .= ' - Unauthorized: Invalid API token';
+            } elseif ($httpCode === 404) {
+                $errorMsg .= ' - Invoice not found in EasyVerein';
+            }
+            throw new Exception($errorMsg);
+
+        } catch (Exception $e) {
+            error_log('EasyVerein markInvoiceAsPaidInEV Error (Invoice ID: ' . $easyvereinInvoiceId . '): ' . $e->getMessage());
+            return ['success' => false, 'error' => $e->getMessage()];
+        }
+    }
+
+    /**
      * Update item in EasyVerein (Write-Back)
      * 
      * Sends a PATCH request to EasyVerein API to update an inventory item
