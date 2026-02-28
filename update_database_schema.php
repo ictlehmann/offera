@@ -1238,6 +1238,20 @@ try {
         "Drop stripe_session_id column from invoices table"
     );
 
+    // Change shop_orders.payment_method ENUM: replace 'sepa' with 'bank_transfer'
+    executeSql(
+        $content_db,
+        "ALTER TABLE `shop_orders` MODIFY COLUMN `payment_method` ENUM('paypal','bank_transfer') NOT NULL DEFAULT 'paypal'",
+        "Change shop_orders.payment_method ENUM from sepa to bank_transfer"
+    );
+
+    // Make invoices.file_path nullable to allow shop-order-generated invoice entries
+    executeSql(
+        $rech_db,
+        "ALTER TABLE `invoices` MODIFY COLUMN `file_path` VARCHAR(500) DEFAULT NULL COMMENT 'Path to uploaded invoice file (NULL for shop-order invoices)'",
+        "Make invoices.file_path nullable for shop-order invoice entries"
+    );
+
 
     echo "==============================================\n";
     echo "SUMMARY\n";

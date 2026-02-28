@@ -1389,7 +1389,7 @@ class MailService {
      * @param string      $lastName       Buyer's last name
      * @param string      $buyerEmail     Buyer's e-mail address
      * @param array       $cartItems      Cart items (keys: product_name, variant_name, quantity, price)
-     * @param string      $paymentMethod  'paypal' or 'sepa'
+     * @param string      $paymentMethod  'paypal' or 'bank_transfer'
      * @param float       $total          Grand total in EUR
      * @param string|null $shippingAddress Delivery address or null for pickup
      * @return bool
@@ -1407,9 +1407,9 @@ class MailService {
         $subject = 'Neue Shop-Bestellung eingegangen';
 
         $paymentLabel = match ($paymentMethod) {
-            'sepa'   => 'SEPA-Lastschrift',
-            'paypal' => 'PayPal',
-            default  => htmlspecialchars($paymentMethod),
+            'bank_transfer' => 'Überweisung',
+            'paypal'        => 'PayPal',
+            default         => htmlspecialchars($paymentMethod),
         };
 
         // Build rows for the items table
@@ -1463,5 +1463,57 @@ class MailService {
         $htmlBody = self::getTemplate($subject, $bodyContent);
 
         return self::sendEmail('merch@business-consulting.de', $subject, $htmlBody);
+    }
+
+    /**
+     * Send bank-transfer payment instructions to the buyer after a bank-transfer
+     * checkout.  The e-mail prominently displays the Verwendungszweck, IBAN and
+     * total amount so the buyer can complete the transfer correctly.
+     *
+     * @param string $toEmail        Buyer's Entra e-mail address
+     * @param string $firstName      Buyer's first name
+     * @param float  $total          Order total in EUR
+     * @param string $paymentPurpose Generated Verwendungszweck (e.g. 'TOMLEHMA00001')
+     * @return bool
+     */
+    public static function sendBankTransferInstructions(
+        string $toEmail,
+        string $firstName,
+        float  $total,
+        string $paymentPurpose
+    ): bool {
+        if (self::isVendorMissing()) {
+            error_log('Cannot send bank transfer instructions: Composer vendor missing');
+            return false;
+        }
+
+        $iban    = defined('VEREIN_IBAN') ? VEREIN_IBAN : '';
+        $subject = 'Deine Bestellung – Überweisungsdetails';
+
+        $bodyContent = '
+        <p class="email-text">Hallo ' . htmlspecialchars($firstName) . ',</p>
+        <p class="email-text">vielen Dank für deine Bestellung! Bitte überweise den folgenden Betrag auf unser Vereinskonto.</p>
+
+        <table class="info-table">
+            <tr><td><strong>Gesamtbetrag</strong></td><td><strong>' . number_format($total, 2, ',', '.') . ' €</strong></td></tr>
+            <tr><td><strong>IBAN</strong></td><td><strong>' . htmlspecialchars($iban) . '</strong></td></tr>
+        </table>
+
+        <div style="margin:24px 0;padding:20px;background:#fff3cd;border:2px solid #f0ad4e;border-radius:8px;text-align:center;">
+            <p style="margin:0 0 8px 0;font-size:13px;color:#856404;">Verwendungszweck</p>
+            <p style="margin:0 0 16px 0;font-size:28px;font-weight:900;letter-spacing:3px;color:#1a1a1a;font-family:monospace;">'
+                . htmlspecialchars($paymentPurpose) . '</p>
+            <p style="margin:0;font-size:13px;font-weight:700;color:#856404;">
+                Bitte gib bei der Überweisung EXAKT diesen Verwendungszweck an,<br>
+                da wir deine Zahlung sonst nicht automatisch zuordnen können.
+            </p>
+        </div>
+
+        <p class="email-text">Sobald deine Zahlung bei uns eingegangen ist, wird deine Bestellung bearbeitet.</p>
+        <p class="email-text">Viele Grüße,<br>dein IBC-Team</p>';
+
+        $htmlBody = self::getTemplate($subject, $bodyContent);
+
+        return self::sendEmailWithEmbeddedImage($toEmail, $subject, $htmlBody);
     }
 }
