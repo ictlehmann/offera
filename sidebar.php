@@ -100,6 +100,15 @@ if (!empty($userName)) {
             </svg>
             <span>Dashboard</span>
         </a>
+        <a href="/alumni"
+           class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium hover:bg-gray-700 transition-colors">
+            <!-- Alumni icon -->
+            <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/>
+            </svg>
+            <span>Alumni Datenbank</span>
+        </a>
         <a href="/angebote"
            class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium hover:bg-gray-700 transition-colors">
             <!-- Offers icon -->
@@ -109,12 +118,49 @@ if (!empty($userName)) {
             </svg>
             <span>Angebote</span>
         </a>
+
+        <!-- Statistiken Dropdown -->
+        <div>
+            <button type="button" id="stats-toggle"
+                    aria-expanded="false"
+                    aria-controls="stats-submenu"
+                    onclick="sidebarToggleStats(this)"
+                    class="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium hover:bg-gray-700 transition-colors w-full text-left text-white">
+                <!-- Chart icon -->
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                </svg>
+                <span class="flex-1">Statistiken</span>
+                <svg class="chevron w-4 h-4 shrink-0 transition-transform duration-200" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                </svg>
+            </button>
+            <div id="stats-submenu" role="region" aria-labelledby="stats-toggle" class="hidden pl-4 space-y-1 mt-1">
+                <a href="/admin/db_maintenance"
+                   class="flex items-center gap-3 rounded-md px-3 py-1.5 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white transition-colors">
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/>
+                    </svg>
+                    <span>System Health</span>
+                </a>
+                <a href="/admin/audit"
+                   class="flex items-center gap-3 rounded-md px-3 py-1.5 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white transition-colors">
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                    </svg>
+                    <span>Audit Logs</span>
+                </a>
+            </div>
+        </div>
     </nav>
 
     <!-- ===================== USER PROFILE ===================== -->
-    <div class="shrink-0 border-t border-gray-700 px-2 py-2 md:px-3 md:py-3">
+    <div class="shrink-0 border-t border-gray-700 px-2 py-1.5">
         <!-- User info -->
-        <div class="flex items-start gap-2 mb-2">
+        <div class="flex items-center gap-2">
             <!-- Profile image or initials avatar -->
             <?php if (!empty($_sidebarProfileImageUrl)): ?>
             <img
@@ -127,10 +173,12 @@ if (!empty($userName)) {
                 <?= htmlspecialchars($_sidebarInitials) ?>
             </div>
             <?php endif; ?>
-            <div class="min-w-0 flex flex-col gap-0.5">
-                <p class="text-xs font-semibold leading-tight"><?= htmlspecialchars($userName) ?></p>
-                <span class="text-[10px] text-gray-400 leading-tight block break-all"><?= htmlspecialchars($userEmail) ?></span>
-                <span aria-label="Rolle: <?= htmlspecialchars($userRole) ?>" class="inline-block w-full mt-1 px-1.5 py-0.5 rounded text-[9px] font-medium bg-purple-500/10 text-purple-400 border border-purple-500/20 whitespace-normal leading-snug text-center"><?= htmlspecialchars($userRole) ?></span>
+            <div class="min-w-0 flex-1">
+                <p class="text-sm font-bold leading-tight truncate"><?= htmlspecialchars($userName) ?></p>
+                <span class="text-[10px] text-gray-500 truncate block"><?= htmlspecialchars($userEmail) ?></span>
+                <span aria-label="Rolle: <?= htmlspecialchars($userRole) ?>"
+                      class="inline-flex items-center mt-0.5 px-1.5 py-px rounded-full text-[9px] font-bold tracking-wider uppercase bg-gradient-to-r from-violet-500/20 to-indigo-500/20 border border-violet-400/30 text-violet-300 max-w-full truncate"
+                ><?= htmlspecialchars($userRole) ?></span>
             </div>
         </div>
 
@@ -140,7 +188,7 @@ if (!empty($userName)) {
         -->
 
         <!-- Mobile: 2×2 icon grid (hidden on md+) -->
-        <div class="grid grid-cols-2 gap-1 md:hidden">
+        <div class="grid grid-cols-2 gap-1 mt-1 md:hidden">
             <a href="/profil" title="Mein Profil"
                class="flex items-center justify-center rounded-md p-2 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -173,7 +221,7 @@ if (!empty($userName)) {
         </div>
 
         <!-- Desktop (md+): full buttons with icon + label (hidden on mobile) -->
-        <div class="hidden md:flex md:flex-col md:gap-1">
+        <div class="hidden mt-1 md:flex md:flex-col md:gap-1">
             <a href="/profil"
                class="flex items-center gap-1 rounded-md px-2 py-1 text-xs text-gray-300 hover:bg-gray-700 hover:text-white transition-colors">
                 <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -210,3 +258,12 @@ if (!empty($userName)) {
         </div>
     </div>
 </aside>
+<script>
+function sidebarToggleStats(btn) {
+    var submenu = document.getElementById('stats-submenu');
+    var expanded = btn.getAttribute('aria-expanded') === 'true';
+    submenu.classList.toggle('hidden', expanded);
+    btn.setAttribute('aria-expanded', String(!expanded));
+    btn.querySelector('svg.chevron').classList.toggle('rotate-180', !expanded);
+}
+</script>
