@@ -321,7 +321,7 @@ ob_start();
         </button>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6" id="product-grid">
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8" id="product-grid">
         <?php foreach ($products as $product):
             $productOutOfStock = !empty($product['variants']) && array_sum(array_column($product['variants'], 'stock_quantity')) === 0;
             $isBulk = !empty($product['is_bulk_order']);
@@ -333,10 +333,10 @@ ob_start();
             }
             $sliderId = 'slider-grid-' . $product['id'];
         ?>
-        <div class="bg-white dark:bg-gray-800 rounded-lg border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col group <?php echo $productOutOfStock ? 'opacity-60' : ''; ?>"
+        <div class="bg-white rounded-lg overflow-hidden flex flex-col group hover:shadow-lg transition-shadow duration-300 <?php echo $productOutOfStock ? 'opacity-60' : ''; ?>"
              data-instock="<?php echo $productOutOfStock ? '0' : '1'; ?>">
             <!-- Product image (square) -->
-            <div class="relative aspect-square overflow-hidden bg-gray-100 dark:bg-gray-700" id="<?php echo $sliderId; ?>">
+            <div class="relative aspect-square overflow-hidden bg-gray-100" id="<?php echo $sliderId; ?>">
                 <?php if (!empty($allImages)): ?>
                     <?php foreach ($allImages as $idx => $img): ?>
                     <img src="<?php echo asset($img['image_path']); ?>"
