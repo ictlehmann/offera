@@ -30,6 +30,11 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 $input  = json_decode(file_get_contents('php://input'), true);
+if (json_last_error() !== JSON_ERROR_NONE) {
+    http_response_code(400);
+    echo json_encode(['success' => false, 'error' => 'Ungültiges JSON-Format']);
+    exit;
+}
 
 if (!is_array($input)) {
     http_response_code(400);

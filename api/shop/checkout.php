@@ -34,7 +34,12 @@ if ($routeAction === 'create') {
         exit;
     }
 
-    $input          = json_decode(file_get_contents('php://input'), true) ?? [];
+    $input          = json_decode(file_get_contents('php://input'), true);
+    if (json_last_error() !== JSON_ERROR_NONE || !is_array($input)) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'message' => 'Ungültiges JSON-Format']);
+        exit;
+    }
     $shippingMethod = in_array($input['shipping_method'] ?? '', ['pickup', 'mail'], true)
         ? $input['shipping_method']
         : 'pickup';
@@ -127,7 +132,12 @@ if ($routeAction === 'capture') {
         exit;
     }
 
-    $input         = json_decode(file_get_contents('php://input'), true) ?? [];
+    $input         = json_decode(file_get_contents('php://input'), true);
+    if (json_last_error() !== JSON_ERROR_NONE || !is_array($input)) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'message' => 'Ungültiges JSON-Format']);
+        exit;
+    }
     $paypalOrderId = trim($input['paypal_order_id'] ?? '');
 
     if ($paypalOrderId === '') {
@@ -182,7 +192,12 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-$input         = json_decode(file_get_contents('php://input'), true) ?? [];
+$input         = json_decode(file_get_contents('php://input'), true);
+if (json_last_error() !== JSON_ERROR_NONE || !is_array($input)) {
+    http_response_code(400);
+    echo json_encode(['success' => false, 'message' => 'Ungültiges JSON-Format']);
+    exit;
+}
 $paymentMethod = in_array($input['payment_method'] ?? '', ['paypal', 'bank_transfer'], true)
     ? $input['payment_method']
     : 'paypal';

@@ -34,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 // Get invoice ID
-$invoiceId = $_POST['invoice_id'] ?? null;
+$invoiceId = isset($_POST['invoice_id']) ? (int)$_POST['invoice_id'] : null;
 
 if (empty($invoiceId)) {
     http_response_code(400);

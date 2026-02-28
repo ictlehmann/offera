@@ -629,7 +629,13 @@ class ShopPaymentService {
             exit;
         }
 
-        $event     = json_decode($rawBody, true) ?? [];
+        $event = json_decode($rawBody, true);
+        if (json_last_error() !== JSON_ERROR_NONE || !is_array($event)) {
+            error_log("ShopPaymentService::handlePayPalWebhook – ungültiges JSON im Request-Body");
+            http_response_code(400);
+            echo json_encode(['error' => 'Invalid JSON body']);
+            exit;
+        }
         $eventType = $event['event_type'] ?? '';
         $resource  = $event['resource'] ?? [];
 
