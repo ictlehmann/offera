@@ -61,22 +61,15 @@ if ($hour >= 5 && $hour < 12) {
     $greeting = 'Guten Abend';
 }
 
-// Get user's upcoming events (next 3)
-$userUpcomingEvents = Event::getUserSignups($user['id']);
-$nextEvents = [];
-if (!empty($userUpcomingEvents)) {
-    // Filter for upcoming events only
-    $upcomingEvents = array_filter($userUpcomingEvents, function($signup) {
-        return !empty($signup['start_time']) && strtotime($signup['start_time']) > time();
-    });
-    if (!empty($upcomingEvents)) {
-        // Sort by start_time ascending (nearest first)
-        usort($upcomingEvents, function($a, $b) {
-            return strtotime($a['start_time']) - strtotime($b['start_time']);
-        });
-        $nextEvents = array_slice($upcomingEvents, 0, 3);
-    }
-}
+// Get upcoming events from database (next 3 for Schnellübersicht)
+$upcomingEvents = Event::getEvents([
+    'status' => ['planned', 'open', 'closed'],
+    'start_date' => date('Y-m-d H:i:s')
+], $user['role']);
+usort($upcomingEvents, function($a, $b) {
+    return strtotime($a['start_time']) - strtotime($b['start_time']);
+});
+$nextEvents = array_slice($upcomingEvents, 0, 3);
 
 // Get user's open tasks from inventory_requests and inventory_rentals tables
 $openTasksCount = 0;
@@ -313,7 +306,7 @@ function dismissProfileReviewPrompt() {
                         <i class="fas fa-clock mr-1 text-blue-400"></i>
                         <?php echo date('d.m.Y H:i', strtotime($nextEvent['start_time'])); ?> Uhr
                     </p>
-                    <a href="../events/view.php?id=<?php echo $nextEvent['event_id']; ?>" class="inline-flex items-center text-blue-600 hover:text-blue-700 font-semibold text-sm hover:translate-x-1 transition-transform">
+                    <a href="../events/view.php?id=<?php echo $nextEvent['id']; ?>" class="inline-flex items-center text-blue-600 hover:text-blue-700 font-semibold text-sm hover:translate-x-1 transition-transform">
                         Details ansehen <i class="fas fa-arrow-right ml-2"></i>
                     </a>
                 </div>
@@ -524,19 +517,8 @@ function hidePollFromDashboard(pollId) {
     
     <div class="grid grid-cols-1 gap-6">
         <?php 
-        // Get upcoming events (upcoming status, ordered by start time)
-        $upcomingEventsForAllUsers = Event::getEvents([
-            'status' => ['upcoming', 'registration_open'],
-            'start_date' => date('Y-m-d H:i:s')
-        ], $user['role']);
-        
-        // Sort by start_time ascending (nearest first)
-        usort($upcomingEventsForAllUsers, function($a, $b) {
-            return strtotime($a['start_time']) - strtotime($b['start_time']);
-        });
-        
-        // Limit to 5 events
-        $upcomingEventsForAllUsers = array_slice($upcomingEventsForAllUsers, 0, 5);
+        // Reuse pre-fetched upcoming events (already sorted by start_time ASC), limited to 5
+        $upcomingEventsForAllUsers = array_slice($upcomingEvents, 0, 5);
         
         if (!empty($upcomingEventsForAllUsers)): 
         ?>
