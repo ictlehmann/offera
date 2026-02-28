@@ -136,9 +136,9 @@ if (!empty($userName)) {
     </nav>
 
     <!-- ===================== USER PROFILE ===================== -->
-    <div class="shrink-0 border-t border-gray-700 px-2 py-1.5">
+    <div class="shrink-0 border-t border-gray-700 px-1 py-1 md:px-2 md:py-1.5">
         <!-- User info -->
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-1 md:gap-2">
             <!-- Profile image or initials avatar -->
             <?php if (!empty($_sidebarProfileImageUrl)): ?>
             <img
@@ -152,10 +152,10 @@ if (!empty($userName)) {
             </div>
             <?php endif; ?>
             <div class="min-w-0 flex-1">
-                <p class="text-sm font-bold leading-tight truncate"><?= htmlspecialchars($userName) ?></p>
+                <p class="text-xs md:text-sm font-bold leading-tight truncate"><?= htmlspecialchars($userName) ?></p>
                 <span class="text-[10px] text-gray-500 truncate block"><?= htmlspecialchars($userEmail) ?></span>
                 <span aria-label="Rolle: <?= htmlspecialchars($userRole) ?>"
-                      class="inline-flex items-center mt-0.5 px-1.5 py-px rounded-full text-[9px] font-bold tracking-wider uppercase bg-gradient-to-r from-violet-700 to-indigo-700 text-white max-w-full truncate"
+                      class="inline-flex items-center mt-0.5 px-1.5 py-px rounded text-[9px] font-bold tracking-wider uppercase bg-blue-600 text-white max-w-full truncate"
                 ><?= htmlspecialchars($userRole) ?></span>
             </div>
         </div>
