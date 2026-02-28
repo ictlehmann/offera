@@ -397,14 +397,14 @@ require_once __DIR__ . '/../helpers.php';
                 0 30px 90px rgba(0, 0, 0, 0.5),
                 0 0 0 1px rgba(108, 183, 62, 0.1),
                 inset 0 1px 0 rgba(255, 255, 255, 0.05);
-            width: min(500px, 92vw);
-            max-width: 500px;
+            width: calc(100% - 2rem);
+            max-width: 28rem;
             position: relative;
             z-index: 10;
             -webkit-animation: containerAppear 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
             animation: containerAppear 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
             border: 1px solid rgba(108, 183, 62, 0.1);
-            margin: auto;
+            margin: 0 auto;
         }
 
         @-webkit-keyframes containerAppear {
@@ -540,6 +540,7 @@ require_once __DIR__ . '/../helpers.php';
 
         .ibc-logo {
             width: 150px;
+            max-width: 100%;
             height: auto;
             position: relative;
             z-index: 2;
@@ -905,7 +906,6 @@ require_once __DIR__ . '/../helpers.php';
         @media (min-width: 1600px) {
             .login-container {
                 padding: 70px;
-                width: 550px;
             }
 
             .ibc-logo {
@@ -932,7 +932,6 @@ require_once __DIR__ . '/../helpers.php';
         @media (max-width: 1024px) and (min-width: 769px) {
             .login-container {
                 padding: 50px 40px;
-                width: 480px;
             }
 
             .ibc-logo {

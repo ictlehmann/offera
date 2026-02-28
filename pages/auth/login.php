@@ -382,9 +382,9 @@ try {
                 0 30px 90px rgba(0, 0, 0, 0.5),
                 0 0 0 1px rgba(108, 183, 62, 0.1),
                 inset 0 1px 0 rgba(255, 255, 255, 0.05);
-            width: 100%;
-            max-width: 450px;
-            margin: 0 20px;
+            width: calc(100% - 2rem);
+            max-width: 28rem;
+            margin: 0 auto;
             position: relative;
             z-index: 10;
             -webkit-animation: containerAppear 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -525,6 +525,7 @@ try {
 
         .ibc-logo {
             width: 150px;
+            max-width: 100%;
             height: auto;
             position: relative;
             z-index: 2;
