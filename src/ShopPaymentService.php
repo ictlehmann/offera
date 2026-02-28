@@ -419,7 +419,7 @@ class ShopPaymentService {
             $paymentPurpose = self::generatePaymentPurpose($firstName, $lastName, $orderId);
 
             // 1. Save invoice entry in Rech DB with payment_purpose
-            self::saveOrderInvoice($orderId, $userId, $total, $paymentPurpose);
+            $invoiceId = self::saveOrderInvoice($orderId, $userId, $total, $paymentPurpose);
 
             // 2. Send bank-transfer instructions to the buyer (non-blocking)
             try {
@@ -430,7 +430,12 @@ class ShopPaymentService {
 
             // 3. Create open document in EasyVerein (non-blocking)
             try {
-                self::createEasyVereinDocument($orderId, $total, $paymentPurpose);
+                $evDocId = self::createEasyVereinDocument($orderId, $total, $paymentPurpose);
+                if ($evDocId !== null && $invoiceId > 0) {
+                    $db   = Database::getRechDB();
+                    $stmt = $db->prepare("UPDATE invoices SET easyverein_document_id = ? WHERE id = ?");
+                    $stmt->execute([$evDocId, $invoiceId]);
+                }
             } catch (\Exception $evEx) {
                 error_log("ShopPaymentService::initiateBankTransfer – EasyVerein document failed for order #{$orderId}: " . $evEx->getMessage());
             }
@@ -449,9 +454,9 @@ class ShopPaymentService {
      * @param int    $userId         User ID
      * @param float  $total          Order total in EUR
      * @param string $paymentPurpose Generated Verwendungszweck
-     * @return void
+     * @return int                   New invoice ID
      */
-    private static function saveOrderInvoice(int $orderId, int $userId, float $total, string $paymentPurpose): void {
+    private static function saveOrderInvoice(int $orderId, int $userId, float $total, string $paymentPurpose): int {
         $db   = Database::getRechDB();
         $stmt = $db->prepare(
             "INSERT INTO invoices (user_id, description, amount, file_path, status, payment_purpose)
@@ -463,6 +468,7 @@ class ShopPaymentService {
             $total,
             $paymentPurpose,
         ]);
+        return (int) $db->lastInsertId();
     }
 
     /**
@@ -472,13 +478,13 @@ class ShopPaymentService {
      * @param int    $orderId        Shop order ID
      * @param float  $total          Order total in EUR
      * @param string $paymentPurpose Verwendungszweck
-     * @return void
+     * @return string|null           EasyVerein document ID, or null on failure
      */
-    private static function createEasyVereinDocument(int $orderId, float $total, string $paymentPurpose): void {
+    private static function createEasyVereinDocument(int $orderId, float $total, string $paymentPurpose): ?string {
         $apiToken = defined('EASYVEREIN_API_TOKEN') ? EASYVEREIN_API_TOKEN : '';
         if ($apiToken === '') {
             error_log("ShopPaymentService::createEasyVereinDocument – EASYVEREIN_API_TOKEN not configured");
-            return;
+            return null;
         }
 
         $payload = [
@@ -504,7 +510,12 @@ class ShopPaymentService {
         $statusCode = $response->getStatusCode();
         if ($statusCode < 200 || $statusCode >= 300) {
             error_log("ShopPaymentService::createEasyVereinDocument – EasyVerein API returned HTTP {$statusCode} for order #{$orderId}: " . (string) $response->getBody());
+            return null;
         }
+
+        $data = json_decode((string) $response->getBody(), true);
+        $evDocId = isset($data['id']) ? (string) $data['id'] : null;
+        return $evDocId;
     }
 
 

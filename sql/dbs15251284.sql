@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS `invoices` (
   `paid_by_user_id` INT UNSIGNED DEFAULT NULL COMMENT 'User ID who marked invoice as paid',
   `paypal_transaction_id` VARCHAR(64) DEFAULT NULL COMMENT 'PayPal capture/transaction ID for webhook lookup',
   `payment_purpose` VARCHAR(255) DEFAULT NULL COMMENT 'Payment purpose / Verwendungszweck for Vorkasse',
+  `easyverein_document_id` VARCHAR(64) DEFAULT NULL COMMENT 'EasyVerein billing document ID for bank-transfer invoices',
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   INDEX `idx_user_id` (`user_id`),
