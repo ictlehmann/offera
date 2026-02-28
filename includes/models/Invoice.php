@@ -28,6 +28,13 @@ class Invoice {
     ];
     
     /**
+     * Allowed file extensions for invoice uploads (whitelist)
+     */
+    private const ALLOWED_EXTENSIONS = [
+        'pdf', 'jpg', 'jpeg', 'png', 'heic', 'heif'
+    ];
+    
+    /**
      * Maximum file size for invoices (10MB)
      */
     private const MAX_FILE_SIZE = 10485760;
@@ -113,6 +120,16 @@ class Invoice {
                 'success' => false,
                 'path' => null,
                 'error' => 'Datei ist zu groß. Maximum: 10MB'
+            ];
+        }
+        
+        // Validate file extension using strict whitelist (use basename() to prevent path traversal)
+        $originalExtension = strtolower(pathinfo(basename($file['name']), PATHINFO_EXTENSION));
+        if (!in_array($originalExtension, self::ALLOWED_EXTENSIONS)) {
+            return [
+                'success' => false,
+                'path' => null,
+                'error' => 'Ungültige Dateiendung. Erlaubt: PDF, JPG, JPEG, PNG, HEIC, HEIF.'
             ];
         }
         

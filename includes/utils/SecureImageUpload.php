@@ -24,6 +24,13 @@ class SecureImageUpload {
     ];
     
     /**
+     * Allowed file extensions (whitelist)
+     */
+    private const ALLOWED_EXTENSIONS = [
+        'jpg', 'jpeg', 'png', 'webp', 'gif'
+    ];
+    
+    /**
      * Allowed image types for getimagesize()
      */
     private const ALLOWED_IMAGE_TYPES = [
@@ -67,6 +74,16 @@ class SecureImageUpload {
                 'success' => false,
                 'path' => null,
                 'error' => 'Datei ist zu groß. Maximum: 5MB'
+            ];
+        }
+        
+        // Validate file extension using strict whitelist (use basename() to prevent path traversal)
+        $originalExtension = strtolower(pathinfo(basename($file['name']), PATHINFO_EXTENSION));
+        if (!in_array($originalExtension, self::ALLOWED_EXTENSIONS)) {
+            return [
+                'success' => false,
+                'path' => null,
+                'error' => 'Ungültige Dateiendung. Nur JPG, JPEG, PNG, WebP und GIF sind erlaubt.'
             ];
         }
         
