@@ -117,8 +117,37 @@ For issues or questions:
 2. Review the documentation in `/md/`
 3. Contact the development team
 
+## Cron Jobs Setup
+
+Several features require scheduled tasks (cron jobs) to run automatically.
+
+### Birthday Wishes
+
+To send birthday emails daily at 8:00 AM, add the following line to your crontab:
+
+```
+0 8 * * * /usr/bin/php /path/to/offer/cron/send_birthday_wishes.php >> /var/log/birthday_wishes.log 2>&1
+```
+
+Edit the crontab with:
+```bash
+crontab -e
+```
+
+See `cron/README_BIRTHDAY_WISHES.md` for prerequisites and full setup instructions.
+
+### Profile Reminders
+
+To send profile reminder emails weekly on Monday at 9:00 AM:
+```
+0 9 * * 1 /usr/bin/php /path/to/offer/cron/send_profile_reminders.php >> /var/log/cron_profile_reminders.log 2>&1
+```
+
+See `md/PROFILE_REMINDERS_README.md` for prerequisites and full setup instructions.
+
 ## Related Documentation
 
 - `md/SQL_CONSOLIDATION_README.md` - SQL migration guide
 - `md/EVENT_FINANCIAL_STATS_README.md` - Financial stats feature
 - `md/PROFILE_REMINDERS_README.md` - Profile reminders feature
+- `cron/README_BIRTHDAY_WISHES.md` - Birthday wishes cron setup
