@@ -4,7 +4,8 @@
         "thenetworg/oauth2-azure": "^2.2",
         "paypal/paypal-checkout-sdk": "^1.0",
         "ralouphie/getallheaders": "^3.0",
-        "guzzlehttp/guzzle": "^7.10"
+        "guzzlehttp/guzzle": "^7.10",
+        "dompdf/dompdf": "^2.0"
     },
     "config": {
         "github-protocols": ["https", "git"]
