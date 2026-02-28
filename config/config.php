@@ -1,10 +1,8 @@
 <?php
 ob_start(); // Output Buffering starten
 
-// Security Headers
-header("X-Frame-Options: DENY");
-header("X-XSS-Protection: 1; mode=block");
-header("X-Content-Type-Options: nosniff");
+// Security Headers – comprehensive set (HSTS, CSP, X-Frame-Options, …)
+require_once __DIR__ . '/../includes/security_headers.php';
 
 // Load .env file
 $_envFile = __DIR__ . '/../.env';
