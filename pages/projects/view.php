@@ -159,7 +159,7 @@ ob_start();
             Zurück zur Übersicht
         </a>
         <?php if ($user['id'] === ($project['created_by'] ?? null) || Auth::isBoard() || Auth::hasPermission('manage_projects')): ?>
-        <a href="manage.php?edit=<?= $project['id'] ?>" class="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">
+        <a href="manage.php?edit=<?= (int)$project['id'] ?>" class="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">
             <i class="fas fa-edit mr-2"></i>
             Projekt bearbeiten
         </a>
@@ -250,7 +250,7 @@ ob_start();
                     case 'running': echo 'Laufend'; break;
                     case 'completed': echo 'Abgeschlossen'; break;
                     case 'archived': echo 'Archiviert'; break;
-                    default: echo ucfirst($project['status']); break;
+                    default: echo htmlspecialchars(ucfirst($project['status']), ENT_QUOTES, 'UTF-8'); break;
                 }
                 ?>
             </span>
@@ -269,7 +269,7 @@ ob_start();
                     case 'low': echo '<i class="fas fa-arrow-down mr-1"></i> Niedrig'; break;
                     case 'medium': echo '<i class="fas fa-minus mr-1"></i> Mittel'; break;
                     case 'high': echo '<i class="fas fa-arrow-up mr-1"></i> Hoch'; break;
-                    default: echo ucfirst($project['priority']); break;
+                    default: echo htmlspecialchars(ucfirst($project['priority']), ENT_QUOTES, 'UTF-8'); break;
                 }
                 ?>
             </span>
@@ -409,7 +409,7 @@ ob_start();
                                 <i class="fas fa-check-circle mr-2"></i>
                                 Projekt abschließen
                             </button>
-                            <a href="view.php?id=<?php echo $project['id']; ?>" 
+                            <a href="view.php?id=<?php echo (int)$project['id']; ?>" 
                                class="flex-1 text-center px-6 py-4 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition font-bold">
                                 Abbrechen
                             </a>
@@ -418,7 +418,7 @@ ob_start();
                 </div>
             <?php else: ?>
                 <!-- Show Complete Button -->
-                <a href="view.php?id=<?php echo $project['id']; ?>&action=complete" 
+                <a href="view.php?id=<?php echo (int)$project['id']; ?>&action=complete" 
                    class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-600 to-teal-600 text-white rounded-lg font-semibold hover:from-green-700 hover:to-teal-700 shadow-md hover:shadow-lg transform hover:-translate-y-1 transition duration-200">
                     <i class="fas fa-check-circle mr-2"></i>
                     Projekt abschließen
@@ -484,7 +484,7 @@ ob_start();
                                         case 'reviewing': echo 'Wird geprüft'; break;
                                         case 'accepted': echo 'Akzeptiert'; break;
                                         case 'rejected': echo 'Abgelehnt'; break;
-                                        default: echo ucfirst($userApplication['status']); break;
+                                        default: echo htmlspecialchars(ucfirst($userApplication['status']), ENT_QUOTES, 'UTF-8'); break;
                                     }
                                     ?>
                                 </span>
@@ -518,7 +518,7 @@ ob_start();
                             Möchtest du Teil dieses Projekts sein? Bewirb dich jetzt in wenigen Schritten.
                         </p>
                         
-                        <form method="POST" action="view.php?id=<?php echo $project['id']; ?>" class="space-y-6">
+                        <form method="POST" action="view.php?id=<?php echo (int)$project['id']; ?>" class="space-y-6">
                             <input type="hidden" name="csrf_token" value="<?php echo CSRFHandler::getToken(); ?>">
                             <input type="hidden" name="apply" value="1">
                             
@@ -586,7 +586,7 @@ ob_start();
                                     <i class="fas fa-paper-plane mr-2" aria-hidden="true"></i>
                                     Bewerbung absenden
                                 </button>
-                                <a href="view.php?id=<?php echo $project['id']; ?>" 
+                                <a href="view.php?id=<?php echo (int)$project['id']; ?>" 
                                    class="w-full text-center px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 focus:ring-2 focus:ring-gray-400 focus:outline-none transition font-medium">
                                     Abbrechen
                                 </a>
@@ -595,7 +595,7 @@ ob_start();
                     </div>
                 <?php else: ?>
                     <!-- Show "Apply Now" button when user hasn't applied yet -->
-                    <a href="view.php?id=<?php echo $project['id']; ?>&action=apply" 
+                    <a href="view.php?id=<?php echo (int)$project['id']; ?>&action=apply" 
                        class="inline-block px-6 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition">
                         <i class="fas fa-paper-plane mr-2"></i>
                         Jetzt bewerben

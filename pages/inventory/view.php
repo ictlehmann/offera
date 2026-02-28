@@ -543,7 +543,7 @@ if (!empty($logbookNote)):
                         $label = $typeLabels[$entry['change_type']] ?? $entry['change_type'];
                         ?>
                         <span class="px-3 py-1.5 text-xs font-semibold <?php echo $badgeClass; ?> rounded-full">
-                            <?php echo $label; ?>
+                            <?php echo htmlspecialchars($label, ENT_QUOTES, 'UTF-8'); ?>
                         </span>
                     </td>
                     <td class="px-6 py-4 text-sm">
