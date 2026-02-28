@@ -52,6 +52,7 @@ CREATE TABLE IF NOT EXISTS `shop_orders` (
     `shipping_cost`   DECIMAL(10,2) NOT NULL DEFAULT 0.00      COMMENT 'Versandkosten',
     `shipping_address`  TEXT         DEFAULT NULL               COMMENT 'Lieferadresse für Postversand',
     `delivery_status`   ENUM('open','delivered') NOT NULL DEFAULT 'open' COMMENT 'Lieferstatus',
+    `selected_variant`  VARCHAR(255) DEFAULT NULL               COMMENT 'Gewählte Variante (z.B. Größe) aus dem Produktfeld',
     `created_at`       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at`      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),

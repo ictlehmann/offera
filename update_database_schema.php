@@ -1259,6 +1259,13 @@ try {
         "Change shop_orders.payment_method ENUM from sepa to bank_transfer"
     );
 
+    // Add selected_variant column to shop_orders
+    executeSql(
+        $content_db,
+        "ALTER TABLE `shop_orders` ADD COLUMN `selected_variant` VARCHAR(255) DEFAULT NULL COMMENT 'Gewählte Variante (z.B. Größe) aus dem Produktfeld'",
+        "Add selected_variant column to shop_orders"
+    );
+
     // Make invoices.file_path nullable to allow shop-order-generated invoice entries
     executeSql(
         $rech_db,

@@ -852,7 +852,7 @@ function openProductModal(product) {
     // New fields
     document.getElementById('modal-category').value        = isEdit ? (product.category || '') : '';
     document.getElementById('modal-pickup-location').value = isEdit ? (product.pickup_location || '') : '';
-    document.getElementById('modal-variants-text').value   = isEdit ? (product.variants || '') : '';
+    document.getElementById('modal-variants-text').value   = isEdit ? (product.variants_csv || '') : '';
 
     // Header
     document.getElementById('modal-title').textContent        = isEdit ? 'Produkt bearbeiten' : 'Neues Produkt anlegen';
