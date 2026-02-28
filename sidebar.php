@@ -4,7 +4,7 @@
  *
  * Usage: include this file inside any page that needs the sidebar.
  * Expected session variables: user_name, user_email
- * The displayed role is resolved from the database role column (synced from Microsoft Entra).
+ * The displayed role is resolved from the current session via Auth::user().
  */
 
 require_once __DIR__ . '/classes/Auth.php';
@@ -16,33 +16,11 @@ $userEmail = Auth::getUserEmail() ?? '';
 
 $_sidebarUserId = Auth::getUserId();
 
-// Determine display role: use the role column from DB (synced from Microsoft Entra via syncEntraData)
 $userRole = 'Mitglied';
-if ($_sidebarUserId) {
-    try {
-        $_sidebarDb = Database::getUserDB();
-        $_sidebarUserStmt = $_sidebarDb->prepare("SELECT entra_roles, role FROM users WHERE id = ?");
-        $_sidebarUserStmt->execute([$_sidebarUserId]);
-        $_sidebarUserData = $_sidebarUserStmt->fetch();
-        if ($_sidebarUserData && !empty($_sidebarUserData['role'])) {
-            $userRole = translateRole($_sidebarUserData['role']);
-        } elseif ($_sidebarUserData && !empty($_sidebarUserData['entra_roles'])) {
-            // Fallback: match entra groups against ROLE_MAPPING to find the relevant role
-            $_sidebarEntraArr = json_decode($_sidebarUserData['entra_roles'], true);
-            if (json_last_error() === JSON_ERROR_NONE && is_array($_sidebarEntraArr)) {
-                $_sidebarRoleMapping = array_flip(ROLE_MAPPING);
-                foreach ($_sidebarEntraArr as $_sidebarGroup) {
-                    $_sidebarGroupId = is_array($_sidebarGroup) ? ($_sidebarGroup['id'] ?? null) : null;
-                    if ($_sidebarGroupId && isset($_sidebarRoleMapping[$_sidebarGroupId])) {
-                        $userRole = translateRole($_sidebarRoleMapping[$_sidebarGroupId]);
-                        break;
-                    }
-                }
-            }
-        }
-    } catch (Exception $_e) {
-        // Ignore – fall back to default
-    }
+$_sidebarUser = Auth::user();
+if ($_sidebarUser && !empty($_sidebarUser['role'])) {
+    $_sidebarRole = $_sidebarUser['role'];
+    $userRole = function_exists('translateRole') ? translateRole($_sidebarRole) : ucfirst($_sidebarRole);
 }
 $_sidebarProfileImageUrl = null;
 if ($_sidebarUserId) {
