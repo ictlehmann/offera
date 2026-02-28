@@ -53,7 +53,7 @@ try {
 
     // 3. Fetch bank transactions (look back 30 days to cover oldest escalation window)
     echo "Fetching bank transactions...\n";
-    $transactions = $syncService->getBankTransactions(30);
+    $transactions = EasyVereinSync::getBankTransactions(30);
     echo "Fetched " . count($transactions) . " bank transaction(s).\n\n";
 
     // 4. Load all pending bank-transfer invoices (identified by payment_purpose IS NOT NULL)
