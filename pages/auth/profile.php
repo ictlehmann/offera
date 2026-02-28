@@ -1019,6 +1019,31 @@ ob_start();
     </form>
 </div>
 
+<!-- Help & Changes Card -->
+<div class="card p-6 mt-6">
+    <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">
+        <i class="fas fa-life-ring text-blue-600 mr-2"></i>
+        Hilfe &amp; Änderungen
+    </h2>
+    <p class="text-gray-600 dark:text-gray-300 mb-5">
+        Benötigst du Hilfe oder möchtest etwas ändern? Hier geht's direkt zur richtigen Stelle.
+    </p>
+    <div class="flex flex-col sm:flex-row gap-3">
+        <a href="/einstellungen?support_action=email_name" class="btn-primary flex-1 flex items-center justify-center gap-2 no-underline">
+            <i class="fas fa-user-edit"></i>
+            E-Mail/Name ändern
+        </a>
+        <a href="/einstellungen?support_action=reset_2fa" class="btn-primary flex-1 flex items-center justify-center gap-2 no-underline">
+            <i class="fas fa-shield-alt"></i>
+            2FA zurücksetzen
+        </a>
+        <a href="/einstellungen?support_action=bug" class="btn-primary flex-1 flex items-center justify-center gap-2 no-underline">
+            <i class="fas fa-bug"></i>
+            Bug melden
+        </a>
+    </div>
+</div>
+
 <!-- Cropper.js Modal -->
 <div id="cropperModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
     <div class="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-lg max-h-[85vh] flex flex-col overflow-hidden">
