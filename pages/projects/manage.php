@@ -45,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_project'])) {
             'client_name' => trim($_POST['client_name'] ?? ''),
             'client_contact_details' => trim($_POST['client_contact_details'] ?? ''),
             'priority' => $_POST['priority'] ?? 'medium',
-            'type' => in_array($_POST['type'] ?? 'internal', ['internal', 'external']) ? $_POST['type'] : 'internal',
+            'type' => isset($_POST['is_internal']) ? 'internal' : 'external',
             'status' => $status,
             'max_consultants' => max(1, intval($_POST['max_consultants'] ?? 1)),
             'start_date' => !empty($_POST['start_date']) ? $_POST['start_date'] : null,
@@ -502,7 +502,7 @@ document.getElementById('deleteModal')?.addEventListener('click', (e) => {
             </div>
         </div>
 
-        <!-- Priority and Status -->
+        <!-- Priority and Type -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -517,17 +517,28 @@ document.getElementById('deleteModal')?.addEventListener('click', (e) => {
                     <option value="high" <?php echo (($_POST['priority'] ?? $project['priority'] ?? 'medium') === 'high') ? 'selected' : ''; ?>>Hoch</option>
                 </select>
             </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Projekt-Typ
-                </label>
-                <select 
-                    name="type" 
-                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+            <div class="flex items-center pt-6">
+                <input
+                    type="checkbox"
+                    id="is_internal_checkbox"
+                    name="is_internal"
+                    value="1"
+                    <?php
+                    if (isset($_POST['save_project'])) {
+                        // POST: reflect checkbox state
+                        echo isset($_POST['is_internal']) ? 'checked' : '';
+                    } else {
+                        // GET: use project type or default to internal for new projects
+                        echo (($project['type'] ?? 'internal') === 'internal') ? 'checked' : '';
+                    }
+                    ?>
+                    class="h-5 w-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
                 >
-                    <option value="internal" <?php echo (($_POST['type'] ?? $project['type'] ?? 'internal') === 'internal') ? 'selected' : ''; ?>>Intern</option>
-                    <option value="external" <?php echo (($_POST['type'] ?? $project['type'] ?? 'internal') === 'external') ? 'selected' : ''; ?>>Extern</option>
-                </select>
+                <label for="is_internal_checkbox" class="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
+                    <i class="fas fa-building text-indigo-500 mr-1"></i>
+                    Internes Projekt
+                    <span class="block text-xs text-gray-500 dark:text-gray-400 mt-0.5">Mitglieder können direkt teilnehmen, keine Bewerbung nötig</span>
+                </label>
             </div>
         </div>
 
@@ -579,13 +590,14 @@ document.getElementById('deleteModal')?.addEventListener('click', (e) => {
         </div>
 
         <!-- Required Consultants -->
-        <div>
+        <div id="max_consultants_row">
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Benötigte Berater <span class="text-red-500">*</span>
+                Anzahl Berater <span class="text-red-500" id="max_consultants_required_star">*</span>
             </label>
             <input 
                 type="number" 
                 name="max_consultants" 
+                id="max_consultants_input"
                 value="<?php echo htmlspecialchars($_POST['max_consultants'] ?? $project['max_consultants'] ?? '1'); ?>"
                 min="1"
                 required
@@ -672,6 +684,30 @@ document.getElementById('deleteModal')?.addEventListener('click', (e) => {
     </form>
 </div>
 <?php endif; ?>
+
+<script>
+// Internal project checkbox logic
+(function () {
+    const checkbox = document.getElementById('is_internal_checkbox');
+    const consultantsRow = document.getElementById('max_consultants_row');
+    const consultantsInput = document.getElementById('max_consultants_input');
+
+    if (!checkbox) return;
+
+    function applyInternalState(isInternal) {
+        if (consultantsRow) consultantsRow.style.display = isInternal ? 'none' : '';
+        if (consultantsInput) consultantsInput.required = !isInternal;
+    }
+
+    // Apply on page load
+    applyInternalState(checkbox.checked);
+
+    // Apply on change
+    checkbox.addEventListener('change', function () {
+        applyInternalState(this.checked);
+    });
+})();
+</script>
 
 <?php
 $content = ob_get_clean();

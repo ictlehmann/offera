@@ -630,4 +630,130 @@ class Project {
         
         return $result ? intval($result['count']) : 0;
     }
+
+    /**
+     * Get all participants (assigned members) for a project with user details
+     *
+     * @param int $projectId Project ID
+     * @return array Assignments with basic user info (user_id, role, first_name, last_name)
+     */
+    public static function getParticipants($projectId) {
+        $contentDb = Database::getContentDB();
+        $userDb = Database::getUserDB();
+
+        $stmt = $contentDb->prepare("
+            SELECT user_id, role, created_at
+            FROM project_assignments
+            WHERE project_id = ?
+            ORDER BY created_at ASC
+        ");
+        $stmt->execute([$projectId]);
+        $assignments = $stmt->fetchAll();
+
+        if (empty($assignments)) {
+            return [];
+        }
+
+        $userIds = array_column($assignments, 'user_id');
+        $placeholders = implode(',', array_fill(0, count($userIds), '?'));
+
+        // Get emails from user database
+        $stmt = $userDb->prepare("SELECT id AS user_id, email FROM users WHERE id IN ($placeholders)");
+        $stmt->execute($userIds);
+        $userMap = [];
+        foreach ($stmt->fetchAll() as $u) {
+            $userMap[$u['user_id']] = $u['email'];
+        }
+
+        // Get profile names from content database
+        $stmt = $contentDb->prepare("SELECT user_id, first_name, last_name FROM alumni_profiles WHERE user_id IN ($placeholders)");
+        $stmt->execute($userIds);
+        $profileMap = [];
+        foreach ($stmt->fetchAll() as $p) {
+            $profileMap[$p['user_id']] = $p;
+        }
+
+        $participants = [];
+        foreach ($assignments as $assignment) {
+            $uid = $assignment['user_id'];
+            $email = $userMap[$uid] ?? '';
+            $firstName = $profileMap[$uid]['first_name'] ?? '';
+            $lastName = $profileMap[$uid]['last_name'] ?? '';
+
+            if (empty($firstName) && empty($lastName) && !empty($email) && strpos($email, '@') !== false) {
+                $firstName = explode('@', $email)[0];
+            }
+
+            $participants[] = [
+                'user_id'    => $uid,
+                'role'       => $assignment['role'],
+                'created_at' => $assignment['created_at'],
+                'first_name' => $firstName,
+                'last_name'  => $lastName,
+            ];
+        }
+
+        return $participants;
+    }
+
+    /**
+     * Directly join an internal project as a participant
+     *
+     * @param int $projectId Project ID
+     * @param int $userId User ID
+     * @return bool True on success
+     * @throws Exception If already joined or project is full
+     */
+    public static function joinProject($projectId, $userId) {
+        $db = Database::getContentDB();
+
+        // Check if already assigned
+        $stmt = $db->prepare("
+            SELECT id FROM project_assignments
+            WHERE project_id = ? AND user_id = ?
+        ");
+        $stmt->execute([$projectId, $userId]);
+        if ($stmt->fetch()) {
+            throw new Exception('Du nimmst bereits an diesem Projekt teil');
+        }
+
+        // Check capacity (skip for internal projects which allow open participation)
+        $project = self::getById($projectId);
+        if (!$project) {
+            throw new Exception('Projekt nicht gefunden');
+        }
+        if (($project['type'] ?? 'internal') !== 'internal') {
+            $teamSize = self::getTeamSize($projectId);
+            if ($teamSize >= intval($project['max_consultants'] ?? 1)) {
+                throw new Exception('Das Projekt ist bereits vollständig besetzt');
+            }
+        }
+
+        $stmt = $db->prepare("
+            INSERT INTO project_assignments (project_id, user_id, role)
+            VALUES (?, ?, 'member')
+        ");
+        $stmt->execute([$projectId, $userId]);
+
+        return true;
+    }
+
+    /**
+     * Leave an internal project (remove own participation)
+     *
+     * @param int $projectId Project ID
+     * @param int $userId User ID
+     * @return bool True on success
+     */
+    public static function leaveProject($projectId, $userId) {
+        $db = Database::getContentDB();
+
+        $stmt = $db->prepare("
+            DELETE FROM project_assignments
+            WHERE project_id = ? AND user_id = ? AND role != 'lead'
+        ");
+        $stmt->execute([$projectId, $userId]);
+
+        return $stmt->rowCount() > 0;
+    }
 }
