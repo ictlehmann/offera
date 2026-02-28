@@ -62,15 +62,19 @@ if ($hour >= 5 && $hour < 12) {
 }
 
 // Get upcoming events from database
-$upcomingEvents = Event::getEvents([
-    'status' => ['planned', 'open', 'closed'],
-    'start_date' => date('Y-m-d H:i:s')
-], $user['role']);
-usort($upcomingEvents, function($a, $b) {
-    return strtotime($a['start_time']) - strtotime($b['start_time']);
-});
-$nextEvents = array_slice($upcomingEvents, 0, 3);
-$events = array_slice($upcomingEvents, 0, 5);
+$nextEvents = [];
+$events = [];
+try {
+    $contentDb = Database::getContentDB();
+    $stmt = $contentDb->prepare(
+        "SELECT id, title, start_time, location FROM events WHERE status IN ('planned', 'open', 'closed') AND start_time >= NOW() ORDER BY start_time ASC LIMIT 5"
+    );
+    $stmt->execute();
+    $events = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $nextEvents = array_slice($events, 0, 3);
+} catch (Exception $e) {
+    error_log('dashboard: upcoming events query failed: ' . $e->getMessage());
+}
 
 // Get user's open tasks from inventory_requests and inventory_rentals tables
 $openTasksCount = 0;
