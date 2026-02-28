@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 // Get and validate parameters
-$invoiceId = $_POST['invoice_id'] ?? null;
+$invoiceId = isset($_POST['invoice_id']) ? (int)$_POST['invoice_id'] : null;
 $status = $_POST['status'] ?? null;
 $reason = $_POST['reason'] ?? null;
 

@@ -20,7 +20,12 @@ $user = Auth::user();
 
 // Get poll ID from request
 $input = json_decode(file_get_contents('php://input'), true);
-$pollId = $input['poll_id'] ?? null;
+if (json_last_error() !== JSON_ERROR_NONE) {
+    http_response_code(400);
+    echo json_encode(['success' => false, 'message' => 'Ungültiges JSON-Format']);
+    exit;
+}
+$pollId = isset($input['poll_id']) ? (int)$input['poll_id'] : null;
 
 if (!$pollId) {
     http_response_code(400);

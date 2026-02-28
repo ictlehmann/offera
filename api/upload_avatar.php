@@ -29,6 +29,10 @@ try {
 
     // Read JSON body
     $body = json_decode(file_get_contents('php://input'), true);
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        echo json_encode(['success' => false, 'message' => 'Ungültiges JSON-Format']);
+        exit;
+    }
     $base64Data = $body['image'] ?? '';
 
     if (empty($base64Data)) {

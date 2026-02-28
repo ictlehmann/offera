@@ -29,6 +29,11 @@ if (!in_array($userRole, $allowedRoles)) {
 
 // Get POST data
 $data = json_decode(file_get_contents('php://input'), true);
+if (json_last_error() !== JSON_ERROR_NONE) {
+    http_response_code(400);
+    echo json_encode(['success' => false, 'message' => 'Ungültiges JSON-Format']);
+    exit;
+}
 
 if (!$data) {
     http_response_code(400);
@@ -36,7 +41,7 @@ if (!$data) {
     exit;
 }
 
-$eventId = $data['event_id'] ?? null;
+$eventId = isset($data['event_id']) ? (int)$data['event_id'] : null;
 
 // Validation: event_id is always required
 if (!$eventId) {

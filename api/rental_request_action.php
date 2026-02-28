@@ -39,7 +39,12 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-$input     = json_decode(file_get_contents('php://input'), true) ?? [];
+$input     = json_decode(file_get_contents('php://input'), true);
+if (json_last_error() !== JSON_ERROR_NONE || !is_array($input)) {
+    http_response_code(400);
+    echo json_encode(['success' => false, 'message' => 'Ungültiges JSON-Format']);
+    exit;
+}
 $action    = $input['action']     ?? '';
 $requestId = (int)($input['request_id'] ?? 0);
 

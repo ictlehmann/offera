@@ -32,6 +32,11 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 // Get request data
 $input = json_decode(file_get_contents('php://input'), true);
+if (json_last_error() !== JSON_ERROR_NONE) {
+    http_response_code(400);
+    echo json_encode(['success' => false, 'message' => 'Ungültiges JSON-Format']);
+    exit;
+}
 $action = $input['action'] ?? null;
 
 $user = AuthHandler::getCurrentUser();
@@ -42,8 +47,8 @@ try {
     switch ($action) {
         case 'signup':
             // Get parameters
-            $eventId = $input['event_id'] ?? null;
-            $slotId = $input['slot_id'] ?? null;
+            $eventId = isset($input['event_id']) ? (int)$input['event_id'] : null;
+            $slotId = isset($input['slot_id']) ? (int)$input['slot_id'] : null;
             $slotStart = $input['slot_start'] ?? null;
             $slotEnd = $input['slot_end'] ?? null;
             
@@ -178,7 +183,7 @@ try {
             
         case 'cancel':
             // Get parameters
-            $signupId = $input['signup_id'] ?? null;
+            $signupId = isset($input['signup_id']) ? (int)$input['signup_id'] : null;
             
             if (!$signupId) {
                 throw new Exception('Signup-ID fehlt');
@@ -269,7 +274,7 @@ try {
             
         case 'simple_register':
             // Simple event registration using event_registrations table
-            $eventId = $input['event_id'] ?? null;
+            $eventId = isset($input['event_id']) ? (int)$input['event_id'] : null;
             
             if (!$eventId) {
                 throw new Exception('Event-ID fehlt');
