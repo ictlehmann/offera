@@ -157,11 +157,11 @@ if (Auth::check() && isset($_SESSION['profile_incomplete']) && $_SESSION['profil
         .sidebar-footer-btn {
             display: flex;
             align-items: center;
-            gap: 0.625rem;
+            gap: 0.5rem;
             width: 100%;
-            padding: 0.6rem 0.875rem;
-            border-radius: 10px;
-            font-size: 0.85rem;
+            padding: 0.4rem 0.625rem;
+            border-radius: 8px;
+            font-size: 0.78rem;
             font-weight: 500;
             color: rgba(255, 255, 255, 0.9);
             background: rgba(255, 255, 255, 0.08);
@@ -169,7 +169,7 @@ if (Auth::check() && isset($_SESSION['profile_incomplete']) && $_SESSION['profil
             transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
             cursor: pointer;
             text-decoration: none;
-            margin-bottom: 0.375rem;
+            margin-bottom: 0.25rem;
         }
         .sidebar-footer-btn:hover {
             background: rgba(255, 255, 255, 0.18);
@@ -612,6 +612,13 @@ if (Auth::check() && isset($_SESSION['profile_incomplete']) && $_SESSION['profil
             </div>
             
             <nav aria-label="Hauptnavigation">
+                <!-- Dashboard (All) -->
+                <a href="<?php echo asset('pages/dashboard/index.php'); ?>" 
+                   class="flex items-center justify-start px-4 py-2 text-white hover:bg-white/10 transition-colors duration-200 <?php echo isActivePath('/dashboard/') ? 'bg-white/20 text-white border-l-4 border-ibc-green' : ''; ?>">
+                    <i class="fas fa-home w-5 mr-3"></i>
+                    <span>Dashboard</span>
+                </a>
+
                 <!-- Alumni (All) -->
                 <a href="<?php echo asset('pages/alumni/index.php'); ?>" 
                    class="flex items-center justify-start px-4 py-2 text-white hover:bg-white/10 transition-colors duration-200 <?php echo isActivePath('/alumni/') ? 'bg-white/20 text-white border-l-4 border-ibc-green' : ''; ?>">
@@ -624,13 +631,6 @@ if (Auth::check() && isset($_SESSION['profile_incomplete']) && $_SESSION['profil
                    class="flex items-center justify-start px-4 py-2 text-white hover:bg-white/10 transition-colors duration-200 <?php echo isActivePath('/blog/') ? 'bg-white/20 text-white border-l-4 border-ibc-green' : ''; ?>">
                     <i class="fas fa-newspaper w-5 mr-3"></i>
                     <span>Blog</span>
-                </a>
-
-                <!-- Dashboard (All) -->
-                <a href="<?php echo asset('pages/dashboard/index.php'); ?>" 
-                   class="flex items-center justify-start px-4 py-2 text-white hover:bg-white/10 transition-colors duration-200 <?php echo isActivePath('/dashboard/') ? 'bg-white/20 text-white border-l-4 border-ibc-green' : ''; ?>">
-                    <i class="fas fa-home w-5 mr-3"></i>
-                    <span>Dashboard</span>
                 </a>
 
                 <!-- Events (All) -->
@@ -754,15 +754,6 @@ if (Auth::check() && isset($_SESSION['profile_incomplete']) && $_SESSION['profil
                 </div>
                 <?php endif; ?>
 
-                <!-- Audit Logs (All board members) -->
-                <?php if (Auth::isAdmin()): ?>
-                <a href="<?php echo asset('pages/admin/audit.php'); ?>" 
-                   class="flex items-center justify-start px-4 py-2 text-white hover:bg-white/10 transition-colors duration-200 <?php echo isActivePath('/admin/audit.php') ? 'bg-white/20 text-white border-l-4 border-ibc-green' : ''; ?>">
-                    <i class="fas fa-clipboard-list w-5 mr-3"></i>
-                    <span>Audit Logs</span>
-                </a>
-                <?php endif; ?>
-
                 <!-- Benutzerverwaltung (All board members who can manage users) -->
                 <?php if (Auth::canManageUsers()): ?>
                 <a href="<?php echo asset('pages/admin/users.php'); ?>" 
@@ -826,15 +817,6 @@ if (Auth::check() && isset($_SESSION['profile_incomplete']) && $_SESSION['profil
                 </a>
                 <?php endif; ?>
 
-                <!-- System Health (All board members) -->
-                <?php if (Auth::isAdmin()): ?>
-                <a href="<?php echo asset('pages/admin/db_maintenance.php'); ?>" 
-                   class="flex items-center justify-start px-4 py-2 text-white hover:bg-white/10 transition-colors duration-200 <?php echo isActivePath('/admin/db_maintenance.php') ? 'bg-white/20 text-white border-l-4 border-ibc-green' : ''; ?>">
-                    <i class="fas fa-database w-5 mr-3"></i>
-                    <span>System Health</span>
-                </a>
-                <?php endif; ?>
-
                 <!-- Statistiken Section Divider -->
                 <?php if (Auth::isAdmin() || Auth::hasRole(['board_finance', 'board_internal', 'board_external', 'head'])): ?>
                 <div class="my-3 mx-4">
@@ -865,8 +847,26 @@ if (Auth::check() && isset($_SESSION['profile_incomplete']) && $_SESSION['profil
                 <?php if (Auth::isAdmin()): ?>
                 <a href="<?php echo asset('pages/admin/stats.php'); ?>" 
                    class="flex items-center justify-start px-4 py-2 text-white hover:bg-white/10 transition-colors duration-200 <?php echo isActivePath('/admin/stats.php') ? 'bg-white/20 text-white border-l-4 border-ibc-green' : ''; ?>">
-                    <i class="fas fa-chart-bar w-5 mr-3"></i>
+                    <i class="fas fa-chart-pie w-5 mr-3"></i>
                     <span>Statistiken</span>
+                </a>
+                <?php endif; ?>
+
+                <!-- Audit Logs (All board members) -->
+                <?php if (Auth::isAdmin()): ?>
+                <a href="<?php echo asset('pages/admin/audit.php'); ?>" 
+                   class="flex items-center justify-start px-4 py-2 text-white hover:bg-white/10 transition-colors duration-200 <?php echo isActivePath('/admin/audit.php') ? 'bg-white/20 text-white border-l-4 border-ibc-green' : ''; ?>">
+                    <i class="fas fa-clipboard-list w-5 mr-3"></i>
+                    <span>Audit Logs</span>
+                </a>
+                <?php endif; ?>
+
+                <!-- System Health (All board members) -->
+                <?php if (Auth::isAdmin()): ?>
+                <a href="<?php echo asset('pages/admin/db_maintenance.php'); ?>" 
+                   class="flex items-center justify-start px-4 py-2 text-white hover:bg-white/10 transition-colors duration-200 <?php echo isActivePath('/admin/db_maintenance.php') ? 'bg-white/20 text-white border-l-4 border-ibc-green' : ''; ?>">
+                    <i class="fas fa-database w-5 mr-3"></i>
+                    <span>System Health</span>
                 </a>
                 <?php endif; ?>
 
@@ -874,7 +874,7 @@ if (Auth::check() && isset($_SESSION['profile_incomplete']) && $_SESSION['profil
         </div>
 
         <!-- User Profile Section -->
-        <div class='sidebar-footer mt-auto pt-4 pb-4 px-5'>
+        <div class='sidebar-footer mt-auto pt-2 pb-2 px-3'>
             <?php 
             $currentUser = Auth::user();
             
@@ -976,7 +976,7 @@ if (Auth::check() && isset($_SESSION['profile_incomplete']) && $_SESSION['profil
             ?>
 
             <!-- User Info -->
-            <div class='flex items-start gap-2 mb-4'>
+            <div class='flex items-start gap-2 mb-2'>
                 <?php if (!empty($navProfileImageUrl)): ?>
                 <img src="<?php echo htmlspecialchars(asset($navProfileImageUrl)); ?>" alt="Profilbild" class="w-9 h-9 rounded-full object-cover shadow border border-white/20 shrink-0" style="aspect-ratio:1/1;">
                 <?php else: ?>
@@ -1016,9 +1016,9 @@ if (Auth::check() && isset($_SESSION['profile_incomplete']) && $_SESSION['profil
                         $entraRoleDisplay = 'Mitglied';
                     }
                     ?>
-                    <p class='text-[11px] text-white/50 truncate leading-snug mt-0.5' title='<?php echo htmlspecialchars($entraRoleDisplay); ?>'>
+                    <span class='bg-indigo-100 text-indigo-700 font-semibold px-2 py-1 rounded-md text-xs inline-block mt-1' title='<?php echo htmlspecialchars($entraRoleDisplay); ?>' aria-label='Rolle: <?php echo htmlspecialchars($entraRoleDisplay); ?>'>
                         <?php echo htmlspecialchars($entraRoleDisplay); ?>
-                    </p>
+                    </span>
                 </div>
             </div>
             
@@ -1049,7 +1049,7 @@ if (Auth::check() && isset($_SESSION['profile_incomplete']) && $_SESSION['profil
 
             
             <!-- Live Clock -->
-            <div class='mt-4 pt-4 border-t border-white/20 text-center'>
+            <div class='mt-2 pt-2 border-t border-white/20 text-center'>
                 <div id="live-clock" class='text-xs text-white/80 font-mono'>
                     <!-- JavaScript will update this -->
                 </div>
