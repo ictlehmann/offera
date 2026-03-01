@@ -785,6 +785,56 @@ class Shop {
     }
 
     // -------------------------------------------------------------------------
+    // Shipping
+    // -------------------------------------------------------------------------
+
+    /**
+     * Calculate the shipping cost based on the destination country, cart total,
+     * and whether the cart contains only digital/downloadable products.
+     *
+     * Rules:
+     *  - Digital-only cart       →  0,00 €
+     *  - Germany (DE)            →  4,90 € (free from 50,00 € cart total)
+     *  - Austria (AT) / Switzerland (CH) → 9,90 €
+     *  - Other EU countries      → 14,90 €
+     *
+     * @param string $countryCode ISO 3166-1 alpha-2 country code (e.g. 'DE', 'AT', 'CH')
+     * @param float  $cartTotal   Sum of all item prices in the cart (EUR)
+     * @param bool   $isDigital   True when the cart contains only digital products / downloads
+     * @return float              Shipping cost in EUR
+     */
+    public static function calculateShippingCost(string $countryCode, float $cartTotal, bool $isDigital = false): float {
+        if ($isDigital) {
+            return 0.00;
+        }
+
+        $euCountries = [
+            'AT', 'BE', 'BG', 'CY', 'CZ', 'DK', 'EE', 'ES', 'FI', 'FR', 'GR', 'HR',
+            'HU', 'IE', 'IT', 'LT', 'LU', 'LV', 'MT', 'NL', 'PL', 'PT', 'RO', 'SE',
+            'SI', 'SK',
+        ];
+
+        $code = strtoupper($countryCode);
+
+        if ($code === 'DE') {
+            return $cartTotal >= 50.00 ? 0.00 : 4.90;
+        }
+
+        // CH is not an EU member but receives the same flat rate as AT
+        if ($code === 'AT' || $code === 'CH') {
+            return 9.90;
+        }
+
+        // All other EU countries – and any country not listed above
+        if (in_array($code, $euCountries, true)) {
+            return 14.90;
+        }
+
+        // Fallback for non-EU / unknown countries
+        return 14.90;
+    }
+
+    // -------------------------------------------------------------------------
     // Statistics
     // -------------------------------------------------------------------------
 
