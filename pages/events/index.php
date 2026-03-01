@@ -89,12 +89,12 @@ ob_start();
     <!-- Filter Tabs -->
     <div class="mb-6 flex gap-2 flex-wrap">
         <a href="?filter=current" 
-           class="px-6 py-3 rounded-lg font-semibold transition-all <?php echo $filter === 'current' ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-lg' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'; ?>">
+           class="events-filter-tab <?php echo $filter === 'current' ? 'events-filter-tab--active' : ''; ?>">
             <i class="fas fa-calendar-day mr-2"></i>
             Aktuell
         </a>
         <a href="?filter=my_registrations" 
-           class="px-6 py-3 rounded-lg font-semibold transition-all <?php echo $filter === 'my_registrations' ? 'bg-gradient-to-r from-purple-600 to-purple-700 text-white shadow-lg' : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'; ?>">
+           class="events-filter-tab <?php echo $filter === 'my_registrations' ? 'events-filter-tab--active' : ''; ?>">
             <i class="fas fa-user-check mr-2"></i>
             Meine Anmeldungen
         </a>
@@ -102,9 +102,12 @@ ob_start();
 
     <!-- Events Grid -->
     <?php if (empty($events)): ?>
-        <div class="card p-8 text-center">
-            <i class="fas fa-calendar-times text-6xl text-gray-300 dark:text-gray-600 mb-4"></i>
-            <p class="text-xl text-gray-600 dark:text-gray-300">Keine Events gefunden</p>
+        <div class="card p-12 text-center rounded-2xl border border-dashed border-gray-300 dark:border-gray-600">
+            <div class="w-20 h-20 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mx-auto mb-5">
+                <i class="fas fa-calendar-times text-4xl text-gray-400 dark:text-gray-500"></i>
+            </div>
+            <p class="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">Keine Events gefunden</p>
+            <p class="text-sm text-gray-400 dark:text-gray-500">Aktuell gibt es keine Events in dieser Kategorie.</p>
         </div>
     <?php else: ?>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -140,7 +143,9 @@ ob_start();
                     }
                 ?>
                 
-                <a href="view.php?id=<?php echo $event['id']; ?>" class="event-card card flex flex-col overflow-hidden group no-underline" style="text-decoration:none;">
+                <a href="view.php?id=<?php echo $event['id']; ?>" class="event-card card flex flex-col overflow-hidden group no-underline event-card--<?php echo htmlspecialchars($event['status']); ?>" style="text-decoration:none;">
+                    <!-- Status accent strip -->
+                    <div class="event-card-accent"></div>
                     <!-- Event Image -->
                     <div class="event-card-image relative overflow-hidden">
                         <?php if ($hasImage): ?>
@@ -148,8 +153,9 @@ ob_start();
                                  alt="<?php echo htmlspecialchars($event['title']); ?>"
                                  class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
                         <?php else: ?>
-                            <div class="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-ibc-blue to-ibc-blue-dark">
-                                <i class="fas fa-calendar-alt text-white/40 text-5xl"></i>
+                            <div class="w-full h-full flex flex-col items-center justify-center event-card-placeholder">
+                                <i class="fas fa-calendar-alt text-white/30 text-5xl mb-2"></i>
+                                <span class="text-white/50 text-xs font-semibold tracking-widest uppercase">Event</span>
                             </div>
                         <?php endif; ?>
 
@@ -257,11 +263,11 @@ ob_start();
 
                         <!-- CTA -->
                         <div class="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700">
-                            <span class="text-sm font-semibold text-ibc-blue group-hover:text-ibc-blue-dark transition-colors">
+                            <span class="text-sm font-semibold event-cta-link group-hover:text-ibc-blue-dark transition-colors">
                                 Details ansehen
                             </span>
-                            <span class="w-8 h-8 rounded-full bg-ibc-blue/10 flex items-center justify-center group-hover:bg-ibc-blue group-hover:text-white transition-all">
-                                <i class="fas fa-arrow-right text-xs"></i>
+                            <span class="w-8 h-8 rounded-full bg-ibc-blue/10 flex items-center justify-center group-hover:bg-ibc-blue transition-all">
+                                <i class="fas fa-arrow-right text-xs event-cta-link group-hover:text-white transition-colors"></i>
                             </span>
                         </div>
                     </div>
@@ -272,19 +278,80 @@ ob_start();
 </div>
 
 <style>
+    /* ── Filter Tabs ────────────────────────────────── */
+    .events-filter-tab {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.6rem 1.5rem;
+        border-radius: 9999px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: all 0.25s ease;
+        background: var(--bg-card);
+        color: var(--text-muted);
+        border: 1.5px solid var(--border-color);
+        text-decoration: none !important;
+    }
+    .events-filter-tab:hover {
+        border-color: var(--ibc-blue);
+        color: var(--ibc-blue) !important;
+        box-shadow: 0 2px 8px rgba(0,102,179,0.12);
+    }
+    .events-filter-tab--active {
+        background: linear-gradient(135deg, var(--ibc-blue) 0%, var(--ibc-blue-dark) 100%) !important;
+        color: #ffffff !important;
+        border-color: transparent !important;
+        box-shadow: 0 4px 14px rgba(0,102,179,0.35);
+    }
+
+    /* ── Event Card ─────────────────────────────────── */
     .event-card {
         transition: transform 0.25s ease, box-shadow 0.25s ease;
         color: inherit;
+        border: 1.5px solid var(--border-color) !important;
     }
     .event-card:hover {
-        transform: translateY(-4px);
+        transform: translateY(-5px);
         box-shadow: var(--shadow-card-hover);
+        border-color: var(--ibc-blue) !important;
     }
+
+    /* Status accent strip */
+    .event-card-accent {
+        height: 4px;
+        flex-shrink: 0;
+        background: var(--ibc-blue);
+    }
+    .event-card--open    .event-card-accent { background: var(--ibc-green); }
+    .event-card--running .event-card-accent { background: var(--ibc-blue); }
+    .event-card--past    .event-card-accent { background: var(--ibc-gray-400); }
+    .event-card--draft   .event-card-accent { background: var(--ibc-gray-400); }
+    .event-card--closed  .event-card-accent { background: var(--ibc-warning); }
+
+    /* ── Card Image ─────────────────────────────────── */
     .event-card-image {
-        height: 240px;
+        height: 220px;
         background: #e5e7eb;
         flex-shrink: 0;
     }
+
+    /* Image overlay so text badges stay readable */
+    .event-card-image::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to bottom, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.45) 100%);
+        pointer-events: none;
+    }
+
+    /* Placeholder gradient per status */
+    .event-card-placeholder {
+        background: linear-gradient(135deg, var(--ibc-blue) 0%, var(--ibc-blue-dark) 60%, #001f3a 100%);
+    }
+    .event-card--open    .event-card-placeholder { background: linear-gradient(135deg, var(--ibc-green) 0%, var(--ibc-green-dark) 60%, #004a24 100%); }
+    .event-card--past    .event-card-placeholder { background: linear-gradient(135deg, #374151 0%, #1f2937 100%); }
+
+    /* ── Date Chip ───────────────────────────────────── */
     .event-date-chip {
         display: flex;
         flex-direction: column;
@@ -294,7 +361,7 @@ ob_start();
         backdrop-filter: blur(8px);
         -webkit-backdrop-filter: blur(8px);
         border-radius: 0.75rem;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.22);
         padding: 0.35rem 0.65rem;
         min-width: 44px;
         text-align: center;
@@ -320,6 +387,8 @@ ob_start();
     .dark-mode .event-date-chip-day {
         color: #f8fafc;
     }
+
+    /* ── Meta Icon ──────────────────────────────────── */
     .event-meta-icon {
         width: 1.25rem;
         display: inline-flex;
@@ -327,11 +396,16 @@ ob_start();
         justify-content: center;
         flex-shrink: 0;
     }
+
+    /* ── Text Clamp ─────────────────────────────────── */
     .line-clamp-2 {
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
+    }
+    .event-cta-link {
+        color: var(--ibc-blue);
     }
 </style>
 

@@ -144,8 +144,8 @@ $statusInfo = $statusLabels[$currentStatus] ?? ['label' => $currentStatus, 'icon
                      alt="<?php echo htmlspecialchars($event['title']); ?>"
                      class="w-full h-full object-cover">
             <?php else: ?>
-                <div class="w-full h-full bg-gradient-to-br from-ibc-blue to-ibc-blue-dark flex items-center justify-center">
-                    <i class="fas fa-calendar-alt text-white/20 text-8xl"></i>
+                <div class="w-full h-full event-hero-placeholder flex items-center justify-center">
+                    <i class="fas fa-calendar-alt text-white/15 event-hero-placeholder-icon"></i>
                 </div>
             <?php endif; ?>
             <!-- Dark gradient overlay for legibility -->
@@ -182,50 +182,50 @@ $statusInfo = $statusLabels[$currentStatus] ?? ['label' => $currentStatus, 'icon
     ════════════════════════════════════════════════ -->
     <div class="event-quickstats mb-6">
         <!-- Start -->
-        <div class="glass-card shadow-soft rounded-2xl p-4 flex items-center gap-3">
-            <span class="w-10 h-10 rounded-xl bg-ibc-blue/10 flex items-center justify-center flex-shrink-0">
-                <i class="fas fa-calendar-day text-ibc-blue"></i>
+        <div class="event-stat-card event-stat-card--blue">
+            <span class="event-stat-icon">
+                <i class="fas fa-calendar-day"></i>
             </span>
             <div class="min-w-0">
-                <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Beginn</div>
-                <div class="font-bold text-gray-800 dark:text-gray-100"><?php echo date('d.m.Y', $startTimestamp); ?></div>
-                <div class="text-sm text-gray-500 dark:text-gray-400"><?php echo date('H:i', $startTimestamp); ?> Uhr</div>
+                <div class="event-stat-label">Beginn</div>
+                <div class="event-stat-value"><?php echo date('d.m.Y', $startTimestamp); ?></div>
+                <div class="event-stat-sub"><?php echo date('H:i', $startTimestamp); ?> Uhr</div>
             </div>
         </div>
         <!-- End -->
-        <div class="glass-card shadow-soft rounded-2xl p-4 flex items-center gap-3">
-            <span class="w-10 h-10 rounded-xl bg-ibc-blue/10 flex items-center justify-center flex-shrink-0">
-                <i class="fas fa-clock text-ibc-blue"></i>
+        <div class="event-stat-card event-stat-card--purple">
+            <span class="event-stat-icon">
+                <i class="fas fa-clock"></i>
             </span>
             <div class="min-w-0">
-                <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Ende</div>
-                <div class="font-bold text-gray-800 dark:text-gray-100"><?php echo date('d.m.Y', $endTimestamp); ?></div>
-                <div class="text-sm text-gray-500 dark:text-gray-400"><?php echo date('H:i', $endTimestamp); ?> Uhr</div>
+                <div class="event-stat-label">Ende</div>
+                <div class="event-stat-value"><?php echo date('d.m.Y', $endTimestamp); ?></div>
+                <div class="event-stat-sub"><?php echo date('H:i', $endTimestamp); ?> Uhr</div>
             </div>
         </div>
         <?php if (!empty($event['location'])): ?>
         <!-- Location -->
-        <div class="glass-card shadow-soft rounded-2xl p-4 flex items-center gap-3">
-            <span class="w-10 h-10 rounded-xl bg-ibc-green/10 flex items-center justify-center flex-shrink-0">
-                <i class="fas fa-map-marker-alt text-ibc-green"></i>
+        <div class="event-stat-card event-stat-card--green">
+            <span class="event-stat-icon">
+                <i class="fas fa-map-marker-alt"></i>
             </span>
             <div class="min-w-0">
-                <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Ort</div>
-                <div class="font-bold text-gray-800 dark:text-gray-100 truncate"><?php echo htmlspecialchars($event['location']); ?></div>
+                <div class="event-stat-label">Ort</div>
+                <div class="event-stat-value truncate"><?php echo htmlspecialchars($event['location']); ?></div>
             </div>
         </div>
         <?php endif; ?>
         <?php if (!$event['is_external']): ?>
         <!-- Participants -->
-        <div class="glass-card shadow-soft rounded-2xl p-4 flex items-center gap-3">
-            <span class="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center flex-shrink-0">
-                <i class="fas fa-users text-purple-500"></i>
+        <div class="event-stat-card event-stat-card--orange">
+            <span class="event-stat-icon">
+                <i class="fas fa-users"></i>
             </span>
             <div class="min-w-0">
-                <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Teilnehmer</div>
-                <div class="font-bold text-gray-800 dark:text-gray-100"><?php echo $registrationCount; ?></div>
+                <div class="event-stat-label">Teilnehmer</div>
+                <div class="event-stat-value"><?php echo $registrationCount; ?></div>
                 <?php if ($isRegistered): ?>
-                <div class="text-xs text-ibc-green font-semibold"><i class="fas fa-check-circle mr-1"></i>Angemeldet</div>
+                <div class="event-stat-sub" style="color:var(--ibc-green);"><i class="fas fa-check-circle mr-1"></i>Angemeldet</div>
                 <?php endif; ?>
             </div>
         </div>
@@ -284,7 +284,7 @@ $statusInfo = $statusLabels[$currentStatus] ?? ['label' => $currentStatus, 'icon
         </div>
 
         <!-- RIGHT: Info Sidebar -->
-        <div class="space-y-4">
+        <div class="space-y-4 event-sidebar">
 
             <!-- Date & Time Card -->
             <div class="glass-card shadow-soft rounded-2xl p-5">
@@ -350,8 +350,10 @@ $statusInfo = $statusLabels[$currentStatus] ?? ['label' => $currentStatus, 'icon
             <?php endif; ?>
 
             <!-- Registration / CTA Card -->
-            <div class="glass-card shadow-soft rounded-2xl p-5">
-                <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Anmeldung</h3>
+            <div class="event-cta-card rounded-2xl p-5">
+                <h3 class="text-sm font-semibold text-white/80 uppercase tracking-wider mb-3">
+                    <i class="fas fa-ticket-alt mr-1.5"></i>Anmeldung
+                </h3>
                 <div class="flex flex-col gap-3">
                     <?php if (!empty($event['registration_link'])): ?>
                         <a href="<?php echo htmlspecialchars($event['registration_link']); ?>"
@@ -393,17 +395,17 @@ $statusInfo = $statusLabels[$currentStatus] ?? ['label' => $currentStatus, 'icon
                     <?php endif; ?>
 
                     <!-- Calendar Export -->
-                    <div class="pt-2 border-t border-gray-100 dark:border-gray-700">
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mb-2 font-medium">In Kalender eintragen</p>
+                    <div class="pt-2 border-t border-white/20">
+                        <p class="text-xs text-white/60 mb-2 font-medium">In Kalender eintragen</p>
                         <div class="flex gap-2">
                             <a href="<?php echo htmlspecialchars(CalendarService::getGoogleLink($event)); ?>"
                                target="_blank"
                                rel="noopener noreferrer"
-                               class="flex-1 inline-flex items-center justify-center px-3 py-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 rounded-lg text-sm font-semibold hover:border-ibc-blue hover:text-ibc-blue ease-premium shadow-sm">
+                               class="flex-1 inline-flex items-center justify-center px-3 py-2 bg-white/15 border border-white/25 text-white rounded-lg text-sm font-semibold hover:bg-white/25 ease-premium">
                                 <i class="fab fa-google mr-1.5"></i>Google
                             </a>
                             <a href="../../api/download_ics.php?event_id=<?php echo htmlspecialchars($eventId, ENT_QUOTES, 'UTF-8'); ?>"
-                               class="flex-1 inline-flex items-center justify-center px-3 py-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 rounded-lg text-sm font-semibold hover:border-ibc-blue hover:text-ibc-blue ease-premium shadow-sm">
+                               class="flex-1 inline-flex items-center justify-center px-3 py-2 bg-white/15 border border-white/25 text-white rounded-lg text-sm font-semibold hover:bg-white/25 ease-premium">
                                 <i class="fas fa-download mr-1.5"></i>iCal
                             </a>
                         </div>
@@ -428,26 +430,27 @@ $statusInfo = $statusLabels[$currentStatus] ?? ['label' => $currentStatus, 'icon
 
     <!-- Helper Slots Section (Only for non-alumni and if event needs helpers) -->
     <?php if ($event['needs_helpers'] && $userRole !== 'alumni' && !empty($helperTypes)): ?>
-        <div class="glass-card shadow-soft rounded-xl p-8">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6">
-                <i class="fas fa-hands-helping mr-2 text-ibc-green"></i>
+        <div class="card rounded-2xl p-6 border border-gray-200 dark:border-gray-700 shadow-soft">
+            <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-1 flex items-center gap-2">
+                <span class="w-9 h-9 rounded-xl bg-ibc-green/10 flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-hands-helping text-ibc-green"></i>
+                </span>
                 Helfer-Bereich
             </h2>
-            
-            <p class="text-gray-600 dark:text-gray-300 mb-6">Unterstütze uns als Helfer! Wähle einen freien Slot aus.</p>
+            <p class="text-gray-500 dark:text-gray-400 text-sm mb-5 ml-11">Unterstütze uns als Helfer! Wähle einen freien Slot aus.</p>
             
             <?php foreach ($helperTypes as $helperType): ?>
                 <div class="mb-6 last:mb-0">
-                    <h3 class="text-xl font-bold text-gray-800 mb-2">
+                    <h3 class="text-base font-bold text-gray-800 dark:text-gray-100 mb-1">
                         <?php echo htmlspecialchars($helperType['title']); ?>
                     </h3>
                     
                     <?php if (!empty($helperType['description'])): ?>
-                        <p class="text-gray-600 mb-4"><?php echo htmlspecialchars($helperType['description']); ?></p>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm mb-3"><?php echo htmlspecialchars($helperType['description']); ?></p>
                     <?php endif; ?>
                     
                     <!-- Slots -->
-                    <div class="space-y-3">
+                    <div class="space-y-2">
                         <?php foreach ($helperType['slots'] as $slot): ?>
                             <?php
                                 $slotStart = new DateTime($slot['start_time']);
@@ -455,6 +458,9 @@ $statusInfo = $statusLabels[$currentStatus] ?? ['label' => $currentStatus, 'icon
                                 $occupancy = $slot['signups_count'] . '/' . $slot['quantity_needed'];
                                 $canSignup = !$slot['is_full'] && !$slot['user_in_slot'];
                                 $onWaitlist = $slot['is_full'] && !$slot['user_in_slot'];
+                                $fillPct = $slot['quantity_needed'] > 0
+                                    ? min(100, round($slot['signups_count'] / $slot['quantity_needed'] * 100))
+                                    : 0;
                                 
                                 // Prepare slot parameters for onclick handlers
                                 $slotStartFormatted = htmlspecialchars($slotStart->format('Y-m-d H:i:s'), ENT_QUOTES);
@@ -462,46 +468,46 @@ $statusInfo = $statusLabels[$currentStatus] ?? ['label' => $currentStatus, 'icon
                                 $slotSignupHandler = "signupForSlot({$eventId}, {$slot['id']}, '{$slotStartFormatted}', '{$slotEndFormatted}')";
                             ?>
                             
-                            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 p-4 bg-gray-50 rounded-xl border border-gray-200">
-                                <div class="flex-1">
-                                    <div class="font-semibold text-gray-800">
-                                        <i class="fas fa-clock mr-2 text-ibc-blue"></i>
-                                        <?php echo $slotStart->format('H:i'); ?> - <?php echo $slotEnd->format('H:i'); ?> Uhr
+                            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 rounded-xl border <?php echo $slot['user_in_slot'] ? 'border-ibc-green/40 bg-ibc-green/5' : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50'; ?>">
+                                <div class="flex-1 min-w-0">
+                                    <div class="font-semibold text-gray-800 dark:text-gray-100 flex items-center gap-2">
+                                        <i class="fas fa-clock text-ibc-blue text-sm"></i>
+                                        <?php echo $slotStart->format('H:i'); ?> – <?php echo $slotEnd->format('H:i'); ?> Uhr
                                     </div>
-                                    <div class="text-sm text-gray-600 mt-1">
-                                        <span class="font-semibold"><?php echo $occupancy; ?> belegt</span>
+                                    <!-- Capacity bar -->
+                                    <div class="mt-2 flex items-center gap-2">
+                                        <div class="flex-1 h-1.5 rounded-full bg-gray-200 dark:bg-gray-600 overflow-hidden">
+                                            <div class="h-full rounded-full <?php echo $slot['is_full'] ? 'bg-red-500' : 'bg-ibc-green'; ?>" style="width:<?php echo $fillPct; ?>%"></div>
+                                        </div>
+                                        <span class="text-xs font-semibold text-gray-500 dark:text-gray-400 whitespace-nowrap"><?php echo $occupancy; ?> belegt</span>
                                     </div>
                                 </div>
                                 
                                 <div class="flex-shrink-0">
                                     <?php if ($slot['user_in_slot']): ?>
-                                        <div class="flex items-center gap-3">
-                                            <span class="px-4 py-2 bg-ibc-green/10 text-ibc-green border border-ibc-green/20 rounded-xl font-semibold text-sm">
-                                                <i class="fas fa-check mr-1"></i>
-                                                Eingetragen
+                                        <div class="flex items-center gap-2">
+                                            <span class="px-3 py-1.5 bg-ibc-green/10 text-ibc-green border border-ibc-green/20 rounded-xl font-semibold text-sm">
+                                                <i class="fas fa-check mr-1"></i>Eingetragen
                                             </span>
                                             <?php if ($canCancel): ?>
                                                 <button onclick="cancelHelperSlot(<?php echo $userSignupId; ?>)" 
-                                                        class="px-4 py-2 bg-red-100 text-red-800 rounded-xl font-semibold text-sm hover:bg-red-200 ease-premium">
-                                                    <i class="fas fa-times mr-1"></i>
-                                                    Austragen
+                                                        class="px-3 py-1.5 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 rounded-xl font-semibold text-sm hover:bg-red-200 ease-premium">
+                                                    <i class="fas fa-times mr-1"></i>Austragen
                                                 </button>
                                             <?php endif; ?>
                                         </div>
                                     <?php elseif ($canSignup): ?>
                                         <button onclick="<?php echo $slotSignupHandler; ?>" 
-                                                class="rounded-xl bg-ibc-green text-white px-4 py-2 hover:shadow-md transform hover:-translate-y-0.5 transition-all">
-                                            <i class="fas fa-user-plus mr-2"></i>
-                                            Als Helfer eintragen
+                                                class="rounded-xl bg-ibc-green text-white px-4 py-2 text-sm font-semibold hover:shadow-glow ease-premium">
+                                            <i class="fas fa-user-plus mr-1.5"></i>Als Helfer eintragen
                                         </button>
                                     <?php elseif ($onWaitlist): ?>
                                         <button onclick="<?php echo $slotSignupHandler; ?>" 
-                                                class="px-6 py-2 bg-yellow-600 text-white rounded-xl font-semibold hover:bg-yellow-700 ease-premium">
-                                            <i class="fas fa-list mr-2"></i>
-                                            Warteliste
+                                                class="px-4 py-2 bg-amber-500 text-white rounded-xl font-semibold text-sm hover:bg-amber-600 ease-premium">
+                                            <i class="fas fa-list mr-1.5"></i>Warteliste
                                         </button>
                                     <?php else: ?>
-                                        <span class="px-4 py-2 bg-gray-100 text-gray-600 rounded-xl font-semibold text-sm">
+                                        <span class="px-3 py-1.5 bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-xl font-semibold text-sm">
                                             Belegt
                                         </span>
                                     <?php endif; ?>
@@ -592,23 +598,82 @@ $statusInfo = $statusLabels[$currentStatus] ?? ['label' => $currentStatus, 'icon
 
 <!-- Hero & Card Styles -->
 <style>
+    /* Local accent colors for stat cards (reuse if already in theme) */
+    :root {
+        --stat-purple: #7c3aed;
+        --stat-orange: #f97316;
+    }
+
+    /* ── Quick Stats Row ────────────────────────────── */
     .event-quickstats {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
         gap: 0.75rem;
     }
+
+    /* Stat cards with colored left border accents */
+    .event-stat-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 1rem;
+        padding: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        box-shadow: var(--shadow-soft);
+        border-left-width: 4px;
+    }
+    .event-stat-card--blue   { border-left-color: var(--ibc-blue); }
+    .event-stat-card--purple { border-left-color: var(--stat-purple); }
+    .event-stat-card--green  { border-left-color: var(--ibc-green); }
+    .event-stat-card--orange { border-left-color: var(--stat-orange); }
+
+    .event-stat-icon {
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 0.75rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    .event-stat-card--blue   .event-stat-icon { background: rgba(0,102,179,0.12); color: var(--ibc-blue); }
+    .event-stat-card--purple .event-stat-icon { background: rgba(124,58,237,0.12); color: var(--stat-purple); }
+    .event-stat-card--green  .event-stat-icon { background: rgba(0,166,81,0.12);  color: var(--ibc-green); }
+    .event-stat-card--orange .event-stat-icon { background: rgba(249,115,22,0.12); color: var(--stat-orange); }
+
+    .event-stat-label {
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--text-muted);
+    }
+    .event-stat-value {
+        font-weight: 700;
+        color: var(--text-main);
+        font-size: 0.95rem;
+        line-height: 1.3;
+    }
+    .event-stat-sub {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        margin-top: 0.1rem;
+    }
+
+    /* ── Hero Section ───────────────────────────────── */
     .event-hero {
         position: relative;
         background: #1f2937;
     }
     .event-hero-image {
         width: 100%;
-        height: 420px;
+        height: 480px;
         position: relative;
         overflow: hidden;
     }
     @media (max-width: 640px) {
-        .event-hero-image { height: 260px; }
+        .event-hero-image { height: 280px; }
     }
     .event-hero-image img {
         width: 100%;
@@ -616,10 +681,19 @@ $statusInfo = $statusLabels[$currentStatus] ?? ['label' => $currentStatus, 'icon
         object-fit: cover;
         display: block;
     }
+    .event-hero-placeholder {
+        background: linear-gradient(135deg, var(--ibc-blue) 0%, var(--ibc-blue-dark) 55%, #001f3a 100%);
+    }
+    .event-hero-placeholder-icon {
+        font-size: 7rem;
+    }
+    @media (max-width: 640px) {
+        .event-hero-placeholder-icon { font-size: 4rem; }
+    }
     .event-hero-overlay {
         position: absolute;
         inset: 0;
-        background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.35) 50%, rgba(0,0,0,0.15) 100%);
+        background: linear-gradient(to top, rgba(0,0,0,0.80) 0%, rgba(0,0,0,0.40) 50%, rgba(0,0,0,0.10) 100%);
     }
     .event-hero-content {
         position: absolute;
@@ -630,6 +704,27 @@ $statusInfo = $statusLabels[$currentStatus] ?? ['label' => $currentStatus, 'icon
     }
     @media (max-width: 640px) {
         .event-hero-content { padding: 1rem 1.25rem; }
+    }
+
+    /* ── Registration CTA Card ──────────────────────── */
+    .event-cta-card {
+        background: linear-gradient(135deg, var(--ibc-blue) 0%, var(--ibc-blue-dark) 100%);
+        box-shadow: 0 8px 24px rgba(0,102,179,0.35);
+        border: none;
+    }
+    .event-cta-card h3,
+    .event-cta-card p,
+    .event-cta-card .event-stat-label {
+        color: rgba(255,255,255,0.75) !important;
+    }
+
+    /* ── Sidebar Sticky on Desktop ──────────────────── */
+    @media (min-width: 1024px) {
+        .event-sidebar {
+            position: sticky;
+            top: 1.5rem;
+            align-self: flex-start;
+        }
     }
 </style>
 <div id="message-container" class="fixed top-4 right-4 z-50 hidden">
