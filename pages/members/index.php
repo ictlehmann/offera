@@ -181,123 +181,125 @@ ob_start();
                 }
                 ?>
                 <div class="col">
-                <div class="card directory-card directory-card--members p-3 d-flex flex-column h-100 position-relative">
-                    <!-- Role Badge: Different colors for each role - Top Right Corner -->
-                    <div class="position-absolute top-0 end-0 mt-3 me-3">
-                        <span class="inline-block px-3 py-1 text-xs font-semibold directory-role-badge border <?php echo $badgeClass; ?>">
-                            <?php echo $displayRole; ?>
-                        </span>
-                    </div>
-                    
-                    <!-- Profile Image (Circle, top center) -->
-                    <div class="d-flex justify-content-center mb-3 mt-2">
+                <div class="card directory-card directory-card--members d-flex flex-column h-100">
+                    <!-- Card Header: gradient band with avatar -->
+                    <div class="directory-card-header">
+                        <div class="position-absolute top-0 end-0 mt-2 me-2">
+                            <span class="inline-block px-3 py-1 text-xs font-semibold directory-role-badge border <?php echo $badgeClass; ?>">
+                                <?php echo $displayRole; ?>
+                            </span>
+                        </div>
                         <?php
                         $avatarColor = getAvatarColor($member['first_name'] . ' ' . $member['last_name']);
                         ?>
-                        <!-- Image with fallback to placeholder on error -->
-                        <div class="directory-avatar directory-avatar--sm rounded-circle overflow-hidden border border-3 border-white shadow-sm"
-                             style="background-color:<?php echo htmlspecialchars($avatarColor); ?>;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;">
-                            <img
-                                src="<?php echo htmlspecialchars($imageSrc); ?>"
-                                alt="<?php echo htmlspecialchars($member['first_name'] . ' ' . $member['last_name']); ?>"
-                                style="width:100%;height:100%;object-fit:cover;"
-                                onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
-                            >
-                            <div style="display:none;width:100%;height:100%;" class="d-flex align-items-center justify-content-center">
-                                <?php echo htmlspecialchars($initials); ?>
+                        <div class="directory-card-avatar-wrap">
+                            <div class="directory-avatar directory-avatar--sm rounded-circle overflow-hidden border border-3 border-white shadow"
+                                 style="background-color:<?php echo htmlspecialchars($avatarColor); ?>;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;">
+                                <img
+                                    src="<?php echo htmlspecialchars($imageSrc); ?>"
+                                    alt="<?php echo htmlspecialchars($member['first_name'] . ' ' . $member['last_name']); ?>"
+                                    style="width:100%;height:100%;object-fit:cover;"
+                                    onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                                >
+                                <div style="display:none;width:100%;height:100%;" class="d-flex align-items-center justify-content-center">
+                                    <?php echo htmlspecialchars($initials); ?>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Name (Bold) -->
-                    <h3 class="fs-6 directory-card-name text-gray-800 text-center mb-2">
-                        <?php echo htmlspecialchars($member['first_name'] . ' ' . $member['last_name']); ?>
-                    </h3>
-                    
-                    <!-- Info Snippet: 'Position' or 'Studium + Degree' -->
-                    <?php if (!empty($infoSnippet)): ?>
-                    <div class="text-center mb-3 flex-grow-1 d-flex align-items-center justify-content-center" style="min-height:3rem;">
-                        <p class="small text-secondary mb-0">
-                            <i class="fas fa-briefcase me-1 text-muted"></i>
-                            <?php echo htmlspecialchars($infoSnippet); ?>
-                        </p>
-                    </div>
-                    <?php else: ?>
-                    <div class="flex-grow-1" style="min-height:3rem;"></div>
-                    <?php endif; ?>
-                    
-                    <!-- Contact Icons: Round buttons for Mail, LinkedIn and Xing (if set) -->
-                    <div class="d-flex justify-content-center gap-3 mt-4 mb-3">
-                        <!-- Mail Icon -->
-                        <?php if (!empty($member['email'])): ?>
-                            <a 
-                                href="mailto:<?php echo htmlspecialchars($member['email']); ?>" 
-                                class="directory-contact-icon"
-                                title="E-Mail senden"
-                            >
-                                <i class="fas fa-envelope"></i>
-                            </a>
+
+                    <!-- Card Body -->
+                    <div class="directory-card-body">
+                        <!-- Name (Bold) -->
+                        <h3 class="fs-6 directory-card-name text-gray-800 text-center mb-2">
+                            <?php echo htmlspecialchars($member['first_name'] . ' ' . $member['last_name']); ?>
+                        </h3>
+                        
+                        <!-- Info Snippet: 'Position' or 'Studium + Degree' -->
+                        <?php if (!empty($infoSnippet)): ?>
+                        <div class="text-center mb-3 flex-grow-1 d-flex align-items-center justify-content-center" style="min-height:3rem;">
+                            <p class="small text-secondary mb-0">
+                                <i class="fas fa-briefcase me-1 text-muted"></i>
+                                <?php echo htmlspecialchars($infoSnippet); ?>
+                            </p>
+                        </div>
+                        <?php else: ?>
+                        <div class="flex-grow-1" style="min-height:3rem;"></div>
                         <?php endif; ?>
                         
-                        <!-- LinkedIn Icon (if set) -->
-                        <?php if (!empty($member['linkedin_url'])): ?>
-                            <?php
-                            // Validate LinkedIn URL to prevent XSS attacks
-                            $linkedinUrl = $member['linkedin_url'];
-                            $isValidLinkedIn = (
-                                strpos($linkedinUrl, 'https://linkedin.com') === 0 ||
-                                strpos($linkedinUrl, 'https://www.linkedin.com') === 0 ||
-                                strpos($linkedinUrl, 'http://linkedin.com') === 0 ||
-                                strpos($linkedinUrl, 'http://www.linkedin.com') === 0
-                            );
-                            ?>
-                            <?php if ($isValidLinkedIn): ?>
-                            <a 
-                                href="<?php echo htmlspecialchars($linkedinUrl); ?>" 
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                class="directory-contact-icon"
-                                title="LinkedIn Profil"
-                            >
-                                <i class="fab fa-linkedin-in"></i>
-                            </a>
+                        <!-- Contact Icons: Round buttons for Mail, LinkedIn and Xing (if set) -->
+                        <div class="d-flex justify-content-center gap-3 mb-3">
+                            <!-- Mail Icon -->
+                            <?php if (!empty($member['email'])): ?>
+                                <a 
+                                    href="mailto:<?php echo htmlspecialchars($member['email']); ?>" 
+                                    class="directory-contact-icon"
+                                    title="E-Mail senden"
+                                >
+                                    <i class="fas fa-envelope"></i>
+                                </a>
                             <?php endif; ?>
-                        <?php endif; ?>
+                            
+                            <!-- LinkedIn Icon (if set) -->
+                            <?php if (!empty($member['linkedin_url'])): ?>
+                                <?php
+                                // Validate LinkedIn URL to prevent XSS attacks
+                                $linkedinUrl = $member['linkedin_url'];
+                                $isValidLinkedIn = (
+                                    strpos($linkedinUrl, 'https://linkedin.com') === 0 ||
+                                    strpos($linkedinUrl, 'https://www.linkedin.com') === 0 ||
+                                    strpos($linkedinUrl, 'http://linkedin.com') === 0 ||
+                                    strpos($linkedinUrl, 'http://www.linkedin.com') === 0
+                                );
+                                ?>
+                                <?php if ($isValidLinkedIn): ?>
+                                <a 
+                                    href="<?php echo htmlspecialchars($linkedinUrl); ?>" 
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    class="directory-contact-icon"
+                                    title="LinkedIn Profil"
+                                >
+                                    <i class="fab fa-linkedin-in"></i>
+                                </a>
+                                <?php endif; ?>
+                            <?php endif; ?>
+                            
+                            <!-- Xing Icon (if set) -->
+                            <?php if (!empty($member['xing_url'])): ?>
+                                <?php
+                                // Validate Xing URL to prevent XSS attacks
+                                $xingUrl = $member['xing_url'];
+                                $isValidXing = (
+                                    strpos($xingUrl, 'https://xing.com') === 0 ||
+                                    strpos($xingUrl, 'https://www.xing.com') === 0 ||
+                                    strpos($xingUrl, 'http://xing.com') === 0 ||
+                                    strpos($xingUrl, 'http://www.xing.com') === 0
+                                );
+                                ?>
+                                <?php if ($isValidXing): ?>
+                                <a 
+                                    href="<?php echo htmlspecialchars($xingUrl); ?>" 
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    class="directory-contact-icon"
+                                    title="Xing Profil"
+                                >
+                                    <i class="fab fa-xing"></i>
+                                </a>
+                                <?php endif; ?>
+                            <?php endif; ?>
+                        </div>
                         
-                        <!-- Xing Icon (if set) -->
-                        <?php if (!empty($member['xing_url'])): ?>
-                            <?php
-                            // Validate Xing URL to prevent XSS attacks
-                            $xingUrl = $member['xing_url'];
-                            $isValidXing = (
-                                strpos($xingUrl, 'https://xing.com') === 0 ||
-                                strpos($xingUrl, 'https://www.xing.com') === 0 ||
-                                strpos($xingUrl, 'http://xing.com') === 0 ||
-                                strpos($xingUrl, 'http://www.xing.com') === 0
-                            );
-                            ?>
-                            <?php if ($isValidXing): ?>
-                            <a 
-                                href="<?php echo htmlspecialchars($xingUrl); ?>" 
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                class="directory-contact-icon"
-                                title="Xing Profil"
-                            >
-                                <i class="fab fa-xing"></i>
-                            </a>
-                            <?php endif; ?>
-                        <?php endif; ?>
+                        <!-- Action: 'Profil ansehen' Button -->
+                        <a 
+                            href="../alumni/view.php?id=<?php echo $member['profile_id']; ?>&return_to=members"
+                            class="btn btn-primary w-100 fw-semibold shadow-sm"
+                        >
+                            <i class="fas fa-user me-2"></i>
+                            Profil ansehen
+                        </a>
                     </div>
-                    
-                    <!-- Action: 'Profil ansehen' Button -->
-                    <a 
-                        href="../alumni/view.php?id=<?php echo $member['profile_id']; ?>&return_to=members"
-                        class="btn btn-primary w-100 fw-semibold shadow-sm"
-                    >
-                        <i class="fas fa-user me-2"></i>
-                        Profil ansehen
-                    </a>
                 </div>
                 </div>
             <?php endforeach; ?>
