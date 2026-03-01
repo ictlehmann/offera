@@ -41,7 +41,7 @@ if (Auth::check() && isset($_SESSION['profile_incomplete']) && $_SESSION['profil
     <link rel="preload" href="<?php echo asset('assets/css/theme.css'); ?>" as="style">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet" href="<?php echo asset('assets/css/theme.css'); ?>">
-    <script src="https://cdn.jsdelivr.net/npm/tailwindcss@3/cdn.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             corePlugins: { preflight: false },
