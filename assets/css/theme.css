@@ -1503,6 +1503,17 @@ body:not(.dark-mode) .text-blue-900 {
     color: var(--text-main) !important; /* Dark text instead of blue for light mode */
 }
 
+/* Light Mode: Exception - restore blue color on icon elements (they're on white backgrounds) */
+body:not(.dark-mode) i.text-blue-100 { color: #dbeafe !important; }
+body:not(.dark-mode) i.text-blue-200 { color: #bfdbfe !important; }
+body:not(.dark-mode) i.text-blue-300 { color: #93c5fd !important; }
+body:not(.dark-mode) i.text-blue-400 { color: #60a5fa !important; }
+body:not(.dark-mode) i.text-blue-500 { color: #3b82f6 !important; }
+body:not(.dark-mode) i.text-blue-600 { color: #2563eb !important; }
+body:not(.dark-mode) i.text-blue-700 { color: #1d4ed8 !important; }
+body:not(.dark-mode) i.text-blue-800 { color: #1e40af !important; }
+body:not(.dark-mode) i.text-blue-900 { color: #1e3a8a !important; }
+
 body:not(.dark-mode) .text-ibc-blue {
     color: var(--text-main) !important; /* Dark text instead of blue for light mode */
 }
@@ -3681,14 +3692,8 @@ body.dark-mode [class*="bg-gradient"] {
     position: relative;
 }
 
-/* Dark mode hero gradient override */
-body.dark-mode [class*="from-blue-"]:not(.from-blue-50) {
-    background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #1e3a8a 100%) !important;
-}
-
-body.dark-mode [class*="from-green-"]:not(.from-green-50) {
-    background: linear-gradient(135deg, #065f46 0%, #047857 50%, #065f46 100%) !important;
-}
+/* Dark mode hero gradient override - scoped to hero sections only via .hero-gradient */
+/* Note: individual gradient buttons and badges handle their own dark-mode appearance */
 
 /* Dark Mode: Better Button Styles */
 body.dark-mode .btn-primary {
@@ -3751,9 +3756,8 @@ body.dark-mode .divide-y > * {
     border-color: var(--border-color) !important;
 }
 
-/* Dark Mode: Better separation for list items */
-body.dark-mode .space-y-4 > *:not(:last-child),
-body.dark-mode .space-y-6 > *:not(:last-child) {
+/* Dark Mode: Better separation for explicitly marked list containers only */
+body.dark-mode .dark-list > *:not(:last-child) {
     border-bottom: 1px solid var(--border-color);
     padding-bottom: 1rem;
     margin-bottom: 1rem !important;
