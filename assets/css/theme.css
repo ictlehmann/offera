@@ -201,6 +201,21 @@ body {
     height: 100vh;
     height: 100dvh;
     height: -webkit-fill-available;
+    /* Critical layout fallbacks (mirrors Tailwind: fixed left-0 top-0 z-40 w-64 -translate-x-full transition-transform) */
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 40;
+    width: 16rem;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+}
+
+/* Sidebar visible on desktop (mirrors Tailwind: md:translate-x-0) */
+@media (min-width: 768px) {
+    .sidebar {
+        transform: translateX(0);
+    }
 }
 
 /* Sidebar Text - Always White on Blue Background */
@@ -4343,6 +4358,31 @@ body.dark-mode {
     background: var(--ibc-blue);
     min-height: 60px;
     z-index: 1060;
+    /* Critical layout fallbacks (mirrors Tailwind: fixed top-0 left-0 right-0) */
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+}
+
+/* ===== MAIN CONTENT DESKTOP MARGIN FALLBACKS ===== */
+/* These ensure the main content is offset correctly from the sidebar even
+   when Tailwind CDN fails to load (mirrors md:ml-64 / lg:ml-72 / min-h-screen). */
+main {
+    min-height: 100vh;
+}
+
+@media (min-width: 768px) {
+    main {
+        margin-left: 16rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    main {
+        margin-left: 18rem;
+    }
 }
 
 /* ===== BOOTSTRAP 5 COMPATIBILITY OVERRIDES ===== */
