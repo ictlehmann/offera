@@ -60,6 +60,14 @@ if (!empty($invoices)) {
 // Collect open invoices for the dedicated banner
 $openInvoices = array_values(array_filter($invoices, fn($inv) => in_array($inv['status'], ['pending', 'approved'])));
 
+// Compute display status: approved invoices older than 14 days are shown as 'overdue'
+$overdueThresholdDays = 14;
+foreach ($invoices as &$inv) {
+    $inv['_display_status'] = ($inv['status'] === 'approved' && (time() - strtotime($inv['created_at'])) / 86400 > $overdueThresholdDays)
+        ? 'overdue' : $inv['status'];
+}
+unset($inv);
+
 // Compute summary stats from the fetched invoices (visible to all users)
 $summaryOpenAmount = 0.0;
 $summaryInReviewCount = 0;
@@ -298,35 +306,39 @@ ob_start();
                 <?php
                 // Status configuration (dots + colors + labels)
                 $statusColors = [
-                    'pending'  => 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-300 border-yellow-300 dark:border-yellow-700',
-                    'approved' => 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-300 border-blue-300 dark:border-blue-700',
-                    'rejected' => 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-300 border-red-300 dark:border-red-700',
-                    'paid'     => 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-300 border-green-300 dark:border-green-700',
+                    'pending'  => 'bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-700',
+                    'approved' => 'bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300 border-blue-300 dark:border-blue-700',
+                    'rejected' => 'bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-300 border-red-300 dark:border-red-700',
+                    'paid'     => 'bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300 border-green-300 dark:border-green-700',
+                    'overdue'  => 'bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-300 border-red-300 dark:border-red-700',
                 ];
                 $statusIcons = [
-                    'pending'  => '<span class="w-2 h-2 rounded-full bg-yellow-500 inline-block mr-1.5 flex-shrink-0"></span>',
-                    'approved' => '<span class="w-2 h-2 rounded-full bg-blue-500 inline-block mr-1.5 flex-shrink-0"></span>',
-                    'rejected' => '<span class="w-2 h-2 rounded-full bg-red-500 inline-block mr-1.5 flex-shrink-0"></span>',
-                    'paid'     => '<span class="w-2 h-2 rounded-full bg-green-500 inline-block mr-1.5 flex-shrink-0"></span>',
+                    'pending'  => '<i class="fas fa-clock mr-1.5"></i>',
+                    'approved' => '<i class="fas fa-thumbs-up mr-1.5"></i>',
+                    'rejected' => '<i class="fas fa-times-circle mr-1.5"></i>',
+                    'paid'     => '<i class="fas fa-check-circle mr-1.5"></i>',
+                    'overdue'  => '<i class="fas fa-exclamation-triangle mr-1.5"></i>',
                 ];
                 $statusLabels = [
                     'pending'  => 'In Prüfung',
                     'approved' => 'Genehmigt',
                     'rejected' => 'Abgelehnt',
                     'paid'     => 'Bezahlt',
+                    'overdue'  => 'Überfällig',
                 ];
                 ?>
 
                 <!-- Mobile Card View (visible on small screens only) -->
-                <div class="md:hidden flex flex-col gap-4">
+                <div class="md:hidden flex flex-col gap-4 p-4">
                     <?php foreach ($invoices as $invoice): ?>
                         <?php
                         $submitterEmail = $userInfoMap[$invoice['user_id']] ?? 'Unknown';
                         $submitterName  = explode('@', $submitterEmail)[0];
                         $initials       = strtoupper(substr($submitterName, 0, 2));
-                        $statusClass    = $statusColors[$invoice['status']] ?? 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 border-gray-300 dark:border-gray-600';
-                        $statusIcon     = $statusIcons[$invoice['status']] ?? '';
-                        $statusLabel    = $statusLabels[$invoice['status']] ?? ucfirst($invoice['status']);
+                        $displayStatus  = $invoice['_display_status'];
+                        $statusClass    = $statusColors[$displayStatus] ?? 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 border-gray-300 dark:border-gray-600';
+                        $statusIcon     = $statusIcons[$displayStatus] ?? '';
+                        $statusLabel    = $statusLabels[$displayStatus] ?? ucfirst($displayStatus);
 
                         $paidAt      = !empty($invoice['paid_at']) ? date('d.m.Y', strtotime($invoice['paid_at'])) : '';
                         $paidByName  = '';
@@ -345,6 +357,7 @@ ob_start();
                                  description: <?php echo json_encode($invoice['description']); ?>,
                                  amount: '<?php echo number_format($invoice['amount'], 2, ',', '.'); ?>',
                                  status: '<?php echo htmlspecialchars($invoice['status'], ENT_QUOTES); ?>',
+                                 displayStatus: '<?php echo htmlspecialchars($displayStatus, ENT_QUOTES); ?>',
                                  statusLabel: '<?php echo htmlspecialchars($statusLabel, ENT_QUOTES); ?>',
                                  filePath: '<?php echo $filePath; ?>',
                                  paidAt: '<?php echo $paidAt; ?>',
@@ -361,7 +374,7 @@ ob_start();
                                         <p class="text-xs text-gray-500 dark:text-gray-400"><?php echo date('d.m.Y', strtotime($invoice['created_at'])); ?></p>
                                     </div>
                                 </div>
-                                <span class="inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full border <?php echo $statusClass; ?>">
+                                <span class="inline-flex items-center px-2.5 py-1 text-xs font-semibold rounded-full border <?php echo $statusClass; ?>">
                                     <?php echo $statusIcon . htmlspecialchars($statusLabel); ?>
                                 </span>
                             </div>
@@ -411,6 +424,7 @@ ob_start();
                 </div>
 
                 <!-- Desktop Table View (hidden on small screens) -->
+                <div class="overflow-x-auto">
                 <table class="hidden md:table min-w-full">
                     <thead class="bg-gray-50/80 dark:bg-gray-800/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700">
                         <tr>
@@ -431,9 +445,10 @@ ob_start();
                             $submitterEmail = $userInfoMap[$invoice['user_id']] ?? 'Unknown';
                             $submitterName  = explode('@', $submitterEmail)[0];
                             $initials       = strtoupper(substr($submitterName, 0, 2));
-                            $statusClass    = $statusColors[$invoice['status']] ?? 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 border-gray-300 dark:border-gray-600';
-                            $statusIcon     = $statusIcons[$invoice['status']] ?? '';
-                            $statusLabel    = $statusLabels[$invoice['status']] ?? ucfirst($invoice['status']);
+                            $displayStatus  = $invoice['_display_status'];
+                            $statusClass    = $statusColors[$displayStatus] ?? 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 border-gray-300 dark:border-gray-600';
+                            $statusIcon     = $statusIcons[$displayStatus] ?? '';
+                            $statusLabel    = $statusLabels[$displayStatus] ?? ucfirst($displayStatus);
 
                             $paidAt     = !empty($invoice['paid_at']) ? date('d.m.Y', strtotime($invoice['paid_at'])) : '';
                             $paidByName = '';
@@ -451,6 +466,7 @@ ob_start();
                                     description: <?php echo json_encode($invoice['description']); ?>,
                                     amount: '<?php echo number_format($invoice['amount'], 2, ',', '.'); ?>',
                                     status: '<?php echo htmlspecialchars($invoice['status'], ENT_QUOTES); ?>',
+                                    displayStatus: '<?php echo htmlspecialchars($displayStatus, ENT_QUOTES); ?>',
                                     statusLabel: '<?php echo htmlspecialchars($statusLabel, ENT_QUOTES); ?>',
                                     filePath: '<?php echo $filePath; ?>',
                                     paidAt: '<?php echo $paidAt; ?>',
@@ -497,7 +513,7 @@ ob_start();
                                     <?php endif; ?>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full border <?php echo $statusClass; ?>">
+                                    <span class="inline-flex items-center px-3 py-1.5 text-xs font-semibold rounded-full border <?php echo $statusClass; ?>">
                                         <?php echo $statusIcon . htmlspecialchars($statusLabel); ?>
                                     </span>
                                 </td>
@@ -531,6 +547,7 @@ ob_start();
                         <?php endforeach; ?>
                     </tbody>
                 </table>
+                </div>
             </div>
         <?php endif; ?>
     </div>
@@ -807,20 +824,23 @@ function openInvoiceDetail(data) {
     // Status badge
     const badge = document.getElementById('detail-status-badge');
     const statusClasses = {
-        pending:  'bg-yellow-100 text-yellow-800 border-yellow-300',
+        pending:  'bg-amber-100 text-amber-800 border-amber-300',
         approved: 'bg-blue-100 text-blue-800 border-blue-300',
         rejected: 'bg-red-100 text-red-800 border-red-300',
         paid:     'bg-green-100 text-green-800 border-green-300',
+        overdue:  'bg-red-100 text-red-800 border-red-300',
     };
     const statusIcons = {
-        pending:  '<span class="w-2 h-2 rounded-full bg-yellow-500 inline-block mr-1.5 flex-shrink-0"></span>',
-        approved: '<span class="w-2 h-2 rounded-full bg-blue-500 inline-block mr-1.5 flex-shrink-0"></span>',
-        rejected: '<span class="w-2 h-2 rounded-full bg-red-500 inline-block mr-1.5 flex-shrink-0"></span>',
-        paid:     '<span class="w-2 h-2 rounded-full bg-green-500 inline-block mr-1.5 flex-shrink-0"></span>',
+        pending:  '<i class="fas fa-clock mr-1.5"></i>',
+        approved: '<i class="fas fa-thumbs-up mr-1.5"></i>',
+        rejected: '<i class="fas fa-times-circle mr-1.5"></i>',
+        paid:     '<i class="fas fa-check-circle mr-1.5"></i>',
+        overdue:  '<i class="fas fa-exclamation-triangle mr-1.5"></i>',
     };
-    badge.className = 'inline-flex items-center px-3 py-1 text-sm font-semibold rounded-full border ' +
-        (statusClasses[data.status] || 'bg-gray-100 text-gray-800 border-gray-300');
-    badge.innerHTML = (statusIcons[data.status] || '') + data.statusLabel;
+    const ds = data.displayStatus || data.status;
+    badge.className = 'inline-flex items-center px-3 py-1.5 text-sm font-semibold rounded-full border ' +
+        (statusClasses[ds] || 'bg-gray-100 text-gray-800 border-gray-300');
+    badge.innerHTML = (statusIcons[ds] || '') + data.statusLabel;
 
     // Paid info
     const paidRow = document.getElementById('detail-paid-row');
