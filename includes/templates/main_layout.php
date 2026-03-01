@@ -238,13 +238,16 @@ if (Auth::check() && isset($_SESSION['profile_incomplete']) && $_SESSION['profil
             
             if (savedTheme === 'dark') {
                 document.body.classList.add('dark-mode', 'dark');
+                document.documentElement.setAttribute('data-theme', 'dark');
                 document.documentElement.style.colorScheme = 'dark';
             } else if (savedTheme === 'light') {
                 document.body.classList.remove('dark-mode', 'dark');
+                document.documentElement.setAttribute('data-theme', 'light');
                 document.documentElement.style.colorScheme = 'light';
             } else { // auto
                 if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
                     document.body.classList.add('dark-mode', 'dark');
+                    document.documentElement.setAttribute('data-theme', 'dark');
                     document.documentElement.style.colorScheme = 'dark';
                 }
             }
@@ -935,6 +938,7 @@ if (Auth::check() && isset($_SESSION['profile_incomplete']) && $_SESSION['profil
             const isDark = theme === 'dark' || (theme !== 'light' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
             if (isDark) {
                 document.body.classList.add('dark-mode', 'dark');
+                document.documentElement.setAttribute('data-theme', 'dark');
                 document.documentElement.style.colorScheme = 'dark';
                 if (themeIcon) { themeIcon.classList.remove('fa-moon'); themeIcon.classList.add('fa-sun'); }
                 if (themeText) themeText.textContent = 'Lightmode';
@@ -942,6 +946,7 @@ if (Auth::check() && isset($_SESSION['profile_incomplete']) && $_SESSION['profil
                 if (mobileThemeToggle) mobileThemeToggle.setAttribute('aria-label', 'Zu Lightmode wechseln');
             } else {
                 document.body.classList.remove('dark-mode', 'dark');
+                document.documentElement.setAttribute('data-theme', 'light');
                 document.documentElement.style.colorScheme = 'light';
                 if (themeIcon) { themeIcon.classList.remove('fa-sun'); themeIcon.classList.add('fa-moon'); }
                 if (themeText) themeText.textContent = 'Darkmode';
@@ -958,6 +963,7 @@ if (Auth::check() && isset($_SESSION['profile_incomplete']) && $_SESSION['profil
             const isDarkMode = document.body.classList.contains('dark-mode');
             if (isDarkMode) {
                 document.body.classList.remove('dark-mode', 'dark');
+                document.documentElement.setAttribute('data-theme', 'light');
                 document.documentElement.style.colorScheme = 'light';
                 localStorage.setItem('theme', 'light');
                 if (themeIcon) { themeIcon.classList.remove('fa-sun'); themeIcon.classList.add('fa-moon'); }
@@ -966,6 +972,7 @@ if (Auth::check() && isset($_SESSION['profile_incomplete']) && $_SESSION['profil
                 if (mobileThemeToggle) mobileThemeToggle.setAttribute('aria-label', 'Zu Darkmode wechseln');
             } else {
                 document.body.classList.add('dark-mode', 'dark');
+                document.documentElement.setAttribute('data-theme', 'dark');
                 document.documentElement.style.colorScheme = 'dark';
                 localStorage.setItem('theme', 'dark');
                 if (themeIcon) { themeIcon.classList.remove('fa-moon'); themeIcon.classList.add('fa-sun'); }
