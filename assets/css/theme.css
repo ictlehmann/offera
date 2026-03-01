@@ -5384,3 +5384,9 @@ select {
         width: 100%;
     }
 }
+
+.select-locked {
+    pointer-events: none;
+    opacity: 0.75;
+    cursor: not-allowed;
+}
