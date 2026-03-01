@@ -205,13 +205,13 @@ ob_start();
         </div>
         <div class="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             <?php
-            $openStatusLabelMap = ['pending' => 'In Prüfung', 'approved' => 'Genehmigt'];
+            $openStatusLabelMap = ['pending' => 'In Prüfung', 'approved' => 'Offen'];
             $openBadgeClassMap  = [
-                'pending'  => 'bg-yellow-50 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 ring-1 ring-inset ring-yellow-600/20 dark:ring-yellow-500/30',
-                'approved' => 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 ring-1 ring-inset ring-blue-700/10 dark:ring-blue-500/30',
+                'pending'  => 'bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200 ring-1 ring-inset ring-amber-500/40 dark:ring-amber-400/30',
+                'approved' => 'bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-200 ring-1 ring-inset ring-blue-500/40 dark:ring-blue-400/30',
             ];
             $openDotClassMap = [
-                'pending'  => 'bg-yellow-500',
+                'pending'  => 'bg-amber-500',
                 'approved' => 'bg-blue-500',
             ];
             $openDescMaxLen = 45;
@@ -268,11 +268,11 @@ ob_start();
             </button>
             <button onclick="filterByStatus('pending')" id="tab-pending"
                 class="filter-tab px-4 py-2 rounded-lg text-sm font-semibold transition-all border bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700">
-                In Prüfung <span class="ml-1 px-1.5 py-0.5 rounded-full text-xs bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300"><?php echo $statusCounts['pending']; ?></span>
+                In Prüfung <span class="ml-1 px-1.5 py-0.5 rounded-full text-xs bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300"><?php echo $statusCounts['pending']; ?></span>
             </button>
             <button onclick="filterByStatus('approved')" id="tab-approved"
                 class="filter-tab px-4 py-2 rounded-lg text-sm font-semibold transition-all border bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700">
-                Genehmigt <span class="ml-1 px-1.5 py-0.5 rounded-full text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300"><?php echo $statusCounts['approved']; ?></span>
+                Offen <span class="ml-1 px-1.5 py-0.5 rounded-full text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300"><?php echo $statusCounts['approved']; ?></span>
             </button>
             <button onclick="filterByStatus('rejected')" id="tab-rejected"
                 class="filter-tab px-4 py-2 rounded-lg text-sm font-semibold transition-all border bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700">
@@ -313,22 +313,22 @@ ob_start();
                 <?php
                 // Status configuration (dots + colors + labels)
                 $statusColors = [
-                    'pending'  => 'bg-yellow-50 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 ring-1 ring-inset ring-yellow-600/20 dark:ring-yellow-500/30',
-                    'approved' => 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 ring-1 ring-inset ring-blue-700/10 dark:ring-blue-500/30',
-                    'rejected' => 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 ring-1 ring-inset ring-red-600/10 dark:ring-red-500/30',
-                    'paid'     => 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 ring-1 ring-inset ring-green-600/20 dark:ring-green-500/30',
-                    'overdue'  => 'bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 ring-1 ring-inset ring-orange-600/20 dark:ring-orange-500/30',
+                    'pending'  => 'bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200 ring-1 ring-inset ring-amber-500/40 dark:ring-amber-400/30',
+                    'approved' => 'bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-200 ring-1 ring-inset ring-blue-500/40 dark:ring-blue-400/30',
+                    'rejected' => 'bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200 ring-1 ring-inset ring-red-500/40 dark:ring-red-400/30',
+                    'paid'     => 'bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-200 ring-1 ring-inset ring-green-500/40 dark:ring-green-400/30',
+                    'overdue'  => 'bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200 ring-1 ring-inset ring-red-500/40 dark:ring-red-400/30',
                 ];
                 $statusDots = [
-                    'pending'  => 'bg-yellow-500 dark:bg-yellow-400',
+                    'pending'  => 'bg-amber-500 dark:bg-amber-400',
                     'approved' => 'bg-blue-500 dark:bg-blue-400',
                     'rejected' => 'bg-red-500 dark:bg-red-400',
                     'paid'     => 'bg-green-500 dark:bg-green-400',
-                    'overdue'  => 'bg-orange-500 dark:bg-orange-400',
+                    'overdue'  => 'bg-red-500 dark:bg-red-400',
                 ];
                 $statusLabels = [
                     'pending'  => 'In Prüfung',
-                    'approved' => 'Genehmigt',
+                    'approved' => 'Offen',
                     'rejected' => 'Abgelehnt',
                     'paid'     => 'Bezahlt',
                     'overdue'  => 'Überfällig',
@@ -434,20 +434,20 @@ ob_start();
                 <!-- Desktop Table View (hidden on small screens) -->
                 <div class="overflow-x-auto">
                 <table class="hidden md:table min-w-full">
-                    <thead class="bg-gray-50/80 dark:bg-gray-800/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700">
+                    <thead class="bg-gray-50 dark:bg-gray-800/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700">
                         <tr>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Datum</th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Einreicher</th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Zweck</th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Betrag</th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Beleg</th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Datum</th>
+                            <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Einreicher</th>
+                            <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Zweck</th>
+                            <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Betrag</th>
+                            <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Beleg</th>
+                            <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
                             <?php if (Auth::isBoard()): ?>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Aktionen</th>
+                            <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Aktionen</th>
                             <?php endif; ?>
                         </tr>
                     </thead>
-                    <tbody class="bg-white dark:bg-gray-900">
+                    <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-100 dark:divide-gray-800">
                         <?php foreach ($invoices as $invoice): ?>
                             <?php
                             $submitterEmail = $userInfoMap[$invoice['user_id']] ?? 'Unknown';
@@ -465,7 +465,7 @@ ob_start();
                             }
                             $filePath = !empty($invoice['file_path']) ? htmlspecialchars(asset($invoice['file_path']), ENT_QUOTES) : '';
                             ?>
-                            <tr class="hover:bg-blue-50/50 dark:hover:bg-blue-900/20 transition-colors duration-200 cursor-pointer border-b border-gray-50 dark:border-gray-800 last:border-0 invoice-row" data-status="<?php echo htmlspecialchars($invoice['status']); ?>"
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/60 transition-colors duration-150 cursor-pointer invoice-row" data-status="<?php echo htmlspecialchars($invoice['status']); ?>"
                                 onclick="openInvoiceDetail({
                                     id: '<?php echo $invoice['id']; ?>',
                                     date: '<?php echo date('d.m.Y', strtotime($invoice['created_at'])); ?>',
@@ -833,18 +833,18 @@ function openInvoiceDetail(data) {
     // Status badge
     const badge = document.getElementById('detail-status-badge');
     const statusClasses = {
-        pending:  'bg-yellow-50 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 ring-1 ring-inset ring-yellow-600/20 dark:ring-yellow-500/30',
-        approved: 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 ring-1 ring-inset ring-blue-700/10 dark:ring-blue-500/30',
-        rejected: 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 ring-1 ring-inset ring-red-600/10 dark:ring-red-500/30',
-        paid:     'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 ring-1 ring-inset ring-green-600/20 dark:ring-green-500/30',
-        overdue:  'bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 ring-1 ring-inset ring-orange-600/20 dark:ring-orange-500/30',
+        pending:  'bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200 ring-1 ring-inset ring-amber-500/40 dark:ring-amber-400/30',
+        approved: 'bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-200 ring-1 ring-inset ring-blue-500/40 dark:ring-blue-400/30',
+        rejected: 'bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200 ring-1 ring-inset ring-red-500/40 dark:ring-red-400/30',
+        paid:     'bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-200 ring-1 ring-inset ring-green-500/40 dark:ring-green-400/30',
+        overdue:  'bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200 ring-1 ring-inset ring-red-500/40 dark:ring-red-400/30',
     };
     const statusDotColors = {
-        pending:  'bg-yellow-500',
+        pending:  'bg-amber-500',
         approved: 'bg-blue-500',
         rejected: 'bg-red-500',
         paid:     'bg-green-500',
-        overdue:  'bg-orange-500',
+        overdue:  'bg-red-500',
     };
     const ds = data.displayStatus || data.status;
     badge.className = 'inline-flex items-center gap-x-1.5 px-3 py-1 text-sm font-medium rounded-full ' +
