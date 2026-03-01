@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../helpers.php';
 ?>
 <!DOCTYPE html>
@@ -63,6 +64,7 @@ require_once __DIR__ . '/../helpers.php';
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif;
             background: #0a0f1e;
+            color: #f8fafc; /* Light text fallback for dark background */
             min-height: 100vh;
             min-height: 100dvh;
             min-height: var(--app-height, 100vh);
@@ -1585,7 +1587,7 @@ require_once __DIR__ . '/../helpers.php';
 
     </style>
 </head>
-<body class="min-h-screen">
+<body class="min-h-screen dark-mode dark">
     <!-- ANIMATED BACKGROUND -->
     <div class="background-wrapper">
         <!-- Base Gradient -->

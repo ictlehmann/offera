@@ -2,3 +2,4 @@ vendor/
 composer.phar
 *.backup
 .env
+test_render.html

@@ -4,6 +4,7 @@
  * Access: public (linked from email footers)
  */
 
+require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../includes/helpers.php';
 
 $title = 'Impressum - IBC Intranet';
