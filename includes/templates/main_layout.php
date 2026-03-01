@@ -266,8 +266,8 @@ if (Auth::check() && isset($_SESSION['profile_incomplete']) && $_SESSION['profil
                 width: 85% !important;
                 max-width: 320px !important;
                 box-shadow: 10px 0 30px rgba(0, 0, 0, 0.3) !important;
-                top: 60px !important; /* Start below the mobile topbar */
-                height: calc(100vh - 60px) !important;
+                top: var(--topbar-height) !important; /* Start below the mobile topbar */
+                height: calc(100vh - var(--topbar-height)) !important;
                 z-index: 1050 !important; /* Above overlay (1040), below topbar (1060) */
             }
             
@@ -298,7 +298,7 @@ if (Auth::check() && isset($_SESSION['profile_incomplete']) && $_SESSION['profil
                 padding-left: 1rem !important;
                 padding-right: 1rem !important;
                 padding-bottom: 1rem !important;
-                padding-top: calc(var(--topbar-height, 60px) + 1rem) !important; /* Ensure content doesn't hide under topbar */
+                padding-top: calc(var(--topbar-height) + 1.25rem) !important; /* Ensure content doesn't hide under topbar */
                 margin-left: 0 !important;
             }
             
@@ -556,7 +556,7 @@ if (Auth::check() && isset($_SESSION['profile_incomplete']) && $_SESSION['profil
         }
     </style>
 </head>
-<body class="bg-gray-50 text-slate-800 dark:bg-slate-900 dark:text-slate-200" data-user-theme="<?php echo htmlspecialchars($currentUser['theme_preference'] ?? 'auto'); ?>">
+<body class="bg-gray-50 text-slate-800 dark:bg-slate-900 dark:text-slate-200 overflow-x-hidden" data-user-theme="<?php echo htmlspecialchars($currentUser['theme_preference'] ?? 'auto'); ?>">
     <!-- Skip to main content link for accessibility -->
     <a href="#main-content" class="skip-link">Zum Hauptinhalt springen</a>
     
@@ -1040,7 +1040,7 @@ if (Auth::check() && isset($_SESSION['profile_incomplete']) && $_SESSION['profil
     <main id="main-content" role="main" class="md:ml-64 lg:ml-72 min-h-screen p-4 pt-20 md:p-6 lg:p-10" style="padding-bottom: max(1rem, env(safe-area-inset-bottom, 0))">
         <?php if (isset($_SESSION['show_2fa_nudge']) && $_SESSION['show_2fa_nudge']): ?>
         <!-- 2FA Nudge Modal -->
-        <div id="tfa-nudge-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div id="tfa-nudge-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[1070] p-4">
             <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-lg max-h-[85vh] flex flex-col overflow-hidden transform transition-all">
                 <!-- Modal Header -->
                 <div class="bg-gradient-to-r from-blue-600 to-green-600 px-6 py-4">

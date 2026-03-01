@@ -90,6 +90,9 @@
 
     /* Spacing & Layout */
     --mobile-header-offset: 5rem;
+    --topbar-height: 60px;
+    --sidebar-width-md: 16rem;
+    --sidebar-width-lg: 18rem;
     
     /* SVG Icons for Select Dropdowns - Enhanced with better colors */
     --select-arrow-light: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%230066b3' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
@@ -3060,7 +3063,7 @@ body.dark-mode .sidebar {
     /* Main Content Area - Better mobile spacing */
     main {
         padding: 1rem 1.5rem !important;
-        padding-top: 5rem !important; /* Space for mobile header */
+        padding-top: calc(var(--topbar-height) + 1.25rem) !important; /* Space for mobile header */
     }
     
     /* Custom dialogs (non-Bootstrap) - Full screen on mobile */
@@ -3129,7 +3132,7 @@ body.dark-mode .sidebar {
     
     main {
         padding: 1.5rem !important;
-        padding-top: 5rem !important;
+        padding-top: calc(var(--topbar-height) + 1.25rem) !important;
     }
     
     /* Buttons can be inline on small tablets */
@@ -3162,7 +3165,7 @@ body.dark-mode .sidebar {
     
     /* Sidebar visible but narrower - matches md:ml-64 (256px) offset on main content */
     .sidebar {
-        width: 16rem !important;
+        width: var(--sidebar-width-md) !important;
     }
 }
 
@@ -4292,10 +4295,10 @@ body.dark-mode {
 @media (max-width: 767px) {
     .sidebar {
         position: fixed;
-        top: 60px; /* Start below mobile topbar */
+        top: var(--topbar-height); /* Start below mobile topbar */
         left: 0;
-        height: calc(100vh - 60px) !important;
-        height: calc(100dvh - 60px) !important;
+        height: calc(100vh - var(--topbar-height)) !important;
+        height: calc(100dvh - var(--topbar-height)) !important;
         width: 85%;
         max-width: 320px;
         z-index: 1050 !important; /* Must be above overlay (1040); !important overrides Tailwind z-40 */
@@ -4321,9 +4324,12 @@ body.dark-mode {
         margin-left: 0 !important; /* Kein Rand auf Handy */
         width: 100% !important;
     }
-    /* Overlay wenn Sidebar offen */
+    /* Overlay wenn Sidebar offen - smooth fade transition */
     .sidebar-overlay {
-        display: none;
+        display: block;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
         position: fixed;
         top: 0;
         left: 0;
@@ -4331,12 +4337,14 @@ body.dark-mode {
         height: 100%;
         background: rgba(0,0,0,0.5);
         z-index: 1040;
-        /* Smooth fade-in */
+        transition: opacity 0.3s ease, visibility 0.3s ease;
         -webkit-backdrop-filter: none;
         backdrop-filter: none;
     }
     .sidebar-overlay.active {
-        display: block;
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
     }
     /* Sidebar footer icons - ensure they stay centered and don't slide left */
     .sidebar-footer a,
@@ -4356,7 +4364,7 @@ body.dark-mode {
 /* Mobile top navbar */
 .mobile-topbar {
     background: var(--ibc-blue);
-    min-height: 60px;
+    min-height: var(--topbar-height);
     z-index: 1060;
     /* Critical layout fallbacks (mirrors Tailwind: fixed top-0 left-0 right-0) */
     position: fixed;
@@ -4371,17 +4379,18 @@ body.dark-mode {
    when Tailwind CDN fails to load (mirrors md:ml-64 / lg:ml-72 / min-h-screen). */
 main {
     min-height: 100vh;
+    overflow-x: hidden; /* Prevent Bootstrap .row negative-margin horizontal overflow */
 }
 
 @media (min-width: 768px) {
     main {
-        margin-left: 16rem;
+        margin-left: var(--sidebar-width-md);
     }
 }
 
 @media (min-width: 1024px) {
     main {
-        margin-left: 18rem;
+        margin-left: var(--sidebar-width-lg);
     }
 }
 
@@ -4428,12 +4437,12 @@ body {
     border-color: var(--border-light) !important;
 }
 
-/* Ensure Bootstrap modal z-index doesn't conflict with sidebar */
+/* Ensure Bootstrap modal z-index doesn't conflict with sidebar; must be above mobile topbar (1060) */
 .modal {
-    z-index: 1055 !important;
+    z-index: 1065 !important;
 }
 .modal-backdrop {
-    z-index: 1054 !important;
+    z-index: 1064 !important;
 }
 
 /* Bootstrap accordion compatibility */
@@ -4519,9 +4528,9 @@ main {
 /* Mobile full-height sidebar fix for iOS */
 @media (max-width: 767px) {
     .sidebar {
-        height: calc(100vh - 60px) !important; /* fallback */
-        height: calc(100dvh - 60px) !important; /* modern browsers */
-        height: calc(100svh - 60px) !important; /* iOS Safari small viewport */
+        height: calc(100vh - var(--topbar-height)) !important; /* fallback */
+        height: calc(100dvh - var(--topbar-height)) !important; /* modern browsers */
+        height: calc(100svh - var(--topbar-height)) !important; /* iOS Safari small viewport */
     }
 }
 
@@ -5105,10 +5114,10 @@ label,
     body::before {
         content: '';
         position: fixed;
-        top: 60px; /* below mobile topbar */
+        top: var(--topbar-height); /* below mobile topbar */
         left: 0;
         width: 10px;
-        height: calc(100% - 60px);
+        height: calc(100% - var(--topbar-height));
         z-index: 1039; /* below sidebar overlay */
         /* Invisible touch zone - no visual */
         pointer-events: none;
@@ -5305,19 +5314,9 @@ html, body {
 
 /* ============================================================
    CONSISTENT MAIN CONTENT TOP OFFSET
-   Ensures no content is hidden under the mobile topbar
+   Ensures no content is hidden under the mobile topbar.
+   --topbar-height is defined in :root at the top of this file.
    ============================================================ */
-
-@media (max-width: 767px) {
-    /* Use CSS variable for topbar height to keep things in sync */
-    :root {
-        --topbar-height: 60px;
-    }
-
-    main {
-        padding-top: calc(var(--topbar-height) + 1rem) !important;
-    }
-}
 
 /* ============================================================
    IMPROVED SCROLLBAR ON MOBILE CONTENT AREAS
