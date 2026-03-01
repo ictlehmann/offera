@@ -154,6 +154,19 @@ try {
     checkTable($content_db, 'blog_comment_reactions', 'blog_comment_reactions table');
 
     // ============================================
+    // SHOP MODULE CHECKS
+    // ============================================
+    echo "--- Checking Shop Module ---\n";
+
+    checkColumn($content_db, 'shop_products', 'category', 'shop_products.category column');
+    checkColumn($content_db, 'shop_products', 'pickup_location', 'shop_products.pickup_location column');
+    checkColumn($content_db, 'shop_products', 'variants', 'shop_products.variants column');
+    checkColumn($content_db, 'shop_products', 'shipping_cost', 'shop_products.shipping_cost column');
+    checkColumn($content_db, 'shop_orders', 'delivery_status', 'shop_orders.delivery_status column');
+    checkColumn($content_db, 'shop_orders', 'selected_variant', 'shop_orders.selected_variant column');
+    checkColumn($content_db, 'shop_orders', 'delivery_method', 'shop_orders.delivery_method column');
+
+    // ============================================
     // SUMMARY
     // ============================================
     echo "\n==============================================\n";

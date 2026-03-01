@@ -14,6 +14,7 @@ CREATE TABLE IF NOT EXISTS `shop_products` (
     `category`         VARCHAR(100)   DEFAULT NULL COMMENT 'Kategorie (z.B. Merchandise, Tickets, Sonstiges)',
     `pickup_location`  VARCHAR(255)   DEFAULT NULL COMMENT 'Abholort und Zeitpunkt',
     `variants`         VARCHAR(255)   DEFAULT NULL COMMENT 'Kommagetrennte Varianten (z.B. S, M, L, XL)',
+    `shipping_cost`    DECIMAL(10,2)  NOT NULL DEFAULT 0.00 COMMENT 'Versandkosten für dieses Produkt',
     `created_at`       DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at`    DATETIME       NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`)
@@ -53,6 +54,7 @@ CREATE TABLE IF NOT EXISTS `shop_orders` (
     `shipping_address`  TEXT         DEFAULT NULL               COMMENT 'Lieferadresse für Postversand',
     `delivery_status`   ENUM('open','delivered') NOT NULL DEFAULT 'open' COMMENT 'Lieferstatus',
     `selected_variant`  VARCHAR(255) DEFAULT NULL               COMMENT 'Gewählte Variante (z.B. Größe) aus dem Produktfeld',
+    `delivery_method`   VARCHAR(50)  DEFAULT NULL               COMMENT 'Gewählte Liefermethode: Versand oder Abholung',
     `created_at`       DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `updated_at`      DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (`id`),
