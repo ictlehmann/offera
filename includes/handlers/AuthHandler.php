@@ -770,20 +770,17 @@ class AuthHandler {
                 INSERT INTO users (
                     email, password, role, azure_roles, azure_oid, 
                     is_alumni_validated, profile_complete, 
-                    notify_new_projects, notify_new_events
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    notify_new_projects, notify_new_events,
+                    first_name, last_name
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ");
             $stmt->execute([
                 $email, $randomPassword, $roleName, $azureRolesJson, $azureOid,
                 $isAlumniValidated, $profileComplete,
-                $notifyProjects, $notifyEvents
+                $notifyProjects, $notifyEvents,
+                $firstName, $lastName
             ]);
             $userId = $db->lastInsertId();
-
-            // Sync Entra data (displayName, mail, groups, role) for newly created users
-            if ($azureOid) {
-                self::syncEntraData($userId, $claims, $azureOid);
-            }
         }
         
         // Update or create alumni profile if first_name and last_name are available
