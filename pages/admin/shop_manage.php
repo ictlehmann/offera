@@ -51,10 +51,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'category'         => trim($_POST['category'] ?? ''),
             'pickup_location'  => trim($_POST['pickup_location'] ?? ''),
             'variants'         => trim($_POST['variants_text'] ?? ''),
+            'sku'              => trim($_POST['sku'] ?? ''),
             'image_path'    => null,
         ];
 
-        $allowedCategories = ['Merchandise', 'Tickets', 'Sonstiges'];
+        $allowedCategories = ['Merchandise', 'Tickets', 'Sonstiges', 'Office Supplies'];
         if (!empty($data['category']) && !in_array($data['category'], $allowedCategories, true)) {
             $data['category'] = '';
         }
@@ -659,6 +660,7 @@ ob_start();
                                         class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
                                     <option value="">– bitte wählen –</option>
                                     <option value="Merchandise">Merchandise</option>
+                                    <option value="Office Supplies">Office Supplies</option>
                                     <option value="Tickets">Tickets</option>
                                     <option value="Sonstiges">Sonstiges</option>
                                 </select>
@@ -699,6 +701,14 @@ ob_start();
                                         <span class="text-sm text-gray-700 dark:text-gray-300">Produkt aktiv</span>
                                     </label>
                                 </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                                    SKU <span class="font-normal text-gray-400 dark:text-gray-500">(optional)</span>
+                                </label>
+                                <input type="text" name="sku" id="modal-sku"
+                                       placeholder="z.B. MUG-2024-ALUMNI"
+                                       class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
                             </div>
                         </div>
                     </div>
@@ -756,13 +766,13 @@ ob_start();
                         </h3>
                         <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/40 border border-gray-200 dark:border-gray-600 mb-3">
                             <label class="flex items-start gap-3 cursor-pointer">
-                                <input type="checkbox" id="modal-has-variants" name="has_variants" value="1"
-                                       onchange="toggleVariantMode(this.checked)"
+                                <input type="checkbox" id="modal-no-variants" name="no_variants" value="1"
+                                       onchange="toggleVariantMode(!this.checked)"
                                        class="w-4 h-4 mt-0.5 text-purple-600 rounded border-gray-300 dark:border-gray-600 focus:ring-purple-500">
                                 <div>
-                                    <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">Produkt hat Varianten</span>
+                                    <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">Keine Varianten</span>
                                     <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
-                                        Für Artikel mit verschiedenen Ausführungen (z.B. Größe, Farbe). Für normale Artikel nicht nötig.
+                                        Aktivieren wenn der Artikel keine verschiedenen Ausführungen (z.B. Größe, Farbe) hat.
                                     </p>
                                 </div>
                             </label>
@@ -803,11 +813,11 @@ ob_start();
                 <div id="modal-images-grid" class="grid grid-cols-4 sm:grid-cols-6 gap-2 mb-3"></div>
 
                 <!-- New images upload -->
-                <label for="modal-product-images"
+                <label for="modal-product-images" id="image-drop-zone"
                        class="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl cursor-pointer bg-gray-50 dark:bg-gray-700/30 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:border-blue-400 dark:hover:border-blue-500 transition-colors group">
                     <div class="flex flex-col items-center justify-center py-3">
                         <i class="fas fa-cloud-upload-alt text-2xl text-gray-400 group-hover:text-blue-500 dark:group-hover:text-blue-400 mb-1 transition-colors"></i>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors font-medium">Bilder auswählen</p>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors font-medium">Bilder hierher ziehen oder auswählen</p>
                         <p class="text-xs text-gray-400 dark:text-gray-500">JPG, PNG oder WebP · max. 5 MB pro Bild · Mehrfachauswahl möglich</p>
                     </div>
                     <input id="modal-product-images" type="file" name="product_images[]"
@@ -915,6 +925,7 @@ function openProductModal(product) {
     document.getElementById('modal-category').value        = isEdit ? (product.category || '') : '';
     document.getElementById('modal-pickup-location').value = isEdit ? (product.pickup_location || '') : '';
     document.getElementById('modal-variants-text').value   = isEdit ? (product.variants_csv || '') : '';
+    document.getElementById('modal-sku').value             = isEdit ? (product.sku || '') : '';
 
     // Header
     document.getElementById('modal-title').textContent        = isEdit ? 'Produkt bearbeiten' : 'Neues Produkt anlegen';
@@ -1075,6 +1086,42 @@ function previewNewImages(event) {
     });
 }
 
+// ── Drag-and-drop image upload ────────────────────────────────────────────────
+
+(function () {
+    document.addEventListener('DOMContentLoaded', function () {
+        const dz    = document.getElementById('image-drop-zone');
+        const input = document.getElementById('modal-product-images');
+        if (!dz || !input) return;
+
+        dz.addEventListener('dragenter', function (e) {
+            e.preventDefault();
+            dz.classList.add('border-blue-400', 'bg-blue-50', 'dark:bg-blue-900/20');
+        });
+
+        dz.addEventListener('dragover', function (e) {
+            e.preventDefault();
+        });
+
+        dz.addEventListener('dragleave', function (e) {
+            if (e.relatedTarget === null || !dz.contains(e.relatedTarget)) {
+                dz.classList.remove('border-blue-400', 'bg-blue-50', 'dark:bg-blue-900/20');
+            }
+        });
+
+        dz.addEventListener('drop', function (e) {
+            e.preventDefault();
+            dz.classList.remove('border-blue-400', 'bg-blue-50', 'dark:bg-blue-900/20');
+            if (e.dataTransfer.files.length > 0) {
+                const dt = new DataTransfer();
+                Array.from(e.dataTransfer.files).forEach(f => dt.items.add(f));
+                input.files = dt.files;
+                previewNewImages({ target: input });
+            }
+        });
+    });
+}());
+
 // ── Variant UI ────────────────────────────────────────────────────────────────
 
 function buildVariantUI(variants) {
@@ -1096,10 +1143,10 @@ function buildVariantUI(variants) {
         Object.keys(groups).forEach(typeName => {
             container.appendChild(createVariantBlock(variantCount++, typeName, groups[typeName]));
         });
-        document.getElementById('modal-has-variants').checked = true;
+        document.getElementById('modal-no-variants').checked = false;
         document.getElementById('modal-section-variants').classList.remove('hidden');
     } else {
-        document.getElementById('modal-has-variants').checked = false;
+        document.getElementById('modal-no-variants').checked = true;
         document.getElementById('modal-section-variants').classList.add('hidden');
     }
 }
@@ -1240,6 +1287,9 @@ openProductModal(<?php
         'is_bulk_order' => $editProduct['is_bulk_order'],
         'bulk_end_date' => $editProduct['bulk_end_date'],
         'bulk_min_goal' => $editProduct['bulk_min_goal'],
+        'category'      => $editProduct['category'],
+        'pickup_location' => $editProduct['pickup_location'],
+        'sku'           => $editProduct['sku'],
         'image_path'    => !empty($editProduct['image_path']) ? asset($editProduct['image_path']) : '',
         'images'        => $imagesForJs,
         'variants'      => $editProduct['variants'],
