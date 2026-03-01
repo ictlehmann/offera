@@ -76,7 +76,7 @@ ob_start();
         <?php else: ?>
             <a href="index.php" class="inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors">
                 <i class="fas fa-arrow-left mr-2"></i>
-                Zurück zum Alumni Directory
+                Zurück zum Alumni-Verzeichnis
             </a>
         <?php endif; ?>
     </div>
