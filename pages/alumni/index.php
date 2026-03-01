@@ -31,7 +31,7 @@ $profiles = Alumni::searchProfiles($filters);
 // Get all industries for dropdown
 $industries = Alumni::getAllIndustries();
 
-$title = 'Alumni Directory - IBC Intranet';
+$title = 'Alumni-Verzeichnis - IBC Intranet';
 ob_start();
 ?>
 
@@ -51,9 +51,9 @@ ob_start();
         <div>
             <h1 class="text-4xl font-bold text-gray-800 mb-2">
                 <i class="fas fa-user-graduate mr-3 text-purple-600"></i>
-                Alumni Directory
+                Alumni-Verzeichnis
             </h1>
-            <p class="text-gray-600">Discover and connect with our alumni network</p>
+            <p class="text-gray-600">Entdecke und vernetze dich mit unserem Alumni-Netzwerk</p>
         </div>
         
         <!-- Edit My Profile Button - Only for Alumni, Alumni-Vorstand, Alumni-Finanzprüfer, and Ehrenmitglied -->
