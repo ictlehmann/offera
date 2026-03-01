@@ -53,15 +53,30 @@ $polls = $stmt->fetchAll();
 $filteredPolls = filterPollsForUser($polls, $userRole, $userAzureRoles, $user['id']);
 
 $title = 'Umfragen - IBC Intranet';
+
+// Determine vote-status filter from URL
+$voteFilter = $_GET['vote'] ?? 'all';
+$validVoteFilters = ['all', 'open', 'voted'];
+if (!in_array($voteFilter, $validVoteFilters)) {
+    $voteFilter = 'all';
+}
+
+// Apply client-side vote-status filter
+if ($voteFilter === 'open') {
+    $filteredPolls = array_filter($filteredPolls, fn($p) => (int)$p['user_has_voted'] === 0);
+} elseif ($voteFilter === 'voted') {
+    $filteredPolls = array_filter($filteredPolls, fn($p) => (int)$p['user_has_voted'] > 0);
+}
+
 ob_start();
 ?>
 
-<div class="max-w-6xl mx-auto">
+<div class="max-w-7xl mx-auto">
     <!-- Header -->
     <div class="mb-8 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
             <h1 class="text-4xl font-bold text-gray-800 dark:text-gray-100 mb-2">
-                <i class="fas fa-poll mr-3 text-blue-500"></i>
+                <i class="fas fa-poll mr-3 text-ibc-blue"></i>
                 Umfragen
             </h1>
             <p class="text-gray-600 dark:text-gray-300">Aktive Umfragen für Ihre Rolle</p>
@@ -70,7 +85,7 @@ ob_start();
         <?php if (Auth::canCreatePolls()): ?>
         <a 
             href="<?php echo asset('pages/polls/create.php'); ?>"
-            class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg font-semibold hover:from-blue-600 hover:to-blue-700 transition-all shadow-lg no-underline"
+            class="btn-primary no-underline"
         >
             <i class="fas fa-plus mr-2"></i>
             Neue Umfrage erstellen
@@ -84,96 +99,238 @@ ob_start();
     </div>
     <?php endif; ?>
 
+    <!-- Filter Tabs -->
+    <div class="mb-6 flex gap-2 flex-wrap">
+        <a href="?vote=all" class="polls-filter-tab <?php echo $voteFilter === 'all'   ? 'polls-filter-tab--active' : ''; ?>">
+            <i class="fas fa-list mr-2"></i>Alle
+        </a>
+        <a href="?vote=open" class="polls-filter-tab <?php echo $voteFilter === 'open'  ? 'polls-filter-tab--active' : ''; ?>">
+            <i class="fas fa-clock mr-2"></i>Offen
+        </a>
+        <a href="?vote=voted" class="polls-filter-tab <?php echo $voteFilter === 'voted' ? 'polls-filter-tab--active' : ''; ?>">
+            <i class="fas fa-check-circle mr-2"></i>Abgestimmt
+        </a>
+    </div>
+
     <?php if (empty($filteredPolls)): ?>
     <!-- No polls message -->
-    <div class="card p-8 text-center">
-        <div class="w-24 h-24 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+    <div class="card p-12 text-center rounded-2xl border border-dashed border-gray-300 dark:border-gray-600">
+        <div class="w-20 h-20 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mx-auto mb-5">
             <i class="fas fa-poll text-gray-400 dark:text-gray-500 text-4xl"></i>
         </div>
-        <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">Keine aktiven Umfragen</h3>
-        <p class="text-gray-600 dark:text-gray-300">Es sind derzeit keine Umfragen für Sie verfügbar.</p>
+        <h3 class="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">Keine aktiven Umfragen</h3>
+        <p class="text-sm text-gray-400 dark:text-gray-500">Es sind derzeit keine Umfragen in dieser Kategorie verfügbar.</p>
     </div>
     <?php else: ?>
-    
+
     <!-- Polls Grid -->
-    <div class="grid gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <?php foreach ($filteredPolls as $poll): ?>
-        <div class="card p-6 hover:shadow-lg transition-shadow">
-            <div class="flex justify-between items-start mb-4">
-                <div class="flex-1">
-                    <h3 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">
-                        <?php echo htmlspecialchars($poll['title']); ?>
-                    </h3>
-                    <?php if (!empty($poll['description'])): ?>
-                    <p class="text-gray-600 dark:text-gray-300 mb-4">
-                        <?php echo nl2br(htmlspecialchars($poll['description'])); ?>
-                    </p>
+        <?php
+            $hasVoted   = (int)$poll['user_has_voted'] > 0;
+            $isMSForms  = !empty($poll['microsoft_forms_url']);
+            $statusClass = $hasVoted ? 'poll-card--voted' : 'poll-card--open';
+        ?>
+        <div class="poll-card card flex flex-col overflow-hidden <?php echo $statusClass; ?>">
+            <!-- Status accent strip -->
+            <div class="poll-card-accent"></div>
+
+            <!-- Decorative header area -->
+            <div class="poll-card-header relative overflow-hidden flex-shrink-0">
+                <div class="w-full h-full flex flex-col items-center justify-center poll-card-placeholder">
+                    <i class="fas fa-poll text-white/30 text-5xl mb-2"></i>
+                    <span class="text-white/50 text-xs font-semibold tracking-widest uppercase">Umfrage</span>
+                </div>
+
+                <!-- Status badge overlay -->
+                <div class="absolute top-3 left-3">
+                    <?php if ($hasVoted): ?>
+                    <span class="px-2.5 py-1 bg-ibc-green/90 backdrop-blur-sm text-white text-xs font-semibold rounded-full">
+                        <i class="fas fa-check-circle mr-1"></i>Abgestimmt
+                    </span>
+                    <?php else: ?>
+                    <span class="px-2.5 py-1 bg-yellow-500/90 backdrop-blur-sm text-white text-xs font-semibold rounded-full">
+                        <i class="fas fa-clock mr-1"></i>Offen
+                    </span>
                     <?php endif; ?>
                 </div>
-                
-                <!-- Status Badge -->
-                <?php if ($poll['user_has_voted'] > 0): ?>
-                <span class="px-3 py-1 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 rounded-full text-sm font-semibold">
-                    <i class="fas fa-check-circle mr-1"></i>
-                    Abgestimmt
-                </span>
-                <?php else: ?>
-                <span class="px-3 py-1 bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300 rounded-full text-sm font-semibold">
-                    <i class="fas fa-clock mr-1"></i>
-                    Offen
-                </span>
+
+                <?php if ($isMSForms): ?>
+                <div class="absolute top-3 right-3">
+                    <span class="px-2.5 py-1 bg-ibc-blue/90 backdrop-blur-sm text-white text-xs font-semibold rounded-full">
+                        <i class="fas fa-external-link-alt mr-1"></i>Microsoft Forms
+                    </span>
+                </div>
                 <?php endif; ?>
             </div>
-            
-            <!-- Meta Information -->
-            <div class="flex flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-400 mb-4">
-                <div>
-                    <i class="fas fa-calendar-alt mr-1"></i>
-                    Endet am <?php echo formatDateTime($poll['end_date'], 'd.m.Y H:i'); ?> Uhr
-                </div>
-                <div>
-                    <i class="fas fa-users mr-1"></i>
-                    <?php echo $poll['total_votes']; ?> Stimme(n)
-                </div>
-            </div>
-            
-            <!-- Action Button -->
-            <?php if (!empty($poll['microsoft_forms_url'])): ?>
-            <!-- Microsoft Forms Link - Show both buttons -->
-            <div class="flex gap-3">
-                <a 
-                    href="<?php echo htmlspecialchars($poll['microsoft_forms_url']); ?>"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="inline-block px-6 py-2 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600 transition-colors no-underline"
-                >
-                    <i class="fas fa-external-link-alt mr-2"></i>Zur Umfrage
-                </a>
-                <button 
-                    onclick="hidePoll(<?php echo $poll['id']; ?>)"
-                    class="inline-block px-6 py-2 bg-gray-500 text-white rounded-lg font-semibold hover:bg-gray-600 transition-colors"
-                >
-                    <i class="fas fa-eye-slash mr-2"></i>Erledigt / Ausblenden
-                </button>
-            </div>
-            <?php else: ?>
-            <!-- Internal Poll - Regular behavior -->
-            <a 
-                href="<?php echo asset('pages/polls/view.php?id=' . $poll['id']); ?>"
-                class="inline-block px-6 py-2 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600 transition-colors no-underline"
-            >
-                <?php if ($poll['user_has_voted'] > 0): ?>
-                    <i class="fas fa-chart-bar mr-2"></i>Ergebnisse ansehen
+
+            <!-- Card Body -->
+            <div class="flex flex-col flex-1 p-5">
+                <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100 mb-3 leading-snug line-clamp-2">
+                    <?php echo htmlspecialchars($poll['title']); ?>
+                </h3>
+
+                <?php if (!empty($poll['description'])): ?>
+                <p class="text-gray-500 dark:text-gray-400 text-sm line-clamp-2 flex-1 mb-4">
+                    <?php echo htmlspecialchars(substr($poll['description'], 0, 120)); ?><?php echo strlen($poll['description']) > 120 ? '…' : ''; ?>
+                </p>
                 <?php else: ?>
-                    <i class="fas fa-vote-yea mr-2"></i>Jetzt abstimmen
+                <div class="flex-1"></div>
                 <?php endif; ?>
-            </a>
-            <?php endif; ?>
+
+                <!-- Meta Info -->
+                <div class="space-y-2 text-sm text-gray-600 dark:text-gray-400 mb-4">
+                    <div class="flex items-center gap-2">
+                        <span class="poll-meta-icon"><i class="fas fa-calendar-alt text-ibc-blue"></i></span>
+                        <span>Endet am <?php echo formatDateTime($poll['end_date'], 'd.m.Y H:i'); ?> Uhr</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="poll-meta-icon"><i class="fas fa-users text-ibc-blue"></i></span>
+                        <span><?php echo $poll['total_votes']; ?> Stimme(n)</span>
+                    </div>
+                </div>
+
+                <!-- CTA -->
+                <?php if ($isMSForms): ?>
+                <div class="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700 gap-2">
+                    <a 
+                        href="<?php echo htmlspecialchars($poll['microsoft_forms_url']); ?>"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="flex-1 text-center px-4 py-2.5 bg-gradient-to-r from-ibc-blue to-ibc-blue-dark text-white rounded-lg font-semibold text-sm hover:opacity-90 transition-opacity no-underline"
+                    >
+                        <i class="fas fa-external-link-alt mr-1.5"></i>Zur Umfrage
+                    </a>
+                    <button 
+                        onclick="hidePoll(<?php echo $poll['id']; ?>)"
+                        class="px-3 py-2.5 bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-lg font-semibold text-sm hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+                        title="Erledigt / Ausblenden"
+                    >
+                        <i class="fas fa-eye-slash"></i>
+                    </button>
+                </div>
+                <?php else: ?>
+                <div class="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700">
+                    <?php if ($hasVoted): ?>
+                    <span class="text-sm font-semibold text-ibc-green group-hover:text-ibc-green-dark transition-colors">
+                        Ergebnisse ansehen
+                    </span>
+                    <a href="<?php echo asset('pages/polls/view.php?id=' . $poll['id']); ?>"
+                       class="w-8 h-8 rounded-full bg-ibc-green/10 flex items-center justify-center hover:bg-ibc-green transition-all group no-underline">
+                        <i class="fas fa-chart-bar text-xs text-ibc-green group-hover:text-white transition-colors"></i>
+                    </a>
+                    <?php else: ?>
+                    <a href="<?php echo asset('pages/polls/view.php?id=' . $poll['id']); ?>"
+                       class="text-sm font-semibold poll-cta-link hover:text-ibc-blue-dark transition-colors no-underline">
+                        Jetzt abstimmen
+                    </a>
+                    <a href="<?php echo asset('pages/polls/view.php?id=' . $poll['id']); ?>"
+                       class="w-8 h-8 rounded-full bg-ibc-blue/10 flex items-center justify-center hover:bg-ibc-blue transition-all group no-underline">
+                        <i class="fas fa-vote-yea text-xs text-ibc-blue group-hover:text-white transition-colors"></i>
+                    </a>
+                    <?php endif; ?>
+                </div>
+                <?php endif; ?>
+            </div>
         </div>
         <?php endforeach; ?>
     </div>
     <?php endif; ?>
 </div>
+
+<style>
+    /* ── Filter Tabs ────────────────────────────────── */
+    .polls-filter-tab {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.6rem 1.5rem;
+        border-radius: 9999px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: all 0.25s ease;
+        background: var(--bg-card);
+        color: var(--text-muted);
+        border: 1.5px solid var(--border-color);
+        text-decoration: none !important;
+    }
+    .polls-filter-tab:hover {
+        border-color: var(--ibc-blue);
+        color: var(--ibc-blue) !important;
+        box-shadow: 0 2px 8px rgba(0,102,179,0.12);
+    }
+    .polls-filter-tab--active {
+        background: linear-gradient(135deg, var(--ibc-blue) 0%, var(--ibc-blue-dark) 100%) !important;
+        color: #ffffff !important;
+        border-color: transparent !important;
+        box-shadow: 0 4px 14px rgba(0,102,179,0.35);
+    }
+
+    /* ── Poll Card ──────────────────────────────────── */
+    .poll-card {
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+        border: 1.5px solid var(--border-color) !important;
+    }
+    .poll-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-card-hover);
+        border-color: var(--ibc-blue) !important;
+    }
+
+    /* Status accent strip */
+    .poll-card-accent {
+        height: 4px;
+        flex-shrink: 0;
+        background: #f59e0b;
+    }
+    .poll-card--voted .poll-card-accent { background: var(--ibc-green); }
+    .poll-card--open  .poll-card-accent { background: #f59e0b; }
+
+    /* ── Card Header / Placeholder ───────────────────── */
+    .poll-card-header {
+        height: 140px;
+        background: #e5e7eb;
+        flex-shrink: 0;
+    }
+    .poll-card-header::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to bottom, rgba(0,0,0,0.08) 0%, rgba(0,0,0,0.45) 100%);
+        pointer-events: none;
+    }
+    .poll-card-placeholder {
+        background: linear-gradient(135deg, var(--ibc-blue) 0%, var(--ibc-blue-dark) 60%, #001f3a 100%);
+    }
+    .poll-card--voted .poll-card-placeholder {
+        background: linear-gradient(135deg, var(--ibc-green) 0%, var(--ibc-green-dark) 60%, #004a24 100%);
+    }
+
+    /* ── Meta Icon ──────────────────────────────────── */
+    .poll-meta-icon {
+        width: 1.25rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    /* ── Text Clamp ─────────────────────────────────── */
+    .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    .poll-cta-link {
+        color: var(--ibc-blue);
+    }
+
+    /* ── Reduced Motion ─────────────────────────────── */
+    @media (prefers-reduced-motion: reduce) {
+        .poll-card { transition: none; }
+        .poll-card:hover { transform: none; }
+    }
+</style>
 
 <script>
 function hidePoll(pollId) {
