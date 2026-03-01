@@ -3,3 +3,4 @@ composer.phar
 *.backup
 .env
 test_render.html
+backups/*.sql.gz
