@@ -200,6 +200,20 @@ if ($section === 'products') {
         }
     }
     unset($p, $img);
+
+    // Fetch recent sales stats for the dashboard chart
+    $recentSalesStats = Shop::getMonthlySalesStats(6);
+    $chartLabels   = [];
+    $chartCounts   = [];
+    $chartRevenues = [];
+    foreach ($recentSalesStats as $row) {
+        $dt = DateTime::createFromFormat('Y-m', $row['month']);
+        $chartLabels[]   = $dt ? $dt->format('M y') : $row['month'];
+        $chartCounts[]   = (int)   $row['count'];
+        $chartRevenues[] = (float) $row['revenue'];
+    }
+    $recentTotalOrders  = array_sum($chartCounts);
+    $recentTotalRevenue = array_sum($chartRevenues);
 } elseif ($section === 'orders') {
     $orders = Shop::getAllOrders();
 
@@ -270,101 +284,149 @@ ob_start();
          PRODUCTS
     ═══════════════════════════════════════════════════════════════════════════ -->
 
-    <div class="card rounded-xl shadow-lg p-6">
-        <div class="flex items-center justify-between mb-6">
-            <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">
-                <i class="fas fa-list mr-2 text-blue-500"></i>Alle Produkte
-            </h2>
-            <button type="button" onclick="openProductModal()"
-                    class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">
-                <i class="fas fa-plus"></i>Neues Produkt
-            </button>
+    <!-- Add New Product button – prominent, top-level -->
+    <div class="flex items-center justify-between mb-6">
+        <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">
+            <i class="fas fa-list mr-2 text-blue-500"></i>Alle Produkte
+        </h2>
+        <button type="button" onclick="openProductModal()"
+                class="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold text-base shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105">
+            <i class="fas fa-plus"></i>Neues Produkt hinzufügen
+        </button>
+    </div>
+
+    <!-- Dashboard grid: product list + sales chart sidebar -->
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+
+        <!-- Product list (2/3 width on xl) -->
+        <div class="xl:col-span-2 card rounded-xl shadow-lg p-6">
+            <?php if (empty($products)): ?>
+            <div class="flex flex-col items-center justify-center py-16 text-gray-400 dark:text-gray-500">
+                <i class="fas fa-box-open text-5xl mb-4 opacity-40"></i>
+                <p class="text-lg font-medium mb-4">Noch keine Produkte vorhanden.</p>
+                <button type="button" onclick="openProductModal()"
+                        class="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">
+                    <i class="fas fa-plus"></i>Erstes Produkt erstellen
+                </button>
+            </div>
+            <?php else: ?>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm card-table">
+                    <thead>
+                        <tr class="border-b border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 text-left">
+                            <th class="pb-3 font-semibold">Bild</th>
+                            <th class="pb-3 font-semibold">Name</th>
+                            <th class="pb-3 font-semibold hidden md:table-cell">Beschreibung</th>
+                            <th class="pb-3 font-semibold text-right">Preis</th>
+                            <th class="pb-3 font-semibold text-center hidden sm:table-cell">Status</th>
+                            <th class="pb-3 font-semibold text-center hidden sm:table-cell">Varianten</th>
+                            <th class="pb-3"></th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                        <?php foreach ($products as $product): ?>
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
+                            <td class="py-3 pr-3" data-label="Bild">
+                                <?php
+                                $thumbSrc = !empty($product['image_path'])
+                                    ? asset($product['image_path'])
+                                    : (!empty($product['images'][0]['image_path']) ? asset($product['images'][0]['image_path']) : null);
+                                ?>
+                                <?php if ($thumbSrc): ?>
+                                <img src="<?php echo $thumbSrc; ?>"
+                                     alt="" class="w-14 h-14 object-cover rounded-lg border border-gray-100 dark:border-gray-700">
+                                <?php else: ?>
+                                <div class="w-14 h-14 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-box text-gray-400 text-lg"></i>
+                                </div>
+                                <?php endif; ?>
+                            </td>
+                            <td class="py-3 font-semibold text-gray-800 dark:text-gray-100" data-label="Name">
+                                <?php echo htmlspecialchars($product['name']); ?>
+                            </td>
+                            <td class="py-3 text-gray-500 dark:text-gray-400 max-w-xs hidden md:table-cell" data-label="Beschreibung">
+                                <span class="line-clamp-2"><?php echo htmlspecialchars($product['description'] ?? ''); ?></span>
+                            </td>
+                            <td class="py-3 text-right font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap" data-label="Preis">
+                                <?php echo number_format((float) $product['base_price'], 2, ',', '.'); ?> €
+                            </td>
+                            <td class="py-3 text-center hidden sm:table-cell" data-label="Status">
+                                <?php if ($product['active']): ?>
+                                <span class="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 rounded-full text-xs font-medium">Aktiv</span>
+                                <?php else: ?>
+                                <span class="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-full text-xs font-medium">Inaktiv</span>
+                                <?php endif; ?>
+                            </td>
+                            <td class="py-3 text-center hidden sm:table-cell" data-label="Varianten">
+                                <?php
+                                $variantCount = count($product['variants']);
+                                $totalStock   = array_sum(array_column($product['variants'], 'stock_quantity'));
+                                ?>
+                                <div class="flex flex-col items-center">
+                                    <span class="font-medium text-gray-700 dark:text-gray-300"><?php echo $variantCount; ?></span>
+                                    <span class="text-xs text-gray-400 dark:text-gray-500"><?php echo $totalStock; ?> Stk.</span>
+                                </div>
+                            </td>
+                            <td class="py-3 text-right" data-label="Aktionen">
+                                <button type="button"
+                                        onclick="openProductModal(<?php echo htmlspecialchars(json_encode($product), ENT_QUOTES); ?>)"
+                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg text-xs font-medium transition-colors">
+                                    <i class="fas fa-edit"></i>Bearbeiten
+                                </button>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+            <p class="mt-4 text-xs text-gray-400 dark:text-gray-500">
+                <?php echo count($products); ?> Produkt<?php echo count($products) !== 1 ? 'e' : ''; ?> insgesamt
+            </p>
+            <?php endif; ?>
         </div>
 
-        <?php if (empty($products)): ?>
-        <div class="flex flex-col items-center justify-center py-16 text-gray-400 dark:text-gray-500">
-            <i class="fas fa-box-open text-5xl mb-4 opacity-40"></i>
-            <p class="text-lg font-medium mb-4">Noch keine Produkte vorhanden.</p>
-            <button type="button" onclick="openProductModal()"
-                    class="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors">
-                <i class="fas fa-plus"></i>Erstes Produkt erstellen
-            </button>
+        <!-- Recent sales sidebar (1/3 width on xl) -->
+        <div class="xl:col-span-1 flex flex-col gap-6">
+
+            <!-- KPI mini-cards -->
+            <div class="grid grid-cols-2 gap-4">
+                <div class="card rounded-xl shadow p-4 border-l-4 border-blue-500">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-1">Bestellungen</p>
+                    <p class="text-2xl font-bold text-blue-600 dark:text-blue-400"><?php echo number_format($recentTotalOrders); ?></p>
+                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Letzte 6 Monate</p>
+                </div>
+                <div class="card rounded-xl shadow p-4 border-l-4 border-green-500">
+                    <p class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400 mb-1">Umsatz</p>
+                    <p class="text-2xl font-bold text-green-600 dark:text-green-400"><?php echo number_format($recentTotalRevenue, 2, ',', '.'); ?> €</p>
+                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Letzte 6 Monate</p>
+                </div>
+            </div>
+
+            <!-- Recent sales chart -->
+            <div class="card rounded-xl shadow-lg p-5 flex-1">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-sm font-bold text-gray-800 dark:text-gray-100">
+                        <i class="fas fa-chart-line mr-1.5 text-blue-500"></i>Aktuelle Verkäufe
+                    </h3>
+                    <a href="<?php echo asset('pages/admin/shop_stats.php'); ?>"
+                       class="text-xs text-blue-500 hover:text-blue-700 font-medium no-underline">
+                        Details <i class="fas fa-arrow-right ml-0.5"></i>
+                    </a>
+                </div>
+                <?php if (!empty($recentSalesStats)): ?>
+                <div class="relative" style="height:220px">
+                    <canvas id="recentSalesChart"></canvas>
+                </div>
+                <?php else: ?>
+                <div class="flex flex-col items-center justify-center py-10 text-gray-400 dark:text-gray-500">
+                    <i class="fas fa-chart-bar text-3xl mb-2 opacity-30"></i>
+                    <p class="text-sm">Noch keine Verkaufsdaten</p>
+                </div>
+                <?php endif; ?>
+            </div>
         </div>
-        <?php else: ?>
-        <div class="overflow-x-auto">
-            <table class="w-full text-sm card-table">
-                <thead>
-                    <tr class="border-b border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 text-left">
-                        <th class="pb-3 font-semibold">Bild</th>
-                        <th class="pb-3 font-semibold">Name</th>
-                        <th class="pb-3 font-semibold hidden md:table-cell">Beschreibung</th>
-                        <th class="pb-3 font-semibold text-right">Preis</th>
-                        <th class="pb-3 font-semibold text-center hidden sm:table-cell">Status</th>
-                        <th class="pb-3 font-semibold text-center hidden sm:table-cell">Varianten</th>
-                        <th class="pb-3"></th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
-                    <?php foreach ($products as $product): ?>
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
-                        <td class="py-3 pr-3" data-label="Bild">
-                            <?php
-                            $thumbSrc = !empty($product['image_path'])
-                                ? asset($product['image_path'])
-                                : (!empty($product['images'][0]['image_path']) ? asset($product['images'][0]['image_path']) : null);
-                            ?>
-                            <?php if ($thumbSrc): ?>
-                            <img src="<?php echo $thumbSrc; ?>"
-                                 alt="" class="w-14 h-14 object-cover rounded-lg border border-gray-100 dark:border-gray-700">
-                            <?php else: ?>
-                            <div class="w-14 h-14 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
-                                <i class="fas fa-box text-gray-400 text-lg"></i>
-                            </div>
-                            <?php endif; ?>
-                        </td>
-                        <td class="py-3 font-semibold text-gray-800 dark:text-gray-100" data-label="Name">
-                            <?php echo htmlspecialchars($product['name']); ?>
-                        </td>
-                        <td class="py-3 text-gray-500 dark:text-gray-400 max-w-xs hidden md:table-cell" data-label="Beschreibung">
-                            <span class="line-clamp-2"><?php echo htmlspecialchars($product['description'] ?? ''); ?></span>
-                        </td>
-                        <td class="py-3 text-right font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap" data-label="Preis">
-                            <?php echo number_format((float) $product['base_price'], 2, ',', '.'); ?> €
-                        </td>
-                        <td class="py-3 text-center hidden sm:table-cell" data-label="Status">
-                            <?php if ($product['active']): ?>
-                            <span class="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 rounded-full text-xs font-medium">Aktiv</span>
-                            <?php else: ?>
-                            <span class="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-full text-xs font-medium">Inaktiv</span>
-                            <?php endif; ?>
-                        </td>
-                        <td class="py-3 text-center hidden sm:table-cell" data-label="Varianten">
-                            <?php
-                            $variantCount = count($product['variants']);
-                            $totalStock   = array_sum(array_column($product['variants'], 'stock_quantity'));
-                            ?>
-                            <div class="flex flex-col items-center">
-                                <span class="font-medium text-gray-700 dark:text-gray-300"><?php echo $variantCount; ?></span>
-                                <span class="text-xs text-gray-400 dark:text-gray-500"><?php echo $totalStock; ?> Stk.</span>
-                            </div>
-                        </td>
-                        <td class="py-3 text-right" data-label="Aktionen">
-                            <button type="button"
-                                    onclick="openProductModal(<?php echo htmlspecialchars(json_encode($product), ENT_QUOTES); ?>)"
-                                    class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg text-xs font-medium transition-colors">
-                                <i class="fas fa-edit"></i>Bearbeiten
-                            </button>
-                        </td>
-                    </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-        </div>
-        <p class="mt-4 text-xs text-gray-400 dark:text-gray-500">
-            <?php echo count($products); ?> Produkt<?php echo count($products) !== 1 ? 'e' : ''; ?> insgesamt
-        </p>
-        <?php endif; ?>
-    </div>
+
+    </div><!-- end dashboard grid -->
 
     <?php elseif ($section === 'orders'): ?>
     <!-- ════════════════════════════════════════════════════════════════════════
@@ -1187,6 +1249,50 @@ openProductModal(<?php
 openProductModal();
 <?php endif; ?>
 </script>
+
+<?php if ($section === 'products' && !empty($recentSalesStats)): ?>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+(function() {
+    const isDark     = document.documentElement.classList.contains('dark-mode');
+    const gridColor  = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
+    const textColor  = isDark ? '#e5e7eb' : '#374151';
+    const labels     = <?php echo json_encode($chartLabels); ?>;
+    const revenues   = <?php echo json_encode($chartRevenues); ?>;
+
+    new Chart(document.getElementById('recentSalesChart'), {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Umsatz (€)',
+                data: revenues,
+                backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                borderColor: 'rgba(59, 130, 246, 1)',
+                borderWidth: 2,
+                borderRadius: 6,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => ctx.parsed.y.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })
+                    }
+                }
+            },
+            scales: {
+                x: { ticks: { color: textColor, font: { size: 11 } }, grid: { color: gridColor } },
+                y: { ticks: { color: textColor, font: { size: 11 } }, grid: { color: gridColor }, beginAtZero: true }
+            }
+        }
+    });
+})();
+</script>
+<?php endif; ?>
 
 <?php
 $content = ob_get_clean();
