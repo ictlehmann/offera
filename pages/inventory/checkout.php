@@ -136,7 +136,7 @@ ob_start();
         </div>
 
         <!-- Checkout Form -->
-        <form method="POST" class="space-y-6">
+        <form method="POST" id="checkout-rental-form" class="space-y-6">
             <input type="hidden" name="csrf_token" value="<?php echo CSRFHandler::getToken(); ?>">
             <input type="hidden" name="checkout" value="1">
 
@@ -202,7 +202,7 @@ ob_start();
                 <a href="view.php?id=<?php echo $item['id']; ?>" class="flex-1 px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition text-center">
                     Abbrechen
                 </a>
-                <button type="submit" class="flex-1 btn-primary">
+                <button type="submit" id="checkout-rental-btn" class="flex-1 btn-primary">
                     <i class="fas fa-check mr-2"></i>Ausleihen bestätigen
                 </button>
             </div>
@@ -210,6 +210,18 @@ ob_start();
     </div>
 </div>
 
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var form = document.getElementById('checkout-rental-form');
+    var btn  = document.getElementById('checkout-rental-btn');
+    if (form && btn) {
+        form.addEventListener('submit', function () {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Wird gesendet...';
+        });
+    }
+});
+</script>
 <?php
 $content = ob_get_clean();
 include __DIR__ . '/../../includes/templates/main_layout.php';
