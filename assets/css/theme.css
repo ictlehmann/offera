@@ -100,6 +100,7 @@
 }
 
 /* Dark Mode Variables - Source of Truth */
+[data-theme="dark"],
 .dark-mode {
     --bg-body: #0a0f1e; /* Ultra Deep Dark - Enhanced from slate-900 */
     --bg-card: #1a1f2e; /* Rich Dark Slate - Warmer tone */
