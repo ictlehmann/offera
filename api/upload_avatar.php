@@ -92,7 +92,12 @@ try {
 
         $extMap = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp', 'image/gif' => 'gif'];
         $ext = $extMap[$actualMime] ?? 'jpg';
-        $filename = 'avatar_' . bin2hex(random_bytes(16)) . '.' . $ext;
+
+        // Load current user to generate deterministic filename tied to email + username
+        $user = Auth::user();
+        $userId = $user['id'];
+        $userRole = $user['role'] ?? '';
+        $filename = hash('sha256', ($user['email'] ?? '') . ($user['username'] ?? '')) . '.' . $ext;
         $uploadPath = $uploadDir . $filename;
 
         if (!copy($tmpFile, $uploadPath)) {
@@ -105,13 +110,11 @@ try {
         $realUploadPath = realpath($uploadPath);
         $relativePath = str_replace('\\', '/', substr($realUploadPath, strlen($projectRoot) + 1));
 
-        // Load current profile to delete old image
-        $user = Auth::user();
-        $userId = $user['id'];
-        $userRole = $user['role'] ?? '';
-
+        // Delete old profile photo after the new one is saved successfully,
+        // but only if the path differs (avoids removing the just-written file)
         $existingProfile = Member::getProfileByUserId($userId);
-        if ($existingProfile && !empty($existingProfile['image_path'])) {
+        if ($existingProfile && !empty($existingProfile['image_path'])
+            && $existingProfile['image_path'] !== $relativePath) {
             SecureImageUpload::deleteImage($existingProfile['image_path']);
         }
 
