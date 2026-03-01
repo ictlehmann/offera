@@ -1,6 +1,4 @@
 <?php
-ob_start(); // Output Buffering starten
-
 // Security Headers – comprehensive set (HSTS, CSP, X-Frame-Options, …)
 require_once __DIR__ . '/../includes/security_headers.php';
 
@@ -87,7 +85,7 @@ define('AZURE_CLIENT_SECRET', _env('AZURE_CLIENT_SECRET', _env('CLIENT_SECRET', 
 define('AZURE_REDIRECT_URI',  _env('AZURE_REDIRECT_URI',  ''));
 
 if (AZURE_CLIENT_ID === '' || AZURE_CLIENT_SECRET === '') {
-    throw new \RuntimeException('Azure Konfiguration in der .env fehlt oder ist unvollständig');
+    error_log('Warning: Azure configuration is missing or incomplete in .env');
 }
 
 // Legacy aliases for backward compatibility
