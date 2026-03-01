@@ -92,28 +92,28 @@ ob_start();
 
 <!-- Quick Links Section -->
 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-    <a href="add.php" class="group bg-white dark:bg-slate-800 rounded-2xl shadow-md p-5 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-slate-700 text-center">
+    <a href="add.php" class="group inventory-item-card bg-white dark:bg-slate-800 rounded-2xl shadow-md p-5 border border-gray-100 dark:border-slate-700 text-center">
         <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900/40 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-purple-200 dark:group-hover:bg-purple-900/60 transition-colors">
             <i class="fas fa-plus-circle text-purple-600 text-xl"></i>
         </div>
         <h3 class="font-bold text-slate-800 dark:text-slate-100 text-sm">Artikel hinzufügen</h3>
         <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Neuen Artikel erstellen</p>
     </a>
-    <a href="../admin/categories.php" class="group bg-white dark:bg-slate-800 rounded-2xl shadow-md p-5 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-slate-700 text-center">
+    <a href="../admin/categories.php" class="group inventory-item-card bg-white dark:bg-slate-800 rounded-2xl shadow-md p-5 border border-gray-100 dark:border-slate-700 text-center">
         <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/40 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-blue-200 dark:group-hover:bg-blue-900/60 transition-colors">
             <i class="fas fa-tags text-blue-600 text-xl"></i>
         </div>
         <h3 class="font-bold text-slate-800 dark:text-slate-100 text-sm">Kategorien</h3>
         <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Kategorien verwalten</p>
     </a>
-    <a href="../admin/locations.php" class="group bg-white dark:bg-slate-800 rounded-2xl shadow-md p-5 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-slate-700 text-center">
+    <a href="../admin/locations.php" class="group inventory-item-card bg-white dark:bg-slate-800 rounded-2xl shadow-md p-5 border border-gray-100 dark:border-slate-700 text-center">
         <div class="w-12 h-12 bg-green-100 dark:bg-green-900/40 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-green-200 dark:group-hover:bg-green-900/60 transition-colors">
             <i class="fas fa-map-marker-alt text-green-600 text-xl"></i>
         </div>
         <h3 class="font-bold text-slate-800 dark:text-slate-100 text-sm">Standorte</h3>
         <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Standorte verwalten</p>
     </a>
-    <a href="index.php" class="group bg-white dark:bg-slate-800 rounded-2xl shadow-md p-5 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-slate-700 text-center">
+    <a href="index.php" class="group inventory-item-card bg-white dark:bg-slate-800 rounded-2xl shadow-md p-5 border border-gray-100 dark:border-slate-700 text-center">
         <div class="w-12 h-12 bg-orange-100 dark:bg-orange-900/40 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-orange-200 dark:group-hover:bg-orange-900/60 transition-colors">
             <i class="fas fa-boxes text-orange-600 text-xl"></i>
         </div>
@@ -206,7 +206,7 @@ ob_start();
             $imageSrc = null;
         }
     ?>
-    <div class="group bg-white dark:bg-slate-800 rounded-2xl shadow-md overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-slate-700 flex flex-col">
+    <div class="group inventory-item-card bg-white dark:bg-slate-800 rounded-2xl shadow-md overflow-hidden border border-gray-100 dark:border-slate-700 flex flex-col">
 
         <!-- Image Area -->
         <div class="relative h-44 bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 dark:from-purple-900/30 dark:via-blue-900/30 dark:to-indigo-900/30 flex items-center justify-center overflow-hidden">
