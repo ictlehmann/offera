@@ -109,6 +109,13 @@ define('INVOICE_NOTIFICATION_EMAIL', _env('INVOICE_NOTIFICATION_EMAIL', 'vorstan
 // Inventory Settings
 define('INVENTORY_BOARD_EMAIL', _env('INVENTORY_BOARD_EMAIL', 'vorstand@business-consulting.de'));
 
+// Mail Recipient Settings
+define('MAIL_SUPPORT',   _env('SUPPORT_EMAIL',   'it@business-consulting.de'));
+define('MAIL_IDEAS',     _env('IDEAS_EMAIL',      'ideas@business-consulting.de'));
+define('MAIL_FINANCE',   _env('FINANCE_EMAIL',    'finance@business-consulting.de'));
+define('MAIL_INVENTORY', _env('INVENTORY_EMAIL',  'inventory@business-consulting.de'));
+define('MAIL_SHOP',      _env('SHOP_EMAIL',       'shop@business-consulting.de'));
+
 // EasyVerein API
 define('EASYVEREIN_API_TOKEN', _env('EASYVEREIN_API_TOKEN', ''));
 
