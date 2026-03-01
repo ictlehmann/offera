@@ -2083,7 +2083,7 @@ body.dark-mode .text-green-500 {
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-card);
     border: 1px solid rgba(0, 0, 0, 0.05);
-    transition: all var(--transition-slow);
+    transition: transform var(--transition-slow), box-shadow var(--transition-slow), border-color var(--transition-slow);
     position: relative;
     overflow: hidden;
 }
@@ -2753,23 +2753,17 @@ td {
 }
 
 tbody tr {
-    transition: all var(--transition-fast);
+    transition: background-color var(--transition-fast), background var(--transition-fast);
 }
 
 /* Light Mode: Enhanced row hover */
 body:not(.dark-mode) tbody tr:hover {
-    background: linear-gradient(90deg, rgba(0, 102, 179, 0.04) 0%, rgba(0, 166, 81, 0.04) 100%);
-    transform: scale(1.005);
+    background: linear-gradient(90deg, rgba(0, 102, 179, 0.06) 0%, rgba(0, 166, 81, 0.06) 100%);
 }
 
 /* Dark Mode: Enhanced row hover */
 .dark-mode tbody tr:hover {
-    background: linear-gradient(90deg, rgba(51, 133, 196, 0.08) 0%, rgba(51, 184, 114, 0.08) 100%);
-    transform: scale(1.005);
-}
-
-tbody tr:hover {
-    background-color: rgba(0, 102, 179, 0.04);
+    background: linear-gradient(90deg, rgba(51, 133, 196, 0.10) 0%, rgba(51, 184, 114, 0.10) 100%);
 }
 
 /* Badge/Tag Enhancements */
