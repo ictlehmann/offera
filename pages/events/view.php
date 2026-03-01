@@ -95,233 +95,262 @@ $title = htmlspecialchars($event['title']) . ' - Events';
 ob_start();
 ?>
 
+<?php
+// Validate image existence once for reuse
+$imagePath = $event['image_path'] ?? '';
+$imageExists = false;
+if (!empty($imagePath)) {
+    $fullImagePath = __DIR__ . '/../../' . $imagePath;
+    $realPath = realpath($fullImagePath);
+    $baseDir = realpath(__DIR__ . '/../../');
+    $imageExists = $realPath && $baseDir && strpos($realPath, $baseDir) === 0 && file_exists($realPath);
+}
+
+// Status badge config
+$statusLabels = [
+    'planned' => ['label' => 'Geplant',                'icon' => 'fa-clock',          'color' => 'bg-white/20 border-white/30 text-white'],
+    'open'    => ['label' => 'Anmeldung offen',         'icon' => 'fa-door-open',      'color' => 'bg-ibc-green/30 border-ibc-green/50 text-white'],
+    'closed'  => ['label' => 'Anmeldung geschlossen',   'icon' => 'fa-door-closed',    'color' => 'bg-yellow-500/30 border-yellow-400/50 text-white'],
+    'running' => ['label' => 'Läuft gerade',            'icon' => 'fa-play-circle',    'color' => 'bg-white/30 border-white/50 text-white'],
+    'past'    => ['label' => 'Beendet',                 'icon' => 'fa-flag-checkered', 'color' => 'bg-white/10 border-white/20 text-white/70'],
+];
+$currentStatus = $event['status'] ?? 'planned';
+$statusInfo = $statusLabels[$currentStatus] ?? ['label' => $currentStatus, 'icon' => 'fa-circle', 'color' => 'bg-white/20 border-white/30 text-white'];
+?>
+
 <div class="max-w-5xl mx-auto">
+
     <!-- Back Button -->
-    <a href="index.php" class="inline-flex items-center text-ibc-blue hover:text-ibc-blue-dark mb-6 ease-premium">
+    <a href="index.php" class="inline-flex items-center text-ibc-blue hover:text-ibc-blue-dark mb-6 ease-premium font-medium">
         <i class="fas fa-arrow-left mr-2"></i>
         Zurück zur Übersicht
     </a>
 
-    <!-- Event Hero Header -->
-    <div class="bg-gradient-to-br from-ibc-blue to-ibc-blue-dark shadow-premium rounded-xl p-8 mb-6 text-white">
-        <div class="flex flex-col md:flex-row justify-between items-start gap-4 mb-4">
-            <div class="flex-1">
-                <h1 class="text-3xl md:text-4xl font-bold mb-4">
-                    <?php echo htmlspecialchars($event['title']); ?>
-                </h1>
-                
-                <!-- Status Badge -->
-                <?php 
-                $statusLabels = [
-                    'planned' => ['label' => 'Geplant', 'color' => 'bg-white/20 text-white border-white/30'],
-                    'open' => ['label' => 'Anmeldung offen', 'color' => 'bg-ibc-green/20 text-white border-ibc-green/30'],
-                    'closed' => ['label' => 'Anmeldung geschlossen', 'color' => 'bg-yellow-500/20 text-white border-yellow-500/30'],
-                    'running' => ['label' => 'Läuft gerade', 'color' => 'bg-white/30 text-white border-white/50'],
-                    'past' => ['label' => 'Beendet', 'color' => 'bg-white/10 text-white/70 border-white/20']
-                ];
-                $currentStatus = $event['status'] ?? 'planned';
-                $statusInfo = $statusLabels[$currentStatus] ?? ['label' => $currentStatus, 'color' => 'bg-white/20 text-white border-white/30'];
-                ?>
-                <div class="inline-flex items-center px-4 py-2 rounded-xl font-semibold text-sm <?php echo $statusInfo['color']; ?> border mb-4">
-                    <i class="fas fa-circle text-xs mr-2"></i>
-                    <?php echo $statusInfo['label']; ?>
-                </div>
-            </div>
-            
-            <!-- Registration Status -->
-            <?php if ($isRegistered): ?>
-                <div class="flex-shrink-0">
-                    <div class="px-6 py-3 bg-white/20 backdrop-blur-sm text-white rounded-xl font-semibold text-center border border-white/30">
-                        <i class="fas fa-check-circle mr-2"></i>
-                        Angemeldet
-                    </div>
+    <!-- ═══════════════════════════════════════════════
+         HERO SECTION  (image + title overlay)
+    ════════════════════════════════════════════════ -->
+    <div class="event-hero rounded-2xl overflow-hidden shadow-premium mb-6">
+        <!-- Image / Fallback gradient -->
+        <div class="event-hero-image">
+            <?php if ($imageExists): ?>
+                <img src="<?php echo htmlspecialchars(BASE_URL . '/' . $imagePath); ?>"
+                     alt="<?php echo htmlspecialchars($event['title']); ?>"
+                     class="w-full h-full object-cover">
+            <?php else: ?>
+                <div class="w-full h-full bg-gradient-to-br from-ibc-blue to-ibc-blue-dark flex items-center justify-center">
+                    <i class="fas fa-calendar-alt text-white/20 text-8xl"></i>
                 </div>
             <?php endif; ?>
+            <!-- Dark gradient overlay for legibility -->
+            <div class="event-hero-overlay"></div>
+        </div>
+
+        <!-- Title + badges on top of image -->
+        <div class="event-hero-content">
+            <div class="flex flex-wrap items-center gap-2 mb-3">
+                <span class="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold border backdrop-blur-sm <?php echo $statusInfo['color']; ?>">
+                    <i class="fas <?php echo $statusInfo['icon']; ?> mr-1.5 text-xs"></i>
+                    <?php echo $statusInfo['label']; ?>
+                </span>
+                <?php if ($event['is_external']): ?>
+                    <span class="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold border border-white/30 bg-ibc-accent/80 backdrop-blur-sm text-white">
+                        <i class="fas fa-external-link-alt mr-1.5 text-xs"></i>Extern
+                    </span>
+                <?php endif; ?>
+                <?php if ($isRegistered): ?>
+                    <span class="inline-flex items-center px-3 py-1.5 rounded-full text-sm font-semibold border border-ibc-green/50 bg-ibc-green/70 backdrop-blur-sm text-white">
+                        <i class="fas fa-check-circle mr-1.5 text-xs"></i>Angemeldet
+                    </span>
+                <?php endif; ?>
+            </div>
+
+            <h1 class="text-3xl md:text-4xl font-bold text-white drop-shadow-lg leading-tight">
+                <?php echo htmlspecialchars($event['title']); ?>
+            </h1>
         </div>
     </div>
 
-    <!-- Event Details Card -->
-    <div class="glass-card shadow-soft rounded-xl p-8 mb-6">
-        <!-- Event Meta -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-600">
-            <div class="flex items-start">
-                <i class="fas fa-calendar w-6 mt-1 text-ibc-blue"></i>
-                <div>
-                    <div class="font-semibold">Beginn</div>
-                    <div><?php echo date('d.m.Y H:i', strtotime($event['start_time'])); ?> Uhr</div>
+    <!-- ═══════════════════════════════════════════════
+         MAIN CONTENT  (two-column on md+)
+    ════════════════════════════════════════════════ -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+
+        <!-- LEFT: Description + Participants -->
+        <div class="lg:col-span-2 space-y-6">
+
+            <?php if (!empty($event['description'])): ?>
+            <!-- Description Card -->
+            <div class="glass-card shadow-soft rounded-2xl p-6">
+                <h2 class="text-lg font-bold text-gray-800 dark:text-gray-100 mb-3 flex items-center gap-2">
+                    <span class="w-8 h-8 rounded-lg bg-ibc-blue/10 flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-align-left text-ibc-blue text-sm"></i>
+                    </span>
+                    Beschreibung
+                </h2>
+                <p class="text-gray-700 dark:text-gray-300 whitespace-pre-line leading-relaxed"><?php echo htmlspecialchars($event['description']); ?></p>
+            </div>
+            <?php endif; ?>
+
+            <?php if (!$event['is_external']): ?>
+            <!-- Participants Card -->
+            <div class="glass-card shadow-soft rounded-2xl p-6">
+                <h2 class="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
+                    <span class="w-8 h-8 rounded-lg bg-ibc-green/10 flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-users text-ibc-green text-sm"></i>
+                    </span>
+                    Teilnehmer
+                    <span class="ml-auto inline-flex items-center justify-center min-w-[2rem] h-8 px-2.5 rounded-full bg-ibc-blue text-white text-sm font-bold">
+                        <?php echo $registrationCount; ?>
+                    </span>
+                </h2>
+                <?php if (!empty($participants)): ?>
+                    <ul class="divide-y divide-gray-100 dark:divide-gray-700">
+                        <?php foreach ($participants as $participant): ?>
+                            <li class="py-2.5 flex items-center gap-3 text-gray-700 dark:text-gray-300">
+                                <span class="w-7 h-7 rounded-full bg-ibc-blue/10 flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-user text-ibc-blue text-xs"></i>
+                                </span>
+                                <?php echo htmlspecialchars(trim($participant['first_name'] . ' ' . $participant['last_name'])); ?>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                <?php else: ?>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">Noch keine Anmeldungen.</p>
+                <?php endif; ?>
+            </div>
+            <?php endif; ?>
+        </div>
+
+        <!-- RIGHT: Info Sidebar -->
+        <div class="space-y-4">
+
+            <!-- Date & Time Card -->
+            <div class="glass-card shadow-soft rounded-2xl p-5">
+                <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Datum & Uhrzeit</h3>
+                <div class="space-y-3">
+                    <div class="flex items-start gap-3">
+                        <span class="w-9 h-9 rounded-xl bg-ibc-blue/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <i class="fas fa-calendar-day text-ibc-blue"></i>
+                        </span>
+                        <div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400">Beginn</div>
+                            <div class="font-semibold text-gray-800 dark:text-gray-100"><?php echo date('d.m.Y', strtotime($event['start_time'])); ?></div>
+                            <div class="text-sm text-gray-600 dark:text-gray-300"><?php echo date('H:i', strtotime($event['start_time'])); ?> Uhr</div>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <span class="w-9 h-9 rounded-xl bg-ibc-blue/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <i class="fas fa-clock text-ibc-blue"></i>
+                        </span>
+                        <div>
+                            <div class="text-xs text-gray-500 dark:text-gray-400">Ende</div>
+                            <div class="font-semibold text-gray-800 dark:text-gray-100"><?php echo date('d.m.Y', strtotime($event['end_time'])); ?></div>
+                            <div class="text-sm text-gray-600 dark:text-gray-300"><?php echo date('H:i', strtotime($event['end_time'])); ?> Uhr</div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            
-            <div class="flex items-start">
-                <i class="fas fa-clock w-6 mt-1 text-ibc-blue"></i>
-                <div>
-                    <div class="font-semibold">Ende</div>
-                    <div><?php echo date('d.m.Y H:i', strtotime($event['end_time'])); ?> Uhr</div>
-                </div>
-            </div>
-            
+
             <?php if (!empty($event['location'])): ?>
-                <div class="flex items-start">
-                    <i class="fas fa-map-marker-alt w-6 mt-1 text-ibc-blue"></i>
+            <!-- Location Card -->
+            <div class="glass-card shadow-soft rounded-2xl p-5">
+                <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Veranstaltungsort</h3>
+                <div class="flex items-start gap-3">
+                    <span class="w-9 h-9 rounded-xl bg-ibc-green/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <i class="fas fa-map-marker-alt text-ibc-green"></i>
+                    </span>
                     <div class="flex-1">
-                        <div class="font-semibold">Veranstaltungsort</div>
-                        <div class="text-lg font-medium text-gray-800"><?php echo htmlspecialchars($event['location']); ?></div>
+                        <div class="font-semibold text-gray-800 dark:text-gray-100"><?php echo htmlspecialchars($event['location']); ?></div>
                         <?php if (!empty($event['maps_link'])): ?>
-                            <a href="<?php echo htmlspecialchars($event['maps_link']); ?>" 
-                               target="_blank" 
+                            <a href="<?php echo htmlspecialchars($event['maps_link']); ?>"
+                               target="_blank"
                                rel="noopener noreferrer"
-                               class="inline-flex items-center mt-2 px-4 py-2 bg-ibc-green text-white rounded-xl hover:shadow-glow-green ease-premium font-semibold text-sm">
-                                <i class="fas fa-route mr-2"></i>
-                                Route planen
+                               class="inline-flex items-center mt-2 px-3 py-1.5 bg-ibc-green text-white rounded-lg font-semibold text-xs hover:shadow-glow-green ease-premium">
+                                <i class="fas fa-route mr-1.5"></i>Route planen
                             </a>
                         <?php endif; ?>
                     </div>
                 </div>
+            </div>
             <?php endif; ?>
-            
+
             <?php if (!empty($event['contact_person'])): ?>
-                <div class="flex items-start">
-                    <i class="fas fa-user w-6 mt-1 text-ibc-blue"></i>
-                    <div>
-                        <div class="font-semibold">Ansprechpartner</div>
-                        <div><?php echo htmlspecialchars($event['contact_person']); ?></div>
-                    </div>
-                </div>
-            <?php endif; ?>
-        </div>
-
-        <!-- Description -->
-        <?php if (!empty($event['description'])): ?>
-            <div class="mt-6 pt-6 border-t border-gray-200">
-                <h2 class="text-xl font-bold text-gray-800 mb-3">Beschreibung</h2>
-                <p class="text-gray-700 whitespace-pre-line"><?php echo htmlspecialchars($event['description']); ?></p>
-            </div>
-        <?php endif; ?>
-
-        <!-- Event Image -->
-        <?php if (!empty($event['image_path'])): ?>
-            <div class="mt-6 pt-6 border-t border-gray-200">
-                <h2 class="text-xl font-bold text-gray-800 mb-3">Event-Bild</h2>
-                <?php 
-                    // Check if image file exists before displaying
-                    $imagePath = $event['image_path'];
-                    $fullImagePath = __DIR__ . '/../../' . $imagePath;
-                    
-                    // Validate path to prevent directory traversal
-                    $realPath = realpath($fullImagePath);
-                    $baseDir = realpath(__DIR__ . '/../../');
-                    $imageExists = $realPath && $baseDir && strpos($realPath, $baseDir) === 0 && file_exists($realPath);
-                ?>
-                <?php if ($imageExists): ?>
-                    <img 
-                        src="<?php echo htmlspecialchars(BASE_URL . '/' . $imagePath); ?>" 
-                        alt="<?php echo htmlspecialchars($event['title']); ?>"
-                        class="w-full max-w-2xl rounded-xl border border-gray-300 shadow-soft"
-                    >
-                <?php else: ?>
-                    <div class="w-full max-w-2xl rounded-xl border border-gray-300 bg-gray-100 p-8 text-center">
-                        <i class="fas fa-image text-gray-400 text-6xl mb-4"></i>
-                        <p class="text-gray-600">Bild nicht verfügbar</p>
-                    </div>
-                <?php endif; ?>
-            </div>
-        <?php endif; ?>
-
-        <!-- Participant Counter -->
-        <?php if (!$event['is_external']): ?>
-            <div class="mt-6 pt-6 border-t border-gray-200">
-                <div class="flex items-center justify-center bg-gradient-to-r from-ibc-blue/10 to-ibc-green/10 rounded-xl p-6">
-                    <div class="text-center">
-                        <div class="text-4xl font-bold text-ibc-blue mb-2">
-                            <?php echo $registrationCount; ?>
-                        </div>
-                        <div class="text-lg font-semibold text-gray-700">
-                            Angemeldete Teilnehmer
-                        </div>
-                    </div>
+            <!-- Contact Card -->
+            <div class="glass-card shadow-soft rounded-2xl p-5">
+                <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Ansprechpartner</h3>
+                <div class="flex items-center gap-3">
+                    <span class="w-9 h-9 rounded-xl bg-ibc-blue/10 flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-user text-ibc-blue"></i>
+                    </span>
+                    <span class="font-semibold text-gray-800 dark:text-gray-100"><?php echo htmlspecialchars($event['contact_person']); ?></span>
                 </div>
             </div>
-        <?php endif; ?>
-
-        <!-- Participants List -->
-        <?php if (!$event['is_external'] && !empty($participants)): ?>
-            <div class="mt-6 pt-6 border-t border-gray-200">
-                <h2 class="text-xl font-bold text-gray-800 mb-3">Angemeldete Teilnehmer</h2>
-                <ul class="divide-y divide-gray-100">
-                    <?php foreach ($participants as $participant): ?>
-                        <li class="py-2 text-gray-700">
-                            <?php echo htmlspecialchars(trim($participant['first_name'] . ' ' . $participant['last_name'])); ?>
-                        </li>
-                    <?php endforeach; ?>
-                </ul>
-            </div>
-        <?php endif; ?>
-
-        <!-- Calendar Export Buttons -->
-        <div class="mt-6 pt-6 border-t border-gray-200">
-            <h3 class="text-lg font-semibold text-gray-800 mb-4">
-                <i class="fas fa-calendar-plus mr-2 text-ibc-blue"></i>
-                In Kalender eintragen
-            </h3>
-            <div class="flex flex-wrap gap-3">
-                <!-- Google Calendar Button -->
-                <a href="<?php echo htmlspecialchars(CalendarService::getGoogleLink($event)); ?>" 
-                   target="_blank" 
-                   rel="noopener noreferrer"
-                   class="inline-flex items-center px-5 py-2.5 bg-white border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:border-ibc-blue hover:text-ibc-blue ease-premium shadow-sm">
-                    <i class="fab fa-google mr-2 text-lg"></i>
-                    Google Kalender
-                </a>
-                
-                <!-- iCal Download Button -->
-                <a href="../../api/download_ics.php?event_id=<?php echo htmlspecialchars($eventId, ENT_QUOTES, 'UTF-8'); ?>" 
-                   class="inline-flex items-center px-5 py-2.5 bg-white border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:border-ibc-blue hover:text-ibc-blue ease-premium shadow-sm">
-                    <i class="fas fa-download mr-2"></i>
-                    iCal herunterladen
-                </a>
-            </div>
-        </div>
-
-        <!-- Participation Button -->
-        <div class="flex gap-4 mt-6 pt-6 border-t border-gray-200">
-            <?php if (!empty($event['registration_link'])): ?>
-                <!-- External Registration (Microsoft Forms) - Open Link in new tab -->
-                <a href="<?php echo htmlspecialchars($event['registration_link']); ?>" 
-                   target="_blank" 
-                   rel="noopener noreferrer"
-                   class="inline-flex items-center px-8 py-3 bg-ibc-green text-white rounded-xl font-semibold hover:shadow-glow-green ease-premium">
-                    <i class="fas fa-external-link-alt mr-2"></i>
-                    Jetzt anmelden
-                </a>
-            <?php elseif ($event['is_external']): ?>
-                <!-- External Event - Open Link -->
-                <?php if (!empty($event['external_link'])): ?>
-                    <a href="<?php echo htmlspecialchars($event['external_link']); ?>" 
-                       target="_blank" 
-                       rel="noopener noreferrer"
-                       class="inline-flex items-center px-8 py-3 bg-ibc-blue text-white rounded-xl font-semibold hover:bg-ibc-blue-dark ease-premium shadow-soft">
-                        <i class="fas fa-external-link-alt mr-2"></i>
-                        Zur Anmeldung (extern)
-                    </a>
-                <?php endif; ?>
-            <?php else: ?>
-                <!-- Internal Event - AJAX Signup -->
-                <?php if (!$isRegistered && !$userSlotId): ?>
-                    <button onclick="signupForEvent(<?php echo $eventId; ?>)" 
-                            class="inline-flex items-center px-8 py-3 bg-ibc-green text-white rounded-xl font-semibold hover:shadow-glow-green ease-premium">
-                        <i class="fas fa-user-plus mr-2"></i>
-                        Jetzt anmelden
-                    </button>
-                <?php elseif ($canCancel && $userSignupId && !$userSlotId): ?>
-                    <button onclick="cancelSignup(<?php echo $userSignupId; ?>)" 
-                            class="inline-flex items-center px-8 py-3 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 ease-premium">
-                        <i class="fas fa-user-times mr-2"></i>
-                        Abmelden
-                    </button>
-                <?php endif; ?>
             <?php endif; ?>
-        </div>
-    </div>
+
+            <!-- Registration / CTA Card -->
+            <div class="glass-card shadow-soft rounded-2xl p-5">
+                <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Anmeldung</h3>
+                <div class="flex flex-col gap-3">
+                    <?php if (!empty($event['registration_link'])): ?>
+                        <a href="<?php echo htmlspecialchars($event['registration_link']); ?>"
+                           target="_blank"
+                           rel="noopener noreferrer"
+                           class="inline-flex items-center justify-center px-5 py-3 bg-ibc-green text-white rounded-xl font-semibold hover:shadow-glow-green ease-premium w-full">
+                            <i class="fas fa-external-link-alt mr-2"></i>
+                            Jetzt anmelden
+                        </a>
+                    <?php elseif ($event['is_external']): ?>
+                        <?php if (!empty($event['external_link'])): ?>
+                            <a href="<?php echo htmlspecialchars($event['external_link']); ?>"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               class="inline-flex items-center justify-center px-5 py-3 bg-ibc-blue text-white rounded-xl font-semibold hover:bg-ibc-blue-dark ease-premium shadow-soft w-full">
+                                <i class="fas fa-external-link-alt mr-2"></i>
+                                Zur Anmeldung (extern)
+                            </a>
+                        <?php endif; ?>
+                    <?php else: ?>
+                        <?php if (!$isRegistered && !$userSlotId): ?>
+                            <button onclick="signupForEvent(<?php echo $eventId; ?>)"
+                                    class="inline-flex items-center justify-center px-5 py-3 bg-ibc-green text-white rounded-xl font-semibold hover:shadow-glow-green ease-premium w-full">
+                                <i class="fas fa-user-plus mr-2"></i>
+                                Jetzt anmelden
+                            </button>
+                        <?php elseif ($canCancel && $userSignupId && !$userSlotId): ?>
+                            <button onclick="cancelSignup(<?php echo $userSignupId; ?>)"
+                                    class="inline-flex items-center justify-center px-5 py-3 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 ease-premium w-full">
+                                <i class="fas fa-user-times mr-2"></i>
+                                Abmelden
+                            </button>
+                        <?php elseif ($isRegistered): ?>
+                            <div class="flex items-center justify-center gap-2 py-3 rounded-xl bg-ibc-green/10 text-ibc-green font-semibold border border-ibc-green/20">
+                                <i class="fas fa-check-circle"></i>
+                                Du bist angemeldet
+                            </div>
+                        <?php endif; ?>
+                    <?php endif; ?>
+
+                    <!-- Calendar Export -->
+                    <div class="pt-2 border-t border-gray-100 dark:border-gray-700">
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mb-2 font-medium">In Kalender eintragen</p>
+                        <div class="flex gap-2">
+                            <a href="<?php echo htmlspecialchars(CalendarService::getGoogleLink($event)); ?>"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               class="flex-1 inline-flex items-center justify-center px-3 py-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 rounded-lg text-sm font-semibold hover:border-ibc-blue hover:text-ibc-blue ease-premium shadow-sm">
+                                <i class="fab fa-google mr-1.5"></i>Google
+                            </a>
+                            <a href="../../api/download_ics.php?event_id=<?php echo htmlspecialchars($eventId, ENT_QUOTES, 'UTF-8'); ?>"
+                               class="flex-1 inline-flex items-center justify-center px-3 py-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200 rounded-lg text-sm font-semibold hover:border-ibc-blue hover:text-ibc-blue ease-premium shadow-sm">
+                                <i class="fas fa-download mr-1.5"></i>iCal
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /sidebar -->
+    </div><!-- /grid -->
 
     <!-- Helper Slots Section (Only for non-alumni and if event needs helpers) -->
     <?php if ($event['needs_helpers'] && $userRole !== 'alumni' && !empty($helperTypes)): ?>
@@ -412,8 +441,43 @@ ob_start();
     <?php endif; ?>
 </div>
 
-
-<!-- Success/Error Message Container -->
+<!-- Hero & Card Styles -->
+<style>
+    .event-hero {
+        position: relative;
+        background: #1f2937;
+    }
+    .event-hero-image {
+        width: 100%;
+        height: 340px;
+        position: relative;
+        overflow: hidden;
+    }
+    @media (max-width: 640px) {
+        .event-hero-image { height: 220px; }
+    }
+    .event-hero-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+    .event-hero-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.35) 50%, rgba(0,0,0,0.15) 100%);
+    }
+    .event-hero-content {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 1.5rem 2rem;
+    }
+    @media (max-width: 640px) {
+        .event-hero-content { padding: 1rem 1.25rem; }
+    }
+</style>
 <div id="message-container" class="fixed top-4 right-4 z-50 hidden">
     <div id="message-content" class="card px-6 py-4 shadow-2xl"></div>
 </div>
