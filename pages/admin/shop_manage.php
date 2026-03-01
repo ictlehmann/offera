@@ -43,19 +43,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $data = [
             'name'          => trim($_POST['name'] ?? ''),
             'description'   => trim($_POST['description'] ?? ''),
+            'hints'         => trim($_POST['hints'] ?? ''),
             'base_price'    => (float) ($_POST['base_price'] ?? 0),
             'active'        => isset($_POST['active']) ? 1 : 0,
             'is_bulk_order' => isset($_POST['is_bulk_order']) ? 1 : 0,
             'bulk_end_date' => !empty($_POST['bulk_end_date']) ? $_POST['bulk_end_date'] : null,
             'bulk_min_goal' => !empty($_POST['bulk_min_goal']) ? (int) $_POST['bulk_min_goal'] : null,
             'category'         => trim($_POST['category'] ?? ''),
+            'gender'           => trim($_POST['gender'] ?? ''),
             'pickup_location'  => trim($_POST['pickup_location'] ?? ''),
             'variants'         => trim($_POST['variants_text'] ?? ''),
             'sku'              => trim($_POST['sku'] ?? ''),
             'image_path'    => null,
         ];
 
-        $allowedCategories = ['Merchandise', 'Tickets', 'Sonstiges', 'Office Supplies'];
+        $allowedCategories = ['Kleidung', 'Accessoires', 'Bürobedarf', 'Sonstiges'];
         if (!empty($data['category']) && !in_array($data['category'], $allowedCategories, true)) {
             $data['category'] = '';
         }
@@ -659,11 +661,31 @@ ob_start();
                                 <select name="category" id="modal-category"
                                         class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
                                     <option value="">– bitte wählen –</option>
-                                    <option value="Merchandise">Merchandise</option>
-                                    <option value="Office Supplies">Office Supplies</option>
-                                    <option value="Tickets">Tickets</option>
+                                    <option value="Kleidung">Kleidung</option>
+                                    <option value="Accessoires">Accessoires</option>
+                                    <option value="Bürobedarf">Bürobedarf</option>
                                     <option value="Sonstiges">Sonstiges</option>
                                 </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                                    Geschlecht
+                                </label>
+                                <select name="gender" id="modal-gender"
+                                        class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+                                    <option value="Keine">Nicht zutreffend</option>
+                                    <option value="Herren">Herren</option>
+                                    <option value="Damen">Damen</option>
+                                    <option value="Unisex">Unisex</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                                    Hinweise <span class="font-normal text-gray-400 dark:text-gray-500">(optional)</span>
+                                </label>
+                                <textarea name="hints" id="modal-hints" rows="3"
+                                          placeholder="z.B. Pflegehinweise, Besonderheiten, ..."
+                                          class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition resize-none"></textarea>
                             </div>
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
@@ -923,6 +945,8 @@ function openProductModal(product) {
 
     // New fields
     document.getElementById('modal-category').value        = isEdit ? (product.category || '') : '';
+    document.getElementById('modal-gender').value          = isEdit ? (product.gender || 'Keine') : 'Keine';
+    document.getElementById('modal-hints').value           = isEdit ? (product.hints || '') : '';
     document.getElementById('modal-pickup-location').value = isEdit ? (product.pickup_location || '') : '';
     document.getElementById('modal-variants-text').value   = isEdit ? (product.variants_csv || '') : '';
     document.getElementById('modal-sku').value             = isEdit ? (product.sku || '') : '';
