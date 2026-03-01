@@ -992,32 +992,11 @@ if (Auth::check() && isset($_SESSION['profile_incomplete']) && $_SESSION['profil
                     <p class='text-[11px] text-white/70 truncate leading-snug' title='<?php echo htmlspecialchars($email); ?>'>
                         <?php echo htmlspecialchars($email); ?>
                     </p>
-                    <?php
-                    // Show the user's internal role translated to German.
-                    // Fall back to entra_roles group lookup, then 'Mitglied'.
-                    $entraRoleDisplay = '';
-                    if (!empty($role) && $role !== 'User') {
-                        $entraRoleDisplay = translateRole($role);
-                    } elseif (!empty($currentUser['entra_roles'])) {
-                        $entraRolesArr = json_decode($currentUser['entra_roles'], true);
-                        if (json_last_error() === JSON_ERROR_NONE && is_array($entraRolesArr) && defined('ROLE_MAPPING')) {
-                            $roleMapping = array_flip(ROLE_MAPPING);
-                            foreach ($entraRolesArr as $group) {
-                                $groupId = is_array($group) ? ($group['id'] ?? null) : null;
-                                if ($groupId && isset($roleMapping[$groupId])) {
-                                    $entraRoleDisplay = translateRole($roleMapping[$groupId]);
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                    if (empty($entraRoleDisplay)) {
-                        $entraRoleDisplay = 'Mitglied';
-                    }
-                    ?>
-                    <span class='bg-teal-700 text-white font-semibold px-2 py-1 rounded-md text-xs inline-block mt-1' title='<?php echo htmlspecialchars($entraRoleDisplay); ?>' aria-label='Rolle: <?php echo htmlspecialchars($entraRoleDisplay); ?>'>
-                        <?php echo htmlspecialchars($entraRoleDisplay); ?>
+                    <?php foreach ($displayRoles as $sidebarRole): ?>
+                    <span class='bg-teal-700 text-white font-semibold px-2 py-1 rounded-md text-xs inline-block mt-1' title='<?php echo htmlspecialchars($sidebarRole); ?>' aria-label='Rolle: <?php echo htmlspecialchars($sidebarRole); ?>'>
+                        <?php echo htmlspecialchars($sidebarRole); ?>
                     </span>
+                    <?php endforeach; ?>
                 </div>
             </div>
             
