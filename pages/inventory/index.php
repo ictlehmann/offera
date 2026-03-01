@@ -450,7 +450,7 @@ ob_start();
 
         badge.textContent         = count;
         floatBtn.style.display    = count > 0 ? 'flex' : 'none';
-        if (panelCount) panelCount.textContent = count + (count === 1 ? ' Artikel' : ' Artikel');
+        if (panelCount) panelCount.textContent = count + ' Artikel';
         if (submitLbl)  submitLbl.textContent  = count > 1 ? count + ' Anfragen senden' : 'Anfrage senden';
         if (submitBtn)  submitBtn.disabled     = count === 0;
         if (panelOpen)  renderCartItems();
@@ -472,12 +472,10 @@ ob_start();
         if (empty) empty.style.display = 'none';
 
         list.innerHTML = cart.map(function (item) {
-            var thumbInner = item.imageSrc
-                ? '<img src="' + escHtml(item.imageSrc) + '" alt="' + escHtml(item.name) + '" '
-                  + 'class="w-full h-full object-contain" loading="lazy" '
-                  + 'onerror="this.style.display=\'none\';this.nextSibling.style.display=\'flex\'">'
-                  + '<span style="display:none" class="w-full h-full items-center justify-center">'
-                  + '<i class="fas fa-box-open text-gray-300 text-xl"></i></span>'
+            var safeSrc = isSafeImageSrc(item.imageSrc) ? item.imageSrc : '';
+            var thumbInner = safeSrc
+                ? '<img src="' + escHtml(safeSrc) + '" alt="' + escHtml(item.name) + '" '
+                  + 'class="w-full h-full object-contain" loading="lazy">'
                 : '<span class="flex w-full h-full items-center justify-center">'
                   + '<i class="fas fa-box-open text-gray-300 dark:text-gray-600 text-xl"></i></span>';
 
@@ -489,23 +487,34 @@ ob_start();
                 + '<div class="flex-1 min-w-0">'
                 + '<p class="text-sm font-semibold text-slate-900 dark:text-white truncate" title="' + escHtml(item.name) + '">' + escHtml(item.name) + '</p>'
                 + '<div class="flex items-center gap-1.5 mt-1.5">'
-                + '<button onclick="updateCartQty(\'' + escJs(item.id) + '\',-1)" '
+                + '<button data-action="dec" data-id="' + escHtml(item.id) + '" '
                 + 'class="w-6 h-6 rounded-lg bg-gray-200 dark:bg-slate-700 hover:bg-purple-100 dark:hover:bg-purple-900/50 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-colors text-xs font-bold">'
                 + '<i class="fas fa-minus"></i></button>'
                 + '<span class="text-sm font-bold text-slate-900 dark:text-white min-w-[1.5rem] text-center">' + item.quantity + '</span>'
-                + '<button onclick="updateCartQty(\'' + escJs(item.id) + '\',1)" '
+                + '<button data-action="inc" data-id="' + escHtml(item.id) + '" '
                 + 'class="w-6 h-6 rounded-lg bg-gray-200 dark:bg-slate-700 hover:bg-purple-100 dark:hover:bg-purple-900/50 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-colors text-xs font-bold">'
                 + '<i class="fas fa-plus"></i></button>'
                 + '<span class="text-xs text-slate-400 dark:text-slate-500 ml-0.5">/ ' + escHtml(String(item.pieces)) + '</span>'
                 + '</div>'
                 + '</div>'
                 // Remove button
-                + '<button onclick="removeFromCart(\'' + escJs(item.id) + '\')" '
+                + '<button data-action="remove" data-id="' + escHtml(item.id) + '" '
                 + 'class="w-8 h-8 flex-shrink-0 flex items-center justify-center rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors" '
                 + 'aria-label="Entfernen"><i class="fas fa-times"></i></button>'
                 + '</div>';
         }).join('');
     }
+
+    // Event delegation for cart item controls (avoids inline onclick XSS risk)
+    document.getElementById('cartItemsList').addEventListener('click', function (e) {
+        var btn = e.target.closest('button[data-action]');
+        if (!btn) return;
+        var action = btn.dataset.action;
+        var id     = btn.dataset.id;
+        if (action === 'remove') window.removeFromCart(id);
+        if (action === 'dec')    window.updateCartQty(id, -1);
+        if (action === 'inc')    window.updateCartQty(id,  1);
+    });
 
     function updateCardButton(id) {
         var btn = document.getElementById('cartBtn-' + id);
@@ -525,8 +534,12 @@ ob_start();
         var btn = document.getElementById('cartFloatingBtn');
         if (!btn) return;
         btn.classList.remove('cart-pop');
-        void btn.offsetWidth; // reflow
+        btn.offsetWidth; // reflow to restart animation
         btn.classList.add('cart-pop');
+    }
+
+    function isSafeImageSrc(src) {
+        return typeof src === 'string' && /^(https?:\/\/|\/).+/i.test(src);
     }
 
     function escHtml(str) {
@@ -536,13 +549,6 @@ ob_start();
             .replace(/>/g, '&gt;')
             .replace(/"/g, '&quot;')
             .replace(/'/g, '&#039;');
-    }
-
-    // Safe for use inside JS string literals within HTML onclick attributes (single-quoted)
-    function escJs(str) {
-        return String(str)
-            .replace(/\\/g, '\\\\')
-            .replace(/'/g, "\\'");
     }
 
     // ── Submit all cart requests ─────────────────────────────────────────────
@@ -581,7 +587,10 @@ ob_start();
             })
             .then(function (r) { return r.json(); })
             .then(function (data) { return { item: item, data: data }; })
-            .catch(function ()    { return { item: item, data: { success: false, message: 'Netzwerkfehler' } }; });
+            .catch(function (err) {
+                console.error('Cart request failed for item ' + item.id + ':', err);
+                return { item: item, data: { success: false, message: 'Netzwerkfehler' } };
+            });
         });
 
         Promise.all(promises).then(function (results) {
@@ -596,8 +605,10 @@ ob_start();
                     btn.innerHTML = '<i class="fas fa-paper-plane mr-1.5"></i>Anfrage senden';
                 }, 2200);
             } else {
-                var names = failed.map(function (r) { return r.item.name; }).join(', ');
-                showCartMsg('Fehler bei: ' + names, 'error');
+                var errDetails = failed.map(function (r) {
+                    return r.item.name + (r.data.message ? ': ' + r.data.message : '');
+                }).join('; ');
+                showCartMsg('Fehler: ' + errDetails, 'error');
                 btn.disabled  = false;
                 btn.innerHTML = '<i class="fas fa-paper-plane mr-1.5"></i>Erneut versuchen';
             }
