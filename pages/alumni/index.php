@@ -109,7 +109,7 @@ ob_start();
     <div class="mb-6">
         <p class="text-gray-600">
             <strong><?php echo count($profiles); ?></strong> 
-            <?php echo count($profiles) === 1 ? 'profile' : 'profiles'; ?> found
+            <?php echo count($profiles) === 1 ? 'Profil' : 'Profile'; ?> gefunden
         </p>
     </div>
 
@@ -117,8 +117,8 @@ ob_start();
     <?php if (empty($profiles)): ?>
         <div class="card p-12 text-center">
             <i class="fas fa-user-slash text-6xl text-gray-300 mb-4"></i>
-            <p class="text-xl text-gray-600 mb-2">No profiles found</p>
-            <p class="text-gray-500">Try adjusting your search filters</p>
+            <p class="text-xl text-gray-600 mb-2">Keine Profile gefunden</p>
+            <p class="text-gray-500">Bitte Suchfilter anpassen</p>
         </div>
     <?php else: ?>
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
@@ -136,16 +136,14 @@ ob_start();
                 $displayRole = htmlspecialchars($profile['display_role'] ?? Auth::getRoleLabel($profile['role'] ?? ''));
                 ?>
                 <div class="col">
-                <div class="card directory-card directory-card--alumni p-4 d-flex flex-column h-100 position-relative">
-                    <!-- Role Badge: Top Right Corner -->
-                    <div class="position-absolute top-0 end-0 mt-3 me-3">
-                        <span class="inline-block px-3 py-1 text-xs font-semibold directory-role-badge border <?php echo $badgeClass; ?>">
-                            <?php echo $displayRole; ?>
-                        </span>
-                    </div>
-                    
-                    <!-- Profile Image -->
-                    <div class="d-flex justify-content-center mb-3">
+                <div class="card directory-card directory-card--alumni d-flex flex-column h-100">
+                    <!-- Card Header: gradient band with avatar -->
+                    <div class="directory-card-header">
+                        <div class="position-absolute top-0 end-0 mt-2 me-2">
+                            <span class="inline-block px-3 py-1 text-xs font-semibold directory-role-badge border <?php echo $badgeClass; ?>">
+                                <?php echo $displayRole; ?>
+                            </span>
+                        </div>
                         <?php 
                         // Generate initials for fallback
                         $initials = getMemberInitials($profile['first_name'], $profile['last_name']);
@@ -154,77 +152,82 @@ ob_start();
                         // 1. User-uploaded image (image_path), 2. Entra photo, 3. Default
                         $imagePath = '../../' . getProfileImageUrl($profile['image_path'] ?? null, $profile['entra_photo_path'] ?? null);
                         ?>
-                        <div class="directory-avatar rounded-circle overflow-hidden border border-3 border-white shadow-sm"
-                             style="background-color:<?php echo htmlspecialchars($avatarColor); ?>;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;">
-                            <img
-                                src="<?php echo htmlspecialchars($imagePath); ?>"
-                                alt="<?php echo htmlspecialchars($profile['first_name'] . ' ' . $profile['last_name']); ?>"
-                                style="width:100%;height:100%;object-fit:cover;"
-                                onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
-                            >
-                            <div style="display:none;width:100%;height:100%;" class="d-flex align-items-center justify-content-center">
-                                <?php echo htmlspecialchars($initials); ?>
+                        <div class="directory-card-avatar-wrap">
+                            <div class="directory-avatar rounded-circle overflow-hidden border border-3 border-white shadow"
+                                 style="background-color:<?php echo htmlspecialchars($avatarColor); ?>;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;">
+                                <img
+                                    src="<?php echo htmlspecialchars($imagePath); ?>"
+                                    alt="<?php echo htmlspecialchars($profile['first_name'] . ' ' . $profile['last_name']); ?>"
+                                    style="width:100%;height:100%;object-fit:cover;"
+                                    onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                                >
+                                <div style="display:none;width:100%;height:100%;" class="d-flex align-items-center justify-content-center">
+                                    <?php echo htmlspecialchars($initials); ?>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Name -->
-                    <h3 class="fs-6 directory-card-name text-gray-800 text-center mb-2">
-                        <?php echo htmlspecialchars($profile['first_name'] . ' ' . $profile['last_name']); ?>
-                    </h3>
-                    
-                    <!-- Position & Company -->
-                    <div class="text-center mb-3 flex-grow-1">
-                        <p class="small text-secondary mb-1 directory-card-text-truncate">
-                            <?php echo htmlspecialchars($profile['position']); ?>
-                        </p>
-                        <p class="small text-muted mb-0 directory-card-text-truncate">
-                            <?php echo htmlspecialchars($profile['company']); ?>
-                        </p>
-                        <?php if (!empty($profile['industry'])): ?>
-                            <p class="text-muted mt-1 mb-0 directory-card-text-truncate" style="font-size:0.75rem;">
-                                <i class="fas fa-briefcase me-1"></i>
-                                <?php echo htmlspecialchars($profile['industry']); ?>
-                            </p>
-                        <?php endif; ?>
-                    </div>
-                    
-                    <!-- Social Icons & Contact -->
-                    <div class="d-flex justify-content-center gap-3 mt-4 mb-3">
-                        <?php if (!empty($profile['linkedin_url'])): ?>
-                            <a 
-                                href="<?php echo htmlspecialchars($profile['linkedin_url']); ?>" 
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                class="directory-contact-icon"
-                                title="LinkedIn Profile"
-                            >
-                                <i class="fab fa-linkedin-in"></i>
-                            </a>
-                        <?php endif; ?>
+
+                    <!-- Card Body -->
+                    <div class="directory-card-body">
+                        <!-- Name -->
+                        <h3 class="fs-6 directory-card-name text-gray-800 text-center mb-2">
+                            <?php echo htmlspecialchars($profile['first_name'] . ' ' . $profile['last_name']); ?>
+                        </h3>
                         
-                        <?php if (!empty($profile['xing_url'])): ?>
-                            <a 
-                                href="<?php echo htmlspecialchars($profile['xing_url']); ?>" 
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                class="directory-contact-icon"
-                                title="Xing Profile"
-                            >
-                                <i class="fab fa-xing"></i>
-                            </a>
-                        <?php endif; ?>
+                        <!-- Position & Company -->
+                        <div class="text-center mb-3 flex-grow-1">
+                            <p class="small text-secondary mb-1 directory-card-text-truncate">
+                                <?php echo htmlspecialchars($profile['position']); ?>
+                            </p>
+                            <p class="small text-muted mb-0 directory-card-text-truncate">
+                                <?php echo htmlspecialchars($profile['company']); ?>
+                            </p>
+                            <?php if (!empty($profile['industry'])): ?>
+                                <p class="text-muted mt-1 mb-0 directory-card-text-truncate" style="font-size:0.75rem;">
+                                    <i class="fas fa-briefcase me-1"></i>
+                                    <?php echo htmlspecialchars($profile['industry']); ?>
+                                </p>
+                            <?php endif; ?>
+                        </div>
+                        
+                        <!-- Social Icons & Contact -->
+                        <div class="d-flex justify-content-center gap-3 mb-3">
+                            <?php if (!empty($profile['linkedin_url'])): ?>
+                                <a 
+                                    href="<?php echo htmlspecialchars($profile['linkedin_url']); ?>" 
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    class="directory-contact-icon"
+                                    title="LinkedIn Profile"
+                                >
+                                    <i class="fab fa-linkedin-in"></i>
+                                </a>
+                            <?php endif; ?>
+                            
+                            <?php if (!empty($profile['xing_url'])): ?>
+                                <a 
+                                    href="<?php echo htmlspecialchars($profile['xing_url']); ?>" 
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    class="directory-contact-icon"
+                                    title="Xing Profile"
+                                >
+                                    <i class="fab fa-xing"></i>
+                                </a>
+                            <?php endif; ?>
+                        </div>
+                        
+                        <!-- Contact Button -->
+                        <a 
+                            href="mailto:<?php echo htmlspecialchars($profile['email']); ?>"
+                            class="btn w-100 fw-semibold shadow-sm text-white"
+                            style="background:linear-gradient(135deg,#7c3aed,#6d28d9);"
+                        >
+                            <i class="fas fa-envelope me-2"></i>
+                            Kontakt
+                        </a>
                     </div>
-                    
-                    <!-- Contact Button -->
-                    <a 
-                        href="mailto:<?php echo htmlspecialchars($profile['email']); ?>"
-                        class="btn w-100 fw-semibold shadow-sm text-white"
-                        style="background:linear-gradient(135deg,#7c3aed,#6d28d9);"
-                    >
-                        <i class="fas fa-envelope me-2"></i>
-                        Contact
-                    </a>
                 </div>
                 </div>
             <?php endforeach; ?>

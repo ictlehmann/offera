@@ -5020,6 +5020,7 @@ img:not([loading]) {
 /* Directory card hover - lift animation */
 .directory-card {
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    overflow: visible;
 }
 
 .directory-card:hover {
@@ -5155,15 +5156,10 @@ img:not([loading]) {
     }
 }
 
-/* Directory card: always-visible colored top accent border */
-.directory-card--alumni::before {
-    opacity: 1;
-    background: linear-gradient(90deg, #7c3aed, #a78bfa);
-}
-
+/* Suppress the 3px accent ::before line (replaced by full gradient header band) */
+.directory-card--alumni::before,
 .directory-card--members::before {
-    opacity: 1;
-    background: linear-gradient(90deg, var(--ibc-blue), var(--ibc-blue-light));
+    display: none;
 }
 
 /* Small avatar variant for denser grids */
@@ -5171,6 +5167,67 @@ img:not([loading]) {
     width: 72px;
     height: 72px;
     font-size: 1.5rem;
+}
+
+/* ============================================================
+   DIRECTORY CARD - Gradient header band + floating avatar
+   ============================================================ */
+
+/* Gradient header band at top of card */
+.directory-card-header {
+    height: 80px;
+    border-radius: calc(var(--radius-lg) - 1px) calc(var(--radius-lg) - 1px) 0 0;
+    position: relative;
+    overflow: visible;
+    flex-shrink: 0;
+}
+
+.directory-card--alumni .directory-card-header {
+    background: linear-gradient(135deg, #7c3aed, #a78bfa);
+}
+
+.directory-card--members .directory-card-header {
+    background: linear-gradient(135deg, var(--ibc-blue), var(--ibc-blue-light));
+}
+
+/* Avatar centered at base of header, floating into card body */
+.directory-card-avatar-wrap {
+    position: absolute;
+    bottom: -48px; /* half of 96px alumni avatar */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+}
+
+.directory-card--members .directory-card-avatar-wrap {
+    bottom: -36px; /* half of 72px member avatar */
+}
+
+/* Card content area below header */
+.directory-card-body {
+    padding: 56px 1rem 1rem; /* top space = 48px avatar hang + 8px gap */
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.directory-card--members .directory-card-body {
+    padding-top: 44px; /* top space = 36px avatar hang + 8px gap */
+}
+
+/* Role badge inside gradient header: white background for contrast */
+.directory-card-header .directory-role-badge {
+    background: rgba(255, 255, 255, 0.92) !important;
+    border-color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* Dark mode: slightly darken header gradients */
+.dark-mode .directory-card--alumni .directory-card-header {
+    background: linear-gradient(135deg, #6d28d9, #7c3aed);
+}
+
+.dark-mode .directory-card--members .directory-card-header {
+    background: linear-gradient(135deg, var(--ibc-blue-dark), var(--ibc-blue));
 }
 
 /* Browser Date/Time Picker Styling */
