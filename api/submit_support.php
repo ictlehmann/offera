@@ -8,7 +8,6 @@ require_once __DIR__ . '/../includes/handlers/AuthHandler.php';
 require_once __DIR__ . '/../includes/handlers/CSRFHandler.php';
 require_once __DIR__ . '/../src/Auth.php';
 require_once __DIR__ . '/../src/MailService.php';
-require_once __DIR__ . '/../src/Database.php';
 require_once __DIR__ . '/../includes/helpers.php';
 
 AuthHandler::startSession();
@@ -64,11 +63,6 @@ if (!empty($user['firstname']) && !empty($user['lastname'])) {
 $userEmail = $user['email'] ?? '';
 
 try {
-    // Send notification email to admins
-    $db = Database::getUserDB();
-    $stmt = $db->query("SELECT email FROM users WHERE role IN ('admin', 'board_internal') AND email IS NOT NULL AND email != ''");
-    $adminUsers = $stmt->fetchAll();
-
     $subject = '[IBC Support] ' . $typeLabel . ' von ' . $userName;
     $body = MailService::getTemplate(
         'Support-Anfrage: ' . $typeLabel,
@@ -78,11 +72,7 @@ try {
         '<p><strong>Beschreibung:</strong><br>' . nl2br(htmlspecialchars($description)) . '</p>'
     );
 
-    foreach ($adminUsers as $adminUser) {
-        if (!empty($adminUser['email'])) {
-            MailService::sendEmail($adminUser['email'], $subject, $body);
-        }
-    }
+    MailService::sendEmail(MAIL_SUPPORT, $subject, $body);
 
     error_log(sprintf(
         'Support request submitted - Type: %s, User: %s (%s)',
