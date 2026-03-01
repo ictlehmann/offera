@@ -413,7 +413,7 @@ $statusInfo = $statusLabels[$currentStatus] ?? ['label' => $currentStatus, 'icon
                 </div>
             </div>
 
-            <?php if ($canAddStats): ?>
+            <?php if ($canAddStats && in_array($currentStatus, ['closed', 'past'])): ?>
             <!-- Add Financial Stats Card -->
             <div class="glass-card shadow-soft rounded-2xl p-5">
                 <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Verwaltung</h3>
@@ -521,8 +521,7 @@ $statusInfo = $statusLabels[$currentStatus] ?? ['label' => $currentStatus, 'icon
     <?php endif; ?>
 </div>
 
-<?php if ($canAddStats): ?>
-<!-- Add Financial Stats Modal -->
+<?php if ($canAddStats && in_array($currentStatus, ['closed', 'past'])): ?>
 <div id="addStatsModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white dark:bg-gray-800 rounded-lg w-full max-w-lg max-h-[85vh] flex flex-col overflow-hidden">
         <div class="p-6 overflow-y-auto flex-1">
@@ -849,7 +848,7 @@ function cancelHelperSlot(signupId) {
     cancelSignup(signupId, 'Möchtest Du Dich wirklich austragen?', 'Erfolgreich ausgetragen');
 }
 
-<?php if ($canAddStats): ?>
+<?php if ($canAddStats && in_array($currentStatus, ['closed', 'past'])): ?>
 // ── Add Financial Stats Modal ──────────────────────────────────────────────────
 
 function openAddStatsModal() {
