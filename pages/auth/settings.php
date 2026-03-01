@@ -33,8 +33,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['update_notifications'])) {
         $notifyNewProjects = isset($_POST['notify_new_projects']) ? true : false;
         $notifyNewEvents = isset($_POST['notify_new_events']) ? true : false;
+        $blogNewsletter = isset($_POST['blog_newsletter']) ? true : false;
         
-        if (User::updateNotificationPreferences($user['id'], $notifyNewProjects, $notifyNewEvents)) {
+        if (User::updateNotificationPreferences($user['id'], $notifyNewProjects, $notifyNewEvents, $blogNewsletter)) {
             $message = 'Benachrichtigungseinstellungen erfolgreich aktualisiert';
             $user = Auth::user(); // Reload user data
         } else {
@@ -357,6 +358,23 @@ ob_start();
                                 <span class="block text-sm font-medium text-gray-900 dark:text-gray-100">Neue Events</span>
                                 <span class="block text-sm text-gray-600 dark:text-gray-400">
                                     Erhalte eine E-Mail-Benachrichtigung, wenn ein neues Event erstellt wird
+                                </span>
+                            </label>
+                        </div>
+
+                        <!-- Blog Newsletter Notification -->
+                        <div class="flex items-start p-4 bg-gray-50 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
+                            <input 
+                                type="checkbox" 
+                                name="blog_newsletter" 
+                                id="blog_newsletter"
+                                <?php echo ($user['blog_newsletter'] ?? false) ? 'checked' : ''; ?>
+                                class="mt-1 h-5 w-5 text-purple-600 bg-white border-gray-300 rounded focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:focus:ring-blue-500"
+                            >
+                            <label for="blog_newsletter" class="ml-3 flex-1 cursor-pointer">
+                                <span class="block text-sm font-medium text-gray-900 dark:text-gray-100">Blog-Newsletter</span>
+                                <span class="block text-sm text-gray-600 dark:text-gray-400">
+                                    Erhalte eine E-Mail-Benachrichtigung, wenn ein neuer Blog-Artikel veröffentlicht wird
                                 </span>
                             </label>
                         </div>

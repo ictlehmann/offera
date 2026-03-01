@@ -2,8 +2,10 @@
 require_once __DIR__ . '/../../src/Auth.php';
 require_once __DIR__ . '/../../includes/handlers/CSRFHandler.php';
 require_once __DIR__ . '/../../includes/models/BlogPost.php';
+require_once __DIR__ . '/../../includes/models/User.php';
 require_once __DIR__ . '/../../includes/utils/SecureImageUpload.php';
 require_once __DIR__ . '/../../src/Database.php';
+require_once __DIR__ . '/../../src/MailService.php';
 
 // Check authentication
 if (!Auth::check()) {
@@ -139,6 +141,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $data['author_id'] = $userId;
                     $newPostId = BlogPost::create($data);
                     if ($newPostId) {
+                        // Send newsletter email to all subscribed users
+                        $subscribers = User::getNewsletterSubscribers();
+                        $excerpt = mb_strimwidth(strip_tags($content), 0, 200, '...');
+                        foreach ($subscribers as $subscriber) {
+                            $sent = MailService::sendBlogNewsletter(
+                                $subscriber['email'],
+                                $subscriber['first_name'] ?? '',
+                                $title,
+                                $excerpt,
+                                $newPostId
+                            );
+                            if (!$sent) {
+                                error_log("Blog newsletter: failed to send to " . $subscriber['email'] . " for post #{$newPostId}");
+                            }
+                        }
+
                         $_SESSION['success_message'] = 'Beitrag erfolgreich erstellt!';
                         header('Location: index.php');
                         exit;

@@ -112,6 +112,24 @@ ob_start();
         <?php endif; ?>
     </div>
 
+    <!-- Newsletter Banner (shown only to users without blog newsletter subscription) -->
+    <?php if (!($user['blog_newsletter'] ?? false)): ?>
+    <div class="mb-6 flex items-center justify-between gap-4 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 border border-blue-200 dark:border-blue-700 rounded-xl shadow-sm">
+        <div class="flex items-center gap-3">
+            <i class="fas fa-bell text-blue-600 dark:text-blue-400 text-2xl flex-shrink-0"></i>
+            <div>
+                <p class="font-semibold text-gray-800 dark:text-gray-100">Immer auf dem Laufenden bleiben</p>
+                <p class="text-sm text-gray-600 dark:text-gray-300">Erhalte eine E-Mail, sobald ein neuer Artikel veröffentlicht wird.</p>
+            </div>
+        </div>
+        <a href="../auth/settings.php#notifications" 
+           class="flex-shrink-0 inline-flex items-center px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all shadow-md whitespace-nowrap">
+            <i class="fas fa-envelope mr-2"></i>
+            Benachrichtigungen bei neuen Artikeln aktivieren
+        </a>
+    </div>
+    <?php endif; ?>
+
     <!-- Filter Bar -->
     <div class="mb-6 card dark:bg-gray-800 p-4">
         <div class="flex items-center gap-2 flex-wrap">

@@ -1516,4 +1516,44 @@ class MailService {
 
         return self::sendEmailWithEmbeddedImage($toEmail, $subject, $htmlBody);
     }
+
+    /**
+     * Send blog newsletter email to a single subscriber
+     *
+     * @param string $toEmail Recipient email address
+     * @param string $firstName Recipient first name (for personalization)
+     * @param string $postTitle Title of the new blog post
+     * @param string $postExcerpt Short excerpt/preview of the post content
+     * @param int $postId ID of the new blog post
+     * @return bool Success status
+     */
+    public static function sendBlogNewsletter(string $toEmail, string $firstName, string $postTitle, string $postExcerpt, int $postId): bool {
+        if (self::isVendorMissing()) {
+            error_log("Cannot send blog newsletter: Composer vendor missing");
+            return false;
+        }
+
+        $subject = 'Neuer Blog-Artikel: ' . $postTitle;
+
+        $greeting = !empty($firstName) ? 'Hallo ' . htmlspecialchars($firstName) . ',' : 'Hallo,';
+
+        $bodyContent = '<p class="email-text">' . $greeting . '</p>
+        <p class="email-text">es gibt einen neuen Artikel im IBC Intranet Blog:</p>
+        <p class="email-text"><strong>' . htmlspecialchars($postTitle) . '</strong></p>
+        <p class="email-text">' . htmlspecialchars($postExcerpt) . '</p>';
+
+        $postLink = BASE_URL . '/pages/blog/view.php?id=' . $postId;
+        $callToAction = '<a href="' . htmlspecialchars($postLink) . '" class="button">Artikel lesen</a>';
+
+        $settingsLink = BASE_URL . '/pages/auth/settings.php';
+        $bodyContent .= '<p class="email-text" style="margin-top:20px;font-size:13px;color:#6b7280;">
+            Du erhältst diese E-Mail, weil du den Blog-Newsletter abonniert hast.
+            Du kannst diese Benachrichtigung jederzeit in deinen
+            <a href="' . htmlspecialchars($settingsLink) . '" style="color:#6D9744;">Profileinstellungen</a> deaktivieren.
+        </p>';
+
+        $htmlBody = self::getTemplate('Neuer Blog-Artikel', $bodyContent, $callToAction);
+
+        return self::sendEmailWithEmbeddedImage($toEmail, $subject, $htmlBody);
+    }
 }

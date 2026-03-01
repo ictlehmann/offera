@@ -216,22 +216,34 @@ class User {
      * @param int $userId The ID of the user
      * @param bool $notifyNewProjects Whether to notify about new projects
      * @param bool $notifyNewEvents Whether to notify about new events
+     * @param bool $blogNewsletter Whether to notify about new blog posts
      * @return bool Returns true on success
      */
-    public static function updateNotificationPreferences($userId, $notifyNewProjects, $notifyNewEvents) {
+    public static function updateNotificationPreferences($userId, $notifyNewProjects, $notifyNewEvents, $blogNewsletter = false) {
         $db = Database::getUserDB();
         
         $stmt = $db->prepare("
             UPDATE users 
-            SET notify_new_projects = ?, notify_new_events = ? 
+            SET notify_new_projects = ?, notify_new_events = ?, blog_newsletter = ?
             WHERE id = ?
         ");
         
         return $stmt->execute([
             $notifyNewProjects ? 1 : 0,
             $notifyNewEvents ? 1 : 0,
+            $blogNewsletter ? 1 : 0,
             $userId
         ]);
+    }
+
+    /**
+     * Get all users subscribed to the blog newsletter
+     * @return array List of users with id, email, first_name fields
+     */
+    public static function getNewsletterSubscribers() {
+        $db = Database::getUserDB();
+        $stmt = $db->query("SELECT id, email, first_name FROM users WHERE blog_newsletter = 1 AND deleted_at IS NULL");
+        return $stmt->fetchAll();
     }
     
     /**
