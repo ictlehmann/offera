@@ -1266,6 +1266,53 @@ try {
         "Add selected_variant column to shop_orders"
     );
 
+    // ============================================
+    // SHOP MODULE: CATEGORY, PICKUP, VARIANTS & DELIVERY FIELDS
+    // ============================================
+    echo "\n--- SHOP MODULE: CATEGORY, PICKUP, VARIANTS & DELIVERY FIELDS ---\n";
+
+    // Add category column to shop_products
+    executeSql(
+        $content_db,
+        "ALTER TABLE `shop_products` ADD COLUMN `category` VARCHAR(100) DEFAULT NULL COMMENT 'Kategorie (z.B. Merchandise, Tickets, Sonstiges)'",
+        "Add category column to shop_products"
+    );
+
+    // Add pickup_location column to shop_products
+    executeSql(
+        $content_db,
+        "ALTER TABLE `shop_products` ADD COLUMN `pickup_location` VARCHAR(255) DEFAULT NULL COMMENT 'Abholort und Zeitpunkt'",
+        "Add pickup_location column to shop_products"
+    );
+
+    // Add variants column to shop_products
+    executeSql(
+        $content_db,
+        "ALTER TABLE `shop_products` ADD COLUMN `variants` VARCHAR(255) DEFAULT NULL COMMENT 'Kommagetrennte Varianten (z.B. S, M, L, XL)'",
+        "Add variants column to shop_products"
+    );
+
+    // Add shipping_cost column to shop_products
+    executeSql(
+        $content_db,
+        "ALTER TABLE `shop_products` ADD COLUMN `shipping_cost` DECIMAL(10,2) NOT NULL DEFAULT 0.00 COMMENT 'Versandkosten für dieses Produkt'",
+        "Add shipping_cost column to shop_products"
+    );
+
+    // Add delivery_status column to shop_orders
+    executeSql(
+        $content_db,
+        "ALTER TABLE `shop_orders` ADD COLUMN `delivery_status` ENUM('open','delivered') NOT NULL DEFAULT 'open' COMMENT 'Lieferstatus'",
+        "Add delivery_status column to shop_orders"
+    );
+
+    // Add delivery_method column to shop_orders
+    executeSql(
+        $content_db,
+        "ALTER TABLE `shop_orders` ADD COLUMN `delivery_method` VARCHAR(50) DEFAULT NULL COMMENT 'Gewählte Liefermethode: Versand oder Abholung'",
+        "Add delivery_method column to shop_orders"
+    );
+
     // Make invoices.file_path nullable to allow shop-order-generated invoice entries
     executeSql(
         $rech_db,
