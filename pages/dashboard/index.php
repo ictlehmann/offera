@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../../src/Auth.php';
 require_once __DIR__ . '/../../src/Database.php';
 require_once __DIR__ . '/../../includes/models/Event.php';
+require_once __DIR__ . '/../../includes/models/Invoice.php';
 require_once __DIR__ . '/../../includes/helpers.php';
 require_once __DIR__ . '/../../includes/poll_helpers.php';
 require_once __DIR__ . '/../../includes/handlers/CSRFHandler.php';
@@ -135,6 +136,24 @@ try {
     error_log("Dashboard: needs_helpers column not found in events table. Run update_database_schema.php to add it.");
 }
 
+// Get open invoices count for eligible users
+$openInvoicesCount = 0;
+$canAccessInvoices = Auth::canAccessPage('invoices');
+if ($canAccessInvoices) {
+    try {
+        $rechDb = Database::getRechDB();
+        if (in_array($userRole, array_merge(Auth::BOARD_ROLES, ['alumni_board', 'alumni_auditor']))) {
+            $iStmt = $rechDb->prepare("SELECT COUNT(*) FROM invoices WHERE status IN ('pending', 'approved')");
+            $iStmt->execute();
+        } else {
+            $iStmt = $rechDb->prepare("SELECT COUNT(*) FROM invoices WHERE user_id = ? AND status IN ('pending', 'approved')");
+            $iStmt->execute([$userId]);
+        }
+        $openInvoicesCount = (int)$iStmt->fetchColumn();
+    } catch (Exception $e) {
+        error_log('dashboard: open invoices count failed: ' . $e->getMessage());
+    }
+}
 
 $title = 'Dashboard - IBC Intranet';
 ob_start();
@@ -252,92 +271,153 @@ function dismissProfileReviewPrompt() {
         </div>
         <h2 class="text-2xl font-bold" style="color: var(--text-main)">Schnellübersicht</h2>
     </div>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- My Open Tasks Widget -->
+    <div class="grid grid-cols-1 <?php echo $canAccessInvoices ? 'md:grid-cols-3' : 'md:grid-cols-2'; ?> gap-6">
+        <!-- My Open Rentals Widget -->
         <a href="/pages/inventory/my_rentals.php" class="block group">
-            <div class="card p-7 rounded-2xl hover:shadow-2xl transition-all duration-300 cursor-pointer border border-orange-100/50" style="background-color: var(--bg-card)">
-                <div class="mb-5">
-                    <p class="text-xs font-semibold uppercase tracking-wider text-orange-500 mb-3">Ausleihen</p>
-                    <h3 class="text-xl font-bold mb-4" style="color: var(--text-main)">Meine offenen Ausleihen</h3>
-                    <div class="flex items-center justify-center mb-4">
-                        <div class="w-20 h-20 bg-gradient-to-br from-orange-400 to-orange-500 rounded-2xl flex items-center justify-center shadow-lg shadow-orange-200 group-hover:scale-110 transition-transform duration-300">
-                            <span class="text-4xl font-bold text-white"><?php echo $openTasksCount; ?></span>
-                        </div>
+            <div class="card p-6 rounded-2xl hover:shadow-2xl transition-all duration-300 cursor-pointer border-t-4 border-orange-400" style="background-color: var(--bg-card)">
+                <div class="flex items-start justify-between mb-4">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-wider text-orange-500 mb-1">Ausleihen</p>
+                        <h3 class="text-lg font-bold" style="color: var(--text-main)">Meine Ausleihen</h3>
+                    </div>
+                    <div class="w-12 h-12 bg-gradient-to-br from-orange-400 to-orange-500 rounded-xl flex items-center justify-center shadow-md flex-shrink-0">
+                        <i class="fas fa-box-open text-white"></i>
                     </div>
                 </div>
-                <?php if ($openTasksCount > 0): ?>
-                <div class="text-center">
-                    <p class="font-medium mb-4" style="color: var(--text-main)"><?php echo $openTasksCount; ?> offene <?php echo $openTasksCount == 1 ? 'Ausleihe' : 'Ausleihen'; ?></p>
-                    <span class="inline-flex items-center text-orange-600 font-semibold text-sm group-hover:translate-x-1 transition-transform">
-                        Ausleihen verwalten <i class="fas fa-arrow-right ml-2"></i>
+                <div class="flex items-end justify-between">
+                    <span class="text-4xl font-extrabold text-orange-500"><?php echo $openTasksCount; ?></span>
+                    <span class="inline-flex items-center text-orange-500 font-semibold text-sm group-hover:translate-x-1 transition-transform">
+                        <?php echo $openTasksCount > 0 ? 'Verwalten' : 'Zur Ausleihe'; ?> <i class="fas fa-arrow-right ml-1.5"></i>
                     </span>
                 </div>
-                <?php else: ?>
-                <div class="text-center space-y-3">
-                    <p class="font-medium text-base" style="color: var(--text-main)">Keine offenen Ausleihen</p>
-                    <div class="pt-3 border-t border-orange-100">
-                        <p class="text-sm flex items-center justify-center" style="color: var(--text-muted)">
-                            <i class="fas fa-check-circle text-green-500 mr-2"></i>
-                            Alle Artikel wurden zurückgegeben
-                        </p>
-                    </div>
-                </div>
-                <?php endif; ?>
+                <p class="text-xs mt-2" style="color: var(--text-muted)">
+                    <?php if ($openTasksCount > 0): ?>
+                        <i class="fas fa-exclamation-circle text-orange-400 mr-1"></i><?php echo $openTasksCount; ?> offene <?php echo $openTasksCount == 1 ? 'Ausleihe' : 'Ausleihen'; ?>
+                    <?php else: ?>
+                        <i class="fas fa-check-circle text-green-500 mr-1"></i>Keine offenen Ausleihen
+                    <?php endif; ?>
+                </p>
             </div>
         </a>
 
-        <!-- Next Events Widget -->
-        <div class="card p-7 rounded-2xl hover:shadow-2xl transition-all duration-300 border border-blue-100/50" style="background-color: var(--bg-card)">
-            <div class="mb-5">
-                <p class="text-xs font-semibold uppercase tracking-wider text-blue-500 mb-3">Events</p>
-                <h3 class="text-xl font-bold mb-4" style="color: var(--text-main)">Nächste Events</h3>
-            </div>
-            <?php if (!empty($nextEvents)): ?>
-            <?php $monthAbbrs = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez']; ?>
-            <div class="space-y-3">
-                <?php foreach ($nextEvents as $nextEvent): ?>
-                <?php
-                    $ts = strtotime($nextEvent['start_time']);
-                    $monthAbbr = $monthAbbrs[(int)date('n', $ts) - 1];
-                ?>
-                <div class="flex items-center gap-4 pb-3 border-b last:border-b-0 last:pb-0" style="border-color: var(--border-color)">
-                    <!-- Calendar-leaf date badge -->
-                    <div class="flex-shrink-0 w-14 rounded-xl overflow-hidden shadow-md text-center select-none">
-                        <div class="bg-blue-600 text-white text-xs font-bold uppercase tracking-widest py-1">
-                            <?php echo $monthAbbr; ?>
-                        </div>
-                        <div class="text-blue-600 text-2xl font-extrabold leading-tight py-1" style="background-color: var(--bg-card)">
-                            <?php echo date('d', $ts); ?>
-                        </div>
-                    </div>
-                    <!-- Event info -->
-                    <div class="flex-1 min-w-0">
-                        <h4 class="font-semibold truncate" style="color: var(--text-main)"><?php echo htmlspecialchars($nextEvent['title']); ?></h4>
-                        <p class="text-xs mt-0.5" style="color: var(--text-muted)">
-                            <i class="fas fa-clock mr-1 text-blue-400"></i>
-                            <?php echo date('H:i', $ts); ?> Uhr
-                        </p>
-                    </div>
-                    <!-- Details button -->
-                    <a href="../events/view.php?id=<?php echo $nextEvent['id']; ?>" class="flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 font-semibold text-xs transition-colors shadow-sm">
-                        Details <i class="fas fa-arrow-right"></i>
-                    </a>
+        <!-- Next Event Widget -->
+        <div class="card p-6 rounded-2xl hover:shadow-2xl transition-all duration-300 border-t-4 border-blue-500" style="background-color: var(--bg-card)">
+            <div class="flex items-start justify-between mb-4">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-blue-500 mb-1">Events</p>
+                    <h3 class="text-lg font-bold" style="color: var(--text-main)">Neuestes Event</h3>
                 </div>
-                <?php endforeach; ?>
+                <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-md flex-shrink-0">
+                    <i class="fas fa-calendar-alt text-white"></i>
+                </div>
+            </div>
+            <?php if (!empty($nextEvents)):
+                $nextEvent = $nextEvents[0];
+                $ts = strtotime($nextEvent['start_time']);
+                $monthAbbrs = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+                $monthAbbr = $monthAbbrs[(int)date('n', $ts) - 1];
+            ?>
+            <div class="flex items-center gap-3 mb-3">
+                <div class="flex-shrink-0 w-12 rounded-lg overflow-hidden shadow text-center select-none">
+                    <div class="bg-blue-600 text-white text-xs font-bold uppercase tracking-wider py-0.5"><?php echo $monthAbbr; ?></div>
+                    <div class="text-blue-600 text-xl font-extrabold leading-tight py-0.5" style="background-color: var(--bg-card)"><?php echo date('d', $ts); ?></div>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="font-semibold truncate text-sm" style="color: var(--text-main)"><?php echo htmlspecialchars($nextEvent['title']); ?></p>
+                    <p class="text-xs mt-0.5" style="color: var(--text-muted)"><i class="fas fa-clock mr-1 text-blue-400"></i><?php echo date('H:i', $ts); ?> Uhr</p>
+                </div>
+            </div>
+            <div class="flex items-center justify-between">
+                <span class="text-xs" style="color: var(--text-muted)">+<?php echo count($nextEvents) - 1; ?> weitere Events</span>
+                <a href="../events/view.php?id=<?php echo $nextEvent['id']; ?>" class="inline-flex items-center text-blue-500 font-semibold text-sm hover:translate-x-1 transition-transform">
+                    Details <i class="fas fa-arrow-right ml-1.5"></i>
+                </a>
             </div>
             <?php else: ?>
-            <div class="space-y-4">
-                <p class="font-medium text-base" style="color: var(--text-main)">Keine anstehenden Events</p>
-                <div class="pt-3">
-                    <a href="../events/index.php" class="inline-flex items-center text-blue-600 hover:text-blue-700 font-semibold text-sm hover:translate-x-1 transition-transform">
-                        Events durchsuchen <i class="fas fa-arrow-right ml-2"></i>
-                    </a>
-                </div>
-            </div>
+            <p class="text-sm mb-3" style="color: var(--text-muted)">Keine anstehenden Events</p>
+            <a href="../events/index.php" class="inline-flex items-center text-blue-500 font-semibold text-sm hover:translate-x-1 transition-transform">
+                Events durchsuchen <i class="fas fa-arrow-right ml-1.5"></i>
+            </a>
             <?php endif; ?>
+        </div>
+
+        <?php if ($canAccessInvoices): ?>
+        <!-- Open Invoices Widget -->
+        <a href="/pages/invoices/index.php" class="block group">
+            <div class="card p-6 rounded-2xl hover:shadow-2xl transition-all duration-300 cursor-pointer border-t-4 border-emerald-500" style="background-color: var(--bg-card)">
+                <div class="flex items-start justify-between mb-4">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-wider text-emerald-600 mb-1">Rechnungen</p>
+                        <h3 class="text-lg font-bold" style="color: var(--text-main)">Offene Rechnungen</h3>
+                    </div>
+                    <div class="w-12 h-12 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-md flex-shrink-0">
+                        <i class="fas fa-file-invoice-dollar text-white"></i>
+                    </div>
+                </div>
+                <div class="flex items-end justify-between">
+                    <span class="text-4xl font-extrabold text-emerald-600"><?php echo $openInvoicesCount; ?></span>
+                    <span class="inline-flex items-center text-emerald-600 font-semibold text-sm group-hover:translate-x-1 transition-transform">
+                        <?php echo $openInvoicesCount > 0 ? 'Anzeigen' : 'Zur Übersicht'; ?> <i class="fas fa-arrow-right ml-1.5"></i>
+                    </span>
+                </div>
+                <p class="text-xs mt-2" style="color: var(--text-muted)">
+                    <?php if ($openInvoicesCount > 0): ?>
+                        <i class="fas fa-hourglass-half text-amber-500 mr-1"></i><?php echo $openInvoicesCount; ?> <?php echo $openInvoicesCount == 1 ? 'Rechnung ausstehend' : 'Rechnungen ausstehend'; ?>
+                    <?php else: ?>
+                        <i class="fas fa-check-circle text-green-500 mr-1"></i>Alle Rechnungen bearbeitet
+                    <?php endif; ?>
+                </p>
+            </div>
+        </a>
+        <?php endif; ?>
+    </div>
+</div>
+
+<!-- Next Events Detail Section -->
+<?php if (!empty($events)): ?>
+<div class="max-w-6xl mx-auto mb-10">
+    <div class="flex flex-wrap items-center justify-between gap-2 mb-6">
+        <div class="flex items-center">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center mr-3 shadow-md shrink-0">
+                <i class="fas fa-calendar-alt text-white text-sm"></i>
+            </div>
+            <h2 class="text-2xl font-bold" style="color: var(--text-main)">Anstehende Events</h2>
+        </div>
+        <a href="../events/index.php" class="text-blue-600 hover:text-blue-700 font-semibold text-sm shrink-0">
+            Alle Events <i class="fas fa-arrow-right ml-1"></i>
+        </a>
+    </div>
+    <div class="card p-6 rounded-2xl shadow-lg" style="background-color: var(--bg-card)">
+        <?php $monthAbbrs = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez']; ?>
+        <div class="space-y-3">
+            <?php foreach ($events as $event): ?>
+            <?php
+                $ts = strtotime($event['start_time']);
+                $monthAbbr = $monthAbbrs[(int)date('n', $ts) - 1];
+            ?>
+            <div class="flex items-center gap-4 pb-3 border-b last:border-b-0 last:pb-0" style="border-color: var(--border-color)">
+                <div class="flex-shrink-0 w-14 rounded-xl overflow-hidden shadow-md text-center select-none">
+                    <div class="bg-blue-600 text-white text-xs font-bold uppercase tracking-widest py-1"><?php echo $monthAbbr; ?></div>
+                    <div class="text-blue-600 text-2xl font-extrabold leading-tight py-1" style="background-color: var(--bg-card)"><?php echo date('d', $ts); ?></div>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h4 class="font-semibold truncate" style="color: var(--text-main)"><?php echo htmlspecialchars($event['title']); ?></h4>
+                    <p class="text-xs mt-0.5" style="color: var(--text-muted)">
+                        <i class="fas fa-clock mr-1 text-blue-400"></i><?php echo date('H:i', $ts); ?> Uhr
+                        <?php if (!empty($event['location'])): ?>
+                        &nbsp;·&nbsp;<i class="fas fa-map-marker-alt mr-1 text-blue-400"></i><?php echo htmlspecialchars($event['location']); ?>
+                        <?php endif; ?>
+                    </p>
+                </div>
+                <a href="../events/view.php?id=<?php echo $event['id']; ?>" class="flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 font-semibold text-xs transition-colors shadow-sm">
+                    Details <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+            <?php endforeach; ?>
         </div>
     </div>
 </div>
+<?php endif; ?>
 
 <!-- Dashboard Section - Wir suchen Helfer -->
 <div class="max-w-6xl mx-auto mb-12">
@@ -518,56 +598,6 @@ function hidePollFromDashboard(pollId) {
     });
 }
 </script>
-
-<!-- Upcoming Events Section - Visible to All Users -->
-<div class="max-w-6xl mx-auto mb-12">
-    <div class="flex items-center justify-center mb-6">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center mr-3 shadow-md">
-            <i class="fas fa-calendar-alt text-white text-sm"></i>
-        </div>
-        <h2 class="text-2xl font-bold" style="color: var(--text-main)">Anstehende Events</h2>
-    </div>
-    
-    <div class="grid grid-cols-1 gap-6">
-        <?php 
-        if (!empty($events)): 
-        ?>
-        <div class="card p-6 rounded-xl shadow-lg" style="background-color: var(--bg-card)">
-            <div class="space-y-4">
-                <?php foreach ($events as $event): ?>
-                <div class="flex flex-col sm:flex-row sm:items-center gap-3 p-4 rounded-lg shadow-sm hover:shadow-md transition-all" style="background-color: var(--bg-card); border: 1px solid var(--border-color)">
-                    <div class="flex-1 min-w-0">
-                        <h3 class="font-bold mb-1 truncate" style="color: var(--text-main)"><?php echo htmlspecialchars($event['title']); ?></h3>
-                        <p class="text-sm" style="color: var(--text-muted)">
-                            <i class="fas fa-clock mr-1"></i>
-                            <?php echo date('d.m.Y H:i', strtotime($event['start_time'])); ?> Uhr
-                        </p>
-                        <?php if (!empty($event['location'])): ?>
-                        <p class="text-sm mt-1" style="color: var(--text-muted)">
-                            <i class="fas fa-map-marker-alt mr-1"></i>
-                            <?php echo htmlspecialchars($event['location']); ?>
-                        </p>
-                        <?php endif; ?>
-                    </div>
-                    <a href="../events/view.php?id=<?php echo $event['id']; ?>" class="shrink-0 inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all">
-                        Details
-                    </a>
-                </div>
-                <?php endforeach; ?>
-            </div>
-        </div>
-        <?php else: ?>
-        <div class="card p-8 rounded-xl shadow-lg text-center" style="background-color: var(--bg-card)">
-            <i class="fas fa-calendar-times text-4xl mb-3 text-gray-400"></i>
-            <p class="text-lg" style="color: var(--text-muted)">Keine anstehenden Events</p>
-            <a href="../events/index.php" class="inline-flex items-center mt-4 text-blue-600 hover:text-blue-700 font-semibold">
-                Alle Events ansehen <i class="fas fa-arrow-right ml-2"></i>
-            </a>
-        </div>
-        <?php endif; ?>
-    </div>
-</div>
-
 
 <?php
 $content = ob_get_clean();
