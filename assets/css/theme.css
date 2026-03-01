@@ -5569,3 +5569,86 @@ select {
     opacity: 0.75;
     cursor: not-allowed;
 }
+
+/* ============================================================
+   INVENTORY ITEM CARDS – Smooth, flicker-free hover effect
+   Fix: Using `transition-all` on an `overflow:hidden` element
+   combined with a CSS transform causes repaint/composite layer
+   flickering in Chrome and Safari. Replace with targeted
+   transitions and a stable GPU compositing layer.
+   ============================================================ */
+
+.inventory-item-card {
+    /* Specific transitions prevent the "all-properties" repaint storm */
+    transition:
+        transform 0.28s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+        box-shadow 0.28s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+        border-color 0.2s ease;
+    /* Create a stable GPU compositing layer; eliminates the
+       overflow:hidden + transform flicker bug on Chrome/Safari */
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+    will-change: auto;
+}
+
+.inventory-item-card:hover {
+    /* Soft upward lift + diffused shadow – no abrupt jump */
+    transform: translateY(-6px) translateZ(0);
+    box-shadow:
+        0 4px 8px rgba(0, 0, 0, 0.04),
+        0 12px 28px rgba(0, 0, 0, 0.10),
+        0 24px 48px rgba(0, 0, 0, 0.06);
+    border-color: rgba(0, 102, 179, 0.14);
+    will-change: transform, box-shadow;
+}
+
+body.dark-mode .inventory-item-card:hover {
+    box-shadow:
+        0 4px 8px rgba(0, 0, 0, 0.3),
+        0 12px 28px rgba(0, 0, 0, 0.45),
+        0 24px 48px rgba(0, 0, 0, 0.35);
+    border-color: rgba(147, 51, 234, 0.28);
+}
+
+/* Reset will-change when not hovered to free GPU memory */
+.inventory-item-card:not(:hover) {
+    will-change: auto;
+}
+
+/* Pure touch devices (phones without hover): keep a subtle active-state shadow
+   but remove the transform lift to avoid accidental "stuck" hover state.
+   Hybrid devices (iPad with trackpad, Surface) are unaffected because they
+   support @media (hover: hover) and will receive the full hover effect. */
+@media (hover: none) and (pointer: coarse) {
+    .inventory-item-card:hover {
+        transform: translateZ(0);
+        box-shadow:
+            0 2px 8px rgba(0, 0, 0, 0.08),
+            0 4px 16px rgba(0, 0, 0, 0.06);
+        border-color: rgba(0, 102, 179, 0.10);
+    }
+    body.dark-mode .inventory-item-card:hover {
+        box-shadow:
+            0 2px 8px rgba(0, 0, 0, 0.25),
+            0 4px 16px rgba(0, 0, 0, 0.2);
+        border-color: rgba(147, 51, 234, 0.15);
+    }
+}
+
+/* ============================================================
+   SIDEBAR MOBILE – Refined slide-in / slide-out transition
+   ============================================================ */
+
+/* Override the basic ease-in-out with a material-like curve for
+   a more polished open/close feel on mobile */
+@media (max-width: 767px) {
+    .sidebar {
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+
+    /* Active sidebar: snap into place with slight deceleration */
+    .sidebar.open {
+        transition: transform 0.28s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
+    }
+}
