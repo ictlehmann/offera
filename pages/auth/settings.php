@@ -426,15 +426,7 @@ ob_start();
             <p class="text-gray-600 dark:text-gray-300 mb-6">
                 Wende dich bei Fragen oder Problemen direkt an die IT-Ressortleitung
             </p>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <button type="button" onclick="showSupportModal('name_email_change')"
-                   class="flex items-center p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/40 transition text-left w-full">
-                    <i class="fas fa-envelope text-blue-600 dark:text-blue-400 text-2xl mr-4 shrink-0"></i>
-                    <div>
-                        <span class="block font-semibold text-gray-800 dark:text-gray-100">E-Mail/Name ändern</span>
-                        <span class="block text-sm text-gray-600 dark:text-gray-400">Anfrage per E-Mail senden</span>
-                    </div>
-                </button>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <button type="button" onclick="showSupportModal('2fa_reset')"
                    class="flex items-center p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg hover:bg-yellow-100 dark:hover:bg-yellow-900/40 transition text-left w-full">
                     <i class="fas fa-shield-alt text-yellow-600 dark:text-yellow-400 text-2xl mr-4 shrink-0"></i>
@@ -476,7 +468,6 @@ ob_start();
                     <select id="support-modal-type" name="request_type" required
                             class="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-lg focus:ring-blue-500 focus:border-blue-500">
                         <option value="">Bitte auswählen...</option>
-                        <option value="name_email_change">E-Mail/Name ändern</option>
                         <option value="2fa_reset">2FA zurücksetzen</option>
                         <option value="bug">Bug / Fehler</option>
                         <option value="other">Sonstiges</option>
@@ -532,6 +523,8 @@ function showSupportModal(type) {
     const select = document.getElementById('support-modal-type');
     if (select && type) {
         select.value = type;
+        select.classList.add('select-locked');
+        select.dataset.locked = '1';
     }
     modal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
@@ -542,6 +535,11 @@ function hideSupportModal() {
     if (!modal) return;
     modal.classList.add('hidden');
     document.body.style.overflow = '';
+    const select = document.getElementById('support-modal-type');
+    if (select) {
+        select.classList.remove('select-locked');
+        delete select.dataset.locked;
+    }
     const form = document.getElementById('support-modal-form');
     if (form) form.reset();
     const feedback = document.getElementById('support-modal-feedback');
