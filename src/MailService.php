@@ -1462,7 +1462,7 @@ class MailService {
 
         $htmlBody = self::getTemplate($subject, $bodyContent);
 
-        return self::sendEmail('merch@business-consulting.de', $subject, $htmlBody);
+        return self::sendEmail(MAIL_SHOP, $subject, $htmlBody);
     }
 
     /**

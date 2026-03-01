@@ -129,7 +129,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             );
 
             $emailSent = MailService::sendEmail(
-                'it@business-consulting.de',
+                MAIL_SUPPORT,
                 'Änderungsantrag: ' . $requestType . ' von ' . $user['email'],
                 $emailBody
             );

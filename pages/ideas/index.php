@@ -51,10 +51,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_idea'])) {
             $emailBody .= '</table>';
             
             // Send email
-            // NOTE: Email address is hardcoded as per requirements
-            // For production, consider moving to config file
             $emailSent = MailService::send(
-                defined('SMTP_FROM') && SMTP_FROM !== '' ? SMTP_FROM : 'vorstand@business-consulting.de',
+                MAIL_IDEAS,
                 'Neue Idee von ' . $username,
                 $emailBody
             );
