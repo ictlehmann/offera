@@ -116,6 +116,15 @@ ob_start();
                     $isUpcoming = $startTimestamp > $nowTimestamp;
                     $isPast = strtotime($event['end_time']) < $nowTimestamp;
                     $isRegistered = in_array($event['id'], $myEventIds);
+
+                    // Validate image path
+                    $hasImage = false;
+                    if (!empty($event['image_path'])) {
+                        $fullImagePath = __DIR__ . '/../../' . $event['image_path'];
+                        $realPath = realpath($fullImagePath);
+                        $baseDir = realpath(__DIR__ . '/../../');
+                        $hasImage = $realPath && $baseDir && strpos($realPath, $baseDir) === 0 && file_exists($realPath);
+                    }
                     
                     $countdown = '';
                     if ($isUpcoming) {
@@ -131,100 +140,149 @@ ob_start();
                     }
                 ?>
                 
-                <div class="card p-6 relative">
-                    <!-- Status Badge -->
-                    <?php if ($event['status'] === 'draft'): ?>
-                        <div class="absolute top-4 right-4">
-                            <span class="px-3 py-1 bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-xs font-semibold rounded-full">
-                                <i class="fas fa-pencil-alt mr-1"></i>
-                                Entwurf
-                            </span>
+                <a href="view.php?id=<?php echo $event['id']; ?>" class="event-card card flex flex-col overflow-hidden group no-underline" style="text-decoration:none;">
+                    <!-- Event Image -->
+                    <div class="event-card-image relative overflow-hidden">
+                        <?php if ($hasImage): ?>
+                            <img src="<?php echo htmlspecialchars(BASE_URL . '/' . $event['image_path']); ?>"
+                                 alt="<?php echo htmlspecialchars($event['title']); ?>"
+                                 class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                        <?php else: ?>
+                            <div class="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-ibc-blue to-ibc-blue-dark">
+                                <i class="fas fa-calendar-alt text-white/40 text-5xl"></i>
+                            </div>
+                        <?php endif; ?>
+
+                        <!-- Overlay badges -->
+                        <div class="absolute top-3 left-3 flex flex-col gap-1">
+                            <?php if ($event['status'] === 'draft'): ?>
+                                <span class="px-2.5 py-1 bg-gray-800/80 backdrop-blur-sm text-white text-xs font-semibold rounded-full">
+                                    <i class="fas fa-pencil-alt mr-1"></i>Entwurf
+                                </span>
+                            <?php elseif ($event['status'] === 'open'): ?>
+                                <span class="px-2.5 py-1 bg-ibc-green/90 backdrop-blur-sm text-white text-xs font-semibold rounded-full">
+                                    <i class="fas fa-door-open mr-1"></i>Anmeldung offen
+                                </span>
+                            <?php elseif ($event['status'] === 'running'): ?>
+                                <span class="px-2.5 py-1 bg-ibc-blue/90 backdrop-blur-sm text-white text-xs font-semibold rounded-full">
+                                    <i class="fas fa-play mr-1"></i>Läuft gerade
+                                </span>
+                            <?php elseif ($event['status'] === 'past'): ?>
+                                <span class="px-2.5 py-1 bg-gray-600/80 backdrop-blur-sm text-white text-xs font-semibold rounded-full">
+                                    <i class="fas fa-flag-checkered mr-1"></i>Beendet
+                                </span>
+                            <?php endif; ?>
+
+                            <?php if ($event['is_external']): ?>
+                                <span class="px-2.5 py-1 bg-ibc-accent/90 backdrop-blur-sm text-white text-xs font-semibold rounded-full">
+                                    <i class="fas fa-external-link-alt mr-1"></i>Extern
+                                </span>
+                            <?php endif; ?>
                         </div>
-                    <?php elseif ($isRegistered): ?>
-                        <div class="absolute top-4 right-4">
-                            <span class="px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 text-xs font-semibold rounded-full">
-                                <i class="fas fa-check mr-1"></i>
-                                Angemeldet
-                            </span>
-                        </div>
-                    <?php endif; ?>
-                    
-                    <!-- Event Header -->
-                    <div class="mb-4">
-                        <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">
-                            <?php echo htmlspecialchars($event['title']); ?>
-                        </h3>
-                        
-                        <!-- Countdown -->
+
+                        <?php if ($isRegistered): ?>
+                            <div class="absolute top-3 right-3">
+                                <span class="px-2.5 py-1 bg-ibc-green/90 backdrop-blur-sm text-white text-xs font-semibold rounded-full">
+                                    <i class="fas fa-check mr-1"></i>Angemeldet
+                                </span>
+                            </div>
+                        <?php endif; ?>
+
                         <?php if ($countdown): ?>
-                            <div class="mb-2">
-                                <span class="inline-flex items-center px-3 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 text-sm font-semibold rounded-lg">
-                                    <i class="fas fa-clock mr-2"></i>
+                            <div class="absolute bottom-3 left-3">
+                                <span class="inline-flex items-center px-3 py-1 bg-black/60 backdrop-blur-sm text-white text-xs font-semibold rounded-full">
+                                    <i class="fas fa-hourglass-half mr-1.5"></i>
                                     <?php echo $countdown; ?>
                                 </span>
                             </div>
                         <?php endif; ?>
-                        
-                        <!-- Event Info -->
-                        <div class="space-y-2 text-sm text-gray-600 dark:text-gray-300">
-                            <div class="flex items-start">
-                                <i class="fas fa-calendar w-5 mt-0.5 text-purple-600"></i>
+                    </div>
+
+                    <!-- Card Body -->
+                    <div class="flex flex-col flex-1 p-5">
+                        <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100 mb-3 leading-snug line-clamp-2">
+                            <?php echo htmlspecialchars($event['title']); ?>
+                        </h3>
+
+                        <!-- Meta Info -->
+                        <div class="space-y-2 text-sm text-gray-600 dark:text-gray-400 mb-4">
+                            <div class="flex items-center gap-2">
+                                <span class="event-meta-icon"><i class="fas fa-calendar text-ibc-blue"></i></span>
                                 <span>
-                                    <?php 
+                                    <?php
                                         $startDate = new DateTime($event['start_time']);
-                                        $endDate = new DateTime($event['end_time']);
-                                        echo $startDate->format('d.m.Y H:i') . ' - ' . $endDate->format('H:i');
+                                        $endDate   = new DateTime($event['end_time']);
+                                        if ($startDate->format('d.m.Y') === $endDate->format('d.m.Y')) {
+                                            echo $startDate->format('d.m.Y, H:i') . ' – ' . $endDate->format('H:i') . ' Uhr';
+                                        } else {
+                                            echo $startDate->format('d.m.Y, H:i') . ' – ' . $endDate->format('d.m.Y, H:i') . ' Uhr';
+                                        }
                                     ?>
                                 </span>
                             </div>
-                            
                             <?php if (!empty($event['location'])): ?>
-                                <div class="flex items-start">
-                                    <i class="fas fa-map-marker-alt w-5 mt-0.5 text-purple-600"></i>
-                                    <span><?php echo htmlspecialchars($event['location']); ?></span>
+                                <div class="flex items-center gap-2">
+                                    <span class="event-meta-icon"><i class="fas fa-map-marker-alt text-ibc-blue"></i></span>
+                                    <span class="truncate"><?php echo htmlspecialchars($event['location']); ?></span>
                                 </div>
                             <?php endif; ?>
-                            
-                            <?php if ($event['is_external']): ?>
-                                <div class="flex items-start">
-                                    <i class="fas fa-external-link-alt w-5 mt-0.5 text-blue-600 dark:text-blue-400"></i>
-                                    <span class="text-blue-600 dark:text-blue-400">Externes Event</span>
-                                </div>
-                            <?php endif; ?>
-                            
                             <?php if ($event['needs_helpers'] && $userRole !== 'alumni'): ?>
-                                <div class="flex items-start">
-                                    <i class="fas fa-hands-helping w-5 mt-0.5 text-orange-600 dark:text-orange-400"></i>
-                                    <span class="text-orange-600 dark:text-orange-400">Helfer benötigt</span>
+                                <div class="flex items-center gap-2">
+                                    <span class="event-meta-icon"><i class="fas fa-hands-helping text-ibc-accent"></i></span>
+                                    <span class="text-ibc-accent font-medium">Helfer benötigt</span>
                                 </div>
                             <?php endif; ?>
                         </div>
+
+                        <!-- Description Preview -->
+                        <?php if (!empty($event['description'])): ?>
+                            <p class="text-gray-500 dark:text-gray-400 text-sm line-clamp-2 flex-1 mb-4">
+                                <?php echo htmlspecialchars(substr($event['description'], 0, 120)); ?><?php echo strlen($event['description']) > 120 ? '…' : ''; ?>
+                            </p>
+                        <?php else: ?>
+                            <div class="flex-1"></div>
+                        <?php endif; ?>
+
+                        <!-- CTA -->
+                        <div class="flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-700">
+                            <span class="text-sm font-semibold text-ibc-blue group-hover:text-ibc-blue-dark transition-colors">
+                                Details ansehen
+                            </span>
+                            <span class="w-8 h-8 rounded-full bg-ibc-blue/10 flex items-center justify-center group-hover:bg-ibc-blue group-hover:text-white transition-all">
+                                <i class="fas fa-arrow-right text-xs"></i>
+                            </span>
+                        </div>
                     </div>
-                    
-                    <!-- Description Preview -->
-                    <?php if (!empty($event['description'])): ?>
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-3">
-                            <?php echo htmlspecialchars(substr($event['description'], 0, 150)); ?>
-                            <?php echo strlen($event['description']) > 150 ? '...' : ''; ?>
-                        </p>
-                    <?php endif; ?>
-                    
-                    <!-- Action Button -->
-                    <a href="view.php?id=<?php echo $event['id']; ?>" 
-                       class="block w-full text-center px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-purple-800 transition-all">
-                        <i class="fas fa-eye mr-2"></i>
-                        Details ansehen
-                    </a>
-                </div>
+                </a>
             <?php endforeach; ?>
         </div>
     <?php endif; ?>
 </div>
 
 <style>
-    .line-clamp-3 {
+    .event-card {
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+        color: inherit;
+    }
+    .event-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-card-hover);
+    }
+    .event-card-image {
+        height: 200px;
+        background: #e5e7eb;
+        flex-shrink: 0;
+    }
+    .event-meta-icon {
+        width: 1.25rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    .line-clamp-2 {
         display: -webkit-box;
-        -webkit-line-clamp: 3;
+        -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
     }
