@@ -84,6 +84,19 @@ ob_start();
 ?>
 
 <div class="max-w-7xl mx-auto">
+    <!-- Print-only header (hidden on screen, shown when printing) -->
+    <div class="invoice-print-header hidden">
+        <img src="<?php echo asset('assets/img/ibc_logo_original.webp'); ?>" alt="IBC Logo">
+        <div class="invoice-print-header-meta">
+            IBC – International Business Club<br>
+            Rechnungsübersicht<br>
+            Druckdatum: <?php echo date('d.m.Y'); ?>
+        </div>
+    </div>
+    <div class="invoice-print-footer hidden">
+        IBC – Rechnungsmanagement &mdash; Seite <span class="print-page-num"></span>
+    </div>
+
     <!-- Success/Error Messages -->
     <?php if (isset($_SESSION['success_message'])): ?>
     <div class="mb-6 p-4 bg-green-100 dark:bg-green-900 border border-green-400 dark:border-green-700 text-green-700 dark:text-green-300 rounded-lg">
@@ -104,7 +117,7 @@ ob_start();
     ?>
 
     <!-- Header -->
-    <div class="mb-8 rounded-2xl overflow-hidden shadow-lg">
+    <div class="mb-8 rounded-2xl overflow-hidden shadow-lg no-print">
         <div class="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 dark:from-blue-800 dark:via-blue-900 dark:to-indigo-900 px-6 py-7 sm:px-8">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
@@ -127,7 +140,7 @@ ob_start();
     </div>
 
     <!-- Dashboard Summary Cards (visible to all users with invoices) -->
-    <div class="grid grid-cols-1 sm:grid-cols-3 <?php echo $stats ? 'lg:grid-cols-4' : ''; ?> gap-4 mb-8">
+    <div class="grid grid-cols-1 sm:grid-cols-3 <?php echo $stats ? 'lg:grid-cols-4' : ''; ?> gap-4 mb-8 no-print">
         <!-- Gesamtbetrag Offen -->
         <div class="card p-5 bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 border-l-4 border-red-500 dark:border-red-600 hover:shadow-lg transition-shadow duration-200">
             <div class="flex items-center justify-between">
@@ -189,7 +202,7 @@ ob_start();
 
     <!-- Offene Rechnungen Banner -->
     <?php if (!empty($openInvoices)): ?>
-    <div class="mb-6 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-700/50 rounded-2xl overflow-hidden shadow-sm">
+    <div class="mb-6 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-700/50 rounded-2xl overflow-hidden shadow-sm no-print">
         <div class="px-5 py-4 bg-amber-100/70 dark:bg-amber-900/30 border-b border-amber-200 dark:border-amber-700/50 flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <span class="w-8 h-8 bg-amber-500 dark:bg-amber-600 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm">
@@ -259,7 +272,7 @@ ob_start();
         if (isset($statusCounts[$inv['status']])) $statusCounts[$inv['status']]++;
     }
     ?>
-    <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+    <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 no-print">
         <!-- Status filter tabs -->
         <div class="flex flex-wrap gap-2">
             <button onclick="filterByStatus('all')" id="tab-all"
@@ -443,7 +456,7 @@ ob_start();
                             <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Beleg</th>
                             <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
                             <?php if (Auth::isBoard()): ?>
-                            <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Aktionen</th>
+                            <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider invoice-actions-col">Aktionen</th>
                             <?php endif; ?>
                         </tr>
                     </thead>
@@ -527,7 +540,7 @@ ob_start();
                                     </span>
                                 </td>
                                 <?php if (Auth::isBoard()): ?>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm" onclick="event.stopPropagation()">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm invoice-actions-col" onclick="event.stopPropagation()">
                                     <?php if ($invoice['status'] === 'pending'): ?>
                                         <div class="flex gap-2">
                                             <button
