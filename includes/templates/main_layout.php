@@ -1016,7 +1016,7 @@ if (Auth::check() && isset($_SESSION['profile_incomplete']) && $_SESSION['profil
                         $entraRoleDisplay = 'Mitglied';
                     }
                     ?>
-                    <span class='bg-teal-500 text-white font-semibold px-2 py-1 rounded-md text-xs inline-block mt-1' title='<?php echo htmlspecialchars($entraRoleDisplay); ?>' aria-label='Rolle: <?php echo htmlspecialchars($entraRoleDisplay); ?>'>
+                    <span class='bg-teal-700 text-white font-semibold px-2 py-1 rounded-md text-xs inline-block mt-1' title='<?php echo htmlspecialchars($entraRoleDisplay); ?>' aria-label='Rolle: <?php echo htmlspecialchars($entraRoleDisplay); ?>'>
                         <?php echo htmlspecialchars($entraRoleDisplay); ?>
                     </span>
                 </div>
