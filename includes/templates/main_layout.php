@@ -73,471 +73,144 @@ if (Auth::check() && isset($_SESSION['profile_incomplete']) && $_SESSION['profil
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn-uicons.flaticon.com/2.6.0/uicons-regular-rounded/css/uicons-regular-rounded.css">
     <style>
-        /* Sidebar - Permanent IBC Corporate Blue (#00457D) for both light and dark modes */
-        .sidebar {
-            background: var(--sidebar-bg-light) !important; /* IBC Corporate Blue */
-            display: flex;
-            flex-direction: column;
-            overflow-x: hidden;
-        }
-        
-        /* Custom scrollbar styling for sidebar */
-        .sidebar::-webkit-scrollbar,
-        .sidebar-scroll::-webkit-scrollbar {
-            width: 8px;
-        }
-        
-        .sidebar::-webkit-scrollbar-track,
-        .sidebar-scroll::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.05);
-            border-radius: 4px;
-        }
-        
-        .sidebar::-webkit-scrollbar-thumb,
-        .sidebar-scroll::-webkit-scrollbar-thumb {
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 4px;
-        }
-        
-        .sidebar::-webkit-scrollbar-thumb:hover,
-        .sidebar-scroll::-webkit-scrollbar-thumb:hover {
-            background: rgba(0, 0, 0, 0.3);
-        }
-        
-        /* Firefox scrollbar styling */
-        .sidebar,
-        .sidebar-scroll {
-            scrollbar-width: thin;
-            scrollbar-color: rgba(0, 0, 0, 0.2) rgba(0, 0, 0, 0.05);
-        }
-        
-        /* Sidebar styling for dark mode - dark gray with subtle contrast */
-        body.dark-mode .sidebar {
-            background: var(--sidebar-bg-dark) !important;
-            border-right: 1px solid rgba(255, 255, 255, 0.08);
-        }
-        
-        /* Dark mode sidebar scrollbar */
-        body.dark-mode .sidebar::-webkit-scrollbar-track,
-        body.dark-mode .sidebar-scroll::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.2);
-        }
-        
-        body.dark-mode .sidebar::-webkit-scrollbar-thumb,
-        body.dark-mode .sidebar-scroll::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.3);
-        }
-        
-        body.dark-mode .sidebar::-webkit-scrollbar-thumb:hover,
-        body.dark-mode .sidebar-scroll::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.5);
-        }
-        
-        body.dark-mode .sidebar,
-        body.dark-mode .sidebar-scroll {
-            scrollbar-color: rgba(255, 255, 255, 0.3) rgba(0, 0, 0, 0.2);
-        }
-
-        /* Sidebar navigation items - rounded pill style */
-        .sidebar nav > a,
-        .sidebar nav .menu-item-with-submenu > a {
-            margin: 2px 8px;
-            border-radius: 8px;
-            padding: 0.625rem 1rem;
-        }
-
-        .sidebar nav .submenu a {
-            margin: 1px 8px;
-            border-radius: 8px;
-            padding: 0.5rem 1rem 0.5rem 2.5rem;
-        }
-
-        /* Sidebar footer buttons */
-        .sidebar-footer-btn {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            width: 100%;
-            padding: 0.4rem 0.625rem;
-            border-radius: 8px;
-            font-size: 0.78rem;
-            font-weight: 500;
-            color: rgba(255, 255, 255, 0.9);
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            transition: background 0.18s ease, border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
-            cursor: pointer;
-            text-decoration: none;
-            margin-bottom: 0.25rem;
-        }
-        .sidebar-footer-btn:hover {
-            background: rgba(255, 255, 255, 0.18);
-            border-color: rgba(255, 255, 255, 0.25);
-            color: #fff;
-            text-decoration: none;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        }
-        .sidebar-footer-btn:active {
-            transform: translateY(0);
-            box-shadow: none;
-        }
-        .sidebar-footer-btn.active-btn {
-            background: rgba(255, 255, 255, 0.22);
-            border-color: rgba(255, 255, 255, 0.35);
-        }
-        .sidebar-footer-btn i {
-            width: 1.1rem;
-            text-align: center;
-            font-size: 0.9rem;
-        }
-        .sidebar-logout-btn {
-            background: rgba(239, 68, 68, 0.15);
-            border-color: rgba(239, 68, 68, 0.3);
-            color: rgba(255, 200, 200, 0.95);
-            margin-bottom: 0;
-        }
-        .sidebar-logout-btn:hover {
-            background: rgba(239, 68, 68, 0.3);
-            border-color: rgba(239, 68, 68, 0.5);
-            color: #fff;
-            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25);
-        }
-
-        /* Mobile topbar and button styling */
+        /* Mobile topbar and menu button */
         #mobile-menu-btn {
             border: none;
             outline: none;
         }
-        
         #mobile-menu-btn:focus-visible {
             outline: 2px solid rgba(255,255,255,0.8);
             outline-offset: 2px;
         }
-        
-        .card {
-            background: var(--bg-card);
-            border-radius: var(--radius-lg, 16px);
-            box-shadow: var(--shadow-card, 0 1px 3px rgba(0,0,0,0.04), 0 6px 16px rgba(0,0,0,0.06));
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 1px solid rgba(0, 0, 0, 0.06);
-            position: relative;
-            overflow: hidden;
-        }
-        .card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, var(--ibc-green), var(--ibc-blue));
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-        .card:hover {
-            box-shadow: var(--shadow-card-hover, 0 4px 12px rgba(0,0,0,0.08), 0 20px 40px rgba(0,0,0,0.12));
-            transform: translateY(-4px);
-            border-color: rgba(0, 102, 179, 0.12);
-        }
-        .card:hover::before {
-            opacity: 1;
-        }
-        .btn-primary {
-            background: linear-gradient(135deg, var(--ibc-green) 0%, var(--ibc-green-mid) 50%, var(--ibc-blue) 100%) !important;
-            background-size: 200% 200% !important;
-            color: white !important;
-            padding: 0.75rem 2rem !important;
-            border-radius: var(--radius-md, 12px) !important;
-            transition: all 0.3s ease !important;
-            font-weight: 600 !important;
-            letter-spacing: 0.02em !important;
-            box-shadow: 0 4px 15px rgba(0, 166, 81, 0.3) !important;
-            border: none !important;
-        }
-        .btn-primary:hover {
-            transform: translateY(-2px) !important;
-            box-shadow: 0 8px 25px rgba(0, 166, 81, 0.4) !important;
-            color: white !important;
-        }
-        
+
         /* Mobile view improvements */
         @media (max-width: 767px) {
-            /* Sidebar improvements for mobile */
-            .sidebar {
-                width: 85% !important;
-                max-width: 320px !important;
-                box-shadow: 10px 0 30px rgba(0, 0, 0, 0.3) !important;
-                top: var(--topbar-height) !important; /* Start below the mobile topbar */
-                height: calc(100vh - var(--topbar-height)) !important;
-                z-index: 1050 !important; /* Above overlay (1040), below topbar (1060) */
-            }
-            
             .sidebar .sidebar-scroll {
                 padding-bottom: 2rem !important;
             }
-            
+
             /* Better logo sizing on mobile */
             .sidebar img[alt="IBC Logo"] {
                 max-width: 90% !important;
                 margin: 0 auto !important;
             }
-            
-            .card {
-                padding: 1rem !important;
-                border-radius: 12px !important;
-            }
-            
+
             /* Fix text overflow in cards */
             .card p, .card div, .card span {
                 word-wrap: break-word;
                 overflow-wrap: break-word;
                 hyphens: auto;
             }
-            
+
             /* Better spacing on mobile - add top padding for topbar */
             main {
                 padding-left: 1rem !important;
                 padding-right: 1rem !important;
                 padding-bottom: 1rem !important;
-                padding-top: calc(var(--topbar-height) + 1.25rem) !important; /* Ensure content doesn't hide under topbar */
+                padding-top: calc(var(--topbar-height) + 1.25rem) !important;
                 margin-left: 0 !important;
             }
-            
-            /* Prevent horizontal overflow */
+
+            /* Prevent horizontal overflow on tables */
             table {
                 display: block;
                 overflow-x: auto;
                 -webkit-overflow-scrolling: touch;
                 border-radius: 8px;
             }
-            
-            table thead {
-                display: table-header-group;
-            }
-            
-            table tbody {
-                display: table-row-group;
-            }
-            
-            /* Table cells: no-wrap to keep scrollable tables readable */
-            th, td {
-                white-space: nowrap;
-            }
-            
-            /* Better form spacing on mobile */
+            table thead { display: table-header-group; }
+            table tbody { display: table-row-group; }
+            th, td { white-space: nowrap; }
+
+            /* Better form inputs on mobile (prevents iOS zoom-in) */
             form input, form select, form textarea {
-                font-size: 16px; /* Prevents zoom on iOS */
+                font-size: 16px;
                 padding: 0.875rem !important;
                 border-radius: 10px !important;
             }
-            
-            /* Stack action/button groups vertically on mobile - but NOT icon+text combos */
-            .flex.space-x-2:not(.items-center),
-            .flex.space-x-3:not(.items-center),
-            .flex.space-x-4:not(.items-center),
-            .flex.gap-2:not(.items-center),
-            .flex.gap-3:not(.items-center),
-            .flex.gap-4:not(.items-center) {
-                flex-direction: column !important;
-                gap: 0.75rem !important;
-            }
-            
-            .flex.space-x-2:not(.items-center) > *,
-            .flex.space-x-3:not(.items-center) > *,
-            .flex.space-x-4:not(.items-center) > *,
-            .flex.gap-2:not(.items-center) > *,
-            .flex.gap-3:not(.items-center) > *,
-            .flex.gap-4:not(.items-center) > * {
-                width: 100% !important;
-                margin: 0 !important;
-            }
-            
-            /* Preserve horizontal layout in sidebar (it's a wide slide-out drawer on mobile) */
-            .sidebar .flex.gap-2,
-            .sidebar .flex.gap-3,
-            .sidebar .flex.items-center {
-                flex-direction: row !important;
-            }
-            .sidebar .flex.gap-2 > *,
-            .sidebar .flex.gap-3 > * {
-                width: auto !important;
-            }
-            
+
             /* Improve heading sizes on mobile */
-            main h1 {
-                font-size: 1.75rem !important;
-                line-height: 1.2;
-                margin-bottom: 1rem;
-            }
-            
-            main h2 {
-                font-size: 1.5rem !important;
-                line-height: 1.3;
-                margin-bottom: 0.875rem;
-            }
-            
-            main h3 {
-                font-size: 1.25rem !important;
-                line-height: 1.4;
-                margin-bottom: 0.75rem;
-            }
-            
+            main h1 { font-size: 1.75rem !important; line-height: 1.2; margin-bottom: 1rem; }
+            main h2 { font-size: 1.5rem !important; line-height: 1.3; margin-bottom: 0.875rem; }
+            main h3 { font-size: 1.25rem !important; line-height: 1.4; margin-bottom: 0.75rem; }
+
             /* Better image scaling on mobile */
-            img:not([class*="w-"]) {
-                max-width: 100%;
-                height: auto;
-            }
-            
-            /* Ensure grids stack on mobile - for auto-responsive grids */
+            img:not([class*="w-"]) { max-width: 100%; height: auto; }
+
+            /* Ensure grids stack on mobile - use .grid-no-stack to opt out */
             .grid:not(.grid-no-stack):not(.grid-cols-1) {
                 grid-template-columns: 1fr !important;
                 gap: 1rem !important;
             }
-            
+
             /* Improved stat cards on mobile */
-            .stat-icon {
-                width: 48px !important;
-                height: 48px !important;
-                font-size: 1.25rem !important;
-            }
-            
+            .stat-icon { width: 48px !important; height: 48px !important; font-size: 1.25rem !important; }
+
             /* Better badge sizing */
-            .badge, [class*="badge"] {
-                padding: 0.375rem 0.75rem !important;
-                font-size: 0.8125rem !important;
-            }
-            
-            /* Improve sidebar navigation on mobile */
+            .badge, [class*="badge"] { padding: 0.375rem 0.75rem !important; font-size: 0.8125rem !important; }
+
+            /* Larger touch targets and better spacing for sidebar nav on mobile */
             .sidebar nav a {
                 padding: 0.875rem 1rem !important;
                 margin: 2px 8px !important;
                 font-size: 0.9375rem !important;
                 border-radius: 8px !important;
             }
-            
-            /* Better submenu styling on mobile */
             .submenu a {
                 padding-left: 2.25rem !important;
                 font-size: 0.875rem !important;
             }
         }
-        
+
         /* Tablet view improvements */
         @media (min-width: 768px) and (max-width: 1024px) {
-            main {
-                padding: 1.5rem !important;
-                padding-top: 1.5rem !important;
-            }
-            
-            .card {
-                padding: 1.5rem !important;
-            }
-            
-            /* 2-column grid on tablets - for auto-responsive grids */
+            main { padding: 1.5rem !important; }
+
+            /* 2-column grid on tablets */
             .grid:not(.grid-no-stack):not(.grid-cols-1) {
                 grid-template-columns: repeat(2, 1fr) !important;
             }
-            
-            /* Adjust sidebar width on tablets */
-            .sidebar {
-                width: 16rem !important;
-            }
-            
-            main h1 {
-                font-size: 2rem !important;
-            }
-            
-            main h2 {
-                font-size: 1.625rem !important;
-            }
+
+            main h1 { font-size: 2rem !important; }
+            main h2 { font-size: 1.625rem !important; }
         }
+
+        /* Desktop and larger */
         @media (min-width: 1025px) {
-            main {
-                padding: 2rem !important;
-            }
-            
-            .card {
-                padding: 2rem !important;
-            }
-            
-            /* Better spacing for large screens */
-            .container {
-                max-width: 1400px;
-                margin: 0 auto;
-            }
+            main { padding: 2rem !important; }
+            .container { max-width: 1400px; margin: 0 auto; }
         }
-        
+
         /* Extra large screens */
         @media (min-width: 1536px) {
-            main {
-                padding: 2.5rem !important;
-            }
-            
-            .card {
-                padding: 2.5rem !important;
-            }
-            
-            .container {
-                max-width: 1600px;
-            }
+            main { padding: 2.5rem !important; }
+            .container { max-width: 1600px; }
         }
-        
+
         /* Landscape mobile optimization */
         @media (max-height: 500px) and (orientation: landscape) and (max-width: 767px) {
-            /* Compact everything for landscape mobile */
-            .sidebar {
-                width: 14rem !important;
-            }
-            
-            .sidebar nav a {
-                padding: 0.5rem 1rem !important;
-                font-size: 0.875rem !important;
-            }
-            
-            main {
-                padding-top: 4rem !important;
-            }
+            .sidebar { width: 14rem !important; }
+            .sidebar nav a { padding: 0.5rem 1rem !important; font-size: 0.875rem !important; }
+            main { padding-top: 4rem !important; }
         }
-        
+
         /* High DPI displays */
         @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-            body {
-                -webkit-font-smoothing: antialiased;
-                -moz-osx-font-smoothing: grayscale;
-            }
-            
-            .card {
-                border-width: 0.5px;
-            }
+            body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+            .card { border-width: 0.5px; }
         }
-        
-        /* Touch device optimizations */
+
+        /* Touch device optimizations: larger targets, better tap feedback */
         @media (hover: none) and (pointer: coarse) {
-            /* Larger touch targets */
-            a, button, input[type="submit"], input[type="button"] {
-                min-height: 44px;
-                min-width: 44px;
-            }
-            
-            /* Better tap feedback */
-            a:active, button:active {
-                opacity: 0.7;
-                transform: scale(0.98);
-                transition: all 0.1s ease;
-            }
-            
-            /* Remove hover effects on touch devices */
-            .card:hover {
-                transform: translateY(-2px); /* Reduce hover effect */
-            }
+            a, button, input[type="submit"], input[type="button"] { min-height: 44px; min-width: 44px; }
+            a:active, button:active { opacity: 0.7; transform: scale(0.98); transition: all 0.1s ease; }
+            .card:hover { transform: translateY(-2px); }
         }
-        
+
         /* Ensure long text doesn't overflow */
-        .text-sm, .text-xs {
-            overflow-wrap: break-word;
-            word-break: break-word;
-        }
-        
-        /* Skip link accessibility styles */
+        .text-sm, .text-xs { overflow-wrap: break-word; word-break: break-word; }
+
+        /* Skip link accessibility */
         .skip-link {
             position: absolute;
             top: -40px;
@@ -550,10 +223,7 @@ if (Auth::check() && isset($_SESSION['profile_incomplete']) && $_SESSION['profil
             border-radius: 0 0 4px 0;
             font-weight: 600;
         }
-        
-        .skip-link:focus {
-            top: 0;
-        }
+        .skip-link:focus { top: 0; }
     </style>
 </head>
 <body class="bg-gray-50 text-slate-800 dark:bg-slate-900 dark:text-slate-200 overflow-x-hidden" data-user-theme="<?php echo htmlspecialchars($currentUser['theme_preference'] ?? 'auto'); ?>">
