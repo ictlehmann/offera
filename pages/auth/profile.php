@@ -1029,18 +1029,64 @@ ob_start();
         Benötigst du Hilfe oder möchtest etwas ändern? Hier geht's direkt zur richtigen Stelle.
     </p>
     <div class="flex flex-col sm:flex-row gap-3">
-        <a href="/einstellungen?support_action=email_name" class="btn-primary flex-1 flex items-center justify-center gap-2 no-underline">
+        <button type="button" onclick="showSupportModal('name_email_change')" class="btn-primary flex-1 flex items-center justify-center gap-2">
             <i class="fas fa-user-edit"></i>
             E-Mail/Name ändern
-        </a>
-        <a href="/einstellungen?support_action=reset_2fa" class="btn-primary flex-1 flex items-center justify-center gap-2 no-underline">
+        </button>
+        <button type="button" onclick="showSupportModal('2fa_reset')" class="btn-primary flex-1 flex items-center justify-center gap-2">
             <i class="fas fa-shield-alt"></i>
             2FA zurücksetzen
-        </a>
-        <a href="/einstellungen?support_action=bug" class="btn-primary flex-1 flex items-center justify-center gap-2 no-underline">
+        </button>
+        <button type="button" onclick="showSupportModal('bug')" class="btn-primary flex-1 flex items-center justify-center gap-2">
             <i class="fas fa-bug"></i>
             Bug melden
-        </a>
+        </button>
+    </div>
+</div>
+
+<!-- Support Modal -->
+<div id="supportModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-lg max-h-[85vh] flex flex-col overflow-hidden">
+        <div class="p-6 overflow-y-auto flex-1">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold dark:text-white">
+                    <i class="fas fa-headset text-blue-600 mr-2"></i>Änderungen &amp; Support
+                </h3>
+                <button type="button" onclick="hideSupportModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <form id="support-modal-form" method="POST" action="<?php echo asset('api/submit_support.php'); ?>" class="space-y-4">
+                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(CSRFHandler::getToken(), ENT_QUOTES, 'UTF-8'); ?>">
+                <div>
+                    <label for="support-modal-type" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Art der Anfrage</label>
+                    <select id="support-modal-type" name="request_type" required
+                            class="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">Bitte auswählen...</option>
+                        <option value="name_email_change">E-Mail/Name ändern</option>
+                        <option value="2fa_reset">2FA zurücksetzen</option>
+                        <option value="bug">Bug / Fehler</option>
+                        <option value="other">Sonstiges</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="support-modal-description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Beschreibung</label>
+                    <textarea id="support-modal-description" name="description" rows="4" required
+                              placeholder="Beschreibe dein Anliegen..."
+                              class="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-lg focus:ring-blue-500 focus:border-blue-500"></textarea>
+                </div>
+                <div id="support-modal-feedback" class="hidden"></div>
+                <div class="flex gap-3 justify-end">
+                    <button type="button" onclick="hideSupportModal()"
+                            class="px-6 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition">
+                        Abbrechen
+                    </button>
+                    <button type="submit" id="support-modal-submit-btn" class="btn-primary">
+                        <i class="fas fa-paper-plane mr-2"></i>Senden
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
@@ -1225,6 +1271,81 @@ document.addEventListener('DOMContentLoaded', function() {
         if (e.key === 'Escape' && !cropperModal.classList.contains('hidden')) {
             closeModal();
         }
+    });
+}());
+</script>
+
+<script>
+// Support Modal
+function showSupportModal(type) {
+    const modal = document.getElementById('supportModal');
+    if (!modal) return;
+    const select = document.getElementById('support-modal-type');
+    if (select && type) {
+        select.value = type;
+    }
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+function hideSupportModal() {
+    const modal = document.getElementById('supportModal');
+    if (!modal) return;
+    modal.classList.add('hidden');
+    document.body.style.overflow = '';
+    const form = document.getElementById('support-modal-form');
+    if (form) form.reset();
+    const feedback = document.getElementById('support-modal-feedback');
+    if (feedback) {
+        feedback.className = 'hidden';
+        feedback.textContent = '';
+    }
+}
+
+(function() {
+    const modal = document.getElementById('supportModal');
+    if (modal) {
+        modal.addEventListener('click', function(e) {
+            if (e.target === this) hideSupportModal();
+        });
+    }
+
+    const supportForm = document.getElementById('support-modal-form');
+    if (!supportForm) return;
+    supportForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const submitBtn = document.getElementById('support-modal-submit-btn');
+        const feedback = document.getElementById('support-modal-feedback');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Wird gesendet...';
+
+        fetch(this.action, { method: 'POST', body: new FormData(this) })
+            .then(function(r) {
+                if (!r.ok) { throw new Error('HTTP ' + r.status); }
+                return r.json();
+            })
+            .then(function(data) {
+                feedback.classList.remove('hidden');
+                if (data.success) {
+                    feedback.className = 'mt-2 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 text-green-700 dark:text-green-300 rounded-lg';
+                    feedback.textContent = data.message || 'Anfrage erfolgreich gesendet!';
+                    supportForm.reset();
+                    submitBtn.innerHTML = originalText;
+                } else {
+                    feedback.className = 'mt-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 text-red-700 dark:text-red-300 rounded-lg';
+                    feedback.textContent = data.message || 'Fehler beim Senden der Anfrage.';
+                    submitBtn.innerHTML = originalText;
+                }
+                submitBtn.disabled = false;
+            })
+            .catch(function() {
+                feedback.className = 'mt-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 text-red-700 dark:text-red-300 rounded-lg';
+                feedback.classList.remove('hidden');
+                feedback.textContent = 'Fehler beim Senden der Anfrage.';
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            });
     });
 }());
 </script>

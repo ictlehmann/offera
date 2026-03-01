@@ -427,7 +427,7 @@ ob_start();
                 Wende dich bei Fragen oder Problemen direkt an die IT-Ressortleitung
             </p>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <button type="button" onclick="showSupportForm('name_email_change')"
+                <button type="button" onclick="showSupportModal('name_email_change')"
                    class="flex items-center p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/40 transition text-left w-full">
                     <i class="fas fa-envelope text-blue-600 dark:text-blue-400 text-2xl mr-4 shrink-0"></i>
                     <div>
@@ -435,7 +435,7 @@ ob_start();
                         <span class="block text-sm text-gray-600 dark:text-gray-400">Anfrage per E-Mail senden</span>
                     </div>
                 </button>
-                <button type="button" onclick="showSupportForm('2fa_reset')"
+                <button type="button" onclick="showSupportModal('2fa_reset')"
                    class="flex items-center p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg hover:bg-yellow-100 dark:hover:bg-yellow-900/40 transition text-left w-full">
                     <i class="fas fa-shield-alt text-yellow-600 dark:text-yellow-400 text-2xl mr-4 shrink-0"></i>
                     <div>
@@ -443,7 +443,7 @@ ob_start();
                         <span class="block text-sm text-gray-600 dark:text-gray-400">Anfrage per E-Mail senden</span>
                     </div>
                 </button>
-                <button type="button" onclick="showSupportForm('bug')"
+                <button type="button" onclick="showSupportModal('bug')"
                    class="flex items-center p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/40 transition text-left w-full">
                     <i class="fas fa-bug text-red-600 dark:text-red-400 text-2xl mr-4 shrink-0"></i>
                     <div>
@@ -452,15 +452,29 @@ ob_start();
                     </div>
                 </button>
             </div>
+        </div>
+    </div>
 
-            <!-- Support Form (hidden by default) -->
-            <form id="support-form" class="hidden mt-6 pt-6 border-t border-gray-200 dark:border-gray-700 space-y-4"
-                  method="POST" action="<?php echo asset('api/submit_support.php'); ?>">
+</div>
+
+<!-- Support Modal -->
+<div id="supportModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-lg max-h-[85vh] flex flex-col overflow-hidden">
+        <div class="p-6 overflow-y-auto flex-1">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold dark:text-white">
+                    <i class="fas fa-headset text-blue-600 mr-2"></i>Änderungen &amp; Support
+                </h3>
+                <button type="button" onclick="hideSupportModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <form id="support-modal-form" method="POST" action="<?php echo asset('api/submit_support.php'); ?>" class="space-y-4">
                 <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(CSRFHandler::getToken(), ENT_QUOTES, 'UTF-8'); ?>">
                 <div>
-                    <label for="support-type" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Art der Anfrage</label>
-                    <select id="support-type" name="request_type" required
-                            class="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-lg focus:ring-blue-500 focus:border-blue-500">
+                    <label for="support-modal-type" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Art der Anfrage</label>
+                    <select id="support-modal-type" name="request_type" required
+                            class="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-lg focus:ring-blue-500 focus:border-blue-500">
                         <option value="">Bitte auswählen...</option>
                         <option value="name_email_change">E-Mail/Name ändern</option>
                         <option value="2fa_reset">2FA zurücksetzen</option>
@@ -469,25 +483,24 @@ ob_start();
                     </select>
                 </div>
                 <div>
-                    <label for="support-description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Beschreibung</label>
-                    <textarea id="support-description" name="description" rows="4" required
+                    <label for="support-modal-description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Beschreibung</label>
+                    <textarea id="support-modal-description" name="description" rows="4" required
                               placeholder="Beschreibe dein Anliegen..."
-                              class="w-full px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-lg focus:ring-blue-500 focus:border-blue-500"></textarea>
+                              class="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-lg focus:ring-blue-500 focus:border-blue-500"></textarea>
                 </div>
-                <div id="support-feedback" class="hidden"></div>
-                <div class="flex gap-3">
-                    <button type="button" onclick="hideSupportForm()"
+                <div id="support-modal-feedback" class="hidden"></div>
+                <div class="flex gap-3 justify-end">
+                    <button type="button" onclick="hideSupportModal()"
                             class="px-6 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition">
                         Abbrechen
                     </button>
-                    <button type="submit" id="support-submit-btn" class="btn-primary">
+                    <button type="submit" id="support-modal-submit-btn" class="btn-primary">
                         <i class="fas fa-paper-plane mr-2"></i>Senden
                     </button>
                 </div>
             </form>
         </div>
     </div>
-
 </div>
 
 <!-- QR Code Library -->
@@ -512,38 +525,45 @@ document.querySelectorAll('input[name="theme"]').forEach(radio => {
     });
 });
 
-// Show the inline support form with a pre-selected type
-function showSupportForm(type) {
-    const form = document.getElementById('support-form');
-    if (!form) return;
-    form.classList.remove('hidden');
-    const select = document.getElementById('support-type');
-    if (select) {
+// Show the support modal with a pre-selected type
+function showSupportModal(type) {
+    const modal = document.getElementById('supportModal');
+    if (!modal) return;
+    const select = document.getElementById('support-modal-type');
+    if (select && type) {
         select.value = type;
     }
-    form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
 }
 
-function hideSupportForm() {
-    const form = document.getElementById('support-form');
-    if (!form) return;
-    form.classList.add('hidden');
-    form.reset();
-    const feedback = document.getElementById('support-feedback');
+function hideSupportModal() {
+    const modal = document.getElementById('supportModal');
+    if (!modal) return;
+    modal.classList.add('hidden');
+    document.body.style.overflow = '';
+    const form = document.getElementById('support-modal-form');
+    if (form) form.reset();
+    const feedback = document.getElementById('support-modal-feedback');
     if (feedback) {
         feedback.className = 'hidden';
         feedback.textContent = '';
     }
 }
 
-// AJAX submission for the inline support form
+// Close modal on backdrop click
+document.getElementById('supportModal') && document.getElementById('supportModal').addEventListener('click', function(e) {
+    if (e.target === this) hideSupportModal();
+});
+
+// AJAX submission for the support modal form
 (function() {
-    const supportForm = document.getElementById('support-form');
+    const supportForm = document.getElementById('support-modal-form');
     if (!supportForm) return;
     supportForm.addEventListener('submit', function(e) {
         e.preventDefault();
-        const submitBtn = document.getElementById('support-submit-btn');
-        const feedback = document.getElementById('support-feedback');
+        const submitBtn = document.getElementById('support-modal-submit-btn');
+        const feedback = document.getElementById('support-modal-feedback');
         const originalText = submitBtn.innerHTML;
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Wird gesendet...';
