@@ -43,7 +43,10 @@ if ($routeAction === 'create') {
     $shippingMethod = in_array($input['shipping_method'] ?? '', ['pickup', 'mail'], true)
         ? $input['shipping_method']
         : 'pickup';
-    $shippingCost    = ($shippingMethod === 'mail') ? 4.90 : 0.00;
+    $shippingCountry = strtoupper(trim($input['shipping_country'] ?? 'DE'));
+    if (!preg_match('/^[A-Z]{2}$/', $shippingCountry)) {
+        $shippingCountry = 'DE';
+    }
     $shippingAddress = trim($input['shipping_address'] ?? '');
 
     if ($shippingMethod === 'mail' && $shippingAddress === '') {
@@ -67,6 +70,9 @@ if ($routeAction === 'create') {
             exit;
         }
 
+        $itemsTotal  = array_sum(array_map(fn($i) => $i['price'] * $i['quantity'], $cart));
+        $shippingCost = ($shippingMethod === 'mail') ? Shop::calculateShippingCost($shippingCountry, $itemsTotal) : 0.00;
+
         $orderId = Shop::createOrder($userId, $cart, 'paypal', $shippingMethod, $shippingCost, $shippingAddress);
         if (!$orderId) {
             http_response_code(500);
@@ -76,7 +82,7 @@ if ($routeAction === 'create') {
 
         Shop::decrementStock($orderId);
 
-        $total = array_sum(array_map(fn($i) => $i['price'] * $i['quantity'], $cart)) + $shippingCost;
+        $total = $itemsTotal + $shippingCost;
 
         // Send order notification e-mail to merch team (non-blocking)
         try {
@@ -206,7 +212,10 @@ $shippingMethod = in_array($input['shipping_method'] ?? '', ['pickup', 'mail'], 
     ? $input['shipping_method']
     : 'pickup';
 
-$shippingCost = ($shippingMethod === 'mail') ? 4.90 : 0.00;
+$shippingCountry = strtoupper(trim($input['shipping_country'] ?? 'DE'));
+if (!preg_match('/^[A-Z]{2}$/', $shippingCountry)) {
+    $shippingCountry = 'DE';
+}
 // Always use server-side shipping cost to prevent client manipulation
 
 $shippingAddress = trim($input['shipping_address'] ?? '');
@@ -234,6 +243,9 @@ try {
         exit;
     }
 
+    $itemsTotal  = array_sum(array_map(fn($i) => $i['price'] * $i['quantity'], $cart));
+    $shippingCost = ($shippingMethod === 'mail') ? Shop::calculateShippingCost($shippingCountry, $itemsTotal) : 0.00;
+
     // 5. Create order in shop_orders
     $orderId = Shop::createOrder($userId, $cart, $paymentMethod, $shippingMethod, $shippingCost, $shippingAddress);
     if (!$orderId) {
@@ -245,7 +257,7 @@ try {
     // 5a. Immediately decrement stock after order is created
     Shop::decrementStock($orderId);
 
-    $total = array_sum(array_map(fn($i) => $i['price'] * $i['quantity'], $cart)) + $shippingCost;
+    $total = $itemsTotal + $shippingCost;
 
     // 5b. Send order notification e-mail to merch team (non-blocking)
     try {

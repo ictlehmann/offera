@@ -136,7 +136,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($postAction === 'checkout') {
         $paymentMethod = in_array($_POST['payment_method'] ?? '', ['paypal', 'bank_transfer']) ? $_POST['payment_method'] : 'paypal';
         $shippingMethod  = in_array($_POST['shipping_method'] ?? '', ['pickup', 'mail']) ? $_POST['shipping_method'] : 'pickup';
-        $shippingCost    = ($shippingMethod === 'mail') ? 7.99 : 0.00;
+        $shippingCountry = strtoupper(trim($_POST['shipping_country'] ?? 'DE'));
+        if (!preg_match('/^[A-Z]{2}$/', $shippingCountry)) {
+            $shippingCountry = 'DE';
+        }
+        $shippingCost    = ($shippingMethod === 'mail') ? Shop::calculateShippingCost($shippingCountry, cartTotal()) : 0.00;
         $shippingAddress = trim($_POST['shipping_address'] ?? '');
 
         if ($shippingMethod === 'mail' && $shippingAddress === '') {
@@ -872,6 +876,42 @@ ob_start();
 
                     <!-- Shipping address (shown when mail is selected) -->
                     <div id="shipping-address-field" class="hidden mb-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+                        <div class="mb-4">
+                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1" for="shipping-country-select">
+                                Versandland <span class="text-red-500">*</span>
+                            </label>
+                            <select name="shipping_country" id="shipping-country-select"
+                                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-shadow">
+                                <option value="DE" selected>Deutschland</option>
+                                <option value="AT">Österreich</option>
+                                <option value="CH">Schweiz</option>
+                                <option value="BE">Belgien</option>
+                                <option value="BG">Bulgarien</option>
+                                <option value="CY">Zypern</option>
+                                <option value="CZ">Tschechien</option>
+                                <option value="DK">Dänemark</option>
+                                <option value="EE">Estland</option>
+                                <option value="ES">Spanien</option>
+                                <option value="FI">Finnland</option>
+                                <option value="FR">Frankreich</option>
+                                <option value="GR">Griechenland</option>
+                                <option value="HR">Kroatien</option>
+                                <option value="HU">Ungarn</option>
+                                <option value="IE">Irland</option>
+                                <option value="IT">Italien</option>
+                                <option value="LT">Litauen</option>
+                                <option value="LU">Luxemburg</option>
+                                <option value="LV">Lettland</option>
+                                <option value="MT">Malta</option>
+                                <option value="NL">Niederlande</option>
+                                <option value="PL">Polen</option>
+                                <option value="PT">Portugal</option>
+                                <option value="RO">Rumänien</option>
+                                <option value="SE">Schweden</option>
+                                <option value="SI">Slowenien</option>
+                                <option value="SK">Slowakei</option>
+                            </select>
+                        </div>
                         <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
                             Lieferadresse <span class="text-red-500">*</span>
                         </label>
@@ -1090,9 +1130,10 @@ document.addEventListener('DOMContentLoaded', function() {
 // ── Checkout: shipping method toggle + live total ────────────────────────────
 document.addEventListener('DOMContentLoaded', function() {
     var CART_TOTAL = <?php echo json_encode((float) $cartTotalAmt); ?>;
-    var SHIPPING_COST_MAIL = 7.99;
+    var GET_SHIPPING_COST_URL = <?php echo json_encode(asset('api/shop/get_shipping_cost.php')); ?>;
 
     var shippingRadios  = document.querySelectorAll('input[name="shipping_method"]');
+    var countrySelect   = document.getElementById('shipping-country-select');
     var addressField    = document.getElementById('shipping-address-field');
     var addressInput    = document.getElementById('shipping-address-input');
     var summaryShipping = document.getElementById('summary-shipping-cost');
@@ -1104,24 +1145,54 @@ document.addEventListener('DOMContentLoaded', function() {
         return val.toFixed(2).replace('.', ',');
     }
 
-    function updateTotals() {
-        var selected = document.querySelector('input[name="shipping_method"]:checked');
-        var isMail = selected && selected.value === 'mail';
-        var shippingCost = isMail ? SHIPPING_COST_MAIL : 0;
-        var grandTotal   = CART_TOTAL + shippingCost;
-
+    function applyShippingCost(shippingCost) {
+        var grandTotal = CART_TOTAL + shippingCost;
         if (summaryShipping) summaryShipping.textContent = formatMoney(shippingCost) + ' €';
         if (summaryTotal)    summaryTotal.textContent    = formatMoney(grandTotal);
         if (checkoutDisplay) checkoutDisplay.textContent = formatMoney(grandTotal);
+    }
+
+    function fetchShippingCost() {
+        var country = countrySelect ? countrySelect.value : 'DE';
+        var url = GET_SHIPPING_COST_URL + '?country=' + encodeURIComponent(country) + '&cart_total=' + encodeURIComponent(CART_TOTAL);
+        fetch(url)
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                if (data.success) {
+                    applyShippingCost(data.shipping_cost);
+                }
+            })
+            .catch(function() {
+                console.warn('Versandkosten konnten nicht abgerufen werden.');
+            });
+    }
+
+    function updateTotals() {
+        var selected = document.querySelector('input[name="shipping_method"]:checked');
+        var isMail = selected && selected.value === 'mail';
+
         if (deliveryMethodField) deliveryMethodField.value = selected ? selected.value : 'pickup';
 
         if (addressField) {
             addressField.classList.toggle('hidden', !isMail);
             if (addressInput) addressInput.required = isMail;
+            if (countrySelect) countrySelect.required = isMail;
+        }
+
+        if (isMail) {
+            fetchShippingCost();
+        } else {
+            applyShippingCost(0);
         }
     }
 
     shippingRadios.forEach(function(r) { r.addEventListener('change', updateTotals); });
+    if (countrySelect) { countrySelect.addEventListener('change', function() {
+        var selected = document.querySelector('input[name="shipping_method"]:checked');
+        if (selected && selected.value === 'mail') {
+            fetchShippingCost();
+        }
+    }); }
     updateTotals();
 
     // Show/hide submit button vs PayPal button based on payment method
@@ -1187,6 +1258,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     body: JSON.stringify({
                         payment_method:   'paypal',
                         shipping_method:  shippingMethodEl  ? shippingMethodEl.value  : 'pickup',
+                        shipping_country: (document.getElementById('shipping-country-select') || {value: 'DE'}).value,
                         shipping_address: shippingAddressEl ? shippingAddressEl.value : ''
                     })
                 })
