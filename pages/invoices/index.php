@@ -207,8 +207,12 @@ ob_start();
             <?php
             $openStatusLabelMap = ['pending' => 'In Prüfung', 'approved' => 'Genehmigt'];
             $openBadgeClassMap  = [
-                'pending'  => 'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-300 border-yellow-300 dark:border-yellow-600',
-                'approved' => 'bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300 border-blue-300 dark:border-blue-600',
+                'pending'  => 'bg-yellow-50 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 ring-1 ring-inset ring-yellow-600/20 dark:ring-yellow-500/30',
+                'approved' => 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 ring-1 ring-inset ring-blue-700/10 dark:ring-blue-500/30',
+            ];
+            $openDotClassMap = [
+                'pending'  => 'bg-yellow-500',
+                'approved' => 'bg-blue-500',
             ];
             $openDescMaxLen = 45;
             foreach (array_slice($openInvoices, 0, 6) as $openInv):
@@ -216,7 +220,7 @@ ob_start();
                 $oName     = explode('@', $oEmail)[0];
                 $oInitials = strtoupper(substr($oName, 0, 2));
                 $oLabel    = $openStatusLabelMap[$openInv['status']] ?? ucfirst($openInv['status']);
-                $oBadge    = $openBadgeClassMap[$openInv['status']] ?? 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600';
+                $oBadge    = $openBadgeClassMap[$openInv['status']] ?? 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 ring-1 ring-inset ring-gray-500/10';
                 $oDesc     = mb_strlen($openInv['description']) > $openDescMaxLen
                     ? mb_substr($openInv['description'], 0, $openDescMaxLen) . '…'
                     : $openInv['description'];
@@ -232,7 +236,10 @@ ob_start();
                 </div>
                 <div class="text-right flex-shrink-0">
                     <p class="text-sm font-bold text-gray-800 dark:text-gray-100"><?php echo number_format($openInv['amount'], 2, ',', '.'); ?> €</p>
-                    <span class="inline-flex items-center px-2 py-0.5 text-xs font-semibold rounded-full border <?php echo $oBadge; ?>"><?php echo $oLabel; ?></span>
+                    <span class="inline-flex items-center gap-x-1 px-2 py-0.5 text-xs font-medium rounded-full <?php echo $oBadge; ?>">
+                        <span class="w-1.5 h-1.5 rounded-full flex-shrink-0 <?php echo $openDotClassMap[$openInv['status']] ?? 'bg-gray-400'; ?>"></span>
+                        <?php echo $oLabel; ?>
+                    </span>
                 </div>
             </div>
             <?php endforeach; ?>
@@ -306,18 +313,18 @@ ob_start();
                 <?php
                 // Status configuration (dots + colors + labels)
                 $statusColors = [
-                    'pending'  => 'bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-700',
-                    'approved' => 'bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300 border-blue-300 dark:border-blue-700',
-                    'rejected' => 'bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-300 border-red-300 dark:border-red-700',
-                    'paid'     => 'bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-300 border-green-300 dark:border-green-700',
-                    'overdue'  => 'bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-300 border-red-300 dark:border-red-700',
+                    'pending'  => 'bg-yellow-50 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 ring-1 ring-inset ring-yellow-600/20 dark:ring-yellow-500/30',
+                    'approved' => 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 ring-1 ring-inset ring-blue-700/10 dark:ring-blue-500/30',
+                    'rejected' => 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 ring-1 ring-inset ring-red-600/10 dark:ring-red-500/30',
+                    'paid'     => 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 ring-1 ring-inset ring-green-600/20 dark:ring-green-500/30',
+                    'overdue'  => 'bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 ring-1 ring-inset ring-orange-600/20 dark:ring-orange-500/30',
                 ];
-                $statusIcons = [
-                    'pending'  => '<i class="fas fa-clock mr-1.5"></i>',
-                    'approved' => '<i class="fas fa-thumbs-up mr-1.5"></i>',
-                    'rejected' => '<i class="fas fa-times-circle mr-1.5"></i>',
-                    'paid'     => '<i class="fas fa-check-circle mr-1.5"></i>',
-                    'overdue'  => '<i class="fas fa-exclamation-triangle mr-1.5"></i>',
+                $statusDots = [
+                    'pending'  => 'bg-yellow-500 dark:bg-yellow-400',
+                    'approved' => 'bg-blue-500 dark:bg-blue-400',
+                    'rejected' => 'bg-red-500 dark:bg-red-400',
+                    'paid'     => 'bg-green-500 dark:bg-green-400',
+                    'overdue'  => 'bg-orange-500 dark:bg-orange-400',
                 ];
                 $statusLabels = [
                     'pending'  => 'In Prüfung',
@@ -336,8 +343,8 @@ ob_start();
                         $submitterName  = explode('@', $submitterEmail)[0];
                         $initials       = strtoupper(substr($submitterName, 0, 2));
                         $displayStatus  = $invoice['_display_status'];
-                        $statusClass    = $statusColors[$displayStatus] ?? 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 border-gray-300 dark:border-gray-600';
-                        $statusIcon     = $statusIcons[$displayStatus] ?? '';
+                        $statusClass    = $statusColors[$displayStatus] ?? 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 ring-1 ring-inset ring-gray-500/10';
+                        $statusDot      = $statusDots[$displayStatus] ?? 'bg-gray-400';
                         $statusLabel    = $statusLabels[$displayStatus] ?? ucfirst($displayStatus);
 
                         $paidAt      = !empty($invoice['paid_at']) ? date('d.m.Y', strtotime($invoice['paid_at'])) : '';
@@ -374,8 +381,9 @@ ob_start();
                                         <p class="text-xs text-gray-500 dark:text-gray-400"><?php echo date('d.m.Y', strtotime($invoice['created_at'])); ?></p>
                                     </div>
                                 </div>
-                                <span class="inline-flex items-center px-2.5 py-1 text-xs font-semibold rounded-full border <?php echo $statusClass; ?>">
-                                    <?php echo $statusIcon . htmlspecialchars($statusLabel); ?>
+                                <span class="inline-flex items-center gap-x-1.5 px-2.5 py-1 text-xs font-medium rounded-full <?php echo $statusClass; ?>">
+                                    <span class="w-1.5 h-1.5 rounded-full flex-shrink-0 <?php echo $statusDot; ?>"></span>
+                                    <?php echo htmlspecialchars($statusLabel); ?>
                                 </span>
                             </div>
                             <p class="text-sm text-gray-700 dark:text-gray-300 mb-3 line-clamp-2"><?php echo htmlspecialchars($invoice['description']); ?></p>
@@ -446,8 +454,8 @@ ob_start();
                             $submitterName  = explode('@', $submitterEmail)[0];
                             $initials       = strtoupper(substr($submitterName, 0, 2));
                             $displayStatus  = $invoice['_display_status'];
-                            $statusClass    = $statusColors[$displayStatus] ?? 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 border-gray-300 dark:border-gray-600';
-                            $statusIcon     = $statusIcons[$displayStatus] ?? '';
+                            $statusClass    = $statusColors[$displayStatus] ?? 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300 ring-1 ring-inset ring-gray-500/10';
+                            $statusDot      = $statusDots[$displayStatus] ?? 'bg-gray-400';
                             $statusLabel    = $statusLabels[$displayStatus] ?? ucfirst($displayStatus);
 
                             $paidAt     = !empty($invoice['paid_at']) ? date('d.m.Y', strtotime($invoice['paid_at'])) : '';
@@ -513,8 +521,9 @@ ob_start();
                                     <?php endif; ?>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="inline-flex items-center px-3 py-1.5 text-xs font-semibold rounded-full border <?php echo $statusClass; ?>">
-                                        <?php echo $statusIcon . htmlspecialchars($statusLabel); ?>
+                                    <span class="inline-flex items-center gap-x-1.5 px-2.5 py-1 text-xs font-medium rounded-full <?php echo $statusClass; ?>">
+                                        <span class="w-1.5 h-1.5 rounded-full flex-shrink-0 <?php echo $statusDot; ?>"></span>
+                                        <?php echo htmlspecialchars($statusLabel); ?>
                                     </span>
                                 </td>
                                 <?php if (Auth::isBoard()): ?>
@@ -824,23 +833,24 @@ function openInvoiceDetail(data) {
     // Status badge
     const badge = document.getElementById('detail-status-badge');
     const statusClasses = {
-        pending:  'bg-amber-100 text-amber-800 border-amber-300',
-        approved: 'bg-blue-100 text-blue-800 border-blue-300',
-        rejected: 'bg-red-100 text-red-800 border-red-300',
-        paid:     'bg-green-100 text-green-800 border-green-300',
-        overdue:  'bg-red-100 text-red-800 border-red-300',
+        pending:  'bg-yellow-50 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 ring-1 ring-inset ring-yellow-600/20 dark:ring-yellow-500/30',
+        approved: 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 ring-1 ring-inset ring-blue-700/10 dark:ring-blue-500/30',
+        rejected: 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 ring-1 ring-inset ring-red-600/10 dark:ring-red-500/30',
+        paid:     'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 ring-1 ring-inset ring-green-600/20 dark:ring-green-500/30',
+        overdue:  'bg-orange-50 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 ring-1 ring-inset ring-orange-600/20 dark:ring-orange-500/30',
     };
-    const statusIcons = {
-        pending:  '<i class="fas fa-clock mr-1.5"></i>',
-        approved: '<i class="fas fa-thumbs-up mr-1.5"></i>',
-        rejected: '<i class="fas fa-times-circle mr-1.5"></i>',
-        paid:     '<i class="fas fa-check-circle mr-1.5"></i>',
-        overdue:  '<i class="fas fa-exclamation-triangle mr-1.5"></i>',
+    const statusDotColors = {
+        pending:  'bg-yellow-500',
+        approved: 'bg-blue-500',
+        rejected: 'bg-red-500',
+        paid:     'bg-green-500',
+        overdue:  'bg-orange-500',
     };
     const ds = data.displayStatus || data.status;
-    badge.className = 'inline-flex items-center px-3 py-1.5 text-sm font-semibold rounded-full border ' +
-        (statusClasses[ds] || 'bg-gray-100 text-gray-800 border-gray-300');
-    badge.innerHTML = (statusIcons[ds] || '') + data.statusLabel;
+    badge.className = 'inline-flex items-center gap-x-1.5 px-3 py-1 text-sm font-medium rounded-full ' +
+        (statusClasses[ds] || 'bg-gray-100 text-gray-600 ring-1 ring-inset ring-gray-500/10');
+    const dotColor = statusDotColors[ds] || 'bg-gray-400';
+    badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full flex-shrink-0 ${dotColor}"></span>${data.statusLabel}`;
 
     // Paid info
     const paidRow = document.getElementById('detail-paid-row');
