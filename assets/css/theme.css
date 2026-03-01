@@ -3330,38 +3330,168 @@ body.dark-mode .sidebar {
 
 /* Print Styles */
 @media print {
-    /* Hide navigation and interactive elements */
+    /* ── Page setup: DIN A4 ── */
+    @page {
+        size: A4 portrait;
+        margin: 15mm 15mm 20mm;
+    }
+
+    /* ── Hide all navigation and UI chrome ── */
     .sidebar,
     .mobile-topbar,
     .sidebar-overlay,
-    #mobile-menu-btn,
     #sidebar-overlay,
+    #mobile-menu-btn,
+    .skip-link,
     button,
-    nav {
+    nav,
+    /* Invoice page: filter tabs, export button, open-invoices banner,
+       stat/summary cards, action columns, modals */
+    .no-print,
+    .filter-tab,
+    #invoiceDetailModal,
+    #rejectModal,
+    #submissionModal,
+    .invoice-actions-col {
         display: none !important;
     }
-    
-    /* Optimize content for print */
+
+    /* ── Reset body & layout ── */
     body {
-        background: white !important;
-        color: black !important;
+        background: #ffffff !important;
+        color: #111827 !important;
+        font-family: 'Inter', Arial, sans-serif !important;
+        font-size: 10pt !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
     }
-    
-    .card {
-        break-inside: avoid;
-        border: 1px solid #000;
-        box-shadow: none;
-    }
-    
+
+    /* ── Full-width main content (remove sidebar offset) ── */
     main {
+        margin-left: 0 !important;
         padding: 0 !important;
-        margin: 0 !important;
+        min-height: unset !important;
     }
-    
-    /* Show links as text */
+
+    /* ── Print header: logo + organisation name ── */
+    .invoice-print-header {
+        display: flex !important;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 2px solid #0066b3;
+        padding-bottom: 10mm;
+        margin-bottom: 8mm;
+    }
+
+    .invoice-print-header img {
+        height: 16mm;
+        width: auto;
+    }
+
+    .invoice-print-header-meta {
+        text-align: right;
+        font-size: 9pt;
+        color: #4b5563;
+        line-height: 1.5;
+    }
+
+    /* ── Headings ── */
+    .invoice-print-title {
+        display: block !important;
+        font-size: 16pt !important;
+        font-weight: 700 !important;
+        color: #0066b3 !important;
+        margin-bottom: 6mm !important;
+    }
+
+    /* ── Remove max-width constraint so table uses full page width ── */
+    .max-w-7xl {
+        max-width: 100% !important;
+        padding: 0 !important;
+    }
+
+    /* ── Table: show desktop table, hide mobile cards ── */
+    .md\:hidden {
+        display: none !important;
+    }
+
+    table {
+        display: table !important;
+        width: 100% !important;
+        border-collapse: collapse !important;
+        font-size: 9pt !important;
+        page-break-inside: auto;
+    }
+
+    thead {
+        display: table-header-group !important;
+    }
+
+    tr {
+        page-break-inside: avoid;
+        page-break-after: auto;
+    }
+
+    th {
+        background: #f3f4f6 !important;
+        color: #374151 !important;
+        font-weight: 600 !important;
+        padding: 6px 10px !important;
+        border: 1px solid #d1d5db !important;
+        text-align: left !important;
+        font-size: 8pt !important;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    td {
+        padding: 6px 10px !important;
+        border: 1px solid #e5e7eb !important;
+        color: #111827 !important;
+        vertical-align: middle !important;
+    }
+
+    /* Zebra striping for readability */
+    tbody tr:nth-child(even) td {
+        background: #f9fafb !important;
+    }
+
+    /* ── Status badges: keep colours in print ── */
+    .rounded-full {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        border: 1px solid currentColor;
+    }
+
+    /* ── Hide receipt/action links in table cells ── */
+    td a,
+    td [onclick] {
+        display: none !important;
+    }
+
+    /* ── Container / card resets ── */
+    .card,
+    .bg-white,
+    .dark\:bg-gray-900 {
+        background: #ffffff !important;
+        box-shadow: none !important;
+        border: none !important;
+    }
+
+    /* ── Do not append URLs after links ── */
     a::after {
-        content: " (" attr(href) ")";
-        font-size: 0.8em;
+        content: none !important;
+    }
+
+    /* ── Footer / pagination line ── */
+    .invoice-print-footer {
+        display: block !important;
+        margin-top: 8mm;
+        font-size: 8pt;
+        color: #6b7280;
+        text-align: center;
+        border-top: 1px solid #e5e7eb;
+        padding-top: 4mm;
     }
 }
 
