@@ -196,6 +196,18 @@ ob_start();
                                 </span>
                             </div>
                         <?php endif; ?>
+
+                        <!-- Date stamp chip -->
+                        <?php
+                            $germanMonths = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+                            $monthAbbr = $germanMonths[date('n', $startTimestamp) - 1];
+                        ?>
+                        <div class="absolute bottom-3 right-3">
+                            <div class="event-date-chip">
+                                <span class="event-date-chip-month"><?php echo $monthAbbr; ?></span>
+                                <span class="event-date-chip-day"><?php echo date('d', $startTimestamp); ?></span>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Card Body -->
@@ -269,9 +281,44 @@ ob_start();
         box-shadow: var(--shadow-card-hover);
     }
     .event-card-image {
-        height: 200px;
+        height: 240px;
         background: #e5e7eb;
         flex-shrink: 0;
+    }
+    .event-date-chip {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255,255,255,0.92);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border-radius: 0.75rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+        padding: 0.35rem 0.65rem;
+        min-width: 44px;
+        text-align: center;
+        line-height: 1;
+    }
+    .dark-mode .event-date-chip {
+        background: rgba(26,31,46,0.92);
+    }
+    .event-date-chip-month {
+        font-size: 0.65rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--ibc-blue);
+        line-height: 1;
+    }
+    .event-date-chip-day {
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: #111827;
+        line-height: 1.1;
+    }
+    .dark-mode .event-date-chip-day {
+        color: #f8fafc;
     }
     .event-meta-icon {
         width: 1.25rem;
