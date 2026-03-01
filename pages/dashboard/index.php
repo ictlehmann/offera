@@ -135,12 +135,6 @@ try {
     error_log("Dashboard: needs_helpers column not found in events table. Run update_database_schema.php to add it.");
 }
 
-// Security Audit - nur für Board/Head
-$securityWarning = '';
-if (Auth::isBoard() || Auth::hasRole('head')) {
-    require_once __DIR__ . '/../../security_audit.php';
-    $securityWarning = SecurityAudit::getDashboardWarning(__DIR__ . '/../..');
-}
 
 $title = 'Dashboard - IBC Intranet';
 ob_start();
@@ -222,10 +216,6 @@ function dismissProfileReviewPrompt() {
     });
 }
 </script>
-<?php endif; ?>
-
-<?php if (!empty($securityWarning)): ?>
-<?php echo $securityWarning; ?>
 <?php endif; ?>
 
 <!-- Hero Section with Personalized Greeting -->
