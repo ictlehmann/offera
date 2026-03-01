@@ -352,9 +352,9 @@ ob_start();
                 Anfragen werden mit Status <strong>Ausstehend</strong> gespeichert und vom Vorstand geprüft.
             </p>
         </div>
-        <!-- Submit (full-width) -->
+        <!-- Submit (full-width, large CTA) -->
         <button type="button" id="cartSubmitBtn" onclick="submitCartRequests()"
-                class="w-full py-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-2xl font-extrabold text-lg transition-all shadow-xl hover:shadow-2xl transform hover:scale-[1.02] flex items-center justify-center gap-3">
+                class="w-full py-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 disabled:from-gray-400 disabled:to-gray-400 disabled:cursor-not-allowed text-white rounded-2xl font-extrabold text-lg transition-all shadow-xl hover:shadow-2xl transform hover:scale-[1.02] disabled:scale-100 disabled:shadow-none flex items-center justify-center gap-3">
             <i class="fas fa-paper-plane text-xl"></i>
             <span id="cartSubmitLabel">Anfrage senden</span>
         </button>
@@ -376,9 +376,32 @@ ob_start();
     100% { transform: scale(1); }
 }
 .cart-pop { animation: cart-pop 0.3s ease; }
+/* Badge pop when item is added */
+@keyframes badge-pop {
+    0%   { transform: scale(1); }
+    30%  { transform: scale(1.55); }
+    65%  { transform: scale(0.88); }
+    100% { transform: scale(1); }
+}
+.badge-pop { animation: badge-pop 0.38s cubic-bezier(0.36,0.07,0.19,0.97); }
+/* Pulsing glow on submit button */
+@keyframes submit-glow {
+    0%, 100% { box-shadow: 0 6px 24px rgba(124,58,237,0.25), 0 2px 6px rgba(37,99,235,0.15); }
+    50%       { box-shadow: 0 10px 36px rgba(124,58,237,0.45), 0 3px 14px rgba(37,99,235,0.3); }
+}
+#cartSubmitBtn:not([disabled]) { animation: submit-glow 3s ease-in-out infinite; }
+/* Cart item slide-in + hover highlight */
+@keyframes cart-slide-in {
+    from { opacity: 0; transform: translateX(10px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+.cart-item-card { animation: cart-slide-in 0.2s ease both; }
+.cart-item-card:hover { background: #f5f3ff !important; }
+.dark .cart-item-card:hover { background: rgba(109,40,217,0.12) !important; }
 @media (prefers-reduced-motion: reduce) {
-    .cart-pop { animation: none; }
+    .cart-pop, .badge-pop, .cart-item-card { animation: none; }
     #cartPanel { transition: none !important; }
+    #cartSubmitBtn { animation: none !important; }
 }
 </style>
 
@@ -485,29 +508,29 @@ ob_start();
                 ? '<img src="' + escHtml(safeSrc) + '" alt="' + escHtml(item.name) + '" '
                   + 'class="w-full h-full object-contain" loading="lazy">'
                 : '<span class="flex w-full h-full items-center justify-center">'
-                  + '<i class="fas fa-box-open text-gray-300 dark:text-gray-600 text-2xl"></i></span>';
+                  + '<i class="fas fa-box-open text-gray-300 dark:text-gray-600 text-base"></i></span>';
 
-            return '<div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 shadow-sm overflow-hidden">'
-                + '<div class="flex items-start gap-3 p-4">'
-                // Thumbnail with quantity badge overlay
+            return '<div class="cart-item-card bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 shadow-sm overflow-hidden">'
+                + '<div class="flex items-center gap-3 px-3 py-3">'
+                // Tiny thumbnail with quantity badge overlay
                 + '<div class="relative flex-shrink-0">'
-                + '<div class="w-20 h-20 rounded-xl overflow-hidden bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/30 dark:to-blue-900/30 border border-gray-100 dark:border-slate-600 flex items-center justify-center">'
+                + '<div class="w-12 h-12 rounded-xl overflow-hidden bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/30 dark:to-blue-900/30 border border-purple-100 dark:border-purple-800/50 flex items-center justify-center shadow-sm">'
                 + thumbInner + '</div>'
-                + '<span class="absolute -top-1.5 -right-1.5 min-w-[1.5rem] h-[1.5rem] bg-blue-600 text-white text-xs font-extrabold rounded-full flex items-center justify-center px-1 shadow-md ring-2 ring-white dark:ring-slate-800">'
+                + '<span class="absolute -top-2 -right-2 min-w-[1.35rem] h-[1.35rem] bg-gradient-to-br from-purple-600 to-blue-500 text-white text-[10px] font-extrabold rounded-full flex items-center justify-center px-1 shadow ring-2 ring-white dark:ring-slate-800">'
                 + item.quantity + '</span>'
                 + '</div>'
                 // Info + quantity stepper
                 + '<div class="flex-1 min-w-0">'
-                + '<p class="font-bold text-slate-900 dark:text-white text-sm leading-snug mb-3" title="' + escHtml(item.name) + '">' + escHtml(item.name) + '</p>'
-                + '<div class="flex items-center gap-2">'
+                + '<p class="font-semibold text-slate-900 dark:text-white text-sm leading-snug mb-2 truncate" title="' + escHtml(item.name) + '">' + escHtml(item.name) + '</p>'
+                + '<div class="flex items-center gap-1.5">'
                 + '<button data-action="dec" data-id="' + escHtml(item.id) + '" '
-                + 'class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-slate-700 hover:bg-purple-100 dark:hover:bg-purple-900/50 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-colors">'
-                + '<i class="fas fa-minus text-xs"></i></button>'
-                + '<span class="min-w-[2.5rem] text-center text-sm font-extrabold text-slate-900 dark:text-white bg-gray-50 dark:bg-slate-700 rounded-lg py-1 px-2 border border-gray-200 dark:border-slate-600">' + item.quantity + '</span>'
+                + 'class="w-7 h-7 rounded-lg bg-gray-100 dark:bg-slate-700 hover:bg-purple-100 dark:hover:bg-purple-900/50 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-colors">'
+                + '<i class="fas fa-minus text-[10px]"></i></button>'
+                + '<span class="min-w-[2rem] text-center text-sm font-extrabold text-slate-900 dark:text-white bg-gray-50 dark:bg-slate-700 rounded-lg py-0.5 px-1.5 border border-gray-200 dark:border-slate-600">' + item.quantity + '</span>'
                 + '<button data-action="inc" data-id="' + escHtml(item.id) + '" '
-                + 'class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-slate-700 hover:bg-purple-100 dark:hover:bg-purple-900/50 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-colors">'
-                + '<i class="fas fa-plus text-xs"></i></button>'
-                + '<span class="text-xs text-slate-400 dark:text-slate-500">/ ' + escHtml(String(item.pieces)) + '</span>'
+                + 'class="w-7 h-7 rounded-lg bg-gray-100 dark:bg-slate-700 hover:bg-purple-100 dark:hover:bg-purple-900/50 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-colors">'
+                + '<i class="fas fa-plus text-[10px]"></i></button>'
+                + '<span class="text-[11px] text-slate-400 dark:text-slate-500">von ' + escHtml(String(item.pieces)) + '</span>'
                 + '</div>'
                 + '</div>'
                 // Remove button
@@ -545,11 +568,17 @@ ob_start();
     }
 
     function animateBadge() {
-        var btn = document.getElementById('cartFloatingBtn');
+        var btn   = document.getElementById('cartFloatingBtn');
+        var badge = document.getElementById('cartBadge');
         if (!btn) return;
         btn.classList.remove('cart-pop');
         btn.offsetWidth; // reflow to restart animation
         btn.classList.add('cart-pop');
+        if (badge) {
+            badge.classList.remove('badge-pop');
+            badge.offsetWidth;
+            badge.classList.add('badge-pop');
+        }
     }
 
     function isSafeImageSrc(src) {
