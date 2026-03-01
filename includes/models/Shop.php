@@ -26,10 +26,10 @@ class Shop {
      */
     public static function getActiveProducts(): array {
         try {
-            $db = Database::getContentDB();
+            $db = Database::getShopDB();
             $stmt = $db->query("
-                SELECT id, name, description, base_price, image_path, is_bulk_order, bulk_end_date, bulk_min_goal,
-                       category, pickup_location, shipping_cost, variants AS variants_csv, sku
+                SELECT id, name, description, hints, base_price, image_path, is_bulk_order, bulk_end_date, bulk_min_goal,
+                       category, target_group AS gender, pickup_location, shipping_cost, variants AS variants_csv, sku
                 FROM shop_products
                 WHERE active = 1
                 ORDER BY name ASC
@@ -55,10 +55,10 @@ class Shop {
      */
     public static function getAllProducts(): array {
         try {
-            $db = Database::getContentDB();
+            $db = Database::getShopDB();
             $stmt = $db->query("
-                SELECT id, name, description, base_price, image_path, active, is_bulk_order, bulk_end_date, bulk_min_goal,
-                       category, pickup_location, shipping_cost, variants AS variants_csv, sku
+                SELECT id, name, description, hints, base_price, image_path, active, is_bulk_order, bulk_end_date, bulk_min_goal,
+                       category, target_group AS gender, pickup_location, shipping_cost, variants AS variants_csv, sku
                 FROM shop_products
                 ORDER BY name ASC
             ");
@@ -84,10 +84,10 @@ class Shop {
      */
     public static function getProductById(int $id): ?array {
         try {
-            $db   = Database::getContentDB();
+            $db   = Database::getShopDB();
             $stmt = $db->prepare("
-                SELECT id, name, description, base_price, image_path, active, is_bulk_order, bulk_end_date, bulk_min_goal,
-                       category, pickup_location, shipping_cost, variants AS variants_csv, sku
+                SELECT id, name, description, hints, base_price, image_path, active, is_bulk_order, bulk_end_date, bulk_min_goal,
+                       category, target_group AS gender, pickup_location, shipping_cost, variants AS variants_csv, sku
                 FROM shop_products
                 WHERE id = ?
             ");
@@ -108,19 +108,22 @@ class Shop {
     /**
      * Create a new product.
      *
-     * @param array $data  Keys: name, description, base_price, image_path, active, is_bulk_order, bulk_end_date, bulk_min_goal, category, pickup_location, variants, shipping_cost, sku
+     * @param array $data  Keys: name, description, hints, base_price, image_path, active, is_bulk_order, bulk_end_date, bulk_min_goal, category, gender, pickup_location, variants, shipping_cost, sku
      * @return int|null  New product ID or null on failure
      */
     public static function createProduct(array $data): ?int {
         try {
-            $db   = Database::getContentDB();
+            $db   = Database::getShopDB();
             $stmt = $db->prepare("
-                INSERT INTO shop_products (name, description, base_price, image_path, active, is_bulk_order, bulk_end_date, bulk_min_goal, category, pickup_location, variants, shipping_cost, sku)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO shop_products (name, description, hints, base_price, image_path, active, is_bulk_order, bulk_end_date, bulk_min_goal, category, target_group, pickup_location, variants, shipping_cost, sku)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ");
+            $allowedGenders = ['Herren', 'Damen', 'Unisex', 'Keine'];
+            $gender = !empty($data['gender']) && in_array($data['gender'], $allowedGenders, true) ? $data['gender'] : 'Keine';
             $stmt->execute([
                 $data['name'],
                 $data['description'] ?? '',
+                !empty($data['hints']) ? $data['hints'] : null,
                 $data['base_price'] ?? 0,
                 $data['image_path'] ?? null,
                 isset($data['active']) ? (int) $data['active'] : 1,
@@ -128,6 +131,7 @@ class Shop {
                 $data['bulk_end_date'] ?? null,
                 isset($data['bulk_min_goal']) ? (int) $data['bulk_min_goal'] : null,
                 !empty($data['category']) ? $data['category'] : null,
+                $gender,
                 !empty($data['pickup_location']) ? $data['pickup_location'] : null,
                 !empty($data['variants']) ? $data['variants'] : null,
                 isset($data['shipping_cost']) ? (float) $data['shipping_cost'] : 0.00,
@@ -144,23 +148,26 @@ class Shop {
      * Update an existing product.
      *
      * @param int   $id
-     * @param array $data  Keys: name, description, base_price, image_path, active, is_bulk_order, bulk_end_date, bulk_min_goal, category, pickup_location, variants, shipping_cost, sku
+     * @param array $data  Keys: name, description, hints, base_price, image_path, active, is_bulk_order, bulk_end_date, bulk_min_goal, category, gender, pickup_location, variants, shipping_cost, sku
      * @return bool
      */
     public static function updateProduct(int $id, array $data): bool {
         try {
-            $db   = Database::getContentDB();
+            $db   = Database::getShopDB();
             $stmt = $db->prepare("
                 UPDATE shop_products
-                SET name = ?, description = ?, base_price = ?, image_path = ?, active = ?,
+                SET name = ?, description = ?, hints = ?, base_price = ?, image_path = ?, active = ?,
                     is_bulk_order = ?, bulk_end_date = ?, bulk_min_goal = ?,
-                    category = ?, pickup_location = ?, variants = ?, shipping_cost = ?,
+                    category = ?, target_group = ?, pickup_location = ?, variants = ?, shipping_cost = ?,
                     sku = ?
                 WHERE id = ?
             ");
+            $allowedGenders = ['Herren', 'Damen', 'Unisex', 'Keine'];
+            $gender = !empty($data['gender']) && in_array($data['gender'], $allowedGenders, true) ? $data['gender'] : 'Keine';
             $stmt->execute([
                 $data['name'],
                 $data['description'] ?? '',
+                !empty($data['hints']) ? $data['hints'] : null,
                 $data['base_price'] ?? 0,
                 $data['image_path'] ?? null,
                 isset($data['active']) ? (int) $data['active'] : 1,
@@ -168,6 +175,7 @@ class Shop {
                 $data['bulk_end_date'] ?? null,
                 isset($data['bulk_min_goal']) ? (int) $data['bulk_min_goal'] : null,
                 !empty($data['category']) ? $data['category'] : null,
+                $gender,
                 !empty($data['pickup_location']) ? $data['pickup_location'] : null,
                 !empty($data['variants']) ? $data['variants'] : null,
                 isset($data['shipping_cost']) ? (float) $data['shipping_cost'] : 0.00,
@@ -193,7 +201,7 @@ class Shop {
      */
     public static function getProductImages(int $productId): array {
         try {
-            $db   = Database::getContentDB();
+            $db   = Database::getShopDB();
             $stmt = $db->prepare("
                 SELECT id, product_id, image_path, sort_order
                 FROM shop_product_images
@@ -218,7 +226,7 @@ class Shop {
      */
     public static function addProductImage(int $productId, string $imagePath, int $sortOrder = 0): ?int {
         try {
-            $db   = Database::getContentDB();
+            $db   = Database::getShopDB();
             $stmt = $db->prepare("
                 INSERT INTO shop_product_images (product_id, image_path, sort_order)
                 VALUES (?, ?, ?)
@@ -239,7 +247,7 @@ class Shop {
      */
     public static function deleteProductImage(int $imageId): bool {
         try {
-            $db   = Database::getContentDB();
+            $db   = Database::getShopDB();
             $stmt = $db->prepare("DELETE FROM shop_product_images WHERE id = ?");
             $stmt->execute([$imageId]);
             return $stmt->rowCount() > 0;
@@ -258,7 +266,7 @@ class Shop {
      */
     public static function updateImageSortOrder(int $imageId, int $sortOrder): bool {
         try {
-            $db   = Database::getContentDB();
+            $db   = Database::getShopDB();
             $stmt = $db->prepare("
                 UPDATE shop_product_images SET sort_order = ? WHERE id = ?
             ");
@@ -283,7 +291,7 @@ class Shop {
      */
     public static function getBulkOrderProgress(int $productId): int {
         try {
-            $db   = Database::getContentDB();
+            $db   = Database::getShopDB();
             $stmt = $db->prepare("
                 SELECT COALESCE(SUM(oi.quantity), 0)
                 FROM shop_order_items oi
@@ -307,7 +315,7 @@ class Shop {
      */
     public static function deleteProduct(int $id): bool {
         try {
-            $db   = Database::getContentDB();
+            $db   = Database::getShopDB();
             $stmt = $db->prepare("DELETE FROM shop_products WHERE id = ?");
             $stmt->execute([$id]);
             return $stmt->rowCount() > 0;
@@ -329,7 +337,7 @@ class Shop {
      */
     public static function getVariantsByProduct(int $productId): array {
         try {
-            $db   = Database::getContentDB();
+            $db   = Database::getShopDB();
             $stmt = $db->prepare("
                 SELECT id, type, value, stock_quantity
                 FROM shop_variants
@@ -355,7 +363,7 @@ class Shop {
     public static function setVariants(int $productId, array $variants): bool {
         $db = null;
         try {
-            $db = Database::getContentDB();
+            $db = Database::getShopDB();
 
             // Capture out-of-stock (type, value) combinations before update
             $prevStmt = $db->prepare("
@@ -428,7 +436,7 @@ class Shop {
      */
     public static function addRestockNotification(int $userId, int $productId, string $variantType, string $variantValue, string $email): bool {
         try {
-            $db   = Database::getContentDB();
+            $db   = Database::getShopDB();
             $stmt = $db->prepare("
                 INSERT INTO shop_restock_notifications
                     (user_id, product_id, variant_type, variant_value, email)
@@ -454,7 +462,7 @@ class Shop {
      */
     public static function removeRestockNotification(int $userId, int $productId, string $variantType, string $variantValue): bool {
         try {
-            $db   = Database::getContentDB();
+            $db   = Database::getShopDB();
             $stmt = $db->prepare("
                 DELETE FROM shop_restock_notifications
                 WHERE user_id = ? AND product_id = ? AND variant_type = ? AND variant_value = ?
@@ -478,7 +486,7 @@ class Shop {
      */
     public static function hasRestockNotification(int $userId, int $productId, string $variantType, string $variantValue): bool {
         try {
-            $db   = Database::getContentDB();
+            $db   = Database::getShopDB();
             $stmt = $db->prepare("
                 SELECT 1 FROM shop_restock_notifications
                 WHERE user_id = ? AND product_id = ? AND variant_type = ? AND variant_value = ?
@@ -500,7 +508,7 @@ class Shop {
      */
     public static function getUserRestockNotifications(int $userId): array {
         try {
-            $db   = Database::getContentDB();
+            $db   = Database::getShopDB();
             $stmt = $db->prepare("
                 SELECT n.id, n.product_id, n.variant_type, n.variant_value, n.created_at,
                        p.name AS product_name
@@ -528,7 +536,7 @@ class Shop {
      */
     private static function sendRestockNotifications(int $productId, string $variantType, string $variantValue): void {
         try {
-            $db   = Database::getContentDB();
+            $db   = Database::getShopDB();
             $stmt = $db->prepare("
                 SELECT id, user_id, email
                 FROM shop_restock_notifications
@@ -585,7 +593,7 @@ class Shop {
     public static function checkStock(array $cart): array {
         $errors = [];
         try {
-            $db = Database::getContentDB();
+            $db = Database::getShopDB();
             foreach ($cart as $item) {
                 if (empty($item['variant_id'])) {
                     continue;
@@ -618,7 +626,7 @@ class Shop {
      */
     public static function decrementStock(int $orderId): bool {
         try {
-            $db   = Database::getContentDB();
+            $db   = Database::getShopDB();
             $stmt = $db->prepare("
                 SELECT variant_id, quantity
                 FROM shop_order_items
@@ -656,7 +664,7 @@ class Shop {
      */
     public static function createOrder(int $userId, array $cart, string $paymentMethod, string $shippingMethod = 'pickup', float $shippingCost = 0.0, string $shippingAddress = '', string $selectedVariant = '', string $deliveryMethod = ''): ?int {
         try {
-            $db = Database::getContentDB();
+            $db = Database::getShopDB();
             $db->beginTransaction();
 
             $itemsTotal = array_sum(array_map(fn($i) => $i['price'] * $i['quantity'], $cart));
@@ -699,7 +707,7 @@ class Shop {
      */
     public static function getAllOrders(): array {
         try {
-            $db   = Database::getContentDB();
+            $db   = Database::getShopDB();
             $stmt = $db->query("
                 SELECT id, user_id, total_amount, payment_method, payment_status, shipping_status, created_at
                 FROM shop_orders
@@ -720,7 +728,7 @@ class Shop {
      */
     public static function getOrdersByUser(int $userId): array {
         try {
-            $db   = Database::getContentDB();
+            $db   = Database::getShopDB();
             $stmt = $db->prepare("
                 SELECT id, total_amount, payment_method, payment_status, shipping_status, created_at
                 FROM shop_orders
@@ -745,7 +753,7 @@ class Shop {
      */
     public static function updateOrderStatus(int $orderId, ?string $paymentStatus, ?string $shippingStatus): bool {
         try {
-            $db = Database::getContentDB();
+            $db = Database::getShopDB();
 
             $validPayment  = ['pending', 'paid', 'failed'];
             $validShipping = ['pending', 'shipped', 'delivered'];
@@ -788,7 +796,7 @@ class Shop {
      */
     public static function getMonthlySalesStats(int $months = 12): array {
         try {
-            $db   = Database::getContentDB();
+            $db   = Database::getShopDB();
             $stmt = $db->prepare("
                 SELECT
                     DATE_FORMAT(created_at, '%Y-%m') AS month,
