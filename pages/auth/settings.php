@@ -434,6 +434,25 @@ ob_start();
 
     </div>
 
+    <!-- GDPR Data Export -->
+    <div class="mt-6">
+        <div class="card p-6">
+            <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
+                <i class="fas fa-file-export text-green-600 mr-2"></i>
+                Datenschutz / DSGVO
+            </h2>
+            <p class="text-gray-600 dark:text-gray-300 mb-6">
+                Gemäß DSGVO Art. 20 kannst du alle zu deiner Person gespeicherten Daten als JSON-Datei herunterladen (Profil, Ausleihen, Shop-Bestellungen, Event-Teilnahmen).
+            </p>
+            <form method="POST" action="<?php echo asset('api/export_user_data.php'); ?>">
+                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(CSRFHandler::getToken(), ENT_QUOTES, 'UTF-8'); ?>">
+                <button type="submit" class="flex items-center px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-semibold">
+                    <i class="fas fa-download mr-2"></i>Meine Daten anfordern / exportieren
+                </button>
+            </form>
+        </div>
+    </div>
+
     <!-- Support Section -->
     <div class="mt-6">
         <div class="card p-6">
