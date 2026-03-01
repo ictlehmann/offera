@@ -224,14 +224,16 @@ ob_start();
             <?php if ($hasStock): ?>
             <button
                 type="button"
-                onclick="openRentalModal(<?php echo htmlspecialchars(json_encode([
-                    'id'     => (string)$itemId,
-                    'name'   => $itemName,
-                    'pieces' => $itemAvailable,
+                id="cartBtn-<?php echo htmlspecialchars($itemId); ?>"
+                onclick="toggleCartItem(<?php echo htmlspecialchars(json_encode([
+                    'id'       => (string)$itemId,
+                    'name'     => $itemName,
+                    'imageSrc' => $imageSrc ?? '',
+                    'pieces'   => $itemAvailable,
                 ], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8'); ?>)"
                 class="w-full py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-xl font-bold text-sm transition-all transform hover:scale-[1.02] shadow-md hover:shadow-lg flex items-center justify-center gap-2"
             >
-                <i class="fas fa-calendar-plus"></i>Jetzt anfragen
+                <i class="fas fa-cart-plus"></i>In den Warenkorb
             </button>
             <?php else: ?>
             <button
@@ -248,119 +250,127 @@ ob_start();
 </div>
 <?php endif; ?>
 
-<!-- Rental Request Modal -->
-<div id="rentalModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4" style="background: rgba(15,23,42,0.70); backdrop-filter: blur(4px);" role="dialog" aria-modal="true" aria-labelledby="rentalModalTitle">
-    <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-lg max-h-[85vh] flex flex-col overflow-hidden animate-modal-in">
+<!-- ─── Floating Cart Button ─── -->
+<button id="cartFloatingBtn"
+        onclick="openCartPanel()"
+        style="display:none"
+        class="fixed bottom-6 right-6 z-40 w-16 h-16 bg-gradient-to-br from-purple-600 to-blue-600 text-white rounded-full shadow-2xl hover:shadow-purple-500/30 flex items-center justify-center transition-all hover:scale-110 focus:outline-none focus:ring-4 focus:ring-purple-300"
+        aria-label="Warenkorb öffnen">
+    <i class="fas fa-shopping-cart text-xl"></i>
+    <span id="cartBadge"
+          class="absolute -top-2 -right-2 min-w-[1.4rem] h-[1.4rem] bg-red-500 text-white text-xs font-extrabold rounded-full flex items-center justify-center px-1 shadow-lg ring-2 ring-white">
+        0
+    </span>
+</button>
 
-        <!-- Modal Header -->
-        <div class="bg-gradient-to-r from-purple-600 to-blue-600 px-6 py-5 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-calendar-plus text-white text-lg"></i>
-                </div>
-                <div>
-                    <h2 id="rentalModalTitle" class="text-xl font-bold text-white leading-tight">Artikel anfragen</h2>
-                    <p id="rentalModalItemName" class="text-purple-100 text-xs mt-0.5 truncate max-w-[200px]"></p>
-                </div>
+<!-- ─── Cart Overlay ─── -->
+<div id="cartOverlay"
+     class="fixed inset-0 z-40 hidden"
+     style="background: rgba(15,23,42,0.55); backdrop-filter: blur(3px);"
+     onclick="closeCartPanel()"></div>
+
+<!-- ─── Cart Panel (right drawer) ─── -->
+<div id="cartPanel"
+     class="fixed top-0 right-0 h-full w-full max-w-sm z-50 flex flex-col bg-white dark:bg-slate-900 shadow-2xl"
+     style="transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);"
+     role="dialog" aria-modal="true" aria-label="Ausleih-Warenkorb">
+
+    <!-- Panel Header -->
+    <div class="bg-gradient-to-r from-purple-600 to-blue-600 px-5 py-4 flex items-center justify-between flex-shrink-0">
+        <div class="flex items-center gap-3">
+            <div class="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center">
+                <i class="fas fa-shopping-cart text-white"></i>
             </div>
-            <button onclick="closeRentalModal()" class="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-lg flex items-center justify-center text-white transition-colors" aria-label="Schließen">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-
-        <!-- Form Body (scrollable) -->
-        <div class="px-6 py-5 space-y-5 overflow-y-auto flex-1">
-
-            <!-- Availability indicator -->
-            <div id="availabilityInfo" class="hidden items-center gap-3 p-3 rounded-xl border text-sm">
-                <i class="fas fa-info-circle flex-shrink-0"></i>
-                <span id="availabilityText"></span>
-            </div>
-
-            <!-- Date Row -->
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label for="rentalStartDate" class="block text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide mb-1.5">
-                        <i class="fas fa-calendar-day mr-1 text-purple-500"></i>Von <span class="text-red-500">*</span>
-                    </label>
-                    <input
-                        type="date"
-                        id="rentalStartDate"
-                        required
-                        min="<?php echo date('Y-m-d'); ?>"
-                        value="<?php echo date('Y-m-d'); ?>"
-                        class="w-full px-3 py-2.5 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 transition-all"
-                    >
-                </div>
-                <div>
-                    <label for="rentalEndDate" class="block text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide mb-1.5">
-                        <i class="fas fa-calendar-check mr-1 text-blue-500"></i>Bis <span class="text-red-500">*</span>
-                    </label>
-                    <input
-                        type="date"
-                        id="rentalEndDate"
-                        required
-                        min="<?php echo date('Y-m-d', strtotime('+1 day')); ?>"
-                        value="<?php echo date('Y-m-d', strtotime('+1 day')); ?>"
-                        class="w-full px-3 py-2.5 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 transition-all"
-                    >
-                </div>
-            </div>
-
-            <!-- Quantity -->
             <div>
-                <label for="rentalQuantity" class="block text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide mb-1.5">
-                    <i class="fas fa-cubes mr-1 text-green-500"></i>Stückzahl <span class="text-red-500">*</span>
-                </label>
-                <div class="relative">
-                    <input
-                        type="number"
-                        id="rentalQuantity"
-                        required
-                        min="1"
-                        value="1"
-                        class="w-full px-4 py-2.5 border border-gray-200 dark:border-slate-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 transition-all pr-20"
-                        placeholder="Anzahl"
-                    >
-                    <span id="rentalMaxLabel" class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-400 dark:text-slate-500 pointer-events-none"></span>
-                </div>
+                <h2 class="text-base font-bold text-white leading-tight">Ausleih-Warenkorb</h2>
+                <p id="cartPanelCount" class="text-purple-100 text-xs mt-0.5">0 Artikel</p>
             </div>
-
-            <!-- Info hint -->
-            <div class="flex items-start gap-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800 rounded-xl px-4 py-3">
-                <i class="fas fa-info-circle text-amber-500 mt-0.5 flex-shrink-0"></i>
-                <p class="text-xs text-amber-700 dark:text-amber-300 leading-relaxed">
-                    Ihre Anfrage wird mit dem Status <strong>Ausstehend</strong> gespeichert und vom Vorstand geprüft.
-                </p>
-            </div>
-
-            <!-- Error / Success message inside modal -->
-            <div id="rentalModalMsg" class="hidden rounded-xl px-4 py-3 text-sm font-medium"></div>
-
         </div>
+        <button onclick="closeCartPanel()"
+                class="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-lg flex items-center justify-center text-white transition-colors"
+                aria-label="Schließen">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
 
-        <!-- Footer (fixed buttons) -->
-        <div class="px-6 pb-5 pt-3 flex gap-3">
-            <button type="button" onclick="closeRentalModal()" class="flex-1 px-4 py-2.5 bg-gray-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-xl hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors font-semibold text-sm border border-gray-200 dark:border-slate-700">
-                <i class="fas fa-times mr-1.5"></i>Abbrechen
+    <!-- Date Range -->
+    <div class="px-5 py-4 bg-purple-50 dark:bg-purple-900/20 border-b border-purple-100 dark:border-purple-800 flex-shrink-0">
+        <p class="text-xs font-semibold text-purple-700 dark:text-purple-300 uppercase tracking-wide mb-3">
+            <i class="fas fa-calendar-alt mr-1.5"></i>Ausleihzeitraum (gilt für alle Artikel)
+        </p>
+        <div class="grid grid-cols-2 gap-3">
+            <div>
+                <label for="cartStartDate" class="block text-xs text-slate-500 dark:text-slate-400 mb-1">
+                    Von <span class="text-red-500">*</span>
+                </label>
+                <input type="date" id="cartStartDate"
+                       min="<?php echo date('Y-m-d'); ?>"
+                       value="<?php echo date('Y-m-d'); ?>"
+                       class="w-full px-3 py-2 border border-purple-200 dark:border-purple-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100">
+            </div>
+            <div>
+                <label for="cartEndDate" class="block text-xs text-slate-500 dark:text-slate-400 mb-1">
+                    Bis <span class="text-red-500">*</span>
+                </label>
+                <input type="date" id="cartEndDate"
+                       min="<?php echo date('Y-m-d', strtotime('+1 day')); ?>"
+                       value="<?php echo date('Y-m-d', strtotime('+1 day')); ?>"
+                       class="w-full px-3 py-2 border border-purple-200 dark:border-purple-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100">
+            </div>
+        </div>
+    </div>
+
+    <!-- Cart Items (scrollable) -->
+    <div id="cartItemsList" class="flex-1 overflow-y-auto px-5 py-4 space-y-3" style="display:none"></div>
+
+    <!-- Empty State -->
+    <div id="cartEmpty" class="flex-1 flex flex-col items-center justify-center px-5 py-12 text-center">
+        <div class="w-20 h-20 bg-purple-50 dark:bg-purple-900/30 rounded-full flex items-center justify-center mb-4">
+            <i class="fas fa-shopping-cart text-3xl text-purple-300 dark:text-purple-600"></i>
+        </div>
+        <p class="text-slate-500 dark:text-slate-400 font-medium">Ihr Warenkorb ist leer</p>
+        <p class="text-slate-400 dark:text-slate-500 text-sm mt-1">Klicken Sie auf „In den Warenkorb"</p>
+    </div>
+
+    <!-- Panel Footer -->
+    <div class="px-5 pb-6 pt-4 flex-shrink-0 border-t border-gray-100 dark:border-slate-700 space-y-3">
+        <!-- Status messages -->
+        <div id="cartMsg" class="hidden rounded-xl px-4 py-3 text-sm font-medium"></div>
+        <!-- Info hint -->
+        <div class="flex items-start gap-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800 rounded-xl px-3 py-2.5">
+            <i class="fas fa-info-circle text-amber-500 text-xs mt-0.5 flex-shrink-0"></i>
+            <p class="text-xs text-amber-700 dark:text-amber-300">
+                Anfragen werden mit Status <strong>Ausstehend</strong> gespeichert und vom Vorstand geprüft.
+            </p>
+        </div>
+        <!-- Clear + Submit -->
+        <div class="flex gap-3">
+            <button type="button" onclick="clearCart()"
+                    class="px-4 py-3 bg-gray-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-gray-200 dark:hover:bg-slate-700 rounded-xl transition-colors text-sm font-semibold border border-gray-200 dark:border-slate-700 flex-shrink-0"
+                    title="Warenkorb leeren">
+                <i class="fas fa-trash-alt"></i>
             </button>
-            <button type="button" id="rentalSubmitBtn" onclick="submitRentalRequest()" class="flex-1 px-4 py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-xl transition-all font-semibold text-sm shadow-md hover:shadow-lg transform hover:scale-[1.02] flex items-center justify-center gap-2">
-                <i class="fas fa-paper-plane"></i>Anfrage senden
+            <button type="button" id="cartSubmitBtn" onclick="submitCartRequests()"
+                    class="flex-1 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-xl font-bold text-base transition-all shadow-lg hover:shadow-xl transform hover:scale-[1.02] flex items-center justify-center gap-2">
+                <i class="fas fa-paper-plane"></i>
+                <span id="cartSubmitLabel">Anfrage senden</span>
             </button>
         </div>
     </div>
 </div>
 
 <style>
-@keyframes modal-in {
-    from { opacity: 0; transform: scale(0.95) translateY(8px); }
-    to   { opacity: 1; transform: scale(1) translateY(0); }
-}
-.animate-modal-in { animation: modal-in 0.2s ease-out; }
 .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+@keyframes cart-pop {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+.cart-pop { animation: cart-pop 0.3s ease; }
 @media (prefers-reduced-motion: reduce) {
-    .animate-modal-in { animation: none; }
+    .cart-pop { animation: none; }
+    #cartPanel { transition: none !important; }
 }
 </style>
 
@@ -368,169 +378,234 @@ ob_start();
 (function () {
     'use strict';
 
-    var currentItemId   = '';
-    var currentItemName = '';
-    var currentPieces   = 0;
-    var checkAvailTimer = null;
-    var csrfToken       = <?php echo json_encode(CSRFHandler::getToken()); ?>;
+    var cart      = [];
+    var panelOpen = false;
+    var csrfToken = <?php echo json_encode(CSRFHandler::getToken()); ?>;
 
-    window.openRentalModal = function (item) {
-        currentItemId   = item.id;
-        currentItemName = item.name;
-        currentPieces   = item.pieces;
+    // ── Cart item toggle ─────────────────────────────────────────────────────
+    window.toggleCartItem = function (item) {
+        var idx = cart.findIndex(function (c) { return c.id === item.id; });
+        if (idx === -1) {
+            cart.push({ id: item.id, name: item.name, imageSrc: item.imageSrc || '', pieces: item.pieces, quantity: 1 });
+            animateBadge();
+        } else {
+            cart.splice(idx, 1);
+        }
+        updateCartUI();
+        updateCardButton(item.id);
+    };
 
-        document.getElementById('rentalModalItemName').textContent = item.name;
-        document.getElementById('rentalMaxLabel').textContent      = 'max: ' + item.pieces;
-        document.getElementById('rentalQuantity').max              = item.pieces;
-        document.getElementById('rentalQuantity').value            = '1';
+    window.removeFromCart = function (id) {
+        cart = cart.filter(function (c) { return c.id !== id; });
+        updateCartUI();
+        updateCardButton(id);
+    };
 
-        hideModalMsg();
-        hideAvailability();
+    window.updateCartQty = function (id, delta) {
+        var item = cart.find(function (c) { return c.id === id; });
+        if (!item) return;
+        var newQty = item.quantity + delta;
+        if (newQty < 1) { window.removeFromCart(id); return; }
+        if (newQty > item.pieces) newQty = item.pieces;
+        item.quantity = newQty;
+        if (panelOpen) renderCartItems();
+    };
 
-        var modal = document.getElementById('rentalModal');
-        modal.classList.remove('hidden');
-        modal.style.display = 'flex';
+    window.clearCart = function () {
+        var ids = cart.map(function (c) { return c.id; });
+        cart = [];
+        ids.forEach(updateCardButton);
+        updateCartUI();
+    };
+
+    // ── Panel open / close ───────────────────────────────────────────────────
+    window.openCartPanel = function () {
+        panelOpen = true;
+        document.getElementById('cartOverlay').classList.remove('hidden');
+        document.getElementById('cartPanel').style.transform = 'translateX(0)';
         document.body.style.overflow = 'hidden';
-
-        scheduleAvailabilityCheck();
-        document.getElementById('rentalStartDate').focus();
+        renderCartItems();
+        hideCartMsg();
     };
 
-    window.closeRentalModal = function () {
-        var modal = document.getElementById('rentalModal');
-        modal.classList.add('hidden');
-        modal.style.display = '';
-        document.body.style.overflow = 'auto';
-        hideModalMsg();
-
-        var btn = document.getElementById('rentalSubmitBtn');
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-paper-plane mr-1.5"></i>Anfrage senden';
+    window.closeCartPanel = function () {
+        panelOpen = false;
+        document.getElementById('cartOverlay').classList.add('hidden');
+        document.getElementById('cartPanel').style.transform = 'translateX(100%)';
+        document.body.style.overflow = '';
     };
-
-    document.getElementById('rentalModal').addEventListener('click', function (e) {
-        if (e.target === this) closeRentalModal();
-    });
 
     document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape') closeRentalModal();
+        if (e.key === 'Escape' && panelOpen) closeCartPanel();
     });
 
-    ['rentalStartDate', 'rentalEndDate'].forEach(function (id) {
-        document.getElementById(id).addEventListener('change', scheduleAvailabilityCheck);
-    });
+    // ── UI helpers ───────────────────────────────────────────────────────────
+    function updateCartUI() {
+        var count      = cart.length;
+        var badge      = document.getElementById('cartBadge');
+        var floatBtn   = document.getElementById('cartFloatingBtn');
+        var panelCount = document.getElementById('cartPanelCount');
+        var submitLbl  = document.getElementById('cartSubmitLabel');
+        var submitBtn  = document.getElementById('cartSubmitBtn');
 
-    function scheduleAvailabilityCheck() {
-        clearTimeout(checkAvailTimer);
-        checkAvailTimer = setTimeout(checkAvailability, 400);
+        badge.textContent         = count;
+        floatBtn.style.display    = count > 0 ? 'flex' : 'none';
+        if (panelCount) panelCount.textContent = count + (count === 1 ? ' Artikel' : ' Artikel');
+        if (submitLbl)  submitLbl.textContent  = count > 1 ? count + ' Anfragen senden' : 'Anfrage senden';
+        if (submitBtn)  submitBtn.disabled     = count === 0;
+        if (panelOpen)  renderCartItems();
     }
 
-    function checkAvailability() {
-        if (!currentItemId) return;
-        var startDate = document.getElementById('rentalStartDate').value;
-        var endDate   = document.getElementById('rentalEndDate').value;
-        if (!startDate || !endDate || startDate > endDate) return;
+    function renderCartItems() {
+        var list  = document.getElementById('cartItemsList');
+        var empty = document.getElementById('cartEmpty');
+        if (!list) return;
 
-        fetch('/api/inventory_request.php', {
-            method:  'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body:    JSON.stringify({
-                action:              'check_availability',
-                inventory_object_id: currentItemId,
-                start_date:          startDate,
-                end_date:            endDate,
-                csrf_token:          csrfToken
-            })
-        })
-        .then(function (r) { return r.json(); })
-        .then(function (data) {
-            if (data.success !== undefined) {
-                showAvailability(data.success ? data.available : 0, data.success, data.total ?? null);
-            }
-        })
-        .catch(function () {});
-    }
-
-    function showAvailability(avail, success, total) {
-        var el  = document.getElementById('availabilityInfo');
-        var txt = document.getElementById('availabilityText');
-        var btn = document.getElementById('rentalSubmitBtn');
-        var qty = document.getElementById('rentalQuantity');
-
-        el.className = 'flex items-center gap-3 p-3 rounded-xl border text-sm ';
-        var availLabel = total !== null ? avail + ' / ' + total : avail;
-        if (success && avail > 0) {
-            txt.textContent = 'Verfügbar: ' + availLabel + ' Stück';
-            el.className   += 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300';
-            btn.disabled    = false;
-            btn.classList.remove('opacity-50', 'cursor-not-allowed');
-        } else {
-            txt.textContent = 'Für diesen Zeitraum nicht verfügbar' + (total !== null ? ' (Bestand: 0 / ' + total + ')' : '') + '.';
-            el.className   += 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800 text-red-700 dark:text-red-300';
-            btn.disabled    = true;
-            btn.classList.add('opacity-50', 'cursor-not-allowed');
+        if (cart.length === 0) {
+            list.style.display = 'none';
+            if (empty) empty.style.display = 'flex';
+            list.innerHTML = '';
+            return;
         }
-        qty.max = avail;
-        document.getElementById('rentalMaxLabel').textContent = 'max: ' + avail;
-        el.classList.remove('hidden');
-        el.style.display = 'flex';
+
+        list.style.display = '';
+        if (empty) empty.style.display = 'none';
+
+        list.innerHTML = cart.map(function (item) {
+            var thumbInner = item.imageSrc
+                ? '<img src="' + escHtml(item.imageSrc) + '" alt="' + escHtml(item.name) + '" '
+                  + 'class="w-full h-full object-contain" loading="lazy" '
+                  + 'onerror="this.style.display=\'none\';this.nextSibling.style.display=\'flex\'">'
+                  + '<span style="display:none" class="w-full h-full items-center justify-center">'
+                  + '<i class="fas fa-box-open text-gray-300 text-xl"></i></span>'
+                : '<span class="flex w-full h-full items-center justify-center">'
+                  + '<i class="fas fa-box-open text-gray-300 dark:text-gray-600 text-xl"></i></span>';
+
+            return '<div class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-slate-800 rounded-xl border border-gray-100 dark:border-slate-700">'
+                // Thumbnail
+                + '<div class="w-14 h-14 flex-shrink-0 rounded-lg overflow-hidden bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/30 dark:to-blue-900/30 flex items-center justify-center">'
+                + thumbInner + '</div>'
+                // Info + quantity controls
+                + '<div class="flex-1 min-w-0">'
+                + '<p class="text-sm font-semibold text-slate-900 dark:text-white truncate" title="' + escHtml(item.name) + '">' + escHtml(item.name) + '</p>'
+                + '<div class="flex items-center gap-1.5 mt-1.5">'
+                + '<button onclick="updateCartQty(\'' + escJs(item.id) + '\',-1)" '
+                + 'class="w-6 h-6 rounded-lg bg-gray-200 dark:bg-slate-700 hover:bg-purple-100 dark:hover:bg-purple-900/50 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-colors text-xs font-bold">'
+                + '<i class="fas fa-minus"></i></button>'
+                + '<span class="text-sm font-bold text-slate-900 dark:text-white min-w-[1.5rem] text-center">' + item.quantity + '</span>'
+                + '<button onclick="updateCartQty(\'' + escJs(item.id) + '\',1)" '
+                + 'class="w-6 h-6 rounded-lg bg-gray-200 dark:bg-slate-700 hover:bg-purple-100 dark:hover:bg-purple-900/50 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-colors text-xs font-bold">'
+                + '<i class="fas fa-plus"></i></button>'
+                + '<span class="text-xs text-slate-400 dark:text-slate-500 ml-0.5">/ ' + escHtml(String(item.pieces)) + '</span>'
+                + '</div>'
+                + '</div>'
+                // Remove button
+                + '<button onclick="removeFromCart(\'' + escJs(item.id) + '\')" '
+                + 'class="w-8 h-8 flex-shrink-0 flex items-center justify-center rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors" '
+                + 'aria-label="Entfernen"><i class="fas fa-times"></i></button>'
+                + '</div>';
+        }).join('');
     }
 
-    window.submitRentalRequest = function () {
-        var startDate = document.getElementById('rentalStartDate').value;
-        var endDate   = document.getElementById('rentalEndDate').value;
-        var quantity  = parseInt(document.getElementById('rentalQuantity').value, 10);
+    function updateCardButton(id) {
+        var btn = document.getElementById('cartBtn-' + id);
+        if (!btn) return;
+        var inCart   = cart.some(function (c) { return c.id === id; });
+        var baseClass = 'w-full py-2.5 text-white rounded-xl font-bold text-sm transition-all transform hover:scale-[1.02] shadow-md hover:shadow-lg flex items-center justify-center gap-2';
+        if (inCart) {
+            btn.className = baseClass + ' bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700';
+            btn.innerHTML = '<i class="fas fa-check"></i>Im Warenkorb';
+        } else {
+            btn.className = baseClass + ' bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700';
+            btn.innerHTML = '<i class="fas fa-cart-plus"></i>In den Warenkorb';
+        }
+    }
+
+    function animateBadge() {
+        var btn = document.getElementById('cartFloatingBtn');
+        if (!btn) return;
+        btn.classList.remove('cart-pop');
+        void btn.offsetWidth; // reflow
+        btn.classList.add('cart-pop');
+    }
+
+    function escHtml(str) {
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    // Safe for use inside JS string literals within HTML onclick attributes (single-quoted)
+    function escJs(str) {
+        return String(str)
+            .replace(/\\/g, '\\\\')
+            .replace(/'/g, "\\'");
+    }
+
+    // ── Submit all cart requests ─────────────────────────────────────────────
+    window.submitCartRequests = function () {
+        if (cart.length === 0) return;
+
+        var startDate = document.getElementById('cartStartDate').value;
+        var endDate   = document.getElementById('cartEndDate').value;
 
         if (!startDate || !endDate) {
-            showModalMsg('Bitte Zeitraum auswählen.', 'error');
+            showCartMsg('Bitte Zeitraum auswählen.', 'error');
             return;
         }
         if (startDate > endDate) {
-            showModalMsg('Startdatum muss vor dem Enddatum liegen.', 'error');
-            return;
-        }
-        if (!quantity || quantity < 1) {
-            showModalMsg('Bitte eine gültige Stückzahl eingeben.', 'error');
+            showCartMsg('Startdatum muss vor dem Enddatum liegen.', 'error');
             return;
         }
 
-        var btn = document.getElementById('rentalSubmitBtn');
-        btn.disabled = true;
+        var btn = document.getElementById('cartSubmitBtn');
+        btn.disabled  = true;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1.5"></i>Wird gesendet...';
+        hideCartMsg();
 
-        fetch('/api/inventory_request.php', {
-            method:  'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body:    JSON.stringify({
-                action:              'submit_request',
-                inventory_object_id: currentItemId,
-                start_date:          startDate,
-                end_date:            endDate,
-                quantity:            quantity,
-                csrf_token:          csrfToken
+        var promises = cart.map(function (item) {
+            return fetch('/api/inventory_request.php', {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body:    JSON.stringify({
+                    action:              'submit_request',
+                    inventory_object_id: item.id,
+                    start_date:          startDate,
+                    end_date:            endDate,
+                    quantity:            item.quantity,
+                    csrf_token:          csrfToken
+                })
             })
-        })
-        .then(function (r) { return r.json(); })
-        .then(function (data) {
-            if (data.success) {
-                showModalMsg(data.message || 'Anfrage erfolgreich eingereicht!', 'success');
-                btn.innerHTML = '<i class="fas fa-check mr-1.5"></i>Gesendet';
-                setTimeout(closeRentalModal, 2500);
+            .then(function (r) { return r.json(); })
+            .then(function (data) { return { item: item, data: data }; })
+            .catch(function ()    { return { item: item, data: { success: false, message: 'Netzwerkfehler' } }; });
+        });
+
+        Promise.all(promises).then(function (results) {
+            var failed = results.filter(function (r) { return !r.data.success; });
+            if (failed.length === 0) {
+                btn.innerHTML = '<i class="fas fa-check mr-1.5"></i>Gesendet!';
+                showCartMsg('Alle Anfragen erfolgreich eingereicht!', 'success');
+                setTimeout(function () {
+                    clearCart();
+                    closeCartPanel();
+                    btn.disabled  = false;
+                    btn.innerHTML = '<i class="fas fa-paper-plane mr-1.5"></i>Anfrage senden';
+                }, 2200);
             } else {
-                showModalMsg(data.message || 'Unbekannter Fehler.', 'error');
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-paper-plane mr-1.5"></i>Anfrage senden';
+                var names = failed.map(function (r) { return r.item.name; }).join(', ');
+                showCartMsg('Fehler bei: ' + names, 'error');
+                btn.disabled  = false;
+                btn.innerHTML = '<i class="fas fa-paper-plane mr-1.5"></i>Erneut versuchen';
             }
-        })
-        .catch(function () {
-            showModalMsg('Netzwerkfehler. Bitte erneut versuchen.', 'error');
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-paper-plane mr-1.5"></i>Anfrage senden';
         });
     };
 
-    function showModalMsg(text, type) {
-        var el = document.getElementById('rentalModalMsg');
+    function showCartMsg(text, type) {
+        var el = document.getElementById('cartMsg');
         el.textContent = text;
         el.className = 'rounded-xl px-4 py-3 text-sm font-medium ' +
             (type === 'success'
@@ -539,15 +614,11 @@ ob_start();
         el.classList.remove('hidden');
     }
 
-    function hideModalMsg() {
-        document.getElementById('rentalModalMsg').classList.add('hidden');
+    function hideCartMsg() {
+        var el = document.getElementById('cartMsg');
+        if (el) el.classList.add('hidden');
     }
 
-    function hideAvailability() {
-        var el = document.getElementById('availabilityInfo');
-        el.classList.add('hidden');
-        el.style.display = '';
-    }
 }());
 </script>
 
