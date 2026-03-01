@@ -10,6 +10,7 @@ class Database {
     private static $userConnection = null;
     private static $contentConnection = null;
     private static $rechConnection = null;
+    private static $shopConnection = null;
 
     /**
      * Get User Database Connection
@@ -60,6 +61,34 @@ class Database {
     }
 
     /**
+     * Get Shop Database Connection
+     * Exclusive connection for the shop (dbs15381315), strictly separated from the Content DB.
+     *
+     * @return PDO Database connection instance
+     * @throws Exception If database connection fails
+     */
+    public static function getShopDB() {
+        if (self::$shopConnection === null) {
+            try {
+                self::$shopConnection = new PDO(
+                    "mysql:host=" . DB_SHOP_HOST . ";dbname=" . DB_SHOP_NAME . ";charset=utf8mb4",
+                    DB_SHOP_USER,
+                    DB_SHOP_PASS,
+                    [
+                        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                        PDO::ATTR_EMULATE_PREPARES => false
+                    ]
+                );
+            } catch (PDOException $e) {
+                error_log("Verbindung fehlgeschlagen: " . $e->getCode());
+                throw new Exception("Database connection failed");
+            }
+        }
+        return self::$shopConnection;
+    }
+
+    /**
      * Get Invoice/Rech Database Connection
      * 
      * @return PDO Database connection instance
@@ -99,6 +128,8 @@ class Database {
                 return self::getUserDB();
             case 'content':
                 return self::getContentDB();
+            case 'shop':
+                return self::getShopDB();
             case 'rech':
             case 'invoice':
                 return self::getRechDB();
@@ -114,5 +145,6 @@ class Database {
         self::$userConnection = null;
         self::$contentConnection = null;
         self::$rechConnection = null;
+        self::$shopConnection = null;
     }
 }
