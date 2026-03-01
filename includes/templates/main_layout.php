@@ -3,6 +3,7 @@ require_once __DIR__ . '/../helpers.php';
 require_once __DIR__ . '/../../src/Auth.php';
 require_once __DIR__ . '/../handlers/AuthHandler.php';
 require_once __DIR__ . '/../handlers/CSRFHandler.php';
+require_once __DIR__ . '/../models/Notification.php';
 
 // DEBUG: Uncomment to force role for testing
 // $_SESSION['user_role'] = 'board_finance';
@@ -17,6 +18,17 @@ if (Auth::check() && isset($_SESSION['profile_incomplete']) && $_SESSION['profil
         exit;
     }
 }
+
+// Notification unread count for navbar badge
+$_notifUnreadCount = 0;
+if (Auth::check() && isset($_SESSION['user_id'])) {
+    try {
+        $_notifUnreadCount = Notification::getUnreadCount((int) $_SESSION['user_id']);
+    } catch (Exception $_e) {
+        // Silently ignore if notifications table doesn't exist yet
+    }
+}
+$_notifCsrfToken = CSRFHandler::getToken();
 ?>
 <!DOCTYPE html>
 <html lang="de">
@@ -268,9 +280,20 @@ if (Auth::check() && isset($_SESSION['profile_incomplete']) && $_SESSION['profil
             </svg>
         </button>
         <img src="<?php echo asset('assets/img/ibc_logo_original_navbar.webp'); ?>" alt="IBC Logo" class="h-8 w-auto drop-shadow-md">
-        <button id="mobile-theme-toggle" class="flex items-center justify-center w-10 h-10 rounded-lg bg-white/10 hover:bg-white/20 transition-all duration-200 border border-white/20" aria-label="Zu Darkmode wechseln">
-            <i id="mobile-theme-icon" class="fas fa-moon text-white text-sm"></i>
-        </button>
+        <div class="flex items-center gap-2">
+            <!-- Notification Bell (mobile) -->
+            <button id="mobile-notif-btn" class="relative flex items-center justify-center w-10 h-10 rounded-lg bg-white/10 hover:bg-white/20 transition-all duration-200 border border-white/20" aria-label="Benachrichtigungen" aria-expanded="false">
+                <i class="fas fa-bell text-white text-sm"></i>
+                <?php if ($_notifUnreadCount > 0): ?>
+                <span id="mobile-notif-badge" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 leading-none"><?php echo $_notifUnreadCount >= 99 ? '99+' : $_notifUnreadCount; ?></span>
+                <?php else: ?>
+                <span id="mobile-notif-badge" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 leading-none hidden"></span>
+                <?php endif; ?>
+            </button>
+            <button id="mobile-theme-toggle" class="flex items-center justify-center w-10 h-10 rounded-lg bg-white/10 hover:bg-white/20 transition-all duration-200 border border-white/20" aria-label="Zu Darkmode wechseln">
+                <i id="mobile-theme-icon" class="fas fa-moon text-white text-sm"></i>
+            </button>
+        </div>
     </nav>
 
     <!-- Sidebar -->
@@ -684,6 +707,17 @@ if (Auth::check() && isset($_SESSION['profile_incomplete']) && $_SESSION['profil
                 <i class='fas fa-user'></i>
                 <span>Mein Profil</span>
             </a>
+
+            <!-- Notifications -->
+            <button id="sidebar-notif-btn" class='sidebar-footer-btn relative' aria-label="Benachrichtigungen" aria-expanded="false">
+                <i class='fas fa-bell'></i>
+                <span>Benachrichtigungen</span>
+                <?php if ($_notifUnreadCount > 0): ?>
+                <span id="sidebar-notif-badge" class="ml-auto bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 leading-none"><?php echo $_notifUnreadCount >= 99 ? '99+' : $_notifUnreadCount; ?></span>
+                <?php else: ?>
+                <span id="sidebar-notif-badge" class="ml-auto bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 leading-none hidden"></span>
+                <?php endif; ?>
+            </button>
             <a href='<?php echo asset('pages/auth/settings.php'); ?>' 
                class='sidebar-footer-btn <?php echo isActivePath('/auth/settings.php') ? 'active-btn' : ''; ?>'>
                 <i class='fas fa-cog'></i>
@@ -1049,6 +1083,221 @@ if (Auth::check() && isset($_SESSION['profile_incomplete']) && $_SESSION['profil
                 navigator.serviceWorker.register('<?php echo asset('sw.js'); ?>');
             });
         }
+    </script>
+
+    <!-- Notification Dropdown -->
+    <div id="notif-dropdown" class="fixed z-[1060] w-80 max-w-[calc(100vw-2rem)] rounded-2xl shadow-2xl overflow-hidden hidden" role="dialog" aria-label="Benachrichtigungen">
+        <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+            <!-- Header -->
+            <div class="flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-700">
+                <h3 class="font-semibold text-slate-800 dark:text-slate-100 text-sm">Benachrichtigungen</h3>
+                <button id="notif-mark-all-read" class="text-xs text-blue-600 dark:text-blue-400 hover:underline font-medium" aria-label="Alle als gelesen markieren">Alle gelesen</button>
+            </div>
+            <!-- List -->
+            <div id="notif-list" class="max-h-80 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-700">
+                <div id="notif-loading" class="flex items-center justify-center py-8 text-slate-400 dark:text-slate-500">
+                    <i class="fas fa-spinner fa-spin mr-2"></i>
+                    <span class="text-sm">Wird geladen…</span>
+                </div>
+            </div>
+            <!-- Footer -->
+            <div id="notif-footer" class="px-4 py-2 border-t border-slate-200 dark:border-slate-700 text-center hidden">
+                <span class="text-xs text-slate-400 dark:text-slate-500">Keine weiteren Benachrichtigungen</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    (function() {
+        var NOTIF_API = '<?php echo asset('api/notifications.php'); ?>';
+        var CSRF_TOKEN = <?php echo json_encode($_notifCsrfToken); ?>;
+
+        var dropdown    = document.getElementById('notif-dropdown');
+        var notifList   = document.getElementById('notif-list');
+        var notifFooter = document.getElementById('notif-footer');
+        var mobileBadge  = document.getElementById('mobile-notif-badge');
+        var sidebarBadge = document.getElementById('sidebar-notif-badge');
+
+        function updateBadge(count) {
+            [mobileBadge, sidebarBadge].forEach(function(badge) {
+                if (!badge) return;
+                if (count > 0) {
+                    badge.textContent = count > 99 ? '99+' : count;
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                }
+            });
+        }
+
+        function formatTime(dateStr) {
+            var normalized = dateStr ? dateStr.replace(' ', 'T') : '';
+            var d = new Date(normalized);
+            if (isNaN(d.getTime())) return '';
+            var now = new Date();
+            var diff = Math.floor((now - d) / 1000);
+            if (diff < 60)    return 'Gerade eben';
+            if (diff < 3600)  return 'vor ' + Math.floor(diff / 60) + ' Min.';
+            if (diff < 86400) return 'vor ' + Math.floor(diff / 3600) + ' Std.';
+            return d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        }
+
+        function renderNotifications(notifications) {
+            if (!notifications || notifications.length === 0) {
+                notifList.innerHTML = '<div class="flex flex-col items-center justify-center py-10 text-slate-400 dark:text-slate-500"><i class="fas fa-bell-slash text-3xl mb-3 opacity-50"></i><p class="text-sm">Keine Benachrichtigungen</p></div>';
+                notifFooter.classList.add('hidden');
+                return;
+            }
+            var html = '';
+            notifications.forEach(function(n) {
+                var readClass = n.is_read == 1 ? 'opacity-60' : 'bg-blue-50 dark:bg-blue-900/20';
+                var dotClass  = n.is_read == 1 ? 'hidden' : '';
+                var tag = n.link ? 'a' : 'div';
+                var href = n.link ? ' href="' + escapeHtml(n.link) + '"' : '';
+                html += '<' + tag + href + ' class="notif-item flex items-start gap-3 px-4 py-3 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors ' + readClass + '" data-id="' + n.id + '" data-read="' + n.is_read + '">';
+                html += '<div class="mt-1 relative shrink-0"><i class="fas fa-bell text-blue-500 text-sm"></i><span class="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-red-500 ' + dotClass + '"></span></div>';
+                html += '<div class="flex-1 min-w-0">';
+                html += '<p class="text-xs font-semibold text-slate-800 dark:text-slate-100 truncate">' + escapeHtml(n.title) + '</p>';
+                html += '<p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-2">' + escapeHtml(n.message) + '</p>';
+                html += '<p class="text-[10px] text-slate-400 dark:text-slate-500 mt-1">' + formatTime(n.created_at) + '</p>';
+                html += '</div>';
+                html += '</' + tag + '>';
+            });
+            notifList.innerHTML = html;
+            notifFooter.classList.remove('hidden');
+
+            notifList.querySelectorAll('.notif-item').forEach(function(el) {
+                el.addEventListener('click', function() {
+                    var id = el.getAttribute('data-id');
+                    var isRead = el.getAttribute('data-read');
+                    if (isRead == 0) {
+                        markRead(id, el);
+                    }
+                });
+            });
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+
+        function loadNotifications() {
+            notifList.innerHTML = '<div id="notif-loading" class="flex items-center justify-center py-8 text-slate-400 dark:text-slate-500"><i class="fas fa-spinner fa-spin mr-2"></i><span class="text-sm">Wird geladen…</span></div>';
+            notifFooter.classList.add('hidden');
+            fetch(NOTIF_API, { credentials: 'same-origin' })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (data.success) {
+                        renderNotifications(data.notifications);
+                        updateBadge(data.unread_count);
+                    }
+                })
+                .catch(function() {
+                    notifList.innerHTML = '<div class="flex items-center justify-center py-8 text-red-400 text-sm">Fehler beim Laden</div>';
+                });
+        }
+
+        function markRead(id, el) {
+            fetch(NOTIF_API, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'mark_read', id: parseInt(id), csrf_token: CSRF_TOKEN })
+            }).then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.success && el) {
+                    el.classList.remove('bg-blue-50', 'dark:bg-blue-900/20');
+                    el.classList.add('opacity-60');
+                    el.setAttribute('data-read', '1');
+                    var dot = el.querySelector('.rounded-full.bg-red-500');
+                    if (dot) dot.classList.add('hidden');
+                    // Refresh badge count from server
+                    refreshBadgeCount();
+                }
+            }).catch(function() {});
+        }
+
+        function refreshBadgeCount() {
+            fetch(NOTIF_API, { credentials: 'same-origin' })
+                .then(function(r) { return r.json(); })
+                .then(function(data) {
+                    if (data.success) updateBadge(data.unread_count);
+                }).catch(function() {});
+        }
+
+        function markAllRead() {
+            fetch(NOTIF_API, {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'mark_all_read', csrf_token: CSRF_TOKEN })
+            }).then(function() {
+                updateBadge(0);
+                loadNotifications();
+            });
+        }
+
+        function positionDropdown(anchor) {
+            var rect = anchor.getBoundingClientRect();
+            var dropW = 320;
+            var left = rect.right - dropW;
+            if (left < 8) left = 8;
+            if (left + dropW > window.innerWidth - 8) left = window.innerWidth - dropW - 8;
+            dropdown.style.top  = (rect.bottom + 8) + 'px';
+            dropdown.style.left = left + 'px';
+            dropdown.style.width = dropW + 'px';
+        }
+
+        function openDropdown(anchor) {
+            positionDropdown(anchor);
+            dropdown.classList.remove('hidden');
+            loadNotifications();
+            document.addEventListener('click', outsideClick);
+        }
+
+        function closeDropdown() {
+            dropdown.classList.add('hidden');
+            document.removeEventListener('click', outsideClick);
+            [document.getElementById('mobile-notif-btn'), document.getElementById('sidebar-notif-btn')].forEach(function(b) {
+                if (b) b.setAttribute('aria-expanded', 'false');
+            });
+        }
+
+        function outsideClick(e) {
+            if (!dropdown.contains(e.target) &&
+                e.target !== document.getElementById('mobile-notif-btn') &&
+                e.target !== document.getElementById('sidebar-notif-btn') &&
+                !e.target.closest('#mobile-notif-btn') &&
+                !e.target.closest('#sidebar-notif-btn')) {
+                closeDropdown();
+            }
+        }
+
+        function toggleDropdown(anchor) {
+            if (dropdown.classList.contains('hidden')) {
+                openDropdown(anchor);
+                anchor.setAttribute('aria-expanded', 'true');
+            } else {
+                closeDropdown();
+            }
+        }
+
+        var mobileBell  = document.getElementById('mobile-notif-btn');
+        var sidebarBell = document.getElementById('sidebar-notif-btn');
+        if (mobileBell)  mobileBell.addEventListener('click',  function(e) { e.stopPropagation(); toggleDropdown(mobileBell); });
+        if (sidebarBell) sidebarBell.addEventListener('click', function(e) { e.stopPropagation(); toggleDropdown(sidebarBell); });
+
+        var markAllBtn = document.getElementById('notif-mark-all-read');
+        if (markAllBtn) markAllBtn.addEventListener('click', function(e) { e.stopPropagation(); markAllRead(); });
+
+        window.addEventListener('resize', function() {
+            if (!dropdown.classList.contains('hidden')) {
+                var expanded = document.querySelector('[aria-expanded="true"]#mobile-notif-btn, [aria-expanded="true"]#sidebar-notif-btn');
+                if (expanded) positionDropdown(expanded);
+            }
+        });
+    })();
     </script>
 
 </body>
