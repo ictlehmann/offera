@@ -149,7 +149,7 @@ ob_start();
             <p class="text-gray-500">Bitte Suchfilter anpassen</p>
         </div>
     <?php else: ?>
-        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-3">
             <?php foreach ($members as $member): ?>
                 <?php
                 // Determine role badge color
@@ -206,7 +206,7 @@ ob_start();
                 }
                 ?>
                 <div class="col">
-                <div class="card directory-card p-4 d-flex flex-column h-100 position-relative">
+                <div class="card directory-card p-3 d-flex flex-column h-100 position-relative">
                     <!-- Role Badge: Different colors for each role - Top Right Corner -->
                     <div class="position-absolute top-0 end-0 mt-3 me-3">
                         <span class="inline-block px-3 py-1 text-xs font-semibold directory-role-badge border <?php echo $badgeClass; ?>">
@@ -221,11 +221,12 @@ ob_start();
                         ?>
                         <!-- Image with fallback to placeholder on error -->
                         <div class="flex items-center justify-center text-white font-bold overflow-hidden"
-                             style="background-color:<?php echo htmlspecialchars($avatarColor); ?>; width:96px; height:96px; border-radius:9999px; font-size:1.875rem;">
+                             style="background-color:<?php echo htmlspecialchars($avatarColor); ?>; width:72px; height:72px; border-radius:9999px; font-size:1.5rem;">
                             <img 
                                 src="<?php echo htmlspecialchars($imageSrc); ?>" 
                                 alt="<?php echo htmlspecialchars($member['first_name'] . ' ' . $member['last_name']); ?>"
-                                class="w-24 h-24 rounded-full object-cover border-4 border-white shadow-md mx-auto"
+                                class="rounded-full object-cover border-4 border-white shadow-md mx-auto"
+                                style="width:72px;height:72px;"
                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
                             >
                             <div style="display:none;" class="w-full h-full flex items-center justify-center">
