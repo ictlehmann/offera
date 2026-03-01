@@ -150,10 +150,9 @@ ob_start();
                 // Generate initials for fallback
                 $initials = getMemberInitials($member['first_name'], $member['last_name']);
                 
-                // Use default profile image if image_path is empty
-                $imageSrc = !empty($member['image_path'])
-                    ? '../../uploads/profile_photos/' . str_replace("\0", '', basename($member['image_path']))
-                    : '../../assets/img/default_profil.png';
+                // Resolve profile image using the 3-level hierarchy:
+                // 1. User-uploaded image (image_path), 2. Entra photo, 3. Default
+                $imageSrc = '../../' . getProfileImageUrl($member['image_path'] ?? null, $member['entra_photo_path'] ?? null);
                 
                 // Info snippet: Show position, or study_program + degree
                 $infoSnippet = '';

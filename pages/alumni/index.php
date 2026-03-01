@@ -150,9 +150,9 @@ ob_start();
                         // Generate initials for fallback
                         $initials = getMemberInitials($profile['first_name'], $profile['last_name']);
                         $avatarColor = getAvatarColor($profile['first_name'] . ' ' . $profile['last_name']);
-                        $imagePath = !empty($profile['image_path'])
-                            ? '../../uploads/profile_photos/' . str_replace("\0", '', basename($profile['image_path']))
-                            : '../../assets/img/default_profil.png';
+                        // Resolve profile image using the 3-level hierarchy:
+                        // 1. User-uploaded image (image_path), 2. Entra photo, 3. Default
+                        $imagePath = '../../' . getProfileImageUrl($profile['image_path'] ?? null, $profile['entra_photo_path'] ?? null);
                         ?>
                         <div class="directory-avatar rounded-circle overflow-hidden border border-3 border-white shadow-sm"
                              style="background-color:<?php echo htmlspecialchars($avatarColor); ?>;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;">

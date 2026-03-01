@@ -406,7 +406,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $title = 'Profil - IBC Intranet';
-$profile_image = asset(Member::getImageUrl($profile['image_path'] ?? ''));
+$profile_image = asset(Member::getImageUrl($profile['image_path'] ?? '', $user['entra_photo_path'] ?? null));
 ob_start();
 ?>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" rel="stylesheet">

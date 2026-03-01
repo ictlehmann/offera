@@ -294,7 +294,7 @@ class Alumni extends Database {
                 
                 // Fetch all user roles and entra_roles in a single query
                 $placeholders = implode(',', array_fill(0, count($userIds), '?'));
-                $userStmt = $userDb->prepare("SELECT id, role, entra_roles FROM users WHERE id IN ($placeholders)");
+                $userStmt = $userDb->prepare("SELECT id, role, entra_roles, entra_photo_path FROM users WHERE id IN ($placeholders)");
                 $userStmt->execute($userIds);
                 $userDataMap = [];
                 foreach ($userStmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
@@ -310,6 +310,7 @@ class Alumni extends Database {
                     // Only include profiles where user has role 'alumni', 'alumni_board', or 'honorary_member'
                     if (in_array($userRole, ['alumni', 'alumni_board', 'honorary_member'])) {
                         $profile['role'] = $userRole;
+                        $profile['entra_photo_path'] = $userData['entra_photo_path'] ?? null;
                         
                         // Resolve display_role: prefer Entra display names, fall back to role label
                         $displayRole = null;

@@ -890,13 +890,16 @@ if (Auth::check() && isset($_SESSION['profile_incomplete']) && $_SESSION['profil
                 require_once __DIR__ . '/../models/Alumni.php';
                 $profile = Alumni::getProfileByUserId($currentUser['id']);
                 
-                // Resolve profile image for the desktop top navbar
-                if ($profile && !empty($profile['image_path'])) {
-                    $_defaultImg = defined('DEFAULT_PROFILE_IMAGE') ? DEFAULT_PROFILE_IMAGE : 'assets/img/default_profil.png';
-                    $_resolved = getProfileImageUrl($profile['image_path']);
-                    if ($_resolved !== $_defaultImg) {
-                        $navProfileImageUrl = $_resolved;
-                    }
+                // Resolve profile image for the desktop top navbar using the 3-level hierarchy:
+                // 1. User-uploaded image (alumni_profiles.image_path)
+                // 2. Entra ID cached photo (users.entra_photo_path)
+                // 3. Default profile image (no image shown in navbar)
+                $_defaultImg   = defined('DEFAULT_PROFILE_IMAGE') ? DEFAULT_PROFILE_IMAGE : 'assets/img/default_profil.png';
+                $_uploadedPath = $profile ? ($profile['image_path'] ?? null) : null;
+                $_entraPath    = $currentUser['entra_photo_path'] ?? null;
+                $_resolved     = getProfileImageUrl($_uploadedPath, $_entraPath);
+                if ($_resolved !== $_defaultImg) {
+                    $navProfileImageUrl = $_resolved;
                 }
                 
                 // Profile data may be user-edited, so don't transform it

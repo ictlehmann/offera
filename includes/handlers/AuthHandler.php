@@ -1022,6 +1022,29 @@ class AuthHandler {
             return;
         }
 
+        // --- Sync Entra profile photo (only when user has no manually uploaded photo) ---
+        try {
+            require_once __DIR__ . '/../../includes/models/User.php';
+            require_once __DIR__ . '/../../includes/models/Alumni.php';
+
+            $contentDb    = Database::getContentDB();
+            $profileStmt  = $contentDb->prepare("SELECT image_path FROM alumni_profiles WHERE user_id = ?");
+            $profileStmt->execute([$userId]);
+            $profileRow   = $profileStmt->fetch();
+            $hasUpload    = !empty($profileRow['image_path']);
+
+            if (!$hasUpload) {
+                $photoService = new MicrosoftGraphService();
+                $photoData = $photoService->getUserPhoto($azureOid);
+                if ($photoData !== null) {
+                    User::cacheEntraPhoto($userId, $photoData);
+                }
+            }
+        } catch (Exception $e) {
+            // Non-fatal: photo sync failure must not break login
+            error_log('[syncEntraData] Photo sync failed for user ' . $userId . ': ' . $e->getMessage());
+        }
+
         error_log(sprintf(
             '[syncEntraData] Synced user %d: role=%s, entra_roles=%d groups, first_name=%s, mail=%s',
             $userId,

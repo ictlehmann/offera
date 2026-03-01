@@ -109,6 +109,7 @@ class Member {
                 u.email,
                 u.role,
                 u.entra_roles,
+                u.entra_photo_path,
                 u.job_title,
                 u.created_at
             FROM users u
@@ -138,6 +139,7 @@ class Member {
                 $profile['email'] = $user['email'];
                 $profile['role'] = $user['role'];
                 $profile['entra_roles'] = $user['entra_roles'] ?? null;
+                $profile['entra_photo_path'] = $user['entra_photo_path'] ?? null;
                 $profile['job_title'] = $user['job_title'] ?? null;
                 $profile['user_created_at'] = $user['created_at'];
                 
@@ -297,11 +299,12 @@ class Member {
     /**
      * Get the profile image URL with fallback to default image
      *
-     * @param string|null $imagePath The stored image path from the database
+     * @param string|null $imagePath      User-uploaded image path from the database
+     * @param string|null $entraPhotoPath Entra ID cached photo path from users table
      * @return string URL-ready image path
      */
-    public static function getImageUrl(?string $imagePath): string {
-        return getProfileImageUrl($imagePath);
+    public static function getImageUrl(?string $imagePath, ?string $entraPhotoPath = null): string {
+        return getProfileImageUrl($imagePath, $entraPhotoPath);
     }
 
     /**

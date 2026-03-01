@@ -89,7 +89,7 @@ ob_start();
             <div class="flex justify-center md:justify-start">
                 <?php 
                 $initials = strtoupper(substr($profile['first_name'], 0, 1) . substr($profile['last_name'], 0, 1));
-                $imagePath = asset(getProfileImageUrl($profile['image_path'] ?? ''));
+                $imagePath = asset(getProfileImageUrl($profile['image_path'] ?? '', $profileUser['entra_photo_path'] ?? null));
                 ?>
                 <div class="w-32 h-32 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-4xl font-bold overflow-hidden shadow-lg">
                     <?php if (!empty($imagePath)): ?>

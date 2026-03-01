@@ -277,25 +277,53 @@ function getAvatarColor($name) {
 }
 
 /**
- * Get the profile image URL with fallback to the default profile image
- * Returns the stored path only if it is non-empty AND the file exists on the server.
- * Otherwise falls back to the default profile image.
+ * Resolve a single image path: returns the path only if it is non-empty
+ * AND the file actually exists on the server (path-traversal safe).
  *
- * @param string|null $imagePath The stored image path from the database
+ * @param string|null $imagePath Relative path to check
+ * @return string|null The path if valid, null otherwise
+ */
+function resolveImagePath(?string $imagePath): ?string {
+    if (empty($imagePath)) {
+        return null;
+    }
+    $basePath = realpath(__DIR__ . '/..');
+    if ($basePath === false) {
+        return null;
+    }
+    $fullPath = realpath($basePath . '/' . ltrim($imagePath, '/'));
+    if ($fullPath !== false && str_starts_with($fullPath, $basePath) && is_file($fullPath)) {
+        return $imagePath;
+    }
+    return null;
+}
+
+/**
+ * Get the profile image URL with fallback hierarchy:
+ *  1. User-uploaded image ($imagePath from alumni_profiles.image_path)
+ *  2. Entra ID cached photo ($entraPhotoPath from users.entra_photo_path)
+ *  3. Default profile image (assets/img/default_profil.png)
+ *
+ * @param string|null $imagePath        User-uploaded image path from the database
+ * @param string|null $entraPhotoPath   Entra ID cached photo path from users table
  * @return string URL-ready image path
  */
-function getProfileImageUrl(?string $imagePath): string {
+function getProfileImageUrl(?string $imagePath, ?string $entraPhotoPath = null): string {
     $default = defined('DEFAULT_PROFILE_IMAGE') ? DEFAULT_PROFILE_IMAGE : 'assets/img/default_profil.png';
-    if (!empty($imagePath)) {
-        $basePath = realpath(__DIR__ . '/..');
-        if ($basePath !== false) {
-            $fullPath = realpath($basePath . '/' . ltrim($imagePath, '/'));
-            if ($fullPath !== false &&
-                str_starts_with($fullPath, $basePath) && is_file($fullPath)) {
-                return $imagePath;
-            }
-        }
+
+    // 1. User-uploaded image has highest priority
+    $resolved = resolveImagePath($imagePath);
+    if ($resolved !== null) {
+        return $resolved;
     }
+
+    // 2. Fall back to Entra ID cached photo
+    $resolved = resolveImagePath($entraPhotoPath);
+    if ($resolved !== null) {
+        return $resolved;
+    }
+
+    // 3. Default profile image
     return $default;
 }
 
