@@ -1175,6 +1175,69 @@ select:focus {
     transform: translate3d(0, -2px, 0);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
+
+/* Responsive table: Mobile-Card layout */
+@media (max-width: 640px) {
+    #usersTable thead {
+        display: none;
+    }
+
+    #usersTable,
+    #usersTable tbody,
+    #usersTable tr,
+    #usersTable td {
+        display: block;
+        width: 100%;
+    }
+
+    #usersTable tr {
+        margin-bottom: 1rem;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.75rem;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    }
+
+    #usersTable td {
+        display: flex;
+        align-items: flex-start;
+        padding: 0.625rem 1rem;
+        border-bottom: 1px solid #f3f4f6;
+        white-space: normal;
+    }
+
+    #usersTable td:last-child {
+        border-bottom: none;
+    }
+
+    #usersTable td::before {
+        content: attr(data-label);
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #6b7280;
+        min-width: 7rem;
+        flex-shrink: 0;
+        padding-top: 0.2rem;
+    }
+
+    .dark #usersTable td {
+        border-bottom-color: #374151;
+    }
+
+    .dark #usersTable tr {
+        border-color: #374151;
+    }
+
+    .dark #usersTable td::before {
+        color: #9ca3af;
+    }
+
+    .user-row:hover {
+        transform: none;
+    }
+}
 </style>
 
 <?php
