@@ -1111,26 +1111,6 @@ document.getElementById('eventForm')?.addEventListener('submit', function(e) {
                     break;
                 }
                 
-                // Validate that slot times are within event time range
-                if (eventStartDate && eventEndDate && (slotStartDate < eventStartDate || slotEndDate > eventEndDate)) {
-                    e.preventDefault();
-                    
-                    const formattedEventStart = formatDateTime(startTime);
-                    const formattedEventEnd = formatDateTime(endTime);
-                    const formattedSlotStart = formatDateTime(slotStart);
-                    const formattedSlotEnd = formatDateTime(slotEnd);
-                    
-                    const errorMessage = 
-                        `Helfer-Slot Zeitfenster muss innerhalb der Event-Zeit liegen!\n\n` +
-                        `Event: ${formattedEventStart} bis ${formattedEventEnd}\n` +
-                        `Slot: ${formattedSlotStart} bis ${formattedSlotEnd}\n\n` +
-                        `Bitte passe die Slot-Zeiten an.`;
-                    
-                    alert(errorMessage);
-                    validationFailed = true;
-                    break;
-                }
-                
                 slots.push({
                     start_time: slotStart,
                     end_time: slotEnd,
