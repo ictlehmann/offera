@@ -65,40 +65,26 @@ ob_start();
         <?php endif; ?>
     </div>
 
-    <!-- Search Bar and Filters -->
-    <div class="card p-6 mb-8">
-        <form method="GET" action="" class="space-y-4 sm:space-y-0 sm:flex sm:gap-4">
-            <!-- Keyword Search -->
-            <div class="flex-1">
-                <label for="search" class="block text-sm font-medium text-gray-700 mb-2">
-                    <i class="fas fa-search mr-1 text-purple-600"></i>
-                    Search by Name, Position, Company or Industry
-                </label>
+    <!-- Search/Filter Toolbar -->
+    <div class="directory-toolbar mb-8">
+        <form method="GET" action="">
+            <div class="directory-toolbar-group">
+                <label for="search"><i class="fas fa-search me-1" aria-hidden="true"></i>Suche</label>
                 <div class="directory-search-wrapper">
                     <i class="fas fa-search directory-search-icon directory-search-icon--purple" aria-hidden="true"></i>
-                    <input 
-                        type="text" 
-                        id="search" 
-                        name="search" 
+                    <input
+                        type="text"
+                        id="search"
+                        name="search"
                         value="<?php echo htmlspecialchars($searchKeyword); ?>"
-                        placeholder="Enter search term..."
-                        class="w-full py-3 border border-gray-300 transition-all"
+                        placeholder="Name, Position, Unternehmen..."
                     >
                 </div>
             </div>
-            
-            <!-- Industry Filter -->
-            <div class="flex-1">
-                <label for="industry" class="block text-sm font-medium text-gray-700 mb-2">
-                    <i class="fas fa-industry mr-1 text-purple-600"></i>
-                    Filter by Industry
-                </label>
-                <select 
-                    id="industry" 
-                    name="industry"
-                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-                >
-                    <option value="">All Industries</option>
+            <div class="directory-toolbar-group">
+                <label for="industry"><i class="fas fa-industry me-1" aria-hidden="true"></i>Branche</label>
+                <select id="industry" name="industry" class="form-select rounded-pill">
+                    <option value="">Alle Branchen</option>
                     <?php foreach ($industries as $industry): ?>
                         <option value="<?php echo htmlspecialchars($industry); ?>" <?php echo $industryFilter === $industry ? 'selected' : ''; ?>>
                             <?php echo htmlspecialchars($industry); ?>
@@ -106,28 +92,17 @@ ob_start();
                     <?php endforeach; ?>
                 </select>
             </div>
-            
-            <!-- Search Button -->
-            <div class="sm:flex sm:items-end">
-                <button 
-                    type="submit"
-                    class="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-purple-800 transition-all shadow-lg hover:shadow-xl"
-                >
-                    <i class="fas fa-search mr-2"></i>
-                    Search
+            <div class="directory-toolbar-actions">
+                <button type="submit" class="btn fw-semibold text-white" style="background:linear-gradient(135deg,#7c3aed,#6d28d9);padding:0.6rem 1.25rem;">
+                    <i class="fas fa-search me-2"></i>Suchen
                 </button>
+                <?php if (!empty($searchKeyword) || !empty($industryFilter)): ?>
+                <a href="index.php" class="btn btn-outline-secondary" title="Filter zurücksetzen">
+                    <i class="fas fa-times"></i>
+                </a>
+                <?php endif; ?>
             </div>
         </form>
-        
-        <!-- Clear Filters -->
-        <?php if (!empty($searchKeyword) || !empty($industryFilter)): ?>
-            <div class="mt-4">
-                <a href="index.php" class="text-sm text-purple-600 hover:text-purple-800 transition-colors">
-                    <i class="fas fa-times-circle mr-1"></i>
-                    Clear all filters
-                </a>
-            </div>
-        <?php endif; ?>
     </div>
 
     <!-- Results Count -->
@@ -161,7 +136,7 @@ ob_start();
                 $displayRole = htmlspecialchars($profile['display_role'] ?? Auth::getRoleLabel($profile['role'] ?? ''));
                 ?>
                 <div class="col">
-                <div class="card directory-card p-4 d-flex flex-column h-100 position-relative">
+                <div class="card directory-card directory-card--alumni p-4 d-flex flex-column h-100 position-relative">
                     <!-- Role Badge: Top Right Corner -->
                     <div class="position-absolute top-0 end-0 mt-3 me-3">
                         <span class="inline-block px-3 py-1 text-xs font-semibold directory-role-badge border <?php echo $badgeClass; ?>">
@@ -170,7 +145,7 @@ ob_start();
                     </div>
                     
                     <!-- Profile Image -->
-                    <div class="flex justify-center mb-3">
+                    <div class="d-flex justify-content-center mb-3">
                         <?php 
                         // Generate initials for fallback
                         $initials = getMemberInitials($profile['first_name'], $profile['last_name']);
@@ -179,15 +154,15 @@ ob_start();
                             ? '../../uploads/profile_photos/' . str_replace("\0", '', basename($profile['image_path']))
                             : '../../assets/img/default_profil.png';
                         ?>
-                        <div class="flex items-center justify-center text-white font-bold overflow-hidden"
-                             style="background-color:<?php echo htmlspecialchars($avatarColor); ?>; width:96px; height:96px; border-radius:9999px; font-size:1.875rem;">
-                            <img 
-                                src="<?php echo htmlspecialchars($imagePath); ?>" 
+                        <div class="directory-avatar rounded-circle overflow-hidden border border-3 border-white shadow-sm"
+                             style="background-color:<?php echo htmlspecialchars($avatarColor); ?>;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;">
+                            <img
+                                src="<?php echo htmlspecialchars($imagePath); ?>"
                                 alt="<?php echo htmlspecialchars($profile['first_name'] . ' ' . $profile['last_name']); ?>"
-                                class="w-24 h-24 rounded-full object-cover border-4 border-white shadow-md mx-auto"
+                                style="width:100%;height:100%;object-fit:cover;"
                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
                             >
-                            <div style="display:none;" class="w-full h-full flex items-center justify-center">
+                            <div style="display:none;width:100%;height:100%;" class="d-flex align-items-center justify-content-center">
                                 <?php echo htmlspecialchars($initials); ?>
                             </div>
                         </div>
@@ -215,13 +190,13 @@ ob_start();
                     </div>
                     
                     <!-- Social Icons & Contact -->
-                    <div class="flex justify-center gap-3 mt-4 mb-3">
+                    <div class="d-flex justify-content-center gap-3 mt-4 mb-3">
                         <?php if (!empty($profile['linkedin_url'])): ?>
                             <a 
                                 href="<?php echo htmlspecialchars($profile['linkedin_url']); ?>" 
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                class="w-10 h-10 rounded-full flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors"
+                                class="directory-contact-icon"
                                 title="LinkedIn Profile"
                             >
                                 <i class="fab fa-linkedin-in"></i>
@@ -233,7 +208,7 @@ ob_start();
                                 href="<?php echo htmlspecialchars($profile['xing_url']); ?>" 
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                class="w-10 h-10 rounded-full flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors"
+                                class="directory-contact-icon"
                                 title="Xing Profile"
                             >
                                 <i class="fab fa-xing"></i>

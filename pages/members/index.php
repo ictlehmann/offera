@@ -64,38 +64,25 @@ ob_start();
         <?php endif; ?>
     </div>
 
-    <!-- Filter/Search Bar -->
-    <div class="card p-6 mb-8">
-        <form method="GET" action="" class="space-y-4 sm:space-y-0 sm:flex sm:gap-4">
-            <!-- Search Input (Text) -->
-            <div class="flex-1">
-                <label for="search" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Nach Name suchen
-                </label>
+    <!-- Filter/Search Toolbar -->
+    <div class="directory-toolbar mb-8">
+        <form method="GET" action="">
+            <div class="directory-toolbar-group">
+                <label for="search"><i class="fas fa-search me-1" aria-hidden="true"></i>Suche</label>
                 <div class="directory-search-wrapper">
                     <i class="fas fa-search directory-search-icon" aria-hidden="true"></i>
-                    <input 
-                        type="text" 
-                        id="search" 
-                        name="search" 
+                    <input
+                        type="text"
+                        id="search"
+                        name="search"
                         value="<?php echo htmlspecialchars($searchKeyword); ?>"
                         placeholder="Name eingeben..."
-                        class="w-full py-3 bg-white text-gray-900 dark:bg-gray-800 dark:text-white transition-all"
                     >
                 </div>
             </div>
-            
-            <!-- Role Filter (Dropdown) -->
-            <div class="flex-1">
-                <label for="role" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    <i class="fas fa-filter mr-1 text-blue-600"></i>
-                    Nach Rolle filtern
-                </label>
-                <select 
-                    id="role" 
-                    name="role"
-                    class="w-full px-4 py-3 bg-white border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 transition-all"
-                >
+            <div class="directory-toolbar-group">
+                <label for="role"><i class="fas fa-filter me-1" aria-hidden="true"></i>Rolle</label>
+                <select id="role" name="role" class="form-select rounded-pill">
                     <option value="">Alle</option>
                     <option value="candidate" <?php echo $roleFilter === 'candidate' ? 'selected' : ''; ?>>Anwärter</option>
                     <option value="member" <?php echo $roleFilter === 'member' ? 'selected' : ''; ?>>Mitglieder</option>
@@ -109,28 +96,17 @@ ob_start();
                     <option value="board_external" <?php echo $roleFilter === 'board_external' ? 'selected' : ''; ?>>Vorstand Extern</option>
                 </select>
             </div>
-            
-            <!-- Search Button -->
-            <div class="sm:flex sm:items-end">
-                <button 
-                    type="submit"
-                    class="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg hover:shadow-xl"
-                >
-                    <i class="fas fa-search mr-2"></i>
-                    Suchen
+            <div class="directory-toolbar-actions">
+                <button type="submit" class="btn btn-primary fw-semibold" style="padding:0.6rem 1.25rem;">
+                    <i class="fas fa-search me-2"></i>Suchen
                 </button>
+                <?php if (!empty($searchKeyword) || !empty($roleFilter)): ?>
+                <a href="index.php" class="btn btn-outline-secondary" title="Alle Filter zurücksetzen">
+                    <i class="fas fa-times"></i>
+                </a>
+                <?php endif; ?>
             </div>
         </form>
-        
-        <!-- Clear Filters -->
-        <?php if (!empty($searchKeyword) || !empty($roleFilter)): ?>
-            <div class="mt-4">
-                <a href="index.php" class="text-sm text-blue-600 hover:text-blue-800 transition-colors">
-                    <i class="fas fa-times-circle mr-1"></i>
-                    Alle Filter zurücksetzen
-                </a>
-            </div>
-        <?php endif; ?>
     </div>
 
     <!-- Results Count -->
@@ -206,7 +182,7 @@ ob_start();
                 }
                 ?>
                 <div class="col">
-                <div class="card directory-card p-3 d-flex flex-column h-100 position-relative">
+                <div class="card directory-card directory-card--members p-3 d-flex flex-column h-100 position-relative">
                     <!-- Role Badge: Different colors for each role - Top Right Corner -->
                     <div class="position-absolute top-0 end-0 mt-3 me-3">
                         <span class="inline-block px-3 py-1 text-xs font-semibold directory-role-badge border <?php echo $badgeClass; ?>">
@@ -215,21 +191,20 @@ ob_start();
                     </div>
                     
                     <!-- Profile Image (Circle, top center) -->
-                    <div class="flex justify-center mb-3 mt-2">
+                    <div class="d-flex justify-content-center mb-3 mt-2">
                         <?php
                         $avatarColor = getAvatarColor($member['first_name'] . ' ' . $member['last_name']);
                         ?>
                         <!-- Image with fallback to placeholder on error -->
-                        <div class="flex items-center justify-center text-white font-bold overflow-hidden"
-                             style="background-color:<?php echo htmlspecialchars($avatarColor); ?>; width:72px; height:72px; border-radius:9999px; font-size:1.5rem;">
-                            <img 
-                                src="<?php echo htmlspecialchars($imageSrc); ?>" 
+                        <div class="directory-avatar directory-avatar--sm rounded-circle overflow-hidden border border-3 border-white shadow-sm"
+                             style="background-color:<?php echo htmlspecialchars($avatarColor); ?>;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;">
+                            <img
+                                src="<?php echo htmlspecialchars($imageSrc); ?>"
                                 alt="<?php echo htmlspecialchars($member['first_name'] . ' ' . $member['last_name']); ?>"
-                                class="rounded-full object-cover border-4 border-white shadow-md mx-auto"
-                                style="width:72px;height:72px;"
+                                style="width:100%;height:100%;object-fit:cover;"
                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
                             >
-                            <div style="display:none;" class="w-full h-full flex items-center justify-center">
+                            <div style="display:none;width:100%;height:100%;" class="d-flex align-items-center justify-content-center">
                                 <?php echo htmlspecialchars($initials); ?>
                             </div>
                         </div>
@@ -253,12 +228,12 @@ ob_start();
                     <?php endif; ?>
                     
                     <!-- Contact Icons: Round buttons for Mail, LinkedIn and Xing (if set) -->
-                    <div class="flex justify-center gap-3 mt-4 mb-3">
+                    <div class="d-flex justify-content-center gap-3 mt-4 mb-3">
                         <!-- Mail Icon -->
                         <?php if (!empty($member['email'])): ?>
                             <a 
                                 href="mailto:<?php echo htmlspecialchars($member['email']); ?>" 
-                                class="w-10 h-10 rounded-full flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors"
+                                class="directory-contact-icon"
                                 title="E-Mail senden"
                             >
                                 <i class="fas fa-envelope"></i>
@@ -282,7 +257,7 @@ ob_start();
                                 href="<?php echo htmlspecialchars($linkedinUrl); ?>" 
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                class="w-10 h-10 rounded-full flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors"
+                                class="directory-contact-icon"
                                 title="LinkedIn Profil"
                             >
                                 <i class="fab fa-linkedin-in"></i>
@@ -307,7 +282,7 @@ ob_start();
                                 href="<?php echo htmlspecialchars($xingUrl); ?>" 
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                class="w-10 h-10 rounded-full flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 transition-colors"
+                                class="directory-contact-icon"
                                 title="Xing Profil"
                             >
                                 <i class="fab fa-xing"></i>
