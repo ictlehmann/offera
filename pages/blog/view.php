@@ -194,8 +194,10 @@ ob_start();
                      class="w-full h-full object-cover">
             </div>
         <?php else: ?>
-            <div class="w-full h-96 bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
-                <i class="fas fa-newspaper text-9xl text-gray-400"></i>
+            <div class="w-full h-96 overflow-hidden bg-gray-200">
+                <img src="/<?php echo htmlspecialchars(BlogPost::DEFAULT_IMAGE); ?>"
+                     alt=""
+                     class="w-full h-full object-cover">
             </div>
         <?php endif; ?>
         

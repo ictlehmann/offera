@@ -116,9 +116,21 @@ class Member {
             WHERE " . $userWhereSQL . "
         ";
         
-        $userStmt = $userDb->prepare($userSql);
-        $userStmt->execute($userParams);
-        $users = $userStmt->fetchAll();
+        try {
+            $userStmt = $userDb->prepare($userSql);
+            $userStmt->execute($userParams);
+            $users = $userStmt->fetchAll();
+        } catch (PDOException $e) {
+            // SQLSTATE 42S22 = unknown column; fall back if entra_photo_path doesn't exist yet
+            if ($e->getCode() === '42S22' && strpos($e->getMessage(), 'entra_photo_path') !== false) {
+                $userSql = str_replace('u.entra_photo_path,', 'NULL AS entra_photo_path,', $userSql);
+                $userStmt = $userDb->prepare($userSql);
+                $userStmt->execute($userParams);
+                $users = $userStmt->fetchAll();
+            } else {
+                throw $e;
+            }
+        }
         
         // Step 4: Create a map of user_id => user data
         $userMap = [];

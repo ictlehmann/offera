@@ -10,6 +10,19 @@ class Project {
      * Upload directory for project documentation
      */
     private const DOCUMENTATION_UPLOAD_DIR = 'uploads/projects/';
+
+    // Default image used when no project image has been uploaded
+    const DEFAULT_IMAGE = 'assets/img/ibc_logo_original.webp';
+
+    /**
+     * Get the image URL for a project, falling back to the default image if none is set.
+     *
+     * @param string|null $imagePath Stored image path from the database
+     * @return string URL-ready image path
+     */
+    public static function getImageUrl(?string $imagePath): string {
+        return !empty($imagePath) ? $imagePath : self::DEFAULT_IMAGE;
+    }
     
     /**
      * Allowed MIME types for documentation uploads (PDF)
@@ -377,7 +390,15 @@ class Project {
             }
         }
         
-        return $stmt->fetchAll();
+        $projects = $stmt->fetchAll();
+
+        // Apply default image fallback to each project
+        foreach ($projects as &$project) {
+            $project['image_path'] = self::getImageUrl($project['image_path']);
+        }
+        unset($project);
+
+        return $projects;
     }
     
     /**
@@ -387,7 +408,14 @@ class Project {
         $db = Database::getContentDB();
         $stmt = $db->prepare("SELECT * FROM projects WHERE id = ?");
         $stmt->execute([$id]);
-        return $stmt->fetch();
+        $project = $stmt->fetch();
+
+        if ($project) {
+            // Apply default image fallback
+            $project['image_path'] = self::getImageUrl($project['image_path']);
+        }
+
+        return $project;
     }
     
     /**

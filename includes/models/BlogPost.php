@@ -6,6 +6,19 @@
 
 class BlogPost {
     
+    // Default image used when no blog post image has been uploaded
+    const DEFAULT_IMAGE = 'assets/img/ibc_logo_original.webp';
+
+    /**
+     * Get the image URL for a blog post, falling back to the default image if none is set.
+     *
+     * @param string|null $imagePath Stored image path from the database
+     * @return string URL-ready image path
+     */
+    public static function getImageUrl(?string $imagePath): string {
+        return !empty($imagePath) ? $imagePath : self::DEFAULT_IMAGE;
+    }
+
     /**
      * Get all blog posts with optional filtering and pagination
      * Joins with User DB to get author names
@@ -67,9 +80,10 @@ class BlogPost {
             $authorMap[$author['id']] = $author['email'];
         }
         
-        // Add author email to each post
+        // Add author email and image fallback to each post
         foreach ($posts as &$post) {
             $post['author_email'] = $authorMap[$post['author_id']] ?? 'Unknown';
+            $post['image_path'] = self::getImageUrl($post['image_path']);
         }
         
         return $posts;

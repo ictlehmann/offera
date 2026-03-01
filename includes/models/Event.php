@@ -14,6 +14,19 @@ class Event {
     
     // Fields to exclude from update operations
     const EXCLUDED_UPDATE_FIELDS = ['id', 'allowed_roles', 'helper_types', 'status'];
+
+    // Default image used when no event image has been uploaded
+    const DEFAULT_IMAGE = 'assets/img/ibc_logo_original.webp';
+
+    /**
+     * Get the image URL for an event, falling back to the default image if none is set.
+     *
+     * @param string|null $imagePath Stored image path from the database
+     * @return string URL-ready image path
+     */
+    public static function getImageUrl(?string $imagePath): string {
+        return !empty($imagePath) ? $imagePath : self::DEFAULT_IMAGE;
+    }
     
     /**
      * Calculate event status based on current time and event dates
@@ -377,6 +390,9 @@ class Event {
         
         // Get list of attendees with user ID and name
         $event['attendees'] = self::getEventAttendees($id);
+
+        // Apply default image fallback
+        $event['image_path'] = self::getImageUrl($event['image_path']);
         
         return $event;
     }
@@ -665,6 +681,8 @@ class Event {
             }
             
             $event['allowed_roles'] = $allowedRoles;
+            // Apply default image fallback
+            $event['image_path'] = self::getImageUrl($event['image_path']);
             $filteredEvents[] = $event;
         }
         
