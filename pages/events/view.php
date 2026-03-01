@@ -91,6 +91,9 @@ if ($event['needs_helpers'] && $userRole !== 'alumni') {
 $signupDeadline = $event['start_time']; // Default to event start time
 $canCancel = strtotime($signupDeadline) > time();
 
+// Check if user has permission to add financial statistics
+$canAddStats = in_array($userRole, array_merge(Auth::BOARD_ROLES, ['alumni_board']));
+
 $title = htmlspecialchars($event['title']) . ' - Events';
 ob_start();
 ?>
@@ -349,6 +352,18 @@ $statusInfo = $statusLabels[$currentStatus] ?? ['label' => $currentStatus, 'icon
                 </div>
             </div>
 
+            <?php if ($canAddStats): ?>
+            <!-- Add Financial Stats Card -->
+            <div class="glass-card shadow-soft rounded-2xl p-5">
+                <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Verwaltung</h3>
+                <button onclick="openAddStatsModal()"
+                        class="w-full inline-flex items-center justify-center px-5 py-3 bg-purple-600 text-white rounded-xl font-semibold hover:bg-purple-700 ease-premium">
+                    <i class="fas fa-chart-bar mr-2"></i>
+                    Statistiken nachtragen
+                </button>
+            </div>
+            <?php endif; ?>
+
         </div><!-- /sidebar -->
     </div><!-- /grid -->
 
@@ -440,6 +455,81 @@ $statusInfo = $statusLabels[$currentStatus] ?? ['label' => $currentStatus, 'icon
         </div>
     <?php endif; ?>
 </div>
+
+<?php if ($canAddStats): ?>
+<!-- Add Financial Stats Modal -->
+<div id="addStatsModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-lg w-full max-w-lg max-h-[85vh] flex flex-col overflow-hidden">
+        <div class="p-6 overflow-y-auto flex-1">
+            <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
+                <i class="fas fa-chart-bar text-purple-600 mr-2"></i>
+                Statistiken nachtragen
+            </h3>
+
+            <div class="space-y-4">
+                <!-- Category -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Kategorie</label>
+                    <select id="statsCategory" onchange="onStatsCategoryChange()"
+                            class="w-full px-4 py-2 bg-white border border-gray-300 text-gray-900 rounded-lg focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        <option value="Verkauf">Verkauf</option>
+                        <option value="Kalkulation">Kalkulation</option>
+                        <option value="Spenden">Spenden</option>
+                    </select>
+                </div>
+
+                <!-- Item-based fields (Verkauf / Kalkulation) -->
+                <div id="statsItemFields" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Artikelname</label>
+                        <input type="text" id="statsItemName" maxlength="255"
+                               class="w-full px-4 py-2 bg-white border border-gray-300 text-gray-900 rounded-lg focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                               placeholder="z.B. Bratwurst">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Menge</label>
+                            <input type="number" id="statsQuantity" min="0" step="1" value="0"
+                                   class="w-full px-4 py-2 bg-white border border-gray-300 text-gray-900 rounded-lg focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Umsatz (€)</label>
+                            <input type="number" id="statsRevenue" min="0" step="0.01"
+                                   class="w-full px-4 py-2 bg-white border border-gray-300 text-gray-900 rounded-lg focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                   placeholder="Optional">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Jahr</label>
+                        <input type="number" id="statsYear" min="2000" max="<?php echo date('Y') + 10; ?>" value="<?php echo date('Y', strtotime($event['start_time'])); ?>"
+                               class="w-full px-4 py-2 bg-white border border-gray-300 text-gray-900 rounded-lg focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    </div>
+                </div>
+
+                <!-- Donations field (Spenden) -->
+                <div id="statsDonationsField" class="hidden">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Spendenbetrag (€)</label>
+                    <input type="number" id="statsDonationsTotal" min="0" step="0.01" value="0"
+                           class="w-full px-4 py-2 bg-white border border-gray-300 text-gray-900 rounded-lg focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                </div>
+
+                <div id="statsError" class="hidden p-3 bg-red-100 border border-red-300 text-red-700 rounded-lg text-sm"></div>
+            </div>
+        </div>
+
+        <div class="px-6 pb-6 flex space-x-4">
+            <button type="button" id="closeAddStatsModalBtn"
+                    class="flex-1 px-6 py-3 bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition">
+                Abbrechen
+            </button>
+            <button type="button" onclick="submitAddStats()"
+                    class="flex-1 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">
+                <i class="fas fa-save mr-2"></i>Speichern
+            </button>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
 
 <!-- Hero & Card Styles -->
 <style>
@@ -599,6 +689,107 @@ function cancelSignup(signupId, message = 'Möchtest Du Deine Anmeldung wirklich
 function cancelHelperSlot(signupId) {
     cancelSignup(signupId, 'Möchtest Du Dich wirklich austragen?', 'Erfolgreich ausgetragen');
 }
+
+<?php if ($canAddStats): ?>
+// ── Add Financial Stats Modal ──────────────────────────────────────────────────
+
+function openAddStatsModal() {
+    document.getElementById('addStatsModal').classList.remove('hidden');
+    document.getElementById('statsError').classList.add('hidden');
+}
+
+function closeAddStatsModal() {
+    document.getElementById('addStatsModal').classList.add('hidden');
+}
+
+function onStatsCategoryChange() {
+    const category = document.getElementById('statsCategory').value;
+    const itemFields = document.getElementById('statsItemFields');
+    const donationsField = document.getElementById('statsDonationsField');
+    if (category === 'Spenden') {
+        itemFields.classList.add('hidden');
+        donationsField.classList.remove('hidden');
+    } else {
+        itemFields.classList.remove('hidden');
+        donationsField.classList.add('hidden');
+    }
+}
+
+function submitAddStats() {
+    const category = document.getElementById('statsCategory').value;
+    const errorDiv = document.getElementById('statsError');
+    errorDiv.classList.add('hidden');
+
+    let payload = {
+        event_id: <?php echo (int)$eventId; ?>,
+        csrf_token: csrfToken
+    };
+
+    if (category === 'Spenden') {
+        const donationsTotalRaw = document.getElementById('statsDonationsTotal').value;
+        const donationsTotal = parseFloat(donationsTotalRaw);
+        if (donationsTotalRaw === '' || isNaN(donationsTotal) || donationsTotal < 0) {
+            errorDiv.textContent = 'Bitte einen gültigen Spendenbetrag (>= 0) eingeben.';
+            errorDiv.classList.remove('hidden');
+            return;
+        }
+        payload.donations_total = donationsTotal;
+    } else {
+        const itemName = document.getElementById('statsItemName').value.trim();
+        const quantityRaw = document.getElementById('statsQuantity').value;
+        const quantity = parseInt(quantityRaw);
+        const revenue = document.getElementById('statsRevenue').value;
+        const year = document.getElementById('statsYear').value;
+
+        if (!itemName) {
+            errorDiv.textContent = 'Bitte einen Artikelnamen eingeben.';
+            errorDiv.classList.remove('hidden');
+            return;
+        }
+        if (quantityRaw === '' || isNaN(quantity) || quantity < 0) {
+            errorDiv.textContent = 'Bitte eine gültige Menge (>= 0) eingeben.';
+            errorDiv.classList.remove('hidden');
+            return;
+        }
+
+        payload.category = category;
+        payload.item_name = itemName;
+        payload.quantity = quantity;
+        payload.revenue = revenue !== '' ? parseFloat(revenue) : null;
+        payload.record_year = parseInt(year);
+    }
+
+    fetch('../../api/save_financial_stats.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            closeAddStatsModal();
+            showMessage(data.message || 'Statistik erfolgreich gespeichert', 'success');
+        } else {
+            errorDiv.textContent = data.message || 'Fehler beim Speichern';
+            errorDiv.classList.remove('hidden');
+        }
+    })
+    .catch(() => {
+        errorDiv.textContent = 'Netzwerkfehler';
+        errorDiv.classList.remove('hidden');
+    });
+}
+
+document.getElementById('closeAddStatsModalBtn')?.addEventListener('click', closeAddStatsModal);
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeAddStatsModal();
+});
+
+document.getElementById('addStatsModal')?.addEventListener('click', (e) => {
+    if (e.target.id === 'addStatsModal') closeAddStatsModal();
+});
+<?php endif; ?>
 
 </script>
 
