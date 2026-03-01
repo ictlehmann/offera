@@ -75,6 +75,7 @@ try {
         $startDate         = trim($input['start_date'] ?? '');
         $endDate           = trim($input['end_date']   ?? '');
         $quantity          = (int)($input['quantity']  ?? 0);
+        $purpose           = trim($input['purpose']    ?? '');
         $userId = (int)($_SESSION['user_id'] ?? 0);
 
         if (empty($inventoryObjectId) || empty($startDate) || empty($endDate) || $quantity < 1) {
@@ -100,10 +101,10 @@ try {
         $db   = Database::getContentDB();
         $stmt = $db->prepare(
             "INSERT INTO inventory_requests
-                (inventory_object_id, user_id, start_date, end_date, quantity, status, created_at)
-             VALUES (?, ?, ?, ?, ?, 'pending', NOW())"
+                (inventory_object_id, user_id, start_date, end_date, quantity, purpose, status, created_at)
+             VALUES (?, ?, ?, ?, ?, ?, 'pending', NOW())"
         );
-        $stmt->execute([$inventoryObjectId, $userId, $startDate, $endDate, $quantity]);
+        $stmt->execute([$inventoryObjectId, $userId, $startDate, $endDate, $quantity, $purpose ?: null]);
         $requestId = $db->lastInsertId();
 
         echo json_encode([

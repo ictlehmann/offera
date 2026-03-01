@@ -293,9 +293,9 @@ ob_start();
         </button>
     </div>
 
-    <!-- Date Range -->
-    <div class="px-5 py-4 bg-purple-50 dark:bg-purple-900/20 border-b border-purple-100 dark:border-purple-800 flex-shrink-0">
-        <p class="text-xs font-semibold text-purple-700 dark:text-purple-300 uppercase tracking-wide mb-3">
+    <!-- Date Range + Purpose -->
+    <div class="px-5 py-4 bg-purple-50 dark:bg-purple-900/20 border-b border-purple-100 dark:border-purple-800 flex-shrink-0 space-y-3">
+        <p class="text-xs font-semibold text-purple-700 dark:text-purple-300 uppercase tracking-wide">
             <i class="fas fa-calendar-alt mr-1.5"></i>Ausleihzeitraum (gilt für alle Artikel)
         </p>
         <div class="grid grid-cols-2 gap-3">
@@ -317,6 +317,15 @@ ob_start();
                        value="<?php echo date('Y-m-d', strtotime('+1 day')); ?>"
                        class="w-full px-3 py-2 border border-purple-200 dark:border-purple-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100">
             </div>
+        </div>
+        <div>
+            <label for="cartPurpose" class="block text-xs text-slate-500 dark:text-slate-400 mb-1">
+                <i class="fas fa-tag mr-1"></i>Verwendungszweck <span class="text-red-500">*</span>
+            </label>
+            <input type="text" id="cartPurpose"
+                   placeholder="z. B. Vereinsveranstaltung, Projekt…"
+                   maxlength="200"
+                   class="w-full px-3 py-2 border border-purple-200 dark:border-purple-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 placeholder-slate-400">
         </div>
     </div>
 
@@ -343,19 +352,18 @@ ob_start();
                 Anfragen werden mit Status <strong>Ausstehend</strong> gespeichert und vom Vorstand geprüft.
             </p>
         </div>
-        <!-- Clear + Submit -->
-        <div class="flex gap-3">
-            <button type="button" onclick="clearCart()"
-                    class="px-4 py-3 bg-gray-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-gray-200 dark:hover:bg-slate-700 rounded-xl transition-colors text-sm font-semibold border border-gray-200 dark:border-slate-700 flex-shrink-0"
-                    title="Warenkorb leeren">
-                <i class="fas fa-trash-alt"></i>
-            </button>
-            <button type="button" id="cartSubmitBtn" onclick="submitCartRequests()"
-                    class="flex-1 py-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-xl font-bold text-base transition-all shadow-lg hover:shadow-xl transform hover:scale-[1.02] flex items-center justify-center gap-2">
-                <i class="fas fa-paper-plane"></i>
-                <span id="cartSubmitLabel">Anfrage senden</span>
-            </button>
-        </div>
+        <!-- Submit (full-width) -->
+        <button type="button" id="cartSubmitBtn" onclick="submitCartRequests()"
+                class="w-full py-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-2xl font-extrabold text-lg transition-all shadow-xl hover:shadow-2xl transform hover:scale-[1.02] flex items-center justify-center gap-3">
+            <i class="fas fa-paper-plane text-xl"></i>
+            <span id="cartSubmitLabel">Anfrage senden</span>
+        </button>
+        <!-- Clear -->
+        <button type="button" onclick="clearCart()"
+                class="w-full py-2.5 bg-gray-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 rounded-xl transition-colors text-sm font-semibold border border-gray-200 dark:border-slate-700 flex items-center justify-center gap-2"
+                title="Warenkorb leeren">
+            <i class="fas fa-trash-alt text-xs"></i> Warenkorb leeren
+        </button>
     </div>
 </div>
 
@@ -477,30 +485,36 @@ ob_start();
                 ? '<img src="' + escHtml(safeSrc) + '" alt="' + escHtml(item.name) + '" '
                   + 'class="w-full h-full object-contain" loading="lazy">'
                 : '<span class="flex w-full h-full items-center justify-center">'
-                  + '<i class="fas fa-box-open text-gray-300 dark:text-gray-600 text-xl"></i></span>';
+                  + '<i class="fas fa-box-open text-gray-300 dark:text-gray-600 text-2xl"></i></span>';
 
-            return '<div class="flex items-center gap-3 p-3 bg-gray-50 dark:bg-slate-800 rounded-xl border border-gray-100 dark:border-slate-700">'
-                // Thumbnail
-                + '<div class="w-14 h-14 flex-shrink-0 rounded-lg overflow-hidden bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/30 dark:to-blue-900/30 flex items-center justify-center">'
+            return '<div class="bg-white dark:bg-slate-800 rounded-2xl border border-gray-100 dark:border-slate-700 shadow-sm overflow-hidden">'
+                + '<div class="flex items-start gap-3 p-4">'
+                // Thumbnail with quantity badge overlay
+                + '<div class="relative flex-shrink-0">'
+                + '<div class="w-20 h-20 rounded-xl overflow-hidden bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/30 dark:to-blue-900/30 border border-gray-100 dark:border-slate-600 flex items-center justify-center">'
                 + thumbInner + '</div>'
-                // Info + quantity controls
+                + '<span class="absolute -top-1.5 -right-1.5 min-w-[1.5rem] h-[1.5rem] bg-blue-600 text-white text-xs font-extrabold rounded-full flex items-center justify-center px-1 shadow-md ring-2 ring-white dark:ring-slate-800">'
+                + item.quantity + '</span>'
+                + '</div>'
+                // Info + quantity stepper
                 + '<div class="flex-1 min-w-0">'
-                + '<p class="text-sm font-semibold text-slate-900 dark:text-white truncate" title="' + escHtml(item.name) + '">' + escHtml(item.name) + '</p>'
-                + '<div class="flex items-center gap-1.5 mt-1.5">'
+                + '<p class="font-bold text-slate-900 dark:text-white text-sm leading-snug mb-3" title="' + escHtml(item.name) + '">' + escHtml(item.name) + '</p>'
+                + '<div class="flex items-center gap-2">'
                 + '<button data-action="dec" data-id="' + escHtml(item.id) + '" '
-                + 'class="w-6 h-6 rounded-lg bg-gray-200 dark:bg-slate-700 hover:bg-purple-100 dark:hover:bg-purple-900/50 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-colors text-xs font-bold">'
-                + '<i class="fas fa-minus"></i></button>'
-                + '<span class="text-sm font-bold text-slate-900 dark:text-white min-w-[1.5rem] text-center">' + item.quantity + '</span>'
+                + 'class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-slate-700 hover:bg-purple-100 dark:hover:bg-purple-900/50 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-colors">'
+                + '<i class="fas fa-minus text-xs"></i></button>'
+                + '<span class="min-w-[2.5rem] text-center text-sm font-extrabold text-slate-900 dark:text-white bg-gray-50 dark:bg-slate-700 rounded-lg py-1 px-2 border border-gray-200 dark:border-slate-600">' + item.quantity + '</span>'
                 + '<button data-action="inc" data-id="' + escHtml(item.id) + '" '
-                + 'class="w-6 h-6 rounded-lg bg-gray-200 dark:bg-slate-700 hover:bg-purple-100 dark:hover:bg-purple-900/50 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-colors text-xs font-bold">'
-                + '<i class="fas fa-plus"></i></button>'
-                + '<span class="text-xs text-slate-400 dark:text-slate-500 ml-0.5">/ ' + escHtml(String(item.pieces)) + '</span>'
+                + 'class="w-8 h-8 rounded-lg bg-gray-100 dark:bg-slate-700 hover:bg-purple-100 dark:hover:bg-purple-900/50 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-colors">'
+                + '<i class="fas fa-plus text-xs"></i></button>'
+                + '<span class="text-xs text-slate-400 dark:text-slate-500">/ ' + escHtml(String(item.pieces)) + '</span>'
                 + '</div>'
                 + '</div>'
                 // Remove button
                 + '<button data-action="remove" data-id="' + escHtml(item.id) + '" '
-                + 'class="w-8 h-8 flex-shrink-0 flex items-center justify-center rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors" '
-                + 'aria-label="Entfernen"><i class="fas fa-times"></i></button>'
+                + 'class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-xl text-gray-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors" '
+                + 'aria-label="Entfernen"><i class="fas fa-trash-alt text-xs"></i></button>'
+                + '</div>'
                 + '</div>';
         }).join('');
     }
@@ -557,6 +571,7 @@ ob_start();
 
         var startDate = document.getElementById('cartStartDate').value;
         var endDate   = document.getElementById('cartEndDate').value;
+        var purpose   = (document.getElementById('cartPurpose').value || '').trim();
 
         if (!startDate || !endDate) {
             showCartMsg('Bitte Zeitraum auswählen.', 'error');
@@ -566,10 +581,15 @@ ob_start();
             showCartMsg('Startdatum muss vor dem Enddatum liegen.', 'error');
             return;
         }
+        if (!purpose) {
+            showCartMsg('Bitte Verwendungszweck angeben.', 'error');
+            document.getElementById('cartPurpose').focus();
+            return;
+        }
 
         var btn = document.getElementById('cartSubmitBtn');
         btn.disabled  = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1.5"></i>Wird gesendet...';
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin text-xl mr-2"></i>Wird gesendet...';
         hideCartMsg();
 
         var promises = cart.map(function (item) {
@@ -582,6 +602,7 @@ ob_start();
                     start_date:          startDate,
                     end_date:            endDate,
                     quantity:            item.quantity,
+                    purpose:             purpose,
                     csrf_token:          csrfToken
                 })
             })
@@ -596,13 +617,13 @@ ob_start();
         Promise.all(promises).then(function (results) {
             var failed = results.filter(function (r) { return !r.data.success; });
             if (failed.length === 0) {
-                btn.innerHTML = '<i class="fas fa-check mr-1.5"></i>Gesendet!';
+                btn.innerHTML = '<i class="fas fa-check text-xl mr-2"></i>Gesendet!';
                 showCartMsg('Alle Anfragen erfolgreich eingereicht!', 'success');
                 setTimeout(function () {
                     clearCart();
                     closeCartPanel();
                     btn.disabled  = false;
-                    btn.innerHTML = '<i class="fas fa-paper-plane mr-1.5"></i>Anfrage senden';
+                    btn.innerHTML = '<i class="fas fa-paper-plane text-xl mr-2"></i><span id="cartSubmitLabel">Anfrage senden</span>';
                 }, 2200);
             } else {
                 var errDetails = failed.map(function (r) {
@@ -610,7 +631,7 @@ ob_start();
                 }).join('; ');
                 showCartMsg('Fehler: ' + errDetails, 'error');
                 btn.disabled  = false;
-                btn.innerHTML = '<i class="fas fa-paper-plane mr-1.5"></i>Erneut versuchen';
+                btn.innerHTML = '<i class="fas fa-paper-plane text-xl mr-2"></i><span id="cartSubmitLabel">Erneut versuchen</span>';
             }
         });
     };
