@@ -73,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_rental'])) {
                 <tr><td>Datum</td><td>' . date('d.m.Y H:i') . '</td></tr>
             </table>'
         );
-        MailService::sendEmail(INVENTORY_BOARD_EMAIL, 'Neue Ausleihe: ' . $safeSubject, $emailBody);
+        MailService::sendEmail(MAIL_INVENTORY, 'Neue Ausleihe: ' . $safeSubject, $emailBody);
 
         $_SESSION['rental_success'] = 'Artikel erfolgreich ausgeliehen! Bitte geben Sie ihn bis zum ' . date('d.m.Y', strtotime($expectedReturn)) . ' zurück.';
         header('Location: view.php?id=' . $itemId);
@@ -181,7 +181,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['request_return_approv
                         </table>'
                     );
                     MailService::sendEmail(
-                        INVENTORY_BOARD_EMAIL,
+                        MAIL_INVENTORY,
                         'Rückgabe gemeldet: ' . $safeItemName,
                         $emailBody
                     );
@@ -257,7 +257,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['return_rental'])) {
                 <tr><td>Datum</td><td>' . date('d.m.Y H:i') . '</td></tr>
             </table>'
         );
-        $emailSent = MailService::sendEmail(INVENTORY_BOARD_EMAIL, 'Rückgabe: ' . $safeItemName, $emailBody);
+        $emailSent = MailService::sendEmail(MAIL_INVENTORY, 'Rückgabe: ' . $safeItemName, $emailBody);
         if (!$emailSent) {
             error_log('Inventory return notification email failed for item ID ' . $itemId);
         }

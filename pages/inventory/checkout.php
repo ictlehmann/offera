@@ -72,7 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checkout'])) {
                     <tr><td>Datum</td><td>' . date('d.m.Y H:i') . '</td></tr>
                 </table>'
             );
-            MailService::sendEmail(INVENTORY_BOARD_EMAIL, 'Neue Ausleihe: ' . $safeSubject, $emailBody);
+            MailService::sendEmail(MAIL_INVENTORY, 'Neue Ausleihe: ' . $safeSubject, $emailBody);
 
             $_SESSION['checkout_success'] = $result['message'];
             if ($returnTo === 'index') {
