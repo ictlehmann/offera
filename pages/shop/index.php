@@ -1127,6 +1127,18 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+// ── Checkout: loading spinner on submit ──────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function () {
+    var checkoutForm = document.getElementById('checkout-form');
+    var submitBtn    = document.getElementById('checkout-submit-btn');
+    if (checkoutForm && submitBtn) {
+        checkoutForm.addEventListener('submit', function () {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Wird gesendet...';
+        });
+    }
+});
+
 // ── Checkout: shipping method toggle + live total ────────────────────────────
 document.addEventListener('DOMContentLoaded', function() {
     var CART_TOTAL = <?php echo json_encode((float) $cartTotalAmt); ?>;
