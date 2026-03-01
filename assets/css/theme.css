@@ -2956,7 +2956,7 @@ body.dark-mode .sidebar {
 
 /* Improved Transitions for Theme Switch */
 .card, .sidebar, .sidebar a, input, select, textarea, button, a, main {
-    transition: background-color 250ms ease, border-color 250ms ease, color 250ms ease, box-shadow 250ms ease;
+    transition: background-color 300ms ease, border-color 300ms ease, color 300ms ease, box-shadow 300ms ease, transform 300ms ease;
 }
 
 /* Loading skeleton animation */
