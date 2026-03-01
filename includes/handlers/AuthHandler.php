@@ -846,62 +846,10 @@ class AuthHandler {
                 
                 // Store Entra roles in session for display
                 $_SESSION['entra_roles'] = $groups;
-                
-                // Get user photo from Microsoft Graph
-                $photoData = $graphService->getUserPhoto($azureOid);
-                
-                if ($photoData) {
-                    // Ensure profile_photos directory exists using realpath for security
-                    $baseDir = realpath(__DIR__ . '/../../uploads');
-                    if ($baseDir === false) {
-                        $attemptedPath = __DIR__ . '/../../uploads';
-                        throw new Exception("Base uploads directory does not exist at: {$attemptedPath}");
-                    }
-                    
-                    $uploadDir = $baseDir . '/profile_photos';
-                    if (!is_dir($uploadDir)) {
-                        mkdir($uploadDir, 0755, true);
-                    }
-                    
-                    // Save photo as user_{id}.jpg
-                    $filename = "user_{$userId}.jpg";
-                    $filepath = $uploadDir . '/' . $filename;
-                    
-                    $bytesWritten = file_put_contents($filepath, $photoData);
-                    if ($bytesWritten !== false) {
-                        // Update alumni profile with image path using upsert logic
-                        $imagePath = '/uploads/profile_photos/' . $filename;
-                        
-                        try {
-                            $contentDb = Database::getContentDB();
-                            
-                            // Update image_path in profile, creating profile if we have name data
-                            if ($firstName && $lastName) {
-                                // Use INSERT ... ON DUPLICATE KEY UPDATE for upsert (prevents race conditions)
-                                // This handles both profile creation and update in one statement
-                                $stmt = $contentDb->prepare("
-                                    INSERT INTO alumni_profiles (user_id, first_name, last_name, email, image_path)
-                                    VALUES (?, ?, ?, ?, ?)
-                                    ON DUPLICATE KEY UPDATE 
-                                        image_path = VALUES(image_path)
-                                ");
-                                $stmt->execute([$userId, $firstName, $lastName, $email, $imagePath]);
-                            } else {
-                                // Only update image_path if profile already exists (no name data to create profile)
-                                $stmt = $contentDb->prepare("UPDATE alumni_profiles SET image_path = ? WHERE user_id = ?");
-                                $stmt->execute([$imagePath, $userId]);
-                            }
-                        } catch (Exception $e) {
-                            error_log("Failed to update profile image path: " . $e->getMessage());
-                        }
-                    } else {
-                        error_log("Failed to save profile photo for user {$userId}: file_put_contents returned false");
-                    }
-                }
             }
         } catch (Exception $e) {
-            error_log("Failed to sync profile photo from Microsoft Graph: " . $e->getMessage());
-            // Don't throw - allow login to proceed even if photo sync fails
+            error_log("Failed to sync profile data from Microsoft Graph: " . $e->getMessage());
+            // Don't throw - allow login to proceed even if profile sync fails
         }
         
         // Check if profile is complete and 2FA status
