@@ -63,13 +63,13 @@ ob_start();
             <p class="text-slate-600 dark:text-slate-400 text-lg"><?php echo count($items); ?> Artikel gefunden</p>
         </div>
         <div class="flex gap-2 flex-wrap">
-            <a href="sync.php" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-5 py-3 rounded-xl flex items-center shadow-lg font-semibold transition-all transform hover:scale-105">
+            <a href="sync.php" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-5 py-3 rounded-xl flex items-center shadow-lg font-semibold transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
                 <i class="fas fa-sync-alt mr-2"></i> EasyVerein Sync
             </a>
-            <a href="../admin/rental_returns.php" class="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-5 py-3 rounded-xl flex items-center shadow-lg font-semibold transition-all transform hover:scale-105">
+            <a href="../admin/rental_returns.php" class="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-5 py-3 rounded-xl flex items-center shadow-lg font-semibold transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
                 <i class="fas fa-clipboard-list mr-2"></i> Anfragen
             </a>
-            <a href="add.php" class="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-5 py-3 rounded-xl flex items-center shadow-lg font-semibold transition-all transform hover:scale-105">
+            <a href="add.php" class="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-5 py-3 rounded-xl flex items-center shadow-lg font-semibold transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
                 <i class="fas fa-plus mr-2"></i> Neuer Artikel
             </a>
         </div>
@@ -173,7 +173,7 @@ ob_start();
             <a href="manage.php" class="px-5 py-2.5 bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-slate-600 transition font-semibold text-sm">
                 <i class="fas fa-times mr-1.5"></i>Zurücksetzen
             </a>
-            <button type="submit" class="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-lg transition-all transform hover:scale-105 shadow-md font-semibold text-sm">
+            <button type="submit" class="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-lg transition-all duration-300 hover:-translate-y-0.5 shadow-md font-semibold text-sm">
                 <i class="fas fa-search mr-1.5"></i>Filtern
             </button>
         </div>
@@ -186,7 +186,7 @@ ob_start();
     <i class="fas fa-box-open text-6xl text-gray-300 dark:text-gray-600 mb-4"></i>
     <h3 class="text-xl font-semibold text-slate-600 dark:text-slate-300 mb-2">Keine Artikel gefunden</h3>
     <p class="text-slate-500 dark:text-slate-400 mb-6">Es wurden keine Artikel mit den ausgewählten Filtern gefunden.</p>
-    <a href="add.php" class="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-5 py-3 rounded-xl font-bold shadow-md transition-all transform hover:scale-105 inline-flex items-center gap-2">
+    <a href="add.php" class="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-5 py-3 rounded-xl font-bold shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl inline-flex items-center gap-2">
         <i class="fas fa-plus"></i>Ersten Artikel erstellen
     </a>
 </div>
@@ -206,7 +206,7 @@ ob_start();
             $imageSrc = null;
         }
     ?>
-    <div class="group bg-white dark:bg-slate-800 rounded-2xl shadow-md overflow-hidden hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-slate-700 flex flex-col">
+    <div class="group bg-white dark:bg-slate-800 rounded-2xl shadow-md overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-slate-700 flex flex-col">
 
         <!-- Image Area -->
         <div class="relative h-44 bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 dark:from-purple-900/30 dark:via-blue-900/30 dark:to-indigo-900/30 flex items-center justify-center overflow-hidden">
