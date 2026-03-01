@@ -6,7 +6,6 @@
 
 require_once __DIR__ . '/../database.php';
 require_once __DIR__ . '/../../config/config.php';
-require_once __DIR__ . '/../../src/MailService.php';
 
 class Invoice {
     
@@ -74,9 +73,6 @@ class Invoice {
             ]);
             
             $invoiceId = $db->lastInsertId();
-            
-            // Send notification email
-            self::sendNotification($data, $uploadResult['path']);
             
             return [
                 'success' => true,
@@ -215,47 +211,6 @@ class Invoice {
         ];
         
         return $extensions[$mimeType] ?? '.bin';
-    }
-    
-    /**
-     * Send notification email about new invoice
-     * 
-     * @param array $data Invoice data
-     * @param string $filePath Path to uploaded file
-     * @return bool Success status
-     */
-    private static function sendNotification($data, $filePath) {
-        try {
-            $description = $data['description'] ?? 'N/A';
-            $amount = $data['amount'] ?? 0;
-            
-            $subject = 'Neue Rechnung eingereicht: ' . $description . ' - ' . number_format($amount, 2, ',', '.') . '€';
-            
-            // Build email body
-            $bodyContent = '<p class="email-text">Eine neue Rechnung wurde eingereicht:</p>';
-            $bodyContent .= '<table class="info-table">';
-            $bodyContent .= '<tr><td><strong>Beschreibung</strong></td><td>' . htmlspecialchars($description) . '</td></tr>';
-            $bodyContent .= '<tr><td><strong>Betrag</strong></td><td>' . number_format($amount, 2, ',', '.') . '€</td></tr>';
-            $bodyContent .= '</table>';
-            
-            $htmlBody = MailService::getTemplate('Neue Rechnung', $bodyContent);
-            
-            // Get absolute file path for attachment
-            $absoluteFilePath = __DIR__ . '/../../' . $filePath;
-            
-            // Send email with attachment
-            return MailService::sendEmailWithFileAttachment(
-                INVOICE_NOTIFICATION_EMAIL,
-                $subject,
-                $htmlBody,
-                $absoluteFilePath
-            );
-            
-        } catch (Exception $e) {
-            error_log('Failed to send invoice notification email: ' . $e->getMessage());
-            // Don't fail the invoice creation if email fails
-            return false;
-        }
     }
     
     /**

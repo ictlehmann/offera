@@ -10,6 +10,7 @@ require_once __DIR__ . '/../includes/handlers/AuthHandler.php';
 require_once __DIR__ . '/../includes/handlers/CSRFHandler.php';
 require_once __DIR__ . '/../includes/database.php';
 require_once __DIR__ . '/../includes/services/EasyVereinInventory.php';
+require_once __DIR__ . '/../src/MailService.php';
 
 AuthHandler::startSession();
 header('Content-Type: application/json; charset=utf-8');
@@ -106,6 +107,27 @@ try {
         );
         $stmt->execute([$inventoryObjectId, $userId, $startDate, $endDate, $quantity, $purpose ?: null]);
         $requestId = $db->lastInsertId();
+
+        // Send email notification to inventory inbox
+        try {
+            $requesterEmail = $_SESSION['user_email'] ?? '';
+            $subject = 'Neue Inventar-Anfrage von ' . $requesterEmail;
+            $body = MailService::getTemplate(
+                'Neue Inventar-Anfrage',
+                '<p>Eine neue Inventar-Anfrage wurde eingereicht.</p>' .
+                '<table class="info-table">' .
+                '<tr><td><strong>Anfragesteller</strong></td><td>' . htmlspecialchars($requesterEmail) . '</td></tr>' .
+                '<tr><td><strong>Inventar-ID</strong></td><td>' . htmlspecialchars($inventoryObjectId) . '</td></tr>' .
+                '<tr><td><strong>Zeitraum</strong></td><td>' . htmlspecialchars($startDate) . ' bis ' . htmlspecialchars($endDate) . '</td></tr>' .
+                '<tr><td><strong>Menge</strong></td><td>' . (int)$quantity . '</td></tr>' .
+                ($purpose !== '' ? '<tr><td><strong>Verwendungszweck</strong></td><td>' . htmlspecialchars($purpose) . '</td></tr>' : '') .
+                '</table>' .
+                '<p>Bitte prüfen Sie die Anfrage im System.</p>'
+            );
+            MailService::sendEmail(MAIL_INVENTORY, $subject, $body);
+        } catch (Exception $mailEx) {
+            error_log('inventory_request: Fehler beim Senden der Benachrichtigungs-E-Mail: ' . $mailEx->getMessage());
+        }
 
         echo json_encode([
             'success'    => true,
