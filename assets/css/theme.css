@@ -5050,6 +5050,86 @@ img:not([loading]) {
     }
 }
 
+/* ============================================================
+   DIRECTORY TOOLBAR - Clean horizontal search/filter bar
+   ============================================================ */
+
+.directory-toolbar {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 0.875rem 1.25rem;
+    box-shadow: var(--shadow-soft);
+}
+
+.directory-toolbar form {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.directory-toolbar-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    flex: 1 1 200px;
+    min-width: 0;
+}
+
+.directory-toolbar-group label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 0;
+}
+
+.directory-toolbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+.dark-mode .directory-toolbar {
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+@media (max-width: 575px) {
+    .directory-toolbar form {
+        flex-direction: column;
+    }
+    .directory-toolbar-group {
+        flex: 1 1 100%;
+    }
+    .directory-toolbar-actions {
+        width: 100%;
+    }
+    .directory-toolbar-actions .btn {
+        flex: 1;
+    }
+}
+
+/* Directory card: always-visible colored top accent border */
+.directory-card--alumni::before {
+    opacity: 1;
+    background: linear-gradient(90deg, #7c3aed, #a78bfa);
+}
+
+.directory-card--members::before {
+    opacity: 1;
+    background: linear-gradient(90deg, var(--ibc-blue), var(--ibc-blue-light));
+}
+
+/* Small avatar variant for denser grids */
+.directory-avatar--sm {
+    width: 72px;
+    height: 72px;
+    font-size: 1.5rem;
+}
+
 /* Browser Date/Time Picker Styling */
 input[type="date"],
 input[type="datetime-local"],
