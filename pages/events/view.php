@@ -109,6 +109,10 @@ if (!empty($imagePath)) {
     $imageExists = $realPath && $baseDir && strpos($realPath, $baseDir) === 0 && file_exists($realPath);
 }
 
+// Precompute timestamps for reuse
+$startTimestamp = strtotime($event['start_time']);
+$endTimestamp   = strtotime($event['end_time']);
+
 // Status badge config
 $statusLabels = [
     'planned' => ['label' => 'Geplant',                'icon' => 'fa-clock',          'color' => 'bg-white/20 border-white/30 text-white'],
@@ -171,6 +175,61 @@ $statusInfo = $statusLabels[$currentStatus] ?? ['label' => $currentStatus, 'icon
                 <?php echo htmlspecialchars($event['title']); ?>
             </h1>
         </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════
+         QUICK STATS ROW  (date, location, participants)
+    ════════════════════════════════════════════════ -->
+    <div class="event-quickstats mb-6">
+        <!-- Start -->
+        <div class="glass-card shadow-soft rounded-2xl p-4 flex items-center gap-3">
+            <span class="w-10 h-10 rounded-xl bg-ibc-blue/10 flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-calendar-day text-ibc-blue"></i>
+            </span>
+            <div class="min-w-0">
+                <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Beginn</div>
+                <div class="font-bold text-gray-800 dark:text-gray-100"><?php echo date('d.m.Y', $startTimestamp); ?></div>
+                <div class="text-sm text-gray-500 dark:text-gray-400"><?php echo date('H:i', $startTimestamp); ?> Uhr</div>
+            </div>
+        </div>
+        <!-- End -->
+        <div class="glass-card shadow-soft rounded-2xl p-4 flex items-center gap-3">
+            <span class="w-10 h-10 rounded-xl bg-ibc-blue/10 flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-clock text-ibc-blue"></i>
+            </span>
+            <div class="min-w-0">
+                <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Ende</div>
+                <div class="font-bold text-gray-800 dark:text-gray-100"><?php echo date('d.m.Y', $endTimestamp); ?></div>
+                <div class="text-sm text-gray-500 dark:text-gray-400"><?php echo date('H:i', $endTimestamp); ?> Uhr</div>
+            </div>
+        </div>
+        <?php if (!empty($event['location'])): ?>
+        <!-- Location -->
+        <div class="glass-card shadow-soft rounded-2xl p-4 flex items-center gap-3">
+            <span class="w-10 h-10 rounded-xl bg-ibc-green/10 flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-map-marker-alt text-ibc-green"></i>
+            </span>
+            <div class="min-w-0">
+                <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Ort</div>
+                <div class="font-bold text-gray-800 dark:text-gray-100 truncate"><?php echo htmlspecialchars($event['location']); ?></div>
+            </div>
+        </div>
+        <?php endif; ?>
+        <?php if (!$event['is_external']): ?>
+        <!-- Participants -->
+        <div class="glass-card shadow-soft rounded-2xl p-4 flex items-center gap-3">
+            <span class="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-users text-purple-500"></i>
+            </span>
+            <div class="min-w-0">
+                <div class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Teilnehmer</div>
+                <div class="font-bold text-gray-800 dark:text-gray-100"><?php echo $registrationCount; ?></div>
+                <?php if ($isRegistered): ?>
+                <div class="text-xs text-ibc-green font-semibold"><i class="fas fa-check-circle mr-1"></i>Angemeldet</div>
+                <?php endif; ?>
+            </div>
+        </div>
+        <?php endif; ?>
     </div>
 
     <!-- ═══════════════════════════════════════════════
@@ -533,18 +592,23 @@ $statusInfo = $statusLabels[$currentStatus] ?? ['label' => $currentStatus, 'icon
 
 <!-- Hero & Card Styles -->
 <style>
+    .event-quickstats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 0.75rem;
+    }
     .event-hero {
         position: relative;
         background: #1f2937;
     }
     .event-hero-image {
         width: 100%;
-        height: 340px;
+        height: 420px;
         position: relative;
         overflow: hidden;
     }
     @media (max-width: 640px) {
-        .event-hero-image { height: 220px; }
+        .event-hero-image { height: 260px; }
     }
     .event-hero-image img {
         width: 100%;
