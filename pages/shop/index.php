@@ -325,7 +325,7 @@ ob_start();
     <?php else: ?>
 
     <!-- ── Availability filter pills ── -->
-    <div class="mb-6 flex flex-wrap gap-2" id="filter-bar">
+    <div class="mb-3 flex flex-wrap gap-2" id="filter-bar">
         <button type="button" data-filter="all"
                 class="filter-pill px-4 py-1.5 rounded-full text-sm font-medium transition-all bg-purple-600 text-white shadow-sm">
             Alle
@@ -340,6 +340,52 @@ ob_start();
         </button>
     </div>
 
+    <!-- ── Gender filter pills ── -->
+    <?php
+    $availableGenders = array_unique(array_filter(array_column($products, 'gender'), function($g) {
+        return !empty($g) && $g !== 'Keine';
+    }));
+    sort($availableGenders);
+    if (!empty($availableGenders)):
+    ?>
+    <div class="mb-3 flex flex-wrap gap-2" id="gender-filter-bar">
+        <button type="button" data-gender="all"
+                class="gender-pill px-4 py-1.5 rounded-full text-sm font-medium transition-all bg-blue-600 text-white shadow-sm">
+            Alle
+        </button>
+        <?php foreach (['Herren', 'Damen', 'Unisex'] as $g): ?>
+        <?php if (in_array($g, $availableGenders, true)): ?>
+        <button type="button" data-gender="<?php echo htmlspecialchars($g); ?>"
+                class="gender-pill px-4 py-1.5 rounded-full text-sm font-medium transition-all bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-blue-600 hover:text-white">
+            <?php echo htmlspecialchars($g); ?>
+        </button>
+        <?php endif; ?>
+        <?php endforeach; ?>
+    </div>
+    <?php endif; ?>
+
+    <!-- ── Category filter pills ── -->
+    <?php
+    $availableCategories = array_unique(array_filter(array_column($products, 'category')));
+    sort($availableCategories);
+    if (!empty($availableCategories)):
+    ?>
+    <div class="mb-6 flex flex-wrap gap-2" id="category-filter-bar">
+        <button type="button" data-category="all"
+                class="category-pill px-4 py-1.5 rounded-full text-sm font-medium transition-all bg-green-600 text-white shadow-sm">
+            Alle Kategorien
+        </button>
+        <?php foreach ($availableCategories as $cat): ?>
+        <button type="button" data-category="<?php echo htmlspecialchars($cat); ?>"
+                class="category-pill px-4 py-1.5 rounded-full text-sm font-medium transition-all bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-green-600 hover:text-white">
+            <?php echo htmlspecialchars($cat); ?>
+        </button>
+        <?php endforeach; ?>
+    </div>
+    <?php else: ?>
+    <div class="mb-6"></div>
+    <?php endif; ?>
+
     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8" id="product-grid">
         <?php foreach ($products as $product):
             $productOutOfStock = !empty($product['variants']) && array_sum(array_column($product['variants'], 'stock_quantity')) === 0;
@@ -353,7 +399,9 @@ ob_start();
             $sliderId = 'slider-grid-' . $product['id'];
         ?>
         <div class="bg-white rounded-lg overflow-hidden flex flex-col group hover:shadow-lg transition-shadow duration-300 <?php echo $productOutOfStock ? 'opacity-60' : ''; ?>"
-             data-instock="<?php echo $productOutOfStock ? '0' : '1'; ?>">
+             data-instock="<?php echo $productOutOfStock ? '0' : '1'; ?>"
+             data-gender="<?php echo htmlspecialchars($product['gender'] ?? ''); ?>"
+             data-category="<?php echo htmlspecialchars($product['category'] ?? ''); ?>">
             <!-- Product image (square) -->
             <div class="relative aspect-square overflow-hidden bg-gray-100" id="<?php echo $sliderId; ?>">
                 <?php if (!empty($allImages)): ?>
@@ -978,33 +1026,65 @@ function adjustQty(delta) {
 
 // ── Filter pills ─────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', function() {
-    var pills = document.querySelectorAll('.filter-pill');
-    var grid  = document.getElementById('product-grid');
+    var grid = document.getElementById('product-grid');
+    if (!grid) return;
 
-    if (pills.length && grid) {
-        pills.forEach(function(pill) {
-            pill.addEventListener('click', function() {
-                pills.forEach(function(p) {
-                    p.dataset.active = '0';
-                    p.className = 'filter-pill px-4 py-1.5 rounded-full text-sm font-medium transition-all bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-purple-600 hover:text-white';
-                });
-                this.dataset.active = '1';
-                this.className = 'filter-pill px-4 py-1.5 rounded-full text-sm font-medium transition-all bg-purple-600 text-white shadow-sm';
+    var activeStock    = 'all';
+    var activeGender   = 'all';
+    var activeCategory = 'all';
 
-                var filter = this.dataset.filter;
-                grid.querySelectorAll('[data-instock]').forEach(function(card) {
-                    var inStock = card.dataset.instock === '1';
-                    if (filter === 'all') {
-                        card.style.display = '';
-                    } else if (filter === 'available') {
-                        card.style.display = inStock ? '' : 'none';
-                    } else if (filter === 'soldout') {
-                        card.style.display = inStock ? 'none' : '';
-                    }
-                });
-            });
+    function applyFilters() {
+        grid.querySelectorAll('[data-instock]').forEach(function(card) {
+            var inStock     = card.dataset.instock   === '1';
+            var cardGender  = card.dataset.gender    || '';
+            var cardCat     = card.dataset.category  || '';
+
+            var stockOk  = activeStock    === 'all'
+                        || (activeStock   === 'available' && inStock)
+                        || (activeStock   === 'soldout'   && !inStock);
+            var genderOk = activeGender   === 'all' || cardGender  === activeGender;
+            var catOk    = activeCategory === 'all' || cardCat      === activeCategory;
+
+            card.style.display = (stockOk && genderOk && catOk) ? '' : 'none';
         });
     }
+
+    var PILL_ACTIVE   = 'filter-pill px-4 py-1.5 rounded-full text-sm font-medium transition-all bg-purple-600 text-white shadow-sm';
+    var PILL_INACTIVE = 'filter-pill px-4 py-1.5 rounded-full text-sm font-medium transition-all bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-purple-600 hover:text-white';
+    var GENDER_ACTIVE   = 'gender-pill px-4 py-1.5 rounded-full text-sm font-medium transition-all bg-blue-600 text-white shadow-sm';
+    var GENDER_INACTIVE = 'gender-pill px-4 py-1.5 rounded-full text-sm font-medium transition-all bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-blue-600 hover:text-white';
+    var CAT_ACTIVE   = 'category-pill px-4 py-1.5 rounded-full text-sm font-medium transition-all bg-green-600 text-white shadow-sm';
+    var CAT_INACTIVE = 'category-pill px-4 py-1.5 rounded-full text-sm font-medium transition-all bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-green-600 hover:text-white';
+
+    document.querySelectorAll('.filter-pill').forEach(function(pill) {
+        pill.addEventListener('click', function() {
+            activeStock = this.dataset.filter;
+            document.querySelectorAll('.filter-pill').forEach(function(p) {
+                p.className = (p.dataset.filter === activeStock) ? PILL_ACTIVE : PILL_INACTIVE;
+            });
+            applyFilters();
+        });
+    });
+
+    document.querySelectorAll('.gender-pill').forEach(function(pill) {
+        pill.addEventListener('click', function() {
+            activeGender = this.dataset.gender;
+            document.querySelectorAll('.gender-pill').forEach(function(p) {
+                p.className = (p.dataset.gender === activeGender) ? GENDER_ACTIVE : GENDER_INACTIVE;
+            });
+            applyFilters();
+        });
+    });
+
+    document.querySelectorAll('.category-pill').forEach(function(pill) {
+        pill.addEventListener('click', function() {
+            activeCategory = this.dataset.category;
+            document.querySelectorAll('.category-pill').forEach(function(p) {
+                p.className = (p.dataset.category === activeCategory) ? CAT_ACTIVE : CAT_INACTIVE;
+            });
+            applyFilters();
+        });
+    });
 });
 
 // ── Checkout: shipping method toggle + live total ────────────────────────────

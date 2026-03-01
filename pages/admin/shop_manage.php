@@ -144,6 +144,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     Shop::setVariants($pid, $variants);
 
+                    // If creating a new product and "also create for other gender" was requested
+                    if (!isset($_POST['product_id']) || (int) $_POST['product_id'] === 0) {
+                        if (isset($_POST['also_create_other_gender'])) {
+                            if ($data['gender'] === 'Herren') {
+                                $otherGender = 'Damen';
+                            } elseif ($data['gender'] === 'Damen') {
+                                $otherGender = 'Herren';
+                            } else {
+                                $otherGender = null;
+                            }
+                            if ($otherGender) {
+                                $dataCopy               = $data;
+                                $dataCopy['gender']     = $otherGender;
+                                $dataCopy['image_path'] = null; // Images are gender-specific; admin can add them separately
+                                $copyId = Shop::createProduct($dataCopy);
+                                if ($copyId) {
+                                    Shop::setVariants($copyId, $variants);
+                                }
+                            }
+                        }
+                    }
+
                     // Redirect to avoid re-POST
                     header('Location: ' . asset('pages/admin/shop_manage.php?section=products&saved=1'));
                     exit;
@@ -861,6 +883,14 @@ ob_start();
                         <i class="fas fa-trash-alt"></i>Produkt löschen
                     </button>
                 </div>
+                <!-- "Also create for other gender" – only shown when creating a new Herren/Damen product -->
+                <div id="modal-also-gender-area" class="hidden">
+                    <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-600 dark:text-gray-300">
+                        <input type="checkbox" name="also_create_other_gender" id="modal-also-gender" value="1"
+                               class="w-4 h-4 text-blue-600 rounded border-gray-300 dark:border-gray-600 focus:ring-blue-500">
+                        <span id="modal-also-gender-label">Auch für Damen anlegen</span>
+                    </label>
+                </div>
                 <div class="flex gap-3 ml-auto">
                     <button type="button" onclick="closeProductModal()"
                             class="px-5 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 font-medium transition-colors">
@@ -951,6 +981,9 @@ function openProductModal(product) {
     document.getElementById('modal-variants-text').value   = isEdit ? (product.variants_csv || '') : '';
     document.getElementById('modal-sku').value             = isEdit ? (product.sku || '') : '';
 
+    // "Also create for other gender" checkbox – only relevant for new products
+    updateAlsoGenderArea(isEdit);
+
     // Header
     document.getElementById('modal-title').textContent        = isEdit ? 'Produkt bearbeiten' : 'Neues Produkt anlegen';
     document.getElementById('modal-header-icon').className    = 'fas ' + (isEdit ? 'fa-edit' : 'fa-plus') + ' text-white';
@@ -989,6 +1022,31 @@ function closeProductModal() {
     document.getElementById('product-modal').classList.add('hidden');
     document.body.style.overflow = '';
 }
+
+// ── "Also create for other gender" toggle ────────────────────────────────────
+
+function updateAlsoGenderArea(isEdit) {
+    const area    = document.getElementById('modal-also-gender-area');
+    const label   = document.getElementById('modal-also-gender-label');
+    const gender  = document.getElementById('modal-gender').value;
+    if (!isEdit && (gender === 'Herren' || gender === 'Damen')) {
+        label.textContent = gender === 'Herren' ? 'Auch für Damen anlegen' : 'Auch für Herren anlegen';
+        area.classList.remove('hidden');
+    } else {
+        area.classList.add('hidden');
+        document.getElementById('modal-also-gender').checked = false;
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    var genderSelect = document.getElementById('modal-gender');
+    if (genderSelect) {
+        genderSelect.addEventListener('change', function() {
+            var isEdit = !!document.getElementById('modal-product-id').value;
+            updateAlsoGenderArea(isEdit);
+        });
+    }
+});
 
 // ── Bulk order fields toggle ──────────────────────────────────────────────────
 
