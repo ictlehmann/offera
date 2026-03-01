@@ -144,7 +144,9 @@ if (!headers_sent()) {
     //                                 by Tailwind utility classes
     //   img-src                     – self + data: (SVG / base64) + blob:
     //   font-src                    – Google Fonts CDN + Flaticon
-    //   connect-src 'self'          – XHR/fetch only to same origin
+    //   connect-src 'self'          – XHR/fetch only to same origin;
+    //                                 cdn.jsdelivr.net allowed for source
+    //                                 map fetches by browser DevTools
     //   form-action 'self'          – form submissions only to same origin
     //   base-uri 'self'             – prevents <base> tag hijacking
     //   object-src 'none'           – blocks Flash / plugins entirely
@@ -155,11 +157,11 @@ if (!headers_sent()) {
     if (!header_sent_check('Content-Security-Policy')) {
         $csp_directives = [
             "default-src 'self'",
-            "script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdnjs.cloudflare.com https://cdn.jsdelivr.net",
-            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.tailwindcss.com https://cdnjs.cloudflare.com https://cdn-uicons.flaticon.com https://cdn.jsdelivr.net",
+            "script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net",
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://cdn-uicons.flaticon.com https://cdn.jsdelivr.net",
             "img-src 'self' data: blob:",
             "font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com https://cdn-uicons.flaticon.com",
-            "connect-src 'self'",
+            "connect-src 'self' https://cdn.jsdelivr.net",
             "form-action 'self'",
             "base-uri 'self'",
             "object-src 'none'",
