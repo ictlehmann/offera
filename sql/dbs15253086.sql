@@ -30,6 +30,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `job_title` VARCHAR(255) DEFAULT NULL COMMENT 'Job title from Microsoft Entra ID',
   `company` VARCHAR(255) DEFAULT NULL COMMENT 'Company name from Microsoft Entra ID',
   `entra_roles` TEXT DEFAULT NULL COMMENT 'JSON array of Microsoft Entra role names for display',
+  `entra_photo_path` VARCHAR(500) DEFAULT NULL COMMENT 'Cached profile photo path fetched from Microsoft Entra ID',
   `profile_complete` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'Flag to track if user has completed initial profile setup',
   `tfa_secret` VARCHAR(255) DEFAULT NULL COMMENT 'Two-factor authentication secret key',
   `tfa_enabled` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'Whether two-factor authentication is enabled',

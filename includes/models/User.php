@@ -16,7 +16,7 @@ class User {
      */
     public static function getById($id) {
         $db = Database::getUserDB();
-        $stmt = $db->prepare("SELECT id, email, role, entra_roles, tfa_enabled, is_alumni_validated, last_login, created_at FROM users WHERE id = ?");
+        $stmt = $db->prepare("SELECT id, email, role, entra_roles, entra_photo_path, tfa_enabled, is_alumni_validated, last_login, created_at FROM users WHERE id = ?");
         $stmt->execute([$id]);
         return $stmt->fetch();
     }
@@ -360,5 +360,88 @@ class User {
         $stmt->execute([$token]);
         
         return true;
+    }
+
+    /**
+     * Save a profile photo fetched from Entra ID to disk and record its path.
+     *
+     * The photo is stored in uploads/profile_photos/ using a deterministic filename
+     * derived from the user ID so it gets overwritten on re-sync without accumulating
+     * orphaned files.
+     *
+     * @param int    $userId     Local database user ID
+     * @param string $photoData  Raw binary content of the photo from Microsoft Graph
+     * @return string|null       Relative path stored in the database, or null on failure
+     */
+    public static function cacheEntraPhoto(int $userId, string $photoData): ?string {
+        if (empty($photoData)) {
+            return null;
+        }
+
+        // Enforce 5 MB size limit to prevent memory exhaustion
+        if (strlen($photoData) > 5242880) {
+            error_log('[cacheEntraPhoto] Entra photo for user ' . $userId . ' exceeds 5 MB limit, skipping.');
+            return null;
+        }
+
+        // Write to a temp file to detect the actual MIME type safely
+        $tmpFile = tempnam(sys_get_temp_dir(), 'entra_photo_');
+        if ($tmpFile === false) {
+            return null;
+        }
+
+        try {
+            file_put_contents($tmpFile, $photoData);
+
+            $finfo    = finfo_open(FILEINFO_MIME_TYPE);
+            $mimeType = finfo_file($finfo, $tmpFile);
+            finfo_close($finfo);
+
+            $allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+            if (!in_array($mimeType, $allowedMimes, true)) {
+                return null;
+            }
+
+            if (@getimagesize($tmpFile) === false) {
+                return null;
+            }
+
+            $extMap    = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp', 'image/gif' => 'gif'];
+            $ext       = $extMap[$mimeType] ?? 'jpg';
+            $uploadDir = dirname(__DIR__, 2) . '/uploads/profile_photos/';
+
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
+
+            $filename   = 'entra_' . $userId . '.' . $ext;
+            $uploadPath = $uploadDir . $filename;
+
+            if (!copy($tmpFile, $uploadPath)) {
+                error_log('[cacheEntraPhoto] Failed to copy temp file to ' . $uploadPath . ' for user ' . $userId);
+                return null;
+            }
+            if (!chmod($uploadPath, 0644)) {
+                error_log('[cacheEntraPhoto] Failed to chmod ' . $uploadPath . ' for user ' . $userId);
+            }
+
+            $projectRoot = realpath(dirname(__DIR__, 2));
+            $realPath    = realpath($uploadPath);
+            if ($projectRoot === false || $realPath === false) {
+                return null;
+            }
+
+            $relativePath = str_replace('\\', '/', substr($realPath, strlen($projectRoot) + 1));
+
+            // Persist the path in the users table
+            $db   = Database::getUserDB();
+            $stmt = $db->prepare("UPDATE users SET entra_photo_path = ? WHERE id = ?");
+            $stmt->execute([$relativePath, $userId]);
+
+            return $relativePath;
+
+        } finally {
+            @unlink($tmpFile);
+        }
     }
 }
