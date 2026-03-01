@@ -29,6 +29,8 @@ if (Auth::check() && isset($_SESSION['profile_incomplete']) && $_SESSION['profil
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title><?php echo $title ?? 'IBC Intranet'; ?></title>
     <link rel="icon" type="image/webp" href="<?php echo asset('assets/img/cropped_maskottchen_32x32.webp'); ?>">
+    <link rel="apple-touch-icon" href="<?php echo asset('assets/img/cropped_maskottchen_180x180.webp'); ?>">
+    <link rel="manifest" href="<?php echo asset('manifest.json'); ?>">
     <!-- DNS prefetch for performance -->
     <link rel="dns-prefetch" href="//fonts.googleapis.com">
     <link rel="dns-prefetch" href="//fonts.gstatic.com">
@@ -1041,6 +1043,13 @@ if (Auth::check() && isset($_SESSION['profile_incomplete']) && $_SESSION['profil
         });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('<?php echo asset('sw.js'); ?>');
+            });
+        }
+    </script>
 
 </body>
 </html>

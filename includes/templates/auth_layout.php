@@ -13,6 +13,8 @@ require_once __DIR__ . '/../helpers.php';
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title><?php echo $title ?? 'IBC Intranet'; ?></title>
     <link rel="icon" type="image/webp" href="<?php echo asset('assets/img/cropped_maskottchen_32x32.webp'); ?>">
+    <link rel="apple-touch-icon" href="<?php echo asset('assets/img/cropped_maskottchen_180x180.webp'); ?>">
+    <link rel="manifest" href="<?php echo asset('manifest.json'); ?>">
     <!-- DNS prefetch for performance -->
     <link rel="dns-prefetch" href="//fonts.googleapis.com">
     <link rel="dns-prefetch" href="//fonts.gstatic.com">
@@ -1652,6 +1654,13 @@ require_once __DIR__ . '/../helpers.php';
                 setTimeout(setAppHeight, 200);
             });
         })();
+    </script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('<?php echo asset('sw.js'); ?>');
+            });
+        }
     </script>
 </body>
 </html>
