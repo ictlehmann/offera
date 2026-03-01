@@ -29,7 +29,7 @@ class Shop {
             $db = Database::getContentDB();
             $stmt = $db->query("
                 SELECT id, name, description, base_price, image_path, is_bulk_order, bulk_end_date, bulk_min_goal,
-                       category, pickup_location, shipping_cost, variants AS variants_csv
+                       category, pickup_location, shipping_cost, variants AS variants_csv, sku
                 FROM shop_products
                 WHERE active = 1
                 ORDER BY name ASC
@@ -58,7 +58,7 @@ class Shop {
             $db = Database::getContentDB();
             $stmt = $db->query("
                 SELECT id, name, description, base_price, image_path, active, is_bulk_order, bulk_end_date, bulk_min_goal,
-                       category, pickup_location, shipping_cost, variants AS variants_csv
+                       category, pickup_location, shipping_cost, variants AS variants_csv, sku
                 FROM shop_products
                 ORDER BY name ASC
             ");
@@ -87,7 +87,7 @@ class Shop {
             $db   = Database::getContentDB();
             $stmt = $db->prepare("
                 SELECT id, name, description, base_price, image_path, active, is_bulk_order, bulk_end_date, bulk_min_goal,
-                       category, pickup_location, shipping_cost, variants AS variants_csv
+                       category, pickup_location, shipping_cost, variants AS variants_csv, sku
                 FROM shop_products
                 WHERE id = ?
             ");
@@ -108,15 +108,15 @@ class Shop {
     /**
      * Create a new product.
      *
-     * @param array $data  Keys: name, description, base_price, image_path, active, is_bulk_order, bulk_end_date, bulk_min_goal, category, pickup_location, variants, shipping_cost
+     * @param array $data  Keys: name, description, base_price, image_path, active, is_bulk_order, bulk_end_date, bulk_min_goal, category, pickup_location, variants, shipping_cost, sku
      * @return int|null  New product ID or null on failure
      */
     public static function createProduct(array $data): ?int {
         try {
             $db   = Database::getContentDB();
             $stmt = $db->prepare("
-                INSERT INTO shop_products (name, description, base_price, image_path, active, is_bulk_order, bulk_end_date, bulk_min_goal, category, pickup_location, variants, shipping_cost)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO shop_products (name, description, base_price, image_path, active, is_bulk_order, bulk_end_date, bulk_min_goal, category, pickup_location, variants, shipping_cost, sku)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ");
             $stmt->execute([
                 $data['name'],
@@ -131,6 +131,7 @@ class Shop {
                 !empty($data['pickup_location']) ? $data['pickup_location'] : null,
                 !empty($data['variants']) ? $data['variants'] : null,
                 isset($data['shipping_cost']) ? (float) $data['shipping_cost'] : 0.00,
+                !empty($data['sku']) ? $data['sku'] : null,
             ]);
             return (int) $db->lastInsertId();
         } catch (Exception $e) {
@@ -143,7 +144,7 @@ class Shop {
      * Update an existing product.
      *
      * @param int   $id
-     * @param array $data  Keys: name, description, base_price, image_path, active, is_bulk_order, bulk_end_date, bulk_min_goal, category, pickup_location, variants, shipping_cost
+     * @param array $data  Keys: name, description, base_price, image_path, active, is_bulk_order, bulk_end_date, bulk_min_goal, category, pickup_location, variants, shipping_cost, sku
      * @return bool
      */
     public static function updateProduct(int $id, array $data): bool {
@@ -153,7 +154,8 @@ class Shop {
                 UPDATE shop_products
                 SET name = ?, description = ?, base_price = ?, image_path = ?, active = ?,
                     is_bulk_order = ?, bulk_end_date = ?, bulk_min_goal = ?,
-                    category = ?, pickup_location = ?, variants = ?, shipping_cost = ?
+                    category = ?, pickup_location = ?, variants = ?, shipping_cost = ?,
+                    sku = ?
                 WHERE id = ?
             ");
             $stmt->execute([
@@ -169,6 +171,7 @@ class Shop {
                 !empty($data['pickup_location']) ? $data['pickup_location'] : null,
                 !empty($data['variants']) ? $data['variants'] : null,
                 isset($data['shipping_cost']) ? (float) $data['shipping_cost'] : 0.00,
+                !empty($data['sku']) ? $data['sku'] : null,
                 $id,
             ]);
             return true;

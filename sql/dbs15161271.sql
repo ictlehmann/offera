@@ -655,6 +655,7 @@ CREATE TABLE IF NOT EXISTS `shop_products` (
     `is_bulk_order` TINYINT(1)     NOT NULL DEFAULT 1 COMMENT 'Sammelbestellung aktiv',
     `bulk_end_date` DATETIME       DEFAULT NULL COMMENT 'Ende der Sammelbestellfrist',
     `bulk_min_goal`    INT            DEFAULT NULL COMMENT 'Mindestanzahl an Vorbestellungen für Produktion',
+    `sku`              VARCHAR(100)   DEFAULT NULL COMMENT 'Lagerbestandseinheit (SKU)',
     `category`         VARCHAR(100)   DEFAULT NULL COMMENT 'Kategorie (z.B. Merchandise, Tickets, Sonstiges)',
     `pickup_location`  VARCHAR(255)   DEFAULT NULL COMMENT 'Abholort und Zeitpunkt',
     `variants`         VARCHAR(255)   DEFAULT NULL COMMENT 'Kommagetrennte Varianten (z.B. S, M, L, XL)',
