@@ -32,7 +32,7 @@ CSRFHandler::verifyToken($_POST['csrf_token'] ?? '');
 $requestType = trim($_POST['request_type'] ?? '');
 $description = trim($_POST['description'] ?? '');
 
-$allowedTypes = ['bug', '2fa_reset', 'name_email_change', 'other'];
+$allowedTypes = ['bug', '2fa_reset', 'other'];
 if (empty($requestType) || !in_array($requestType, $allowedTypes, true)) {
     http_response_code(400);
     echo json_encode(['success' => false, 'message' => 'Ungültige Art der Anfrage']);
@@ -48,7 +48,6 @@ if (empty($description)) {
 $typeLabels = [
     'bug'              => 'Bug / Fehler',
     '2fa_reset'        => '2FA zurücksetzen',
-    'name_email_change' => 'E-Mail/Name ändern',
     'other'            => 'Sonstiges',
 ];
 $typeLabel = $typeLabels[$requestType] ?? $requestType;

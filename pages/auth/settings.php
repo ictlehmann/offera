@@ -421,7 +421,7 @@ ob_start();
         <div class="card p-6">
             <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
                 <i class="fas fa-life-ring text-blue-600 mr-2"></i>
-                Änderungen &amp; Support
+                Hilfe
             </h2>
             <p class="text-gray-600 dark:text-gray-300 mb-6">
                 Wende dich bei Fragen oder Problemen direkt an die IT-Ressortleitung
@@ -455,7 +455,7 @@ ob_start();
         <div class="p-6 overflow-y-auto flex-1">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-bold dark:text-white">
-                    <i class="fas fa-headset text-blue-600 mr-2"></i>Änderungen &amp; Support
+                    <i class="fas fa-headset text-blue-600 mr-2"></i>Hilfe
                 </h3>
                 <button type="button" onclick="hideSupportModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
                     <i class="fas fa-times text-xl"></i>
@@ -523,8 +523,16 @@ function showSupportModal(type) {
     const select = document.getElementById('support-modal-type');
     if (select && type) {
         select.value = type;
-        select.classList.add('select-locked');
-        select.dataset.locked = '1';
+        select.disabled = true;
+        let hidden = document.getElementById('support-modal-type-hidden');
+        if (!hidden) {
+            hidden = document.createElement('input');
+            hidden.type = 'hidden';
+            hidden.id = 'support-modal-type-hidden';
+            hidden.name = 'request_type';
+            select.parentNode.appendChild(hidden);
+        }
+        hidden.value = type;
     }
     modal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
@@ -537,9 +545,10 @@ function hideSupportModal() {
     document.body.style.overflow = '';
     const select = document.getElementById('support-modal-type');
     if (select) {
-        select.classList.remove('select-locked');
-        delete select.dataset.locked;
+        select.disabled = false;
     }
+    const hidden = document.getElementById('support-modal-type-hidden');
+    if (hidden) hidden.remove();
     const form = document.getElementById('support-modal-form');
     if (form) form.reset();
     const feedback = document.getElementById('support-modal-feedback');
