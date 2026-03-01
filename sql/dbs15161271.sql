@@ -525,6 +525,7 @@ CREATE TABLE IF NOT EXISTS `inventory_requests` (
   `start_date`          DATE                NOT NULL    COMMENT 'Requested start date of the loan',
   `end_date`            DATE                NOT NULL    COMMENT 'Requested end date of the loan',
   `quantity`            INT UNSIGNED        NOT NULL DEFAULT 1 COMMENT 'Number of units requested',
+  `purpose`             VARCHAR(200)        DEFAULT NULL COMMENT 'Stated purpose / Verwendungszweck',
   `status`              ENUM('pending','approved','rejected','returned','pending_return') NOT NULL DEFAULT 'pending' COMMENT 'Approval workflow status',
   `return_notes`        TEXT                DEFAULT NULL COMMENT 'Optional remarks at return',
   `returned_at`         DATETIME            DEFAULT NULL COMMENT 'When the return was verified',
