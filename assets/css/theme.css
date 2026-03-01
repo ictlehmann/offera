@@ -776,7 +776,6 @@ body.dark-mode a:not(.btn-primary) {
 /* Light Mode Links - Keep visible on white backgrounds, use appropriate color */
 body:not(.dark-mode) a:not(.btn-primary):not(.no-underline):not(.sidebar a) {
     color: var(--text-main) !important; /* Dark text for visibility on white backgrounds */
-    position: relative;
     text-decoration: none;
     transition: color var(--transition-normal);
 }
@@ -784,28 +783,33 @@ body:not(.dark-mode) a:not(.btn-primary):not(.no-underline):not(.sidebar a) {
 /* Sidebar links in light mode must be white */
 body:not(.dark-mode) .sidebar a:not(.no-underline) {
     color: #ffffff !important;
-    position: relative;
     text-decoration: none;
     transition: color var(--transition-normal);
 }
 
-/* Light Mode: Animated underline on hover */
-body:not(.dark-mode) a:not(.btn-primary):not(.no-underline) {
-    display: inline-block;
+/* Light Mode: Animated underline on hover - scoped to text links inside paragraphs and lists */
+body:not(.dark-mode) p > a:not(.btn-primary):not(.no-underline):not(.sidebar a),
+body:not(.dark-mode) li > a:not(.btn-primary):not(.no-underline):not(.sidebar a),
+body:not(.dark-mode) td > a:not(.btn-primary):not(.no-underline):not(.sidebar a) {
+    position: relative;
 }
 
-body:not(.dark-mode) a:not(.btn-primary):not(.no-underline):not(.sidebar a)::after {
+body:not(.dark-mode) p > a:not(.btn-primary):not(.no-underline):not(.sidebar a)::after,
+body:not(.dark-mode) li > a:not(.btn-primary):not(.no-underline):not(.sidebar a)::after,
+body:not(.dark-mode) td > a:not(.btn-primary):not(.no-underline):not(.sidebar a)::after {
     content: '';
     position: absolute;
     bottom: -2px;
     left: 0;
     width: 0;
     height: 2px;
-    background: linear-gradient(90deg, var(--ibc-green), var(--ibc-green-light)); /* Green gradient instead of blue-green */
+    background: linear-gradient(90deg, var(--ibc-green), var(--ibc-green-light));
     transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-body:not(.dark-mode) a:not(.btn-primary):not(.no-underline):hover::after {
+body:not(.dark-mode) p > a:not(.btn-primary):not(.no-underline):not(.sidebar a):hover::after,
+body:not(.dark-mode) li > a:not(.btn-primary):not(.no-underline):not(.sidebar a):hover::after,
+body:not(.dark-mode) td > a:not(.btn-primary):not(.no-underline):not(.sidebar a):hover::after {
     width: 100%;
 }
 
@@ -1458,17 +1462,24 @@ body.dark-mode .flatpickr-time input:focus {
 
 /* LIGHT MODE: Force dark text for better readability */
 /* Exclude sidebar elements to keep them white on blue background */
+/* Note: spans are excluded from this rule to allow colored utility classes (text-red, text-green etc.) */
 body:not(.dark-mode) h1:not(.sidebar *),
 body:not(.dark-mode) h2:not(.sidebar *),
 body:not(.dark-mode) h3:not(.sidebar *),
 body:not(.dark-mode) p:not(.sidebar *),
 body:not(.dark-mode) li:not(.sidebar *),
-body:not(.dark-mode) span:not(.badge):not(.btn-primary):not(.text-white):not(.sidebar *),
 body:not(.dark-mode) label:not(.sidebar *),
 body:not(.dark-mode) input:not(.sidebar *),
 body:not(.dark-mode) select:not(.sidebar *),
 body:not(.dark-mode) textarea:not(.sidebar *),
 body:not(.dark-mode) td:not(.sidebar *) {
+    color: #0f172a !important; /* slate-900 - Almost black for max readability */
+}
+
+/* LIGHT MODE: Span text color - dark for unstyled spans, but allow colored utility classes.
+   Exclusions for Tailwind color prefixes prevent status badges, error indicators, and other
+   semantic color-coded elements from having their colors overridden to near-black. */
+body:not(.dark-mode) span:not(.badge):not(.btn-primary):not(.text-white):not(.sidebar *):not([class*="text-red"]):not([class*="text-green"]):not([class*="text-orange"]):not([class*="text-yellow"]):not([class*="text-purple"]):not([class*="text-pink"]):not([class*="text-teal"]):not([class*="text-indigo"]):not([class*="text-cyan"]):not([class*="text-emerald"]):not([class*="text-amber"]):not([class*="text-rose"]):not([class*="text-sky"]):not([class*="text-violet"]):not([class*="text-fuchsia"]):not([class*="text-lime"]):not([class*="text-ibc"]) {
     color: #0f172a !important; /* slate-900 - Almost black for max readability */
 }
 
@@ -1509,9 +1520,15 @@ body.dark-mode h2,
 body.dark-mode h3,
 body.dark-mode p,
 body.dark-mode li,
-body.dark-mode span:not(.badge):not(.text-black),
 body.dark-mode label,
 body.dark-mode td {
+    color: #f1f5f9 !important; /* slate-100 - Almost white for dark mode */
+}
+
+/* Dark Mode: Span text color - light for unstyled spans, but allow specific color utility class overrides.
+   Exclusions for Tailwind color prefixes allow the dark-mode-specific lighter color variants
+   (e.g. text-red-300 instead of text-red-700) defined later in this file to take effect on spans. */
+body.dark-mode span:not(.badge):not(.text-black):not([class*="text-red"]):not([class*="text-green"]):not([class*="text-orange"]):not([class*="text-yellow"]):not([class*="text-purple"]):not([class*="text-pink"]):not([class*="text-teal"]):not([class*="text-indigo"]):not([class*="text-cyan"]):not([class*="text-emerald"]):not([class*="text-amber"]):not([class*="text-rose"]):not([class*="text-sky"]):not([class*="text-violet"]):not([class*="text-fuchsia"]):not([class*="text-lime"]):not([class*="text-blue"]):not([class*="text-ibc"]) {
     color: #f1f5f9 !important; /* slate-100 - Almost white for dark mode */
 }
 
@@ -1936,15 +1953,14 @@ body.dark-mode button {
 }
 
 body.dark-mode button:not(.btn-primary):not(.btn-secondary) {
-    background-color: var(--bg-card);
     color: #ffffff !important; /* Ensure all buttons have white text in dark mode */
 }
 
-body.dark-mode button:hover:not(.btn-primary):not(.btn-secondary) {
+body.dark-mode button:hover:not(.btn-primary):not(.btn-secondary):not([class^="bg-"]):not([class*=" bg-"]) {
     background-color: #374151;
 }
 
-body.dark-mode button:active:not(.btn-primary):not(.btn-secondary) {
+body.dark-mode button:active:not(.btn-primary):not(.btn-secondary):not([class^="bg-"]):not([class*=" bg-"]) {
     background-color: #1f2937;
     transform: scale(0.97);
     transition: transform 0.1s ease, background-color 0.1s ease;
@@ -4339,10 +4355,9 @@ body {
     color: var(--text-main);
 }
 
-/* Ensure Bootstrap containers don't create unexpected padding */
+/* Ensure Bootstrap containers work with proper padding for grid layouts */
 .container, .container-fluid, .container-sm, .container-md, .container-lg, .container-xl {
-    padding-left: 0 !important;
-    padding-right: 0 !important;
+    box-sizing: border-box;
 }
 
 /* Bootstrap row negative margins fix */
