@@ -208,11 +208,11 @@ ob_start();
             $openStatusLabelMap = ['pending' => 'In Prüfung', 'approved' => 'Offen'];
             $openBadgeClassMap  = [
                 'pending'  => 'bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200 ring-1 ring-inset ring-amber-500/40 dark:ring-amber-400/30',
-                'approved' => 'bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-200 ring-1 ring-inset ring-blue-500/40 dark:ring-blue-400/30',
+                'approved' => 'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-200 ring-1 ring-inset ring-yellow-500/40 dark:ring-yellow-400/30',
             ];
             $openDotClassMap = [
                 'pending'  => 'bg-amber-500',
-                'approved' => 'bg-blue-500',
+                'approved' => 'bg-yellow-500',
             ];
             $openDescMaxLen = 45;
             foreach (array_slice($openInvoices, 0, 6) as $openInv):
@@ -272,7 +272,7 @@ ob_start();
             </button>
             <button onclick="filterByStatus('approved')" id="tab-approved"
                 class="filter-tab px-4 py-2 rounded-lg text-sm font-semibold transition-all border bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700">
-                Offen <span class="ml-1 px-1.5 py-0.5 rounded-full text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300"><?php echo $statusCounts['approved']; ?></span>
+                Offen <span class="ml-1 px-1.5 py-0.5 rounded-full text-xs bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300"><?php echo $statusCounts['approved']; ?></span>
             </button>
             <button onclick="filterByStatus('rejected')" id="tab-rejected"
                 class="filter-tab px-4 py-2 rounded-lg text-sm font-semibold transition-all border bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700">
@@ -314,14 +314,14 @@ ob_start();
                 // Status configuration (dots + colors + labels)
                 $statusColors = [
                     'pending'  => 'bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200 ring-1 ring-inset ring-amber-500/40 dark:ring-amber-400/30',
-                    'approved' => 'bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-200 ring-1 ring-inset ring-blue-500/40 dark:ring-blue-400/30',
+                    'approved' => 'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-200 ring-1 ring-inset ring-yellow-500/40 dark:ring-yellow-400/30',
                     'rejected' => 'bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200 ring-1 ring-inset ring-red-500/40 dark:ring-red-400/30',
                     'paid'     => 'bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-200 ring-1 ring-inset ring-green-500/40 dark:ring-green-400/30',
                     'overdue'  => 'bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200 ring-1 ring-inset ring-red-500/40 dark:ring-red-400/30',
                 ];
                 $statusDots = [
                     'pending'  => 'bg-amber-500 dark:bg-amber-400',
-                    'approved' => 'bg-blue-500 dark:bg-blue-400',
+                    'approved' => 'bg-yellow-500 dark:bg-yellow-400',
                     'rejected' => 'bg-red-500 dark:bg-red-400',
                     'paid'     => 'bg-green-500 dark:bg-green-400',
                     'overdue'  => 'bg-red-500 dark:bg-red-400',
@@ -834,14 +834,14 @@ function openInvoiceDetail(data) {
     const badge = document.getElementById('detail-status-badge');
     const statusClasses = {
         pending:  'bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200 ring-1 ring-inset ring-amber-500/40 dark:ring-amber-400/30',
-        approved: 'bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-200 ring-1 ring-inset ring-blue-500/40 dark:ring-blue-400/30',
+        approved: 'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-200 ring-1 ring-inset ring-yellow-500/40 dark:ring-yellow-400/30',
         rejected: 'bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200 ring-1 ring-inset ring-red-500/40 dark:ring-red-400/30',
         paid:     'bg-green-100 dark:bg-green-900/40 text-green-800 dark:text-green-200 ring-1 ring-inset ring-green-500/40 dark:ring-green-400/30',
         overdue:  'bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-200 ring-1 ring-inset ring-red-500/40 dark:ring-red-400/30',
     };
     const statusDotColors = {
         pending:  'bg-amber-500',
-        approved: 'bg-blue-500',
+        approved: 'bg-yellow-500',
         rejected: 'bg-red-500',
         paid:     'bg-green-500',
         overdue:  'bg-red-500',
