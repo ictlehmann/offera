@@ -229,17 +229,17 @@ ob_start();
             <!-- Checkout/Borrow Button for all users -->
             <?php if ($item['available_quantity'] > 0): ?>
             <div class="mb-8 flex flex-wrap items-center gap-3">
-                <button onclick="openCheckoutModal()" class="inline-flex items-center px-8 py-4 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl hover:from-green-700 hover:to-green-800 transition-all transform hover:scale-105 font-bold shadow-lg text-lg">
-                    <i class="fas fa-hand-holding-box mr-3"></i>Entnehmen / Ausleihen
+                <button onclick="openCheckoutModal()" class="inline-flex items-center px-8 py-4 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl hover:from-green-700 hover:to-green-800 transition-all transform hover:scale-105 font-bold shadow-lg text-lg" aria-haspopup="dialog">
+                    <i class="fas fa-hand-holding-box mr-3" aria-hidden="true"></i>Entnehmen / Ausleihen
                 </button>
                 <button type="button" onclick="window.location.reload()" class="inline-flex items-center px-4 py-4 bg-blue-500 hover:bg-blue-600 text-white rounded-xl transition-all transform hover:scale-105 shadow-lg font-semibold" title="Ansicht aktualisieren" aria-label="Aktualisieren">
-                    <i class="fas fa-rotate-right"></i>
+                    <i class="fas fa-rotate-right" aria-hidden="true"></i>
                 </button>
             </div>
             <?php else: ?>
             <div class="mb-8">
                 <button type="button" onclick="window.location.reload()" class="inline-flex items-center px-4 py-4 bg-blue-500 hover:bg-blue-600 text-white rounded-xl transition-all transform hover:scale-105 shadow-lg font-semibold" title="Ansicht aktualisieren" aria-label="Aktualisieren">
-                    <i class="fas fa-rotate-right"></i>
+                    <i class="fas fa-rotate-right" aria-hidden="true"></i>
                 </button>
             </div>
             <?php endif; ?>
@@ -403,7 +403,7 @@ ob_start();
                             <input type="hidden" name="request_return" value="1">
                             <input type="hidden" name="rental_id" value="<?php echo (int)$rental['id']; ?>">
                             <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition text-xs font-semibold">
-                                <i class="fas fa-undo mr-1"></i>Rückgabe melden
+                                <i class="fas fa-undo mr-1" aria-hidden="true"></i>Rückgabe melden
                             </button>
                         </form>
                         <?php endif; ?>
@@ -577,7 +577,7 @@ if (!empty($logbookNote)):
 </div>
 
 <!-- Combined Checkout/Rental Modal -->
-<div id="checkoutModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+<div id="checkoutModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="checkout-modal-title">
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-lg max-h-[85vh] flex flex-col overflow-hidden">
         <form id="combinedCheckoutForm" method="POST" action="checkout.php?id=<?php echo htmlspecialchars($item['id']); ?>" class="flex flex-col flex-1 min-h-0">
             <input type="hidden" name="csrf_token" value="<?php echo CSRFHandler::getToken(); ?>">
@@ -585,12 +585,12 @@ if (!empty($logbookNote)):
 
             <div class="p-6 overflow-y-auto flex-1">
                 <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">
-                        <i class="fas fa-hand-holding-box text-green-600 mr-2"></i>
+                    <h2 id="checkout-modal-title" class="text-2xl font-bold text-gray-800 dark:text-gray-100">
+                        <i class="fas fa-hand-holding-box text-green-600 mr-2" aria-hidden="true"></i>
                         Entnehmen / Ausleihen
                     </h2>
-                    <button type="button" onclick="closeCheckoutModal()" class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
-                        <i class="fas fa-times text-xl"></i>
+                    <button type="button" onclick="closeCheckoutModal()" class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300" aria-label="Dialog schließen">
+                        <i class="fas fa-times text-xl" aria-hidden="true"></i>
                     </button>
                 </div>
 
@@ -601,27 +601,30 @@ if (!empty($logbookNote)):
 
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Startdatum der Ausleihe <span class="text-red-500">*</span>
+                        <label for="checkout-start-date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Startdatum der Ausleihe <span class="text-red-500" aria-hidden="true">*</span>
                         </label>
                         <input
                             type="date"
+                            id="checkout-start-date"
                             name="start_date"
                             required
+                            aria-required="true"
                             value="<?php echo date('Y-m-d'); ?>"
                             class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:text-gray-100"
                         >
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Menge <span class="text-red-500">*</span>
+                        <label for="checkoutQuantity" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Menge <span class="text-red-500" aria-hidden="true">*</span>
                         </label>
                         <input
                             type="number"
                             id="checkoutQuantity"
                             name="quantity"
                             required
+                            aria-required="true"
                             min="1"
                             max="<?php echo htmlspecialchars(max(0, $item['available_quantity'])); ?>"
                             value="1"
@@ -631,10 +634,11 @@ if (!empty($logbookNote)):
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <label for="checkout-purpose" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             Zweck / Notiz
                         </label>
                         <textarea
+                            id="checkout-purpose"
                             name="purpose"
                             rows="3"
                             class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 dark:bg-gray-700 dark:text-gray-100"
@@ -643,7 +647,7 @@ if (!empty($logbookNote)):
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <label for="checkoutReturnDate" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             Voraussichtliches Rückgabedatum
                         </label>
                         <input
@@ -663,7 +667,7 @@ if (!empty($logbookNote)):
                     Abbrechen
                 </button>
                 <button type="submit" class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
-                    <i class="fas fa-check mr-2"></i>Bestätigen
+                    <i class="fas fa-check mr-2" aria-hidden="true"></i>Bestätigen
                 </button>
             </div>
         </form>
