@@ -148,8 +148,8 @@ class User {
         $db = Database::getUserDB();
         
         $sql = $role
-            ? "SELECT id, email, first_name, last_name, role, user_type, tfa_enabled, is_alumni_validated, last_login, created_at, entra_roles, entra_photo_path FROM users WHERE role = ? ORDER BY created_at DESC"
-            : "SELECT id, email, first_name, last_name, role, user_type, tfa_enabled, is_alumni_validated, last_login, created_at, entra_roles, entra_photo_path FROM users ORDER BY created_at DESC";
+            ? "SELECT id, email, first_name, last_name, role, user_type, tfa_enabled, is_alumni_validated, last_login, created_at, entra_roles, entra_photo_path, azure_oid, is_locked_permanently, locked_until FROM users WHERE role = ? ORDER BY created_at DESC"
+            : "SELECT id, email, first_name, last_name, role, user_type, tfa_enabled, is_alumni_validated, last_login, created_at, entra_roles, entra_photo_path, azure_oid, is_locked_permanently, locked_until FROM users ORDER BY created_at DESC";
         try {
             if ($role) {
                 $stmt = $db->prepare($sql);
