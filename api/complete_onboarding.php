@@ -77,15 +77,7 @@ try {
         echo json_encode(['success' => false, 'message' => 'Nachname ist erforderlich']);
         exit;
     }
-    if (empty($mobilePhone)) {
-        echo json_encode(['success' => false, 'message' => 'Mobiltelefon ist erforderlich']);
-        exit;
-    }
-    if (empty($birthday)) {
-        echo json_encode(['success' => false, 'message' => 'Das Geburtsdatum ist ein Pflichtfeld']);
-        exit;
-    }
-    if (strtotime($birthday) > strtotime('-16 years', strtotime('today'))) {
+    if (!empty($birthday) && strtotime($birthday) > strtotime('-16 years', strtotime('today'))) {
         echo json_encode(['success' => false, 'message' => 'Du musst mindestens 16 Jahre alt sein']);
         exit;
     }
@@ -94,7 +86,7 @@ try {
         'first_name'   => $firstName,
         'last_name'    => $lastName,
         'email'        => $email,
-        'mobile_phone' => $mobilePhone,
+        'mobile_phone' => !empty($mobilePhone) ? $mobilePhone : null,
     ];
 
     // Save profile via the appropriate model
@@ -116,9 +108,10 @@ try {
 
     // Update users table: birthday, is_onboarded, profile_complete, has_seen_onboarding
     $db = Database::getUserDB();
+    $birthdayValue = !empty($birthday) ? $birthday : null;
     $stmt = $db->prepare("UPDATE users SET birthday = ?, is_onboarded = 1, profile_complete = 1, has_seen_onboarding = 1 WHERE id = ?");
 
-    if ($stmt->execute([$birthday, $userId])) {
+    if ($stmt->execute([$birthdayValue, $userId])) {
         // Update session so the onboarding middleware no longer triggers
         $_SESSION['is_onboarded'] = true;
         $_SESSION['profile_incomplete'] = false;

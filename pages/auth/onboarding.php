@@ -335,16 +335,15 @@ if ($showQRCode) {
                 </div>
 
                 <div class="form-group">
-                    <label for="mobile_phone">Mobiltelefon<span class="required">*</span></label>
+                    <label for="mobile_phone">Mobiltelefon</label>
                     <input type="tel" id="mobile_phone" name="mobile_phone"
-                           placeholder="+49 123 456789" required>
+                           placeholder="+49 123 456789">
                 </div>
 
                 <div class="form-group">
-                    <label for="birthday">Geburtsdatum<span class="required">*</span></label>
+                    <label for="birthday">Geburtsdatum</label>
                     <input type="date" id="birthday" name="birthday"
-                           max="<?php echo date('Y-m-d', strtotime('-16 years')); ?>"
-                           required>
+                           max="<?php echo date('Y-m-d', strtotime('-16 years')); ?>">
                 </div>
 
                 <button type="submit" class="btn btn-primary" style="width:100%;" id="submit-btn">
