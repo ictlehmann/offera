@@ -21,7 +21,7 @@ $userId = $_SESSION['user_id'];
 $userRole = $user['role'] ?? '';
 
 // Check permission: All authenticated users with these roles can edit their own profile
-$allowedRoles = ['alumni', 'alumni_board', 'alumni_auditor', 'board_finance', 'board_internal', 'board_external', 'head', 'candidate', 'member', 'honorary_member'];
+$allowedRoles = ['alumni', 'alumni_vorstand', 'alumni_finanzpruefer', 'vorstand_finanzen', 'vorstand_intern', 'vorstand_extern', 'resortleiter', 'anwaerter', 'mitglied', 'ehrenmitglied'];
 if (!in_array($userRole, $allowedRoles)) {
     $_SESSION['error_message'] = 'Du hast keine Berechtigung, Profile zu bearbeiten.';
     header('Location: ../dashboard/index.php');

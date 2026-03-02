@@ -211,27 +211,27 @@ class AuthHandler {
             return false;
         }
         
-        // Role hierarchy: alumni and member have read-only access (level 1)
-        // head can edit inventory (level 2)
-        // board roles and alumni_board have full board access (level 3)
+        // Role hierarchy: alumni and mitglied have read-only access (level 1)
+        // resortleiter can edit inventory (level 2)
+        // board roles and alumni_vorstand have full board access (level 3)
         // Note: 'admin', 'board', and 'manager' kept for backward compatibility with legacy code paths.
-        // 'manager' is DEPRECATED in favor of 'head' but kept for existing users
+        // 'manager' is DEPRECATED in favor of 'resortleiter' but kept for existing users
         // 'board' is a placeholder level 3 role used for permission checks
         // 'admin' is DEPRECATED and not assignable to new users
         $roleHierarchy = [
-            'candidate' => 1,
-            'alumni' => 1, 
-            'member' => 1,
-            'honorary_member' => 1,
-            'manager' => 2,  // DEPRECATED: Use 'head' instead. Kept for existing users.
-            'head' => 2,
-            'alumni_board' => 3,
-            'alumni_auditor' => 3,  // Same level as alumni_board
-            'board_finance' => 3,
-            'board_internal' => 3,
-            'board_external' => 3,
-            'board' => 3,  // DEPRECATED: Placeholder for backward compatibility checks
-            'admin' => 3  // DEPRECATED: Keep for backward compatibility only. Not assignable to new users.
+            'anwaerter'           => 1,
+            'alumni'              => 1,
+            'mitglied'            => 1,
+            'ehrenmitglied'       => 1,
+            'manager'             => 2,  // DEPRECATED: Use 'resortleiter' instead. Kept for existing users.
+            'resortleiter'        => 2,
+            'alumni_vorstand'     => 3,
+            'alumni_finanzpruefer'=> 3,  // Same level as alumni_vorstand
+            'vorstand_finanzen'   => 3,
+            'vorstand_intern'     => 3,
+            'vorstand_extern'     => 3,
+            'board'               => 3,  // DEPRECATED: Placeholder for backward compatibility checks
+            'admin'               => 3  // DEPRECATED: Keep for backward compatibility only. Not assignable to new users.
         ];
         $userRole = $_SESSION['user_role'];
         
@@ -310,7 +310,7 @@ class AuthHandler {
     /**
      * Check if user can manage invoices
      * 
-     * @return bool True if user is board_finance
+     * @return bool True if user is vorstand_finanzen
      */
     public static function canManageInvoices() {
         self::startSession();
@@ -319,13 +319,13 @@ class AuthHandler {
         }
         
         $userRole = $_SESSION['user_role'] ?? '';
-        return $userRole === 'board_finance';
+        return $userRole === 'vorstand_finanzen';
     }
     
     /**
      * Check if user can manage users
      * 
-     * @return bool True if user has any board role, alumni_board, or alumni_auditor
+     * @return bool True if user has any board role, alumni_vorstand, or alumni_finanzpruefer
      */
     public static function canManageUsers() {
         return Auth::canManageUsers();
@@ -571,39 +571,34 @@ class AuthHandler {
         // Flip the mapping so Group IDs become keys and internal role names become values
         $roleMapping = array_flip(ROLE_MAPPING);
         
-        // Add backward compatibility mappings for App Roles and display names
+        // Add direct mappings for App Roles and display names using new role keys
         $roleMapping = array_merge($roleMapping, [
-            // Lowercase versions (for App Roles - backward compatibility)
-            'anwaerter' => 'candidate',
-            'mitglied' => 'member',
-            'ressortleiter' => 'head',
-            'vorstand_finanzen' => 'board_finance',
-            'vorstand_intern' => 'board_internal',
-            'vorstand_extern' => 'board_external',
-            'vorstand' => 'board_internal',
-            'alumni' => 'alumni',
-            'alumni_vorstand' => 'alumni_board',
-            'alumni_finanz' => 'alumni_auditor',
-            'ehrenmitglied' => 'honorary_member',
-            // Capitalized versions with underscore (for Group display names - backward compatibility)
-            'Anwaerter' => 'candidate',
-            'Mitglied' => 'member',
-            'Ressortleiter' => 'head',
-            'Vorstand_Finanzen' => 'board_finance',
-            'Vorstand_Intern' => 'board_internal',
-            'Vorstand_Extern' => 'board_external',
-            'Vorstand' => 'board_internal',
-            'Alumni' => 'alumni',
-            'Alumni_Vorstand' => 'alumni_board',
-            'Alumni_Finanz' => 'alumni_auditor',
-            'Ehrenmitglied' => 'honorary_member',
-            // Capitalized versions with space (alternative Group display names - backward compatibility)
-            'Vorstand Finanzen' => 'board_finance',
-            'Vorstand Finanzen und Recht' => 'board_finance',
-            'Vorstand Intern' => 'board_internal',
-            'Vorstand Extern' => 'board_external',
-            'Alumni Vorstand' => 'alumni_board',
-            'Alumni Finanz' => 'alumni_auditor'
+            // Entra App Role values (what JWT sends in roles claim)
+            'vorstand_intern'         => 'vorstand_intern',
+            'vorstand_extern'         => 'vorstand_extern',
+            'vorstand_finanzen'       => 'vorstand_finanzen',
+            'resortleiter'            => 'resortleiter',
+            'mitglied'                => 'mitglied',
+            'anwaerter'               => 'anwaerter',
+            'alumni'                  => 'alumni',
+            'alumni_vorstand'         => 'alumni_vorstand',
+            'alumni_finanzpruefer'    => 'alumni_finanzpruefer',
+            'ehrenmitglied'           => 'ehrenmitglied',
+            // Display name variants (Entra group display names)
+            'Vorstand Intern'             => 'vorstand_intern',
+            'Vorstand Extern'             => 'vorstand_extern',
+            'Vorstand Finanzen'           => 'vorstand_finanzen',
+            'Vorstand Finanzen und Recht' => 'vorstand_finanzen',
+            'Ressortleiter'               => 'resortleiter',
+            'Mitglied'                    => 'mitglied',
+            'Anwärter'                    => 'anwaerter',
+            'Anwaerter'                   => 'anwaerter',
+            'Alumni'                      => 'alumni',
+            'Alumni Vorstand'             => 'alumni_vorstand',
+            'Alumni-Vorstand'             => 'alumni_vorstand',
+            'Alumni Finanz'               => 'alumni_finanzpruefer',
+            'Alumni-Finanzprüfer'         => 'alumni_finanzpruefer',
+            'Ehrenmitglied'               => 'ehrenmitglied',
         ]);
         
         // Debug logging for expected role keys
@@ -611,21 +606,21 @@ class AuthHandler {
         
         // Define role hierarchy for priority selection (higher value = higher priority)
         $roleHierarchy = [
-            'candidate' => 1,
-            'member' => 2,
-            'head' => 3,
-            'alumni' => 4,
-            'honorary_member' => 5,
-            'board_finance' => 6,
-            'board_internal' => 7,
-            'board_external' => 8,
-            'alumni_board' => 9,
-            'alumni_auditor' => 10
+            'anwaerter'           => 1,
+            'mitglied'            => 2,
+            'resortleiter'        => 3,
+            'alumni'              => 4,
+            'ehrenmitglied'       => 5,
+            'vorstand_finanzen'   => 6,
+            'vorstand_intern'     => 7,
+            'vorstand_extern'     => 8,
+            'alumni_vorstand'     => 9,
+            'alumni_finanzpruefer'=> 10
         ];
         
         // Find the role with the highest priority from all sources
         $highestPriority = 0;
-        $selectedRole = 'member'; // Default to member if no valid role found
+        $selectedRole = 'mitglied'; // Default to mitglied if no valid role found
         
         // Process JWT roles (simple strings)
         foreach ($azureRoles as $roleSource) {
@@ -776,22 +771,17 @@ class AuthHandler {
             $isAlumniValidated = ($roleName === 'alumni') ? 0 : 1;
             // Set profile_complete=0 to force first-time profile completion
             $profileComplete = 0;
-            // Enable email notifications by default
-            $notifyProjects = 1;
-            $notifyEvents = 1;
             
             $stmt = $db->prepare("
                 INSERT INTO users (
                     email, password, role, azure_roles, azure_oid, 
                     is_alumni_validated, profile_complete, 
-                    notify_new_projects, notify_new_events,
                     first_name, last_name
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             ");
             $stmt->execute([
                 $email, $randomPassword, $roleName, $azureRolesJson, $azureOid,
                 $isAlumniValidated, $profileComplete,
-                $notifyProjects, $notifyEvents,
                 $firstName, $lastName
             ]);
             $userId = $db->lastInsertId();
@@ -972,41 +962,48 @@ class AuthHandler {
         // fallback below. Space-separated entries must be listed explicitly because
         // strtolower('Vorstand Intern') != 'vorstand_intern'.
         $roleMapping = array_merge($roleMapping, [
-            // Lowercase app role value / group name strings
-            'anwaerter'                   => 'candidate',
-            'mitglied'                    => 'member',
-            'ressortleiter'               => 'head',
-            'vorstand_finanzen'           => 'board_finance',
-            'vorstand_intern'             => 'board_internal',
-            'vorstand_extern'             => 'board_external',
-            'vorstand'                    => 'board_internal',
-            'alumni'                      => 'alumni',
-            'alumni_vorstand'             => 'alumni_board',
-            'alumni_finanz'               => 'alumni_auditor',
-            'ehrenmitglied'               => 'honorary_member',
+            // Direct mappings for new role keys
+            'vorstand_intern'         => 'vorstand_intern',
+            'vorstand_extern'         => 'vorstand_extern',
+            'vorstand_finanzen'       => 'vorstand_finanzen',
+            'resortleiter'            => 'resortleiter',
+            'mitglied'                => 'mitglied',
+            'anwaerter'               => 'anwaerter',
+            'alumni'                  => 'alumni',
+            'alumni_vorstand'         => 'alumni_vorstand',
+            'alumni_finanzpruefer'    => 'alumni_finanzpruefer',
+            'ehrenmitglied'           => 'ehrenmitglied',
             // Space-separated display names (common Azure AD group names)
-            'Vorstand Finanzen'           => 'board_finance',
-            'Vorstand Finanzen und Recht' => 'board_finance',
-            'Vorstand Intern'             => 'board_internal',
-            'Vorstand Extern'             => 'board_external',
-            'Alumni Vorstand'             => 'alumni_board',
-            'Alumni Finanz'               => 'alumni_auditor',
+            'Vorstand Intern'             => 'vorstand_intern',
+            'Vorstand Extern'             => 'vorstand_extern',
+            'Vorstand Finanzen'           => 'vorstand_finanzen',
+            'Vorstand Finanzen und Recht' => 'vorstand_finanzen',
+            'Ressortleiter'               => 'resortleiter',
+            'Mitglied'                    => 'mitglied',
+            'Anwärter'                    => 'anwaerter',
+            'Anwaerter'                   => 'anwaerter',
+            'Alumni'                      => 'alumni',
+            'Alumni Vorstand'             => 'alumni_vorstand',
+            'Alumni-Vorstand'             => 'alumni_vorstand',
+            'Alumni Finanz'               => 'alumni_finanzpruefer',
+            'Alumni-Finanzprüfer'         => 'alumni_finanzpruefer',
+            'Ehrenmitglied'               => 'ehrenmitglied',
         ]);
         $roleHierarchy = [
-            'candidate'       => 1,
-            'member'          => 2,
-            'head'            => 3,
-            'alumni'          => 4,
-            'honorary_member' => 5,
-            'board_finance'   => 6,
-            'board_internal'  => 7,
-            'board_external'  => 8,
-            'alumni_board'    => 9,
-            'alumni_auditor'  => 10,
+            'anwaerter'           => 1,
+            'mitglied'            => 2,
+            'resortleiter'        => 3,
+            'alumni'              => 4,
+            'ehrenmitglied'       => 5,
+            'vorstand_finanzen'   => 6,
+            'vorstand_intern'     => 7,
+            'vorstand_extern'     => 8,
+            'alumni_vorstand'     => 9,
+            'alumni_finanzpruefer'=> 10,
         ];
 
         $highestPriority = 0;
-        $selectedRole    = 'member'; // Default to member when no group matches ROLE_MAPPING
+        $selectedRole    = 'mitglied'; // Default to mitglied when no group matches ROLE_MAPPING
 
         foreach ($entraGroups as $group) {
             $candidates = [];

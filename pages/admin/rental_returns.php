@@ -11,7 +11,7 @@ require_once __DIR__ . '/../../includes/models/Inventory.php';
 require_once __DIR__ . '/../../includes/handlers/CSRFHandler.php';
 require_once __DIR__ . '/../../includes/helpers.php';
 
-if (!Auth::check() || (!Auth::isBoard() && !Auth::hasRole(['alumni_auditor', 'alumni_board']))) {
+if (!Auth::check() || (!Auth::isBoard() && !Auth::hasRole(['alumni_finanzpruefer', 'alumni_vorstand']))) {
     header('Location: ../auth/login.php');
     exit;
 }

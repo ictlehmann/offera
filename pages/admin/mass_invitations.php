@@ -56,7 +56,7 @@ function applySharedPlaceholders(string $body, array $customLinks = []): string 
                 $vorstand3V = trim(($row['first_name'] ?? '') . ' ' . ($row['last_name'] ?? ''));
             }
         } catch (Exception $e) {
-            error_log('applySharedPlaceholders: board_finance lookup failed: ' . $e->getMessage());
+            error_log('applySharedPlaceholders: vorstand_finanzen lookup failed: ' . $e->getMessage());
         }
     }
 

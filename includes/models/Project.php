@@ -358,9 +358,9 @@ class Project {
         if ($userRole !== null) {
             $roleHierarchy = [
                 'alumni' => 1,
-                'member' => 1,
+                'mitglied' => 1,
                 'manager' => 2,
-                'alumni_board' => 3,
+                'alumni_vorstand' => 3,
                 'board' => 3,
                 'admin' => 4
             ];

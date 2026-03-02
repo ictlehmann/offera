@@ -19,7 +19,7 @@ $user = Auth::user();
 $userRole = $user['role'] ?? '';
 
 // Check if user has one of the allowed roles
-$allowedRoles = ['alumni', 'alumni_board'];
+$allowedRoles = ['alumni', 'alumni_vorstand'];
 if (!in_array($userRole, $allowedRoles)) {
     header('Location: ../dashboard/index.php');
     exit;

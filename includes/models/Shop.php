@@ -13,7 +13,7 @@ class Shop {
     /**
      * Roles allowed to manage products and view all orders
      */
-    const MANAGER_ROLES = ['board_finance', 'board_internal', 'board_external', 'head'];
+    const MANAGER_ROLES = ['vorstand_finanzen', 'vorstand_intern', 'vorstand_extern', 'resortleiter'];
 
     // -------------------------------------------------------------------------
     // Products

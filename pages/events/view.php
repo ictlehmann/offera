@@ -11,7 +11,7 @@ if (!Auth::check()) {
 }
 
 $user = Auth::user();
-$userRole = $_SESSION['user_role'] ?? 'member';
+$userRole = $_SESSION['user_role'] ?? 'mitglied';
 
 // Get event ID
 $eventId = $_GET['id'] ?? null;
@@ -92,11 +92,11 @@ $signupDeadline = $event['start_time']; // Default to event start time
 $canCancel = strtotime($signupDeadline) > time();
 
 // Check if user has permission to add financial statistics
-$canAddStats = in_array($userRole, array_merge(Auth::BOARD_ROLES, ['alumni_board']));
+$canAddStats = in_array($userRole, array_merge(Auth::BOARD_ROLES, ['alumni_vorstand']));
 
 // Load feedback contact info
 $feedbackContact = Event::getFeedbackContact((int)$eventId);
-$feedbackContactRoles = ['alumni', 'alumni_board', 'alumni_auditor', 'honorary_member'];
+$feedbackContactRoles = ['alumni', 'alumni_vorstand', 'alumni_finanzpruefer', 'ehrenmitglied'];
 $canBecomeFeedbackContact = in_array($userRole, $feedbackContactRoles);
 $isFeedbackContact = $feedbackContact && (int)($feedbackContact['user_id'] ?? 0) === (int)$user['id'];
 
@@ -152,7 +152,7 @@ $statusInfo = $statusLabels[$currentStatus] ?? ['label' => $currentStatus, 'icon
             <i class="fas fa-arrow-left mr-2"></i>
             Zurück zur Übersicht
         </a>
-        <?php if (Auth::hasPermission('manage_projects') || Auth::isBoard() || Auth::hasRole(['head', 'alumni_board'])): ?>
+        <?php if (Auth::hasPermission('manage_projects') || Auth::isBoard() || Auth::hasRole(['resortleiter', 'alumni_vorstand'])): ?>
         <a href="edit.php?id=<?php echo (int)$eventId; ?>" class="inline-flex items-center px-4 py-2 bg-ibc-blue text-white rounded-xl font-semibold text-sm hover:bg-ibc-blue-dark ease-premium shadow-soft">
             <i class="fas fa-edit mr-2"></i>
             Event bearbeiten

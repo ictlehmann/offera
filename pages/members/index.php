@@ -56,7 +56,7 @@ ob_start();
         </div>
         
         <!-- Edit My Profile Button - Only for Vorstand (all types), Resortleiter, Mitglied, Anwärter -->
-        <?php if (Auth::isBoard() || Auth::hasRole(['head', 'member', 'candidate'])): ?>
+        <?php if (Auth::isBoard() || Auth::hasRole(['resortleiter', 'mitglied', 'anwaerter'])): ?>
         <a href="../auth/profile.php" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg hover:shadow-xl">
             <i class="fas fa-user-edit mr-2"></i>
             Profil bearbeiten
@@ -84,16 +84,16 @@ ob_start();
                 <label for="role"><i class="fas fa-filter me-1" aria-hidden="true"></i>Rolle</label>
                 <select id="role" name="role" class="form-select rounded-pill">
                     <option value="">Alle</option>
-                    <option value="candidate" <?php echo $roleFilter === 'candidate' ? 'selected' : ''; ?>>Anwärter</option>
-                    <option value="member" <?php echo $roleFilter === 'member' ? 'selected' : ''; ?>>Mitglieder</option>
-                    <option value="honorary_member" <?php echo $roleFilter === 'honorary_member' ? 'selected' : ''; ?>>Ehrenmitglieder</option>
-                    <option value="head" <?php echo $roleFilter === 'head' ? 'selected' : ''; ?>>Ressortleiter</option>
+                    <option value="anwaerter" <?php echo $roleFilter === 'anwaerter' ? 'selected' : ''; ?>>Anwärter</option>
+                    <option value="mitglied" <?php echo $roleFilter === 'mitglied' ? 'selected' : ''; ?>>Mitglieder</option>
+                    <option value="ehrenmitglied" <?php echo $roleFilter === 'ehrenmitglied' ? 'selected' : ''; ?>>Ehrenmitglieder</option>
+                    <option value="resortleiter" <?php echo $roleFilter === 'resortleiter' ? 'selected' : ''; ?>>Ressortleiter</option>
                     <option value="alumni" <?php echo $roleFilter === 'alumni' ? 'selected' : ''; ?>>Alumni</option>
-                    <option value="alumni_board" <?php echo $roleFilter === 'alumni_board' ? 'selected' : ''; ?>>Alumni-Vorstand</option>
-                    <option value="alumni_auditor" <?php echo $roleFilter === 'alumni_auditor' ? 'selected' : ''; ?>>Alumni-Finanzprüfer</option>
-                    <option value="board_finance" <?php echo $roleFilter === 'board_finance' ? 'selected' : ''; ?>>Vorstand Finanzen und Recht</option>
-                    <option value="board_internal" <?php echo $roleFilter === 'board_internal' ? 'selected' : ''; ?>>Vorstand Intern</option>
-                    <option value="board_external" <?php echo $roleFilter === 'board_external' ? 'selected' : ''; ?>>Vorstand Extern</option>
+                    <option value="alumni_vorstand" <?php echo $roleFilter === 'alumni_vorstand' ? 'selected' : ''; ?>>Alumni-Vorstand</option>
+                    <option value="alumni_finanzpruefer" <?php echo $roleFilter === 'alumni_finanzpruefer' ? 'selected' : ''; ?>>Alumni-Finanzprüfer</option>
+                    <option value="vorstand_finanzen" <?php echo $roleFilter === 'vorstand_finanzen' ? 'selected' : ''; ?>>Vorstand Finanzen und Recht</option>
+                    <option value="vorstand_intern" <?php echo $roleFilter === 'vorstand_intern' ? 'selected' : ''; ?>>Vorstand Intern</option>
+                    <option value="vorstand_extern" <?php echo $roleFilter === 'vorstand_extern' ? 'selected' : ''; ?>>Vorstand Extern</option>
                 </select>
             </div>
             <div class="directory-toolbar-actions">
@@ -137,16 +137,16 @@ ob_start();
                 <?php
                 // Determine role badge color
                 $roleBadgeColors = [
-                    'board_finance' => 'bg-purple-100 text-purple-800 border-purple-300',
-                    'board_internal' => 'bg-purple-100 text-purple-800 border-purple-300',
-                    'board_external' => 'bg-purple-100 text-purple-800 border-purple-300',
-                    'head' => 'bg-blue-100 text-blue-800 border-blue-300',
-                    'member' => 'bg-green-100 text-green-800 border-green-300',
-                    'candidate' => 'bg-yellow-100 text-yellow-800 border-yellow-300',
-                    'alumni' => 'bg-gray-100 text-gray-800 border-gray-300',
-                    'alumni_board' => 'bg-indigo-100 text-indigo-800 border-indigo-300',
-                    'alumni_auditor' => 'bg-indigo-100 text-indigo-800 border-indigo-300',
-                    'honorary_member' => 'bg-amber-100 text-amber-800 border-amber-300',
+                    'vorstand_finanzen'   => 'bg-purple-100 text-purple-800 border-purple-300',
+                    'vorstand_intern'     => 'bg-purple-100 text-purple-800 border-purple-300',
+                    'vorstand_extern'     => 'bg-purple-100 text-purple-800 border-purple-300',
+                    'resortleiter'        => 'bg-blue-100 text-blue-800 border-blue-300',
+                    'mitglied'            => 'bg-green-100 text-green-800 border-green-300',
+                    'anwaerter'           => 'bg-yellow-100 text-yellow-800 border-yellow-300',
+                    'alumni'              => 'bg-gray-100 text-gray-800 border-gray-300',
+                    'alumni_vorstand'     => 'bg-indigo-100 text-indigo-800 border-indigo-300',
+                    'alumni_finanzpruefer'=> 'bg-indigo-100 text-indigo-800 border-indigo-300',
+                    'ehrenmitglied'       => 'bg-amber-100 text-amber-800 border-amber-300',
                 ];
                 
                 // Display role: prefer Entra-derived display_role, fall back to local role label

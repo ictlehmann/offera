@@ -14,11 +14,11 @@ require_once __DIR__ . '/../helpers.php';
 class Member {
     
     /**
-     * Active member roles (excludes 'alumni', 'alumni_board', 'honorary_member')
-     * Includes all board role variants: 'board_finance', 'board_internal', 'board_external'
-     * Plus: 'head' (Resortleiter), 'member' (Mitglied), 'candidate' (Anwärter)
+     * Active member roles (excludes 'alumni', 'alumni_vorstand', 'ehrenmitglied')
+     * Includes all board role variants: 'vorstand_finanzen', 'vorstand_intern', 'vorstand_extern'
+     * Plus: 'resortleiter' (Ressortleiter), 'mitglied' (Mitglied), 'anwaerter' (Anwärter)
      */
-    const ACTIVE_ROLES = ['board_finance', 'board_internal', 'board_external', 'head', 'member', 'candidate'];
+    const ACTIVE_ROLES = ['vorstand_finanzen', 'vorstand_intern', 'vorstand_extern', 'resortleiter', 'mitglied', 'anwaerter'];
     
     /**
      * Get all active members with optional search and role filtering
@@ -261,12 +261,12 @@ class Member {
         $currentRole = $currentUser['role'] ?? '';
         
         // Members and candidates can update their own profile
-        // Board roles (all types) and head can update any profile
-        if (in_array($currentRole, ['member', 'candidate'])) {
+        // Board roles (all types) and resortleiter can update any profile
+        if (in_array($currentRole, ['mitglied', 'anwaerter'])) {
             if ($currentUser['id'] !== $userId) {
                 throw new Exception("Keine Berechtigung zum Aktualisieren anderer Mitgliederprofile");
             }
-        } elseif (!in_array($currentRole, array_merge(Auth::BOARD_ROLES, ['head']))) {
+        } elseif (!in_array($currentRole, array_merge(Auth::BOARD_ROLES, ['resortleiter']))) {
             throw new Exception("Keine Berechtigung zum Aktualisieren des Mitgliederprofils");
         }
         

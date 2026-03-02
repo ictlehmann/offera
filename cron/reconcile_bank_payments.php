@@ -134,15 +134,15 @@ try {
 
         } elseif ($daysPending > 14) {
             // 6. Escalation: invoice pending for more than 14 days without a matching transaction
-            echo "  -> No match found and pending > 14 days. Escalating to board_finance...\n";
+            echo "  -> No match found and pending > 14 days. Escalating to vorstand_finanzen...\n";
 
-            // Find all users with role 'board_finance'
-            $boardStmt = $userDb->prepare("SELECT id, email FROM users WHERE role = 'board_finance'");
+            // Find all users with role 'vorstand_finanzen'
+            $boardStmt = $userDb->prepare("SELECT id, email FROM users WHERE role = 'vorstand_finanzen'");
             $boardStmt->execute();
             $boardUsers = $boardStmt->fetchAll();
 
             if (empty($boardUsers)) {
-                echo "  Warning: No users with role board_finance found for escalation.\n";
+                echo "  Warning: No users with role vorstand_finanzen found for escalation.\n";
             }
 
             $amountFormatted = number_format((float) $amount, 2, ',', '.');

@@ -123,13 +123,13 @@ class Alumni extends Database {
         $currentUser = Auth::user();
         $currentRole = $currentUser['role'] ?? '';
         
-        // Alumni, honorary_member, and active members (member, candidate, head) can update their own profile
-        // alumni_board/alumni_auditor/board roles (all types) can update any
-        if (in_array($currentRole, ['alumni', 'honorary_member', 'member', 'candidate', 'head'])) {
+        // Alumni, ehrenmitglied, and active members (mitglied, anwaerter, resortleiter) can update their own profile
+        // alumni_vorstand/alumni_finanzpruefer/board roles (all types) can update any
+        if (in_array($currentRole, ['alumni', 'ehrenmitglied', 'mitglied', 'anwaerter', 'resortleiter'])) {
             if ($currentUser['id'] !== $userId) {
                 throw new Exception("Keine Berechtigung zum Aktualisieren anderer Alumni-Profile");
             }
-        } elseif (!in_array($currentRole, array_merge(Auth::BOARD_ROLES, ['alumni_board', 'alumni_auditor']))) {
+        } elseif (!in_array($currentRole, array_merge(Auth::BOARD_ROLES, ['alumni_vorstand', 'alumni_finanzpruefer']))) {
             throw new Exception("Keine Berechtigung zum Aktualisieren des Alumni-Profils");
         }
         
@@ -230,7 +230,7 @@ class Alumni extends Database {
     
     /**
      * Search profiles with filters
-     * Returns ONLY profiles where the linked User has role 'alumni', 'alumni_board', or 'honorary_member'
+     * Returns ONLY profiles where the linked User has role 'alumni', 'alumni_vorstand', or 'ehrenmitglied'
      * 
      * @param array $filters Array of filters: search (name/position/company/industry), industry
      * @return array Array of matching profiles
@@ -319,8 +319,8 @@ class Alumni extends Database {
                     $userData = $userDataMap[$userId] ?? null;
                     $userRole = $userData['role'] ?? null;
                     
-                    // Only include profiles where user has role 'alumni', 'alumni_board', or 'honorary_member'
-                    if (in_array($userRole, ['alumni', 'alumni_board', 'honorary_member'])) {
+                    // Only include profiles where user has role 'alumni', 'alumni_vorstand', or 'ehrenmitglied'
+                    if (in_array($userRole, ['alumni', 'alumni_vorstand', 'ehrenmitglied'])) {
                         $profile['role'] = $userRole;
                         $profile['entra_photo_path'] = $userData['entra_photo_path'] ?? null;
                         
@@ -385,7 +385,7 @@ class Alumni extends Database {
     /**
      * Get profiles where updated_at is older than specified months
      * Used by email bot to send verification reminders
-     * Only returns profiles for users with role 'alumni' or 'alumni_board'
+     * Only returns profiles for users with role 'alumni' or 'alumni_vorstand'
      * 
      * @param int $months Number of months (default: 12)
      * @return array Array of outdated profiles
@@ -423,12 +423,12 @@ class Alumni extends Database {
                 $userStmt->execute($userIds);
                 $userRoles = $userStmt->fetchAll(PDO::FETCH_KEY_PAIR); // id => role mapping
                 
-                // Filter profiles by role - only include 'alumni' or 'alumni_board'
+                // Filter profiles by role - only include 'alumni' or 'alumni_vorstand'
                 foreach ($profiles as $profile) {
                     $userId = $profile['user_id'];
                     $userRole = $userRoles[$userId] ?? null;
                     
-                    if (in_array($userRole, ['alumni', 'alumni_board'])) {
+                    if (in_array($userRole, ['alumni', 'alumni_vorstand'])) {
                         $result[] = $profile;
                     }
                 }
