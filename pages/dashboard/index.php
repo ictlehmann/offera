@@ -7,6 +7,7 @@ require_once __DIR__ . '/../../includes/helpers.php';
 require_once __DIR__ . '/../../includes/poll_helpers.php';
 require_once __DIR__ . '/../../includes/handlers/CSRFHandler.php';
 require_once __DIR__ . '/../../includes/models/BlogPost.php';
+require_once __DIR__ . '/../../includes/models/Alumni.php';
 
 // Update event statuses (pseudo-cron)
 require_once __DIR__ . '/../../includes/pseudo_cron.php';
@@ -180,6 +181,26 @@ try {
     $recentBlogPosts = BlogPost::getAll(3, 0);
 } catch (Exception $e) {
     error_log('dashboard: recent blog posts query failed: ' . $e->getMessage());
+}
+
+// Calculate profile completeness for the gamification widget
+$profileCompletenessPercent = 0;
+if (in_array($userRole, $rolesRequiringProfile)) {
+    try {
+        $alumniProfile = Alumni::getProfileByUserId($userId);
+        $completenessFields = ['image_path', 'mobile_phone', 'bio', 'study_program'];
+        $filledCount = 0;
+        if ($alumniProfile) {
+            foreach ($completenessFields as $field) {
+                if (!empty($alumniProfile[$field])) {
+                    $filledCount++;
+                }
+            }
+        }
+        $profileCompletenessPercent = (int)round(($filledCount / count($completenessFields)) * 100);
+    } catch (Exception $e) {
+        error_log('dashboard: profile completeness check failed: ' . $e->getMessage());
+    }
 }
 
 $title = 'Dashboard - IBC Intranet';
@@ -662,6 +683,39 @@ function dismissProfileReviewPrompt() {
         <?php endif; ?>
     </div>
 </div>
+
+<?php if (in_array($userRole, $rolesRequiringProfile) && $profileCompletenessPercent < 100): ?>
+<!-- Profile Completeness Widget -->
+<div class="max-w-6xl mx-auto mb-10">
+    <div class="card p-6 rounded-2xl shadow-lg" style="background-color: var(--bg-card); border-left: 4px solid #a855f7">
+        <div class="flex flex-col sm:flex-row items-start gap-4">
+            <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md">
+                <i class="fas fa-user-circle text-white text-xl"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+                <h3 class="text-lg font-bold mb-1" style="color: var(--text-main)">
+                    🎯 Vervollständige dein Profil!
+                </h3>
+                <p class="text-sm mb-4" style="color: var(--text-muted)">
+                    Ein vollständiges Profil hilft deinen Kolleginnen und Kollegen, dich besser kennenzulernen. Du bist schon zu <strong><?php echo $profileCompletenessPercent; ?>%</strong> fertig – fast geschafft!
+                </p>
+                <div class="mb-4">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <span class="text-xs font-semibold" style="color: var(--text-muted)">Profil-Fortschritt</span>
+                        <span class="text-xs font-bold" style="color: #a855f7"><?php echo $profileCompletenessPercent; ?>%</span>
+                    </div>
+                    <div class="w-full rounded-full h-3 overflow-hidden" style="background-color: var(--border-color)">
+                        <div class="h-3 rounded-full transition-all duration-500" style="width: <?php echo $profileCompletenessPercent; ?>%; background: linear-gradient(90deg, #a855f7, #ec4899)"></div>
+                    </div>
+                </div>
+                <a href="../alumni/edit.php" class="inline-flex items-center px-4 py-2 text-white rounded-lg font-semibold text-sm transition-all duration-300 shadow-md hover:opacity-90" style="background: linear-gradient(90deg, #a855f7, #ec4899)">
+                    <i class="fas fa-user-edit mr-2"></i>Profil vervollständigen
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
 
 <!-- Meine nächsten Events Section -->
 <?php if (!empty($events)): ?>
