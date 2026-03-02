@@ -871,6 +871,41 @@ class AuthHandler {
             $profileRow   = $profileStmt->fetch();
             $hasUpload    = !empty($profileRow['image_path']);
 
+            // --- Also sync first_name / last_name into alumni_profiles when available ---
+            if ($firstName !== null || $lastName !== null || $mail !== null) {
+                try {
+                    if ($profileRow !== false) {
+                        // Profile exists – update only the name/email fields provided by Entra
+                        $nameFields  = [];
+                        $nameParams  = [];
+                        if ($firstName !== null) {
+                            $nameFields[] = 'first_name = ?';
+                            $nameParams[] = $firstName;
+                        }
+                        if ($lastName !== null) {
+                            $nameFields[] = 'last_name = ?';
+                            $nameParams[] = $lastName;
+                        }
+                        if ($mail !== null) {
+                            $nameFields[] = 'email = ?';
+                            $nameParams[] = $mail;
+                        }
+                        if (!empty($nameFields)) {
+                            $nameParams[] = $userId;
+                            $contentDb->prepare('UPDATE alumni_profiles SET ' . implode(', ', $nameFields) . ' WHERE user_id = ?')
+                                      ->execute($nameParams);
+                        }
+                    } elseif ($firstName !== null && $lastName !== null && $mail !== null) {
+                        // No profile yet – create a minimal one so the sidebar can display the name
+                        $contentDb->prepare('INSERT INTO alumni_profiles (user_id, first_name, last_name, email) VALUES (?, ?, ?, ?)')
+                                  ->execute([$userId, $firstName, $lastName, $mail]);
+                    }
+                } catch (Exception $e) {
+                    // Non-fatal: name sync failure must not break login
+                    error_log('[syncEntraData] Name sync to alumni_profiles failed for user ' . $userId . ': ' . $e->getMessage());
+                }
+            }
+
             if (!$hasUpload) {
                 $photoService = new MicrosoftGraphService();
                 $photoData = $photoService->getUserPhoto($azureOid);

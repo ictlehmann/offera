@@ -34,6 +34,17 @@ ErrorDocument 404 /pages/errors/404.php
     </IfModule>
 </FilesMatch>
 
+# Ausnahme: manifest.json muss für den Browser zugänglich sein (Web App Manifest)
+<Files "manifest.json">
+    <IfModule mod_authz_core.c>
+        Require all granted
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order allow,deny
+        Allow from all
+    </IfModule>
+</Files>
+
 # ----------------------------------------------------------------------
 # 3. Ordner-Schutz
 # ----------------------------------------------------------------------
