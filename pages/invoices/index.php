@@ -99,8 +99,8 @@ ob_start();
 
     <!-- Success/Error Messages -->
     <?php if (isset($_SESSION['success_message'])): ?>
-    <div class="mb-6 p-4 bg-green-100 dark:bg-green-900 border border-green-400 dark:border-green-700 text-green-700 dark:text-green-300 rounded-lg">
-        <i class="fas fa-check-circle mr-2"></i><?php echo htmlspecialchars($_SESSION['success_message']); ?>
+    <div class="mb-5 p-3.5 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800/50 text-green-700 dark:text-green-300 rounded-xl text-sm font-medium flex items-center gap-2">
+        <i class="fas fa-check-circle text-green-500 flex-shrink-0"></i><?php echo htmlspecialchars($_SESSION['success_message']); ?>
     </div>
     <?php 
         unset($_SESSION['success_message']); 
@@ -108,8 +108,8 @@ ob_start();
     ?>
     
     <?php if (isset($_SESSION['error_message'])): ?>
-    <div class="mb-6 p-4 bg-red-100 dark:bg-red-900 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-300 rounded-lg">
-        <i class="fas fa-exclamation-circle mr-2"></i><?php echo htmlspecialchars($_SESSION['error_message']); ?>
+    <div class="mb-5 p-3.5 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 text-red-700 dark:text-red-300 rounded-xl text-sm font-medium flex items-center gap-2">
+        <i class="fas fa-exclamation-circle text-red-500 flex-shrink-0"></i><?php echo htmlspecialchars($_SESSION['error_message']); ?>
     </div>
     <?php 
         unset($_SESSION['error_message']); 
@@ -117,151 +117,72 @@ ob_start();
     ?>
 
     <!-- Header -->
-    <div class="mb-8 rounded-2xl overflow-hidden shadow-lg no-print">
-        <div class="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 dark:from-blue-800 dark:via-blue-900 dark:to-indigo-900 px-6 py-7 sm:px-8">
-            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <div>
-                    <h1 class="text-3xl sm:text-4xl font-bold text-white mb-1">
-                        <i class="fas fa-file-invoice-dollar mr-3 opacity-90"></i>
-                        Rechnungsmanagement
-                    </h1>
-                    <p class="text-blue-100 dark:text-blue-200 mt-1">Verwalte Belege und Erstattungen</p>
+    <div class="mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 no-print">
+        <div>
+            <div class="flex items-center gap-3 mb-1">
+                <div class="w-10 h-10 rounded-2xl bg-blue-50 dark:bg-blue-900/40 flex items-center justify-center shadow-sm">
+                    <i class="fas fa-file-invoice-dollar text-blue-600 dark:text-blue-400 text-lg"></i>
                 </div>
-                <!-- New Submission Button -->
-                <button
-                    id="openSubmissionModal"
-                    class="inline-flex items-center justify-center px-6 py-3 bg-white text-blue-700 rounded-xl font-semibold hover:bg-blue-50 transition-all shadow-md hover:shadow-lg flex-shrink-0"
-                >
-                    <i class="fas fa-plus mr-2"></i>
-                    Neue Einreichung
-                </button>
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-50 tracking-tight">Rechnungen</h1>
             </div>
+            <p class="text-gray-500 dark:text-gray-400 text-sm ml-0.5">Belege einreichen und Erstattungen verfolgen</p>
         </div>
+        <button
+            id="openSubmissionModal"
+            class="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-sm hover:shadow-md transition-all text-sm flex-shrink-0"
+        >
+            <i class="fas fa-plus"></i>
+            Beleg einreichen
+        </button>
     </div>
 
-    <!-- Dashboard Summary Cards (visible to all users with invoices) -->
-    <div class="grid grid-cols-1 sm:grid-cols-3 <?php echo $stats ? 'lg:grid-cols-4' : ''; ?> gap-4 mb-8 no-print">
-        <!-- Gesamtbetrag Offen -->
-        <div class="card p-5 bg-gradient-to-br from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20 border-l-4 border-red-500 dark:border-red-600 hover:shadow-lg transition-shadow duration-200">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-xs text-gray-600 dark:text-gray-400 mb-1 uppercase tracking-wide">Gesamtbetrag Offen</p>
-                    <p class="text-2xl font-bold text-gray-800 dark:text-gray-100"><?php echo number_format($summaryOpenAmount, 2, ',', '.'); ?> €</p>
-                    <p class="text-xs text-red-600 dark:text-red-400 mt-1"><i class="fas fa-folder-open mr-1"></i>Ausstehend</p>
-                </div>
-                <div class="w-12 h-12 bg-red-500 dark:bg-red-600 rounded-full flex items-center justify-center flex-shrink-0 shadow-md">
-                    <i class="fas fa-folder-open text-white text-xl"></i>
-                </div>
-            </div>
+    <!-- Summary Stats -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 <?php echo $stats ? 'lg:grid-cols-4' : ''; ?> gap-3 mb-8 no-print">
+        <!-- Offen -->
+        <div class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 shadow-sm">
+            <p class="text-xs font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-1">Offen</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-gray-50"><?php echo number_format($summaryOpenAmount, 2, ',', '.'); ?> €</p>
+            <p class="text-xs text-red-500 dark:text-red-400 mt-1 font-medium">Ausstehend</p>
         </div>
 
         <!-- In Prüfung -->
-        <div class="card p-5 bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 border-l-4 border-yellow-500 dark:border-yellow-600 hover:shadow-lg transition-shadow duration-200">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-xs text-gray-600 dark:text-gray-400 mb-1 uppercase tracking-wide">In Prüfung</p>
-                    <p class="text-3xl font-bold text-gray-800 dark:text-gray-100"><?php echo $summaryInReviewCount; ?></p>
-                    <p class="text-xs text-yellow-600 dark:text-yellow-400 mt-1"><i class="fas fa-clock mr-1"></i>Warten auf Genehmigung</p>
-                </div>
-                <div class="w-12 h-12 bg-yellow-500 dark:bg-yellow-600 rounded-full flex items-center justify-center flex-shrink-0 shadow-md">
-                    <i class="fas fa-clock text-white text-xl"></i>
-                </div>
-            </div>
+        <div class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 shadow-sm">
+            <p class="text-xs font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-1">In Prüfung</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-gray-50"><?php echo $summaryInReviewCount; ?></p>
+            <p class="text-xs text-amber-500 dark:text-amber-400 mt-1 font-medium">Warten auf Genehmigung</p>
         </div>
 
         <!-- Bezahlt -->
-        <div class="card p-5 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-l-4 border-green-500 dark:border-green-600 hover:shadow-lg transition-shadow duration-200">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-xs text-gray-600 dark:text-gray-400 mb-1 uppercase tracking-wide">Bezahlt</p>
-                    <p class="text-2xl font-bold text-gray-800 dark:text-gray-100"><?php echo number_format($summaryPaidAmount, 2, ',', '.'); ?> €</p>
-                    <p class="text-xs text-green-600 dark:text-green-400 mt-1"><i class="fas fa-check-circle mr-1"></i><?php echo $summaryPaidCount; ?> Rechnung<?php echo $summaryPaidCount !== 1 ? 'en' : ''; ?></p>
-                </div>
-                <div class="w-12 h-12 bg-green-500 dark:bg-green-600 rounded-full flex items-center justify-center flex-shrink-0 shadow-md">
-                    <i class="fas fa-check-circle text-white text-xl"></i>
-                </div>
-            </div>
+        <div class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 shadow-sm">
+            <p class="text-xs font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-1">Bezahlt</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-gray-50"><?php echo number_format($summaryPaidAmount, 2, ',', '.'); ?> €</p>
+            <p class="text-xs text-green-500 dark:text-green-400 mt-1 font-medium"><?php echo $summaryPaidCount; ?> Rechnung<?php echo $summaryPaidCount !== 1 ? 'en' : ''; ?></p>
         </div>
 
         <?php if ($stats): ?>
-        <!-- Offene Beträge (Board/Alumni Board only) -->
-        <div class="card p-5 bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 border-l-4 border-orange-500 dark:border-orange-600 hover:shadow-lg transition-shadow duration-200">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-xs text-gray-600 dark:text-gray-400 mb-1 uppercase tracking-wide">Offene Beträge</p>
-                    <p class="text-2xl font-bold text-gray-800 dark:text-gray-100"><?php echo number_format($stats['total_pending'], 2, ',', '.'); ?> €</p>
-                    <p class="text-xs text-orange-600 dark:text-orange-400 mt-1"><i class="fas fa-hourglass-half mr-1"></i>Gesamt ausstehend</p>
-                </div>
-                <div class="w-12 h-12 bg-orange-500 dark:bg-orange-600 rounded-full flex items-center justify-center flex-shrink-0 shadow-md">
-                    <i class="fas fa-hourglass-half text-white text-xl"></i>
-                </div>
-            </div>
+        <!-- Gesamt Ausstehend (Board) -->
+        <div class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-5 shadow-sm">
+            <p class="text-xs font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wide mb-1">Gesamt Offen</p>
+            <p class="text-2xl font-bold text-gray-900 dark:text-gray-50"><?php echo number_format($stats['total_pending'], 2, ',', '.'); ?> €</p>
+            <p class="text-xs text-orange-500 dark:text-orange-400 mt-1 font-medium">Alle ausstehend</p>
         </div>
         <?php endif; ?>
     </div>
 
     <!-- Offene Rechnungen Banner -->
     <?php if (!empty($openInvoices)): ?>
-    <div class="mb-6 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-700/50 rounded-2xl overflow-hidden shadow-sm no-print">
-        <div class="px-5 py-4 bg-amber-100/70 dark:bg-amber-900/30 border-b border-amber-200 dark:border-amber-700/50 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <span class="w-8 h-8 bg-amber-500 dark:bg-amber-600 rounded-full flex items-center justify-center flex-shrink-0 shadow-sm">
-                    <i class="fas fa-exclamation text-white text-sm"></i>
-                </span>
-                <h2 class="text-base font-bold text-amber-800 dark:text-amber-200">
-                    <?php echo count($openInvoices); ?> offene Rechnung<?php echo count($openInvoices) !== 1 ? 'en' : ''; ?> warten auf Bearbeitung
-                </h2>
+    <div class="mb-6 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800/40 rounded-2xl p-4 flex items-center justify-between gap-3 no-print">
+        <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-xl bg-amber-400 flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-exclamation text-white text-xs font-bold"></i>
             </div>
-            <button onclick="document.getElementById('invoices-table').scrollIntoView({behavior:'smooth'}); filterByStatus('all');" class="text-sm font-semibold text-amber-700 dark:text-amber-300 hover:text-amber-900 dark:hover:text-amber-100 transition-colors">
-                Alle anzeigen <i class="fas fa-arrow-right ml-1"></i>
-            </button>
+            <p class="text-sm font-semibold text-amber-800 dark:text-amber-200">
+                <?php echo count($openInvoices); ?> offene Rechnung<?php echo count($openInvoices) !== 1 ? 'en' : ''; ?> warten auf Bearbeitung
+            </p>
         </div>
-        <div class="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            <?php
-            $openStatusLabelMap = ['pending' => 'In Prüfung', 'approved' => 'Offen'];
-            $openBadgeClassMap  = [
-                'pending'  => 'bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200 ring-1 ring-inset ring-amber-500/40 dark:ring-amber-400/30',
-                'approved' => 'bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-200 ring-1 ring-inset ring-yellow-500/40 dark:ring-yellow-400/30',
-            ];
-            $openDotClassMap = [
-                'pending'  => 'bg-amber-500',
-                'approved' => 'bg-yellow-500',
-            ];
-            $openDescMaxLen = 45;
-            foreach (array_slice($openInvoices, 0, 6) as $openInv):
-                $oEmail    = $userInfoMap[$openInv['user_id']] ?? 'Unknown';
-                $oName     = explode('@', $oEmail)[0];
-                $oInitials = strtoupper(substr($oName, 0, 2));
-                $oLabel    = $openStatusLabelMap[$openInv['status']] ?? ucfirst($openInv['status']);
-                $oBadge    = $openBadgeClassMap[$openInv['status']] ?? 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 ring-1 ring-inset ring-gray-500/10';
-                $oDesc     = mb_strlen($openInv['description']) > $openDescMaxLen
-                    ? mb_substr($openInv['description'], 0, $openDescMaxLen) . '…'
-                    : $openInv['description'];
-            ?>
-            <div class="flex items-center gap-3 p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-                 onclick="filterByStatus('<?php echo htmlspecialchars($openInv['status']); ?>')">
-                <div class="w-9 h-9 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-300 font-bold text-sm flex-shrink-0">
-                    <?php echo htmlspecialchars($oInitials); ?>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <p class="text-sm font-semibold text-gray-800 dark:text-gray-100 truncate"><?php echo htmlspecialchars($oName); ?></p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 truncate"><?php echo htmlspecialchars($oDesc); ?></p>
-                </div>
-                <div class="text-right flex-shrink-0">
-                    <p class="text-sm font-bold text-gray-800 dark:text-gray-100"><?php echo number_format($openInv['amount'], 2, ',', '.'); ?> €</p>
-                    <span class="inline-flex items-center gap-x-1 px-2 py-0.5 text-xs font-medium rounded-full <?php echo $oBadge; ?>">
-                        <span class="w-1.5 h-1.5 rounded-full flex-shrink-0 <?php echo $openDotClassMap[$openInv['status']] ?? 'bg-gray-400'; ?>"></span>
-                        <?php echo $oLabel; ?>
-                    </span>
-                </div>
-            </div>
-            <?php endforeach; ?>
-            <?php if (count($openInvoices) > 6): ?>
-            <div class="flex items-center justify-center p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-dashed border-gray-200 dark:border-gray-700">
-                <p class="text-sm text-gray-500 dark:text-gray-400 font-medium">+ <?php echo count($openInvoices) - 6; ?> weitere</p>
-            </div>
-            <?php endif; ?>
-        </div>
+        <button onclick="filterByStatus('pending')" class="text-xs font-semibold text-amber-700 dark:text-amber-300 hover:text-amber-900 dark:hover:text-amber-100 transition-colors flex-shrink-0">
+            Anzeigen <i class="fas fa-arrow-right ml-1"></i>
+        </button>
     </div>
     <?php endif; ?>
 
@@ -272,36 +193,36 @@ ob_start();
         if (isset($statusCounts[$inv['status']])) $statusCounts[$inv['status']]++;
     }
     ?>
-    <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 no-print">
+    <div class="mb-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 no-print">
         <!-- Status filter tabs -->
-        <div class="flex flex-wrap gap-2">
+        <div class="flex flex-wrap gap-1.5 bg-gray-100 dark:bg-gray-800 rounded-xl p-1">
             <button onclick="filterByStatus('all')" id="tab-all"
-                class="filter-tab px-4 py-2 rounded-lg text-sm font-semibold transition-all border bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700">
-                Alle <span class="ml-1 px-1.5 py-0.5 rounded-full text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200"><?php echo $statusCounts['all']; ?></span>
+                class="filter-tab px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all text-gray-600 dark:text-gray-400">
+                Alle <span class="ml-1 text-xs"><?php echo $statusCounts['all']; ?></span>
             </button>
             <button onclick="filterByStatus('pending')" id="tab-pending"
-                class="filter-tab px-4 py-2 rounded-lg text-sm font-semibold transition-all border bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700">
-                In Prüfung <span class="ml-1 px-1.5 py-0.5 rounded-full text-xs bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300"><?php echo $statusCounts['pending']; ?></span>
+                class="filter-tab px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all text-gray-600 dark:text-gray-400">
+                In Prüfung <span class="ml-1 text-xs"><?php echo $statusCounts['pending']; ?></span>
             </button>
             <button onclick="filterByStatus('approved')" id="tab-approved"
-                class="filter-tab px-4 py-2 rounded-lg text-sm font-semibold transition-all border bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700">
-                Offen <span class="ml-1 px-1.5 py-0.5 rounded-full text-xs bg-yellow-100 dark:bg-yellow-900 text-yellow-700 dark:text-yellow-300"><?php echo $statusCounts['approved']; ?></span>
+                class="filter-tab px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all text-gray-600 dark:text-gray-400">
+                Offen <span class="ml-1 text-xs"><?php echo $statusCounts['approved']; ?></span>
             </button>
             <button onclick="filterByStatus('rejected')" id="tab-rejected"
-                class="filter-tab px-4 py-2 rounded-lg text-sm font-semibold transition-all border bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700">
-                Abgelehnt <span class="ml-1 px-1.5 py-0.5 rounded-full text-xs bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300"><?php echo $statusCounts['rejected']; ?></span>
+                class="filter-tab px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all text-gray-600 dark:text-gray-400">
+                Abgelehnt <span class="ml-1 text-xs"><?php echo $statusCounts['rejected']; ?></span>
             </button>
             <button onclick="filterByStatus('paid')" id="tab-paid"
-                class="filter-tab px-4 py-2 rounded-lg text-sm font-semibold transition-all border bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700">
-                Bezahlt <span class="ml-1 px-1.5 py-0.5 rounded-full text-xs bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300"><?php echo $statusCounts['paid']; ?></span>
+                class="filter-tab px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all text-gray-600 dark:text-gray-400">
+                Bezahlt <span class="ml-1 text-xs"><?php echo $statusCounts['paid']; ?></span>
             </button>
         </div>
         <?php if (Auth::isBoard() || Auth::hasRole(['alumni_board', 'alumni_auditor'])): ?>
-        <a 
+        <a
             href="<?php echo asset('api/export_invoices.php'); ?>"
-            class="inline-flex items-center px-5 py-2 bg-blue-600 dark:bg-blue-700 text-white rounded-lg font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 transition-all shadow-md hover:shadow-lg no-underline flex-shrink-0"
+            class="inline-flex items-center gap-1.5 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-xl text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-all no-underline flex-shrink-0"
         >
-            <i class="fas fa-download mr-2"></i>
+            <i class="fas fa-download text-xs"></i>
             Exportieren
         </a>
         <?php endif; ?>
@@ -700,125 +621,120 @@ ob_start();
 </div>
 
 <!-- Submission Modal -->
-<div id="submissionModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-2xl w-full max-h-[85vh] flex flex-col overflow-hidden">
-        <div class="p-6 border-b border-gray-200 dark:border-gray-700">
-            <div class="flex items-center justify-between">
-                <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">
-                    <i class="fas fa-file-invoice mr-2 text-blue-600 dark:text-blue-400"></i>
-                    Neue Rechnung einreichen
-                </h2>
-                <button id="closeSubmissionModal" class="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300">
-                    <i class="fas fa-times text-2xl"></i>
-                </button>
+<div id="submissionModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] flex flex-col overflow-hidden">
+        <!-- Header -->
+        <div class="px-6 py-5 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between flex-shrink-0">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-900/40 flex items-center justify-center">
+                    <i class="fas fa-file-invoice-dollar text-blue-600 dark:text-blue-400"></i>
+                </div>
+                <h2 class="text-lg font-bold text-gray-900 dark:text-gray-50">Beleg einreichen</h2>
             </div>
+            <button id="closeSubmissionModal" class="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
-        
+
         <form id="submissionForm" action="<?php echo asset('api/submit_invoice.php'); ?>" method="POST" enctype="multipart/form-data" class="flex flex-col flex-1 min-h-0">
             <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(CSRFHandler::getToken(), ENT_QUOTES, 'UTF-8'); ?>">
-            <div class="p-6 overflow-y-auto flex-1">
-                <!-- Betrag -->
-                <div class="mb-6">
-                    <label for="amount" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Betrag (€) <span class="text-red-500 dark:text-red-400">*</span>
-                    </label>
-                    <input 
-                        type="number" 
-                        id="amount" 
-                        name="amount" 
-                        step="0.01"
-                        min="0"
-                        required
-                        class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="0.00"
-                    >
+            <div class="p-6 overflow-y-auto flex-1 space-y-4">
+
+                <!-- Amount + Date row -->
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label for="amount" class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5">
+                            Betrag (€) <span class="text-red-500">*</span>
+                        </label>
+                        <input
+                            type="number"
+                            id="amount"
+                            name="amount"
+                            step="0.01"
+                            min="0"
+                            required
+                            placeholder="0,00"
+                            class="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-colors text-sm"
+                        >
+                    </div>
+                    <div>
+                        <label for="date" class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5">
+                            Belegdatum <span class="text-red-500">*</span>
+                        </label>
+                        <input
+                            type="date"
+                            id="date"
+                            name="date"
+                            required
+                            max="<?php echo date('Y-m-d'); ?>"
+                            class="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-colors text-sm"
+                        >
+                    </div>
                 </div>
 
-                <!-- Belegdatum -->
-                <div class="mb-6">
-                    <label for="date" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Belegdatum <span class="text-red-500 dark:text-red-400">*</span>
+                <!-- Description -->
+                <div>
+                    <label for="description" class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5">
+                        Zweck <span class="text-red-500">*</span>
                     </label>
-                    <input 
-                        type="date" 
-                        id="date" 
-                        name="date" 
-                        required
-                        max="<?php echo date('Y-m-d'); ?>"
-                        class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                </div>
-
-                <!-- Zweck/Beschreibung -->
-                <div class="mb-6">
-                    <label for="description" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Zweck <span class="text-red-500 dark:text-red-400">*</span>
-                    </label>
-                    <textarea 
-                        id="description" 
-                        name="description" 
+                    <textarea
+                        id="description"
+                        name="description"
                         rows="3"
                         required
-                        class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Beschreiben Sie den Zweck der Rechnung..."
+                        placeholder="Wofür wurde der Betrag ausgegeben?"
+                        class="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-colors text-sm resize-none"
                     ></textarea>
                 </div>
 
-                <!-- File Upload (Drag & Drop Zone) -->
-                <div class="mb-6">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        Beleg hochladen <span class="text-red-500 dark:text-red-400">*</span>
+                <!-- File Upload -->
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5">
+                        Beleg <span class="text-red-500">*</span>
                     </label>
-                    <div 
+                    <div
                         id="dropZone"
-                        class="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-8 text-center hover:border-blue-500 dark:hover:border-blue-400 transition-colors cursor-pointer bg-gray-50 dark:bg-gray-700"
+                        class="border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl p-6 text-center hover:border-blue-400 dark:hover:border-blue-500 transition-colors cursor-pointer bg-gray-50 dark:bg-gray-800/50"
                     >
-                        <input 
-                            type="file" 
-                            id="file" 
-                            name="file" 
+                        <input
+                            type="file"
+                            id="file"
+                            name="file"
                             accept=".pdf,.jpg,.jpeg,.png"
                             required
                             class="hidden"
                         >
                         <div id="dropZoneContent">
-                            <i class="fas fa-cloud-upload-alt text-5xl text-gray-400 dark:text-gray-500 mb-4"></i>
-                            <p class="text-gray-600 dark:text-gray-300 mb-2">
-                                <span class="text-blue-600 dark:text-blue-400 font-semibold">Klicken Sie hier</span> oder ziehen Sie eine Datei hierher
+                            <i class="fas fa-cloud-upload-alt text-3xl text-gray-300 dark:text-gray-600 mb-2"></i>
+                            <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">
+                                <span class="text-blue-600 dark:text-blue-400 font-semibold">Klicken</span> oder Datei hierher ziehen
                             </p>
-                            <p class="text-sm text-gray-500 dark:text-gray-400">
-                                Unterstützt: PDF, JPG, PNG (Max. 10MB)
-                            </p>
+                            <p class="text-xs text-gray-400 dark:text-gray-500">PDF, JPG, PNG · max. 10 MB</p>
                         </div>
                         <div id="fileInfo" class="hidden">
-                            <i class="fas fa-file-check text-5xl text-green-500 dark:text-green-400 mb-4"></i>
-                            <p id="fileName" class="text-gray-700 dark:text-gray-300 font-semibold mb-2"></p>
-                            <button 
-                                type="button"
-                                id="removeFile"
-                                class="text-sm text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300"
-                            >
-                                <i class="fas fa-times mr-1"></i>
-                                Datei entfernen
+                            <i class="fas fa-file-check text-3xl text-green-500 dark:text-green-400 mb-2"></i>
+                            <p id="fileName" class="text-sm text-gray-700 dark:text-gray-300 font-medium mb-1"></p>
+                            <button type="button" id="removeFile" class="text-xs text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300">
+                                <i class="fas fa-times mr-0.5"></i>Entfernen
                             </button>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Submit Buttons (fixed footer) -->
-            <div class="flex gap-4 px-6 pb-6 pt-2">
-                <button 
+            <!-- Footer -->
+            <div class="flex gap-3 px-6 pb-6 pt-2 flex-shrink-0">
+                <button
                     type="submit"
-                    class="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg"
+                    class="flex-1 flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-sm hover:shadow-md transition-all text-sm"
                 >
-                    <i class="fas fa-paper-plane mr-2"></i>
+                    <i class="fas fa-paper-plane"></i>
                     Einreichen
                 </button>
-                <button 
+                <button
                     type="button"
                     id="cancelSubmission"
-                    class="px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-semibold hover:bg-gray-300 dark:hover:bg-gray-600 transition-all"
+                    class="px-5 py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-all text-sm"
                 >
                     Abbrechen
                 </button>
@@ -1033,13 +949,13 @@ function updateFileInfo() {
 // ── Status filter tabs ──────────────────────────────────────────────────────
 function filterByStatus(status) {
     document.querySelectorAll('.filter-tab').forEach(btn => {
-        btn.classList.remove('active', 'bg-blue-600', 'text-white', 'border-blue-600', 'dark:bg-blue-700', 'dark:border-blue-700');
-        btn.classList.add('bg-white', 'dark:bg-gray-800', 'text-gray-700', 'dark:text-gray-300', 'border-gray-300', 'dark:border-gray-600', 'hover:bg-gray-50', 'dark:hover:bg-gray-700');
+        btn.classList.remove('bg-white', 'dark:bg-gray-900', 'text-gray-900', 'dark:text-gray-50', 'shadow-sm', 'font-semibold');
+        btn.classList.add('text-gray-600', 'dark:text-gray-400');
     });
     const activeTab = document.getElementById('tab-' + status);
     if (activeTab) {
-        activeTab.classList.add('active', 'bg-blue-600', 'text-white', 'border-blue-600', 'dark:bg-blue-700', 'dark:border-blue-700');
-        activeTab.classList.remove('bg-white', 'dark:bg-gray-800', 'text-gray-700', 'dark:text-gray-300', 'border-gray-300', 'dark:border-gray-600', 'hover:bg-gray-50', 'dark:hover:bg-gray-700');
+        activeTab.classList.add('bg-white', 'dark:bg-gray-900', 'text-gray-900', 'dark:text-gray-50', 'shadow-sm', 'font-semibold');
+        activeTab.classList.remove('text-gray-600', 'dark:text-gray-400');
     }
     document.querySelectorAll('.invoice-row').forEach(row => {
         if (status === 'all' || row.dataset.status === status) {
