@@ -572,6 +572,7 @@ $_tailwindCssVersion = filemtime(__DIR__ . '/../../assets/css/tailwind.css');
             $email = '';
             $role = 'User';
             $navProfileImageUrl = '';
+            $displayRoles = [];
             
             // Only try to get profile if user is logged in
             if ($currentUser && isset($currentUser['id'])) {
@@ -595,9 +596,9 @@ $_tailwindCssVersion = filemtime(__DIR__ . '/../../assets/css/tailwind.css');
                 if ($profile && !empty($profile['first_name'])) {
                     $firstname = $profile['first_name'];
                     $lastname = $profile['last_name'] ?? '';
-                } elseif (!empty($currentUser['firstname'])) {
-                    $firstname = $currentUser['firstname'];
-                    $lastname = $currentUser['lastname'] ?? '';
+                } elseif (!empty($currentUser['first_name'])) {
+                    $firstname = $currentUser['first_name'];
+                    $lastname = $currentUser['last_name'] ?? '';
                 }
                 
                 $email = $currentUser['email'] ?? '';
@@ -618,12 +619,19 @@ $_tailwindCssVersion = filemtime(__DIR__ . '/../../assets/css/tailwind.css');
                 }
                 
                 if (!empty($currentUser['entra_roles'])) {
-                    // Parse JSON array from database - groups from Microsoft Graph are already human-readable (displayName)
-                    // No translation needed unlike azure_roles which use internal lowercase format
+                    // Parse JSON array from database.
+                    // entra_roles stores App Role value strings (e.g. ["mitglied"]).
+                    // Apply translateAzureRole so they are rendered as human-readable German names.
                     $rolesArray = json_decode($currentUser['entra_roles'], true);
                     if (json_last_error() === JSON_ERROR_NONE && is_array($rolesArray)) {
-                        // Extract displayName from each group object (groups now contain both id and displayName)
-                        $displayRoles = extractGroupDisplayNames($rolesArray);
+                        foreach ($rolesArray as $r) {
+                            $label = is_array($r) && isset($r['displayName'])
+                                ? $r['displayName']
+                                : translateAzureRole($r);
+                            if (!empty($label)) {
+                                $displayRoles[] = $label;
+                            }
+                        }
                     } else {
                         error_log("Failed to decode entra_roles in main_layout for user ID " . intval($currentUser['id']) . ": " . json_last_error_msg());
                     }
@@ -684,7 +692,11 @@ $_tailwindCssVersion = filemtime(__DIR__ . '/../../assets/css/tailwind.css');
                     <p class='text-[11px] text-white/70 truncate leading-snug' title='<?php echo htmlspecialchars($email); ?>'>
                         <?php echo htmlspecialchars($email); ?>
                     </p>
-                    <?php if (!empty($role) && $role !== 'User'): ?>
+                    <?php if (!empty($displayRoles)): ?>
+                    <span class='text-[10px] text-white/60 bg-white/10 px-2 py-0.5 rounded-full inline-block mt-1 truncate max-w-full' title='<?php echo htmlspecialchars(implode(', ', $displayRoles)); ?>' aria-label='Rolle: <?php echo htmlspecialchars($displayRoles[0]); ?>'>
+                        <?php echo htmlspecialchars($displayRoles[0]); ?>
+                    </span>
+                    <?php elseif (!empty($role) && $role !== 'User'): ?>
                     <span class='text-[10px] text-white/60 bg-white/10 px-2 py-0.5 rounded-full inline-block mt-1 truncate max-w-full' title='<?php echo htmlspecialchars(getFormattedRoleName($role)); ?>' aria-label='Rolle: <?php echo htmlspecialchars(getFormattedRoleName($role)); ?>'>
                         <?php echo htmlspecialchars(getFormattedRoleName($role)); ?>
                     </span>
