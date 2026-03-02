@@ -353,12 +353,36 @@ function getProfileImageUrl(?string $imagePath, ?string $entraPhotoPath = null):
 }
 
 /**
- * Extract display names from group objects
- * Groups can be either strings (legacy format) or objects with id and displayName
- * 
- * @param array $groups Array of groups (can be strings or objects)
- * @return array Array of display names
+ * Resolve the display role name for a user, preferring Entra role data when available.
+ *
+ * @param string $internalRole    Internal role key (e.g. 'alumni')
+ * @param string|null $entraRolesJson JSON-encoded Entra roles array
+ * @return string Human-readable role name
  */
+function resolveDisplayRole(string $internalRole, ?string $entraRolesJson): string {
+    if (!empty($entraRolesJson)) {
+        require_once __DIR__ . '/../src/Auth.php';
+        $entraArr = json_decode($entraRolesJson, true);
+        if (json_last_error() === JSON_ERROR_NONE && is_array($entraArr) && !empty($entraArr)) {
+            $displayNames = [];
+            foreach ($entraArr as $entraRole) {
+                if (is_array($entraRole) && isset($entraRole['displayName'])) {
+                    $displayNames[] = $entraRole['displayName'];
+                } elseif (is_array($entraRole) && isset($entraRole['id'])) {
+                    $displayNames[] = Auth::getRoleLabel($entraRole['id']);
+                } elseif (is_string($entraRole)) {
+                    $displayNames[] = Auth::getRoleLabel($entraRole);
+                }
+            }
+            if (!empty($displayNames)) {
+                return implode(', ', $displayNames);
+            }
+        }
+    }
+    return getFormattedRoleName($internalRole);
+}
+
+
 function extractGroupDisplayNames($groups) {
     if (!is_array($groups)) {
         return [];

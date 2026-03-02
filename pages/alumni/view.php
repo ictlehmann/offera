@@ -61,6 +61,10 @@ if (!$profileUser) {
 $profileUserRole = $profileUser['role'];
 $profileUserEntraRoles = $profileUser['entra_roles'] ?? null;
 
+// Resolve display role: prefer Entra display names, fall back to internal role label
+$displayRoleKey = Auth::getPrimaryEntraRoleKey($profileUserEntraRoles, $profileUserRole);
+$resolvedDisplayRole = resolveDisplayRole($profileUserRole, $profileUserEntraRoles);
+
 // Calculate profile completeness (only for alumni roles)
 $profileCompletenessPercent = 0;
 $isAlumniProfile = isAlumniRole($profileUserRole);
@@ -146,12 +150,11 @@ ob_start();
                     'alumni_finanz'       => 'bg-indigo-100 text-indigo-800 border-indigo-300 dark:bg-indigo-900 dark:text-indigo-300 dark:border-indigo-500',
                     'ehrenmitglied'       => 'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-900 dark:text-amber-200 dark:border-amber-700',
                 ];
-                $displayRole = getFormattedRoleName($profileUserRole);
-                $badgeClass = $roleBadgeColors[$profileUserRole] ?? 'bg-gray-100 text-gray-800 border-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600';
+                $badgeClass = $roleBadgeColors[$displayRoleKey] ?? 'bg-gray-100 text-gray-800 border-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600';
                 ?>
                 <div class="mb-3">
                     <span class="inline-block px-4 py-1.5 text-sm font-semibold rounded-full border <?php echo $badgeClass; ?>">
-                        <?php echo htmlspecialchars($displayRole); ?>
+                        <?php echo htmlspecialchars($resolvedDisplayRole); ?>
                     </span>
                 </div>
 
@@ -178,13 +181,13 @@ ob_start();
         </div>
 
         <!-- Profile Completeness (only for alumni roles) -->
-        <?php if ($isAlumniProfile && $profileCompletenessPercent < 100): ?>
-        <div class="mt-6 p-4 rounded-xl" style="background-color: var(--bg-card); border-left: 4px solid #a855f7">
+        <?php if ($isAlumniProfile): ?>
+        <div class="mt-6 p-4 rounded-xl bg-gray-50 dark:bg-gray-700" style="border-left: 4px solid #a855f7">
             <div class="flex items-center justify-between mb-1.5">
-                <span class="text-xs font-semibold text-gray-500">Profil-Fortschritt</span>
+                <span class="text-xs font-semibold text-gray-500 dark:text-gray-400">Profil-Fortschritt</span>
                 <span class="text-xs font-bold" style="color: #a855f7"><?php echo $profileCompletenessPercent; ?>%</span>
             </div>
-            <div class="w-full rounded-full h-2.5 overflow-hidden bg-gray-200">
+            <div class="w-full rounded-full h-2.5 overflow-hidden bg-gray-200 dark:bg-gray-600">
                 <div class="h-2.5 rounded-full transition-all duration-500" style="width: <?php echo $profileCompletenessPercent; ?>%; background: linear-gradient(90deg, #a855f7, #ec4899)"></div>
             </div>
         </div>
@@ -216,7 +219,7 @@ ob_start();
             <div class="space-y-3">
                 <!-- E-Mail -->
                 <?php if (!empty($profile['email'])): ?>
-                <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50">
+                <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50">
                     <div class="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 flex-shrink-0">
                         <i class="fas fa-envelope text-sm"></i>
                     </div>
@@ -231,7 +234,7 @@ ob_start();
 
                 <!-- Zweite E-Mail -->
                 <?php if (!empty($profile['secondary_email'])): ?>
-                <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50">
+                <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50">
                     <div class="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 flex-shrink-0">
                         <i class="fas fa-envelope text-sm"></i>
                     </div>
@@ -246,7 +249,7 @@ ob_start();
 
                 <!-- Telefon -->
                 <?php if (!empty($profile['mobile_phone'])): ?>
-                <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50">
+                <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50">
                     <div class="w-9 h-9 rounded-full bg-green-100 flex items-center justify-center text-green-600 flex-shrink-0">
                         <i class="fas fa-phone text-sm"></i>
                     </div>
@@ -261,7 +264,7 @@ ob_start();
 
                 <!-- Geburtstag (only if show_birthday) -->
                 <?php if (!empty($profileUser['birthday']) && !empty($profileUser['show_birthday'])): ?>
-                <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50">
+                <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50">
                     <div class="w-9 h-9 rounded-full bg-pink-100 flex items-center justify-center text-pink-600 flex-shrink-0">
                         <i class="fas fa-birthday-cake text-sm"></i>
                     </div>
@@ -282,7 +285,7 @@ ob_start();
                         strpos($linkedinUrl, 'http://www.linkedin.com') === 0
                     );
                     if ($isValidLinkedIn): ?>
-                <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50">
+                <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50">
                     <div class="w-9 h-9 rounded-full bg-blue-700 flex items-center justify-center text-white flex-shrink-0">
                         <i class="fab fa-linkedin-in text-sm"></i>
                     </div>
@@ -306,7 +309,7 @@ ob_start();
                         strpos($xingUrl, 'http://www.xing.com') === 0
                     );
                     if ($isValidXing): ?>
-                <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50">
+                <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50">
                     <div class="w-9 h-9 rounded-full bg-teal-600 flex items-center justify-center text-white flex-shrink-0">
                         <i class="fab fa-xing text-sm"></i>
                     </div>
@@ -337,21 +340,21 @@ ob_start();
             </h2>
             <div class="space-y-3">
                 <?php if (!empty($profile['company'])): ?>
-                <div class="p-3 rounded-xl bg-gray-50">
+                <div class="p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50">
                     <p class="text-xs text-gray-400 font-medium mb-0.5">Arbeitgeber</p>
                     <p class="font-semibold text-gray-800 dark:text-gray-200 text-sm"><?php echo htmlspecialchars($profile['company']); ?></p>
                 </div>
                 <?php endif; ?>
 
                 <?php if (!empty($profile['position'])): ?>
-                <div class="p-3 rounded-xl bg-gray-50">
+                <div class="p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50">
                     <p class="text-xs text-gray-400 font-medium mb-0.5">Position</p>
                     <p class="font-semibold text-gray-800 dark:text-gray-200 text-sm"><?php echo htmlspecialchars($profile['position']); ?></p>
                 </div>
                 <?php endif; ?>
 
                 <?php if (!empty($profile['industry'])): ?>
-                <div class="p-3 rounded-xl bg-gray-50">
+                <div class="p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50">
                     <p class="text-xs text-gray-400 font-medium mb-0.5">Branche</p>
                     <p class="font-semibold text-gray-800 dark:text-gray-200 text-sm"><?php echo htmlspecialchars($profile['industry']); ?></p>
                 </div>
@@ -362,7 +365,7 @@ ob_start();
     </div>
 
     <!-- Absolviertes Studium -->
-    <?php if (!empty($profile['study_program']) || !empty($profile['semester']) || !empty($profile['angestrebter_abschluss']) || !empty($profile['graduation_year'])): ?>
+    <?php if (!empty($profile['study_program']) || !empty($profile['semester']) || !empty($profile['angestrebter_abschluss']) || !empty($profile['graduation_year']) || !empty($profile['degree'])): ?>
     <div class="card p-6 mb-6">
         <h2 class="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
             <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-indigo-100 text-indigo-600">
@@ -372,28 +375,35 @@ ob_start();
         </h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <?php if (!empty($profile['study_program'])): ?>
-            <div class="p-3 rounded-xl bg-gray-50">
+            <div class="p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50">
                 <p class="text-xs text-gray-400 font-medium mb-0.5">Bachelor-Studiengang</p>
                 <p class="font-semibold text-gray-800 dark:text-gray-200 text-sm"><?php echo htmlspecialchars($profile['study_program']); ?></p>
             </div>
             <?php endif; ?>
 
             <?php if (!empty($profile['semester'])): ?>
-            <div class="p-3 rounded-xl bg-gray-50">
+            <div class="p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50">
                 <p class="text-xs text-gray-400 font-medium mb-0.5">Bachelor-Abschlussjahr</p>
                 <p class="font-semibold text-gray-800 dark:text-gray-200 text-sm"><?php echo htmlspecialchars($profile['semester']); ?></p>
             </div>
             <?php endif; ?>
 
+            <?php if (!empty($profile['degree'])): ?>
+            <div class="p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+                <p class="text-xs text-gray-400 font-medium mb-0.5">Abschluss</p>
+                <p class="font-semibold text-gray-800 dark:text-gray-200 text-sm"><?php echo htmlspecialchars($profile['degree']); ?></p>
+            </div>
+            <?php endif; ?>
+
             <?php if (!empty($profile['angestrebter_abschluss'])): ?>
-            <div class="p-3 rounded-xl bg-gray-50">
+            <div class="p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50">
                 <p class="text-xs text-gray-400 font-medium mb-0.5">Master-Studiengang</p>
                 <p class="font-semibold text-gray-800 dark:text-gray-200 text-sm"><?php echo htmlspecialchars($profile['angestrebter_abschluss']); ?></p>
             </div>
             <?php endif; ?>
 
             <?php if (!empty($profile['graduation_year'])): ?>
-            <div class="p-3 rounded-xl bg-gray-50">
+            <div class="p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50">
                 <p class="text-xs text-gray-400 font-medium mb-0.5">Master-Abschlussjahr</p>
                 <p class="font-semibold text-gray-800 dark:text-gray-200 text-sm"><?php echo htmlspecialchars($profile['graduation_year']); ?></p>
             </div>
