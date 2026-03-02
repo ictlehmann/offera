@@ -773,7 +773,8 @@ function dismissProfileReviewPrompt() {
             <div class="dash-blog-img">
                 <?php if (!empty($post['image_path']) && $post['image_path'] !== BlogPost::DEFAULT_IMAGE): ?>
                     <img src="/<?php echo htmlspecialchars(ltrim($post['image_path'], '/')); ?>"
-                         alt="<?php echo htmlspecialchars($post['title']); ?>">
+                         alt="<?php echo htmlspecialchars($post['title']); ?>"
+                         loading="lazy">
                 <?php else: ?>
                     <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-600">
                         <i class="fas fa-newspaper text-white/30 text-4xl"></i>

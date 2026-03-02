@@ -158,6 +158,7 @@ ob_start();
                                 <img
                                     src="<?php echo htmlspecialchars($imagePath); ?>"
                                     alt="<?php echo htmlspecialchars($profile['first_name'] . ' ' . $profile['last_name']); ?>"
+                                    loading="lazy"
                                     style="width:100%;height:100%;object-fit:cover;"
                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
                                 >
