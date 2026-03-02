@@ -4,6 +4,10 @@
 # Verhindert, dass Besucher Dateilisten sehen
 Options -Indexes
 
+# Benutzerdefinierte Fehlerseiten (Pfade sind relativ zum DocumentRoot – App muss im Root liegen)
+ErrorDocument 403 /pages/errors/403.php
+ErrorDocument 404 /pages/errors/404.php
+
 # ----------------------------------------------------------------------
 # 2. Zugriffsschutz (Apache 2.4 kompatibel)
 # ----------------------------------------------------------------------
