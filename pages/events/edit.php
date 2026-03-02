@@ -670,6 +670,12 @@ ob_start();
                     Definiere die verschiedenen Helfer-Rollen und deren Zeitslots für dieses Event.
                     Jede Rolle kann mehrere Zeitslots haben, und für jeden Slot kannst Du die benötigte Anzahl an Helfern festlegen.
                 </p>
+                <div class="mt-3 p-3 bg-ibc-blue/5 border border-ibc-blue/15 rounded-xl flex items-start gap-2">
+                    <i class="fas fa-info-circle text-ibc-blue mt-0.5 flex-shrink-0"></i>
+                    <p class="text-sm text-ibc-blue">
+                        <strong>Aufbau &amp; Abbau:</strong> Zeitslots dürfen auch <em>vor</em> dem Event-Start (Aufbau) oder <em>nach</em> dem Event-Ende (Abbau) liegen. Das Datum wird in diesem Fall automatisch angezeigt.
+                    </p>
+                </div>
             </div>
 
             <div id="helper-types-container" class="space-y-6">
@@ -1065,10 +1071,6 @@ document.getElementById('eventForm')?.addEventListener('submit', function(e) {
     const helperTypeElements = document.querySelectorAll('#helper-types-container > .helper-card');
     let validationFailed = false;
     
-    // Parse event dates once for reuse in slot validation
-    const eventStartDate = startTime ? new Date(startTime) : null;
-    const eventEndDate = endTime ? new Date(endTime) : null;
-    
     for (let typeDiv of helperTypeElements) {
         const typeIndex = typeDiv.getAttribute('data-index');
         const titleInput = typeDiv.querySelector(`.helper-type-title[data-index="${typeIndex}"]`);
@@ -1103,7 +1105,8 @@ document.getElementById('eventForm')?.addEventListener('submit', function(e) {
                 const slotStartDate = new Date(slotStart);
                 const slotEndDate = new Date(slotEnd);
                 
-                // Validate slot times
+                // Validate that slot start is before slot end.
+                // Slots may be before the event start (Aufbau) or after the event end (Abbau).
                 if (slotStartDate >= slotEndDate) {
                     e.preventDefault();
                     alert('Slot-Startzeit muss vor der Endzeit liegen!');

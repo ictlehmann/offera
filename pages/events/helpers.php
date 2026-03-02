@@ -44,7 +44,7 @@ ob_start();
     <!-- Header -->
     <div class="mb-8">
         <h1 class="text-4xl font-bold text-gray-800 dark:text-gray-100 mb-2">
-            <i class="fas fa-hands-helping mr-3 text-green-600"></i>
+            <i class="fas fa-hands-helping mr-3 text-ibc-green"></i>
             Helfersystem
         </h1>
         <p class="text-gray-600 dark:text-gray-300">Wir suchen Helfer für folgende Events - Unterstütze uns!</p>
@@ -53,20 +53,20 @@ ob_start();
     <?php if ($userRole === 'alumni'): ?>
         <!-- Alumni message -->
         <div class="card p-8 text-center">
-            <i class="fas fa-info-circle text-6xl text-blue-500 mb-4"></i>
+            <i class="fas fa-info-circle text-6xl text-ibc-blue mb-4"></i>
             <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">Information für Alumni</h2>
             <p class="text-xl text-gray-600 dark:text-gray-300">Als Alumni-Mitglied hast Du keinen Zugriff auf das Helfersystem.</p>
         </div>
     <?php elseif (empty($events)): ?>
         <!-- No events message -->
         <div class="card p-8 text-center">
-            <i class="fas fa-check-circle text-6xl text-green-500 mb-4"></i>
+            <i class="fas fa-check-circle text-6xl text-ibc-green mb-4"></i>
             <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">Keine Helfer benötigt</h2>
             <p class="text-xl text-gray-600 dark:text-gray-300">Aktuell werden für keine Events Helfer gesucht.</p>
         </div>
     <?php else: ?>
         <!-- Wir suchen Helfer Section -->
-        <div class="bg-gradient-to-r from-green-500 to-blue-500 rounded-lg p-8 mb-8 text-white shadow-xl">
+        <div class="bg-gradient-to-r from-ibc-green to-ibc-blue rounded-lg p-8 mb-8 text-white shadow-xl">
             <h2 class="text-3xl font-bold mb-4">
                 <i class="fas fa-bullhorn mr-3"></i>
                 Wir suchen Helfer!
@@ -109,6 +109,7 @@ ob_start();
                 
                 // Parse event date
                 $startDate = new DateTime($event['start_time']);
+                $endDate   = new DateTime($event['end_time']);
                 $formattedDate = $startDate->format('d.m.Y');
                 $formattedTime = $startDate->format('H:i');
                 ?>
@@ -122,12 +123,12 @@ ob_start();
                             </h2>
                             <div class="flex flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-300">
                                 <div class="flex items-center">
-                                    <i class="fas fa-calendar mr-2 text-purple-600"></i>
+                                    <i class="fas fa-calendar mr-2 text-ibc-blue"></i>
                                     <?php echo $formattedDate; ?> um <?php echo $formattedTime; ?> Uhr
                                 </div>
                                 <?php if (!empty($event['location'])): ?>
                                     <div class="flex items-center">
-                                        <i class="fas fa-map-marker-alt mr-2 text-red-600"></i>
+                                        <i class="fas fa-map-marker-alt mr-2 text-ibc-green"></i>
                                         <?php echo htmlspecialchars($event['location']); ?>
                                     </div>
                                 <?php endif; ?>
@@ -135,8 +136,8 @@ ob_start();
                         </div>
                         
                         <!-- Slots Summary -->
-                        <div class="bg-gradient-to-br from-green-50 to-blue-50 dark:from-green-900/20 dark:to-blue-900/20 px-6 py-4 rounded-lg text-center border border-green-200 dark:border-green-700">
-                            <div class="text-3xl font-bold text-green-600 dark:text-green-400">
+                        <div class="bg-ibc-green/5 dark:bg-ibc-green/10 px-6 py-4 rounded-lg text-center border border-ibc-green/20 dark:border-ibc-green/30">
+                            <div class="text-3xl font-bold text-ibc-green">
                                 <?php echo $slotsAvailable; ?>
                             </div>
                             <div class="text-sm text-gray-800 dark:text-gray-300">
@@ -159,7 +160,7 @@ ob_start();
                     <?php if (!empty($helperTypes)): ?>
                         <div class="space-y-4">
                             <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">
-                                <i class="fas fa-clipboard-list mr-2 text-blue-600"></i>
+                                <i class="fas fa-clipboard-list mr-2 text-ibc-blue"></i>
                                 Verfügbare Helfer-Rollen:
                             </h3>
                             
@@ -190,15 +191,34 @@ ob_start();
                                                     <?php
                                                     $slotStart = new DateTime($slot['start_time']);
                                                     $slotEnd = new DateTime($slot['end_time']);
-                                                    $slotTimeRange = $slotStart->format('H:i') . ' - ' . $slotEnd->format('H:i');
+                                                    $eventDate    = $startDate->format('Y-m-d');
+                                                    $eventEndDate = $endDate->format('Y-m-d');
+                                                    
+                                                    // Determine Aufbau/Abbau and whether to show the date
+                                                    $isAufbau = $slotStart->format('Y-m-d') < $eventDate;
+                                                    $isAbbau  = $slotEnd->format('Y-m-d')   > $eventEndDate;
+                                                    $showSlotDate = $slotStart->format('Y-m-d') !== $eventDate || $slotEnd->format('Y-m-d') !== $eventDate;
+                                                    
+                                                    if ($showSlotDate) {
+                                                        $slotTimeRange = $slotStart->format('d.m. H:i') . ' – ' . $slotEnd->format('d.m. H:i');
+                                                    } else {
+                                                        $slotTimeRange = $slotStart->format('H:i') . ' – ' . $slotEnd->format('H:i');
+                                                    }
                                                     
                                                     $isFull = $slot['signups_count'] >= $slot['quantity_needed'];
                                                     $isUserSignedUp = in_array($slot['id'], $mySlotIds);
                                                     ?>
                                                     <tr class="border-b border-gray-200 dark:border-gray-700">
                                                         <td class="px-4 py-3 text-gray-800 dark:text-gray-100" data-label="Zeitslot">
-                                                            <i class="fas fa-clock mr-2 text-gray-500"></i>
-                                                            <?php echo $slotTimeRange; ?>
+                                                            <div class="flex items-center gap-2 flex-wrap">
+                                                                <i class="fas fa-clock text-ibc-blue"></i>
+                                                                <?php echo htmlspecialchars($slotTimeRange); ?>
+                                                                <?php if ($isAufbau): ?>
+                                                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-semibold bg-ibc-blue/10 text-ibc-blue"><i class="fas fa-tools mr-1"></i>Aufbau</span>
+                                                                <?php elseif ($isAbbau): ?>
+                                                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-semibold bg-ibc-accent/10 text-ibc-accent"><i class="fas fa-box mr-1"></i>Abbau</span>
+                                                                <?php endif; ?>
+                                                            </div>
                                                         </td>
                                                         <td class="px-4 py-3 text-center text-gray-800 dark:text-gray-100" data-label="Benötigt">
                                                             <?php echo $slot['quantity_needed']; ?>
@@ -208,7 +228,7 @@ ob_start();
                                                         </td>
                                                         <td class="px-4 py-3 text-center" data-label="Status">
                                                             <?php if ($isUserSignedUp): ?>
-                                                                <span class="px-3 py-1 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 rounded-full text-xs font-semibold">
+                                                                <span class="px-3 py-1 bg-ibc-blue/10 text-ibc-blue border border-ibc-blue/20 rounded-full text-xs font-semibold">
                                                                     <i class="fas fa-check mr-1"></i>
                                                                     Angemeldet
                                                                 </span>
@@ -218,7 +238,7 @@ ob_start();
                                                                     Voll
                                                                 </span>
                                                             <?php else: ?>
-                                                                <span class="px-3 py-1 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 rounded-full text-xs font-semibold">
+                                                                <span class="px-3 py-1 bg-ibc-green/10 text-ibc-green border border-ibc-green/20 rounded-full text-xs font-semibold">
                                                                     <i class="fas fa-check-circle mr-1"></i>
                                                                     Verfügbar
                                                                 </span>
@@ -237,7 +257,7 @@ ob_start();
                     <!-- Action Button -->
                     <div class="mt-6 flex justify-end">
                         <a href="view.php?id=<?php echo $event['id']; ?>" 
-                           class="px-6 py-3 bg-gradient-to-r from-green-600 to-blue-600 text-white rounded-lg font-semibold hover:from-green-700 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl">
+                           class="px-6 py-3 bg-ibc-green text-white rounded-lg font-semibold hover:bg-ibc-green-dark transition-all shadow-soft hover:shadow-lg">
                             <i class="fas fa-eye mr-2"></i>
                             Event ansehen & anmelden
                         </a>

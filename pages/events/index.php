@@ -62,7 +62,7 @@ ob_start();
     <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
             <h1 class="text-4xl font-bold text-gray-800 dark:text-gray-100 mb-2">
-                <i class="fas fa-calendar-alt mr-3 text-purple-600"></i>
+                <i class="fas fa-calendar-alt mr-3 text-ibc-blue"></i>
                 Events
             </h1>
             <p class="text-gray-600 dark:text-gray-300">Entdecke kommende Events und melde Dich an</p>
@@ -71,7 +71,7 @@ ob_start();
         <div class="flex gap-3">
             <!-- Statistiken Button - Board/Alumni Board only -->
             <?php if (Auth::isBoard() || Auth::hasRole(['alumni_board'])): ?>
-            <a href="statistics.php" class="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg hover:shadow-xl">
+            <a href="statistics.php" class="px-6 py-3 bg-ibc-blue text-white rounded-lg font-semibold hover:bg-ibc-blue-dark transition-all shadow-soft hover:shadow-lg">
                 <i class="fas fa-chart-bar mr-2"></i>
                 Statistiken
             </a>
@@ -246,8 +246,8 @@ ob_start();
                             <?php endif; ?>
                             <?php if ($event['needs_helpers'] && $userRole !== 'alumni'): ?>
                                 <div class="flex items-center gap-2">
-                                    <span class="event-meta-icon"><i class="fas fa-hands-helping text-ibc-accent"></i></span>
-                                    <span class="text-ibc-accent font-medium">Helfer benötigt</span>
+                                    <span class="event-meta-icon"><i class="fas fa-hands-helping text-ibc-green"></i></span>
+                                    <span class="text-ibc-green font-medium">Helfer benötigt</span>
                                 </div>
                             <?php endif; ?>
                         </div>

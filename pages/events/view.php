@@ -127,11 +127,19 @@ $statusInfo = $statusLabels[$currentStatus] ?? ['label' => $currentStatus, 'icon
 
 <div class="max-w-5xl mx-auto">
 
-    <!-- Back Button -->
-    <a href="index.php" class="inline-flex items-center text-ibc-blue hover:text-ibc-blue-dark mb-6 ease-premium font-medium">
-        <i class="fas fa-arrow-left mr-2"></i>
-        Zurück zur Übersicht
-    </a>
+    <!-- Back Button + Edit Button -->
+    <div class="flex items-center justify-between mb-6">
+        <a href="index.php" class="inline-flex items-center text-ibc-blue hover:text-ibc-blue-dark ease-premium font-medium">
+            <i class="fas fa-arrow-left mr-2"></i>
+            Zurück zur Übersicht
+        </a>
+        <?php if (Auth::hasPermission('manage_projects') || Auth::isBoard() || Auth::hasRole(['head', 'alumni_board'])): ?>
+        <a href="edit.php?id=<?php echo (int)$eventId; ?>" class="inline-flex items-center px-4 py-2 bg-ibc-blue text-white rounded-xl font-semibold text-sm hover:bg-ibc-blue-dark ease-premium shadow-soft">
+            <i class="fas fa-edit mr-2"></i>
+            Event bearbeiten
+        </a>
+        <?php endif; ?>
+    </div>
 
     <!-- ═══════════════════════════════════════════════
          HERO SECTION  (image + title overlay)
@@ -418,7 +426,7 @@ $statusInfo = $statusLabels[$currentStatus] ?? ['label' => $currentStatus, 'icon
             <div class="glass-card shadow-soft rounded-2xl p-5">
                 <h3 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">Verwaltung</h3>
                 <button onclick="openAddStatsModal()"
-                        class="w-full inline-flex items-center justify-center px-5 py-3 bg-purple-600 text-white rounded-xl font-semibold hover:bg-purple-700 ease-premium">
+                        class="w-full inline-flex items-center justify-center px-5 py-3 bg-ibc-blue text-white rounded-xl font-semibold hover:bg-ibc-blue-dark ease-premium">
                     <i class="fas fa-chart-bar mr-2"></i>
                     Statistiken nachtragen
                 </button>
@@ -466,13 +474,35 @@ $statusInfo = $statusLabels[$currentStatus] ?? ['label' => $currentStatus, 'icon
                                 $slotStartFormatted = htmlspecialchars($slotStart->format('Y-m-d H:i:s'), ENT_QUOTES);
                                 $slotEndFormatted = htmlspecialchars($slotEnd->format('Y-m-d H:i:s'), ENT_QUOTES);
                                 $slotSignupHandler = "signupForSlot({$eventId}, {$slot['id']}, '{$slotStartFormatted}', '{$slotEndFormatted}')";
+                                
+                                // Determine if this slot is before event start (Aufbau) or after event end (Abbau)
+                                $isAufbau = $slotStart->format('Y-m-d') < date('Y-m-d', $startTimestamp);
+                                $isAbbau  = $slotEnd->format('Y-m-d')   > date('Y-m-d', $endTimestamp);
+                                $showDate = $slotStart->format('Y-m-d') !== date('Y-m-d', $startTimestamp)
+                                         || $slotEnd->format('Y-m-d')   !== date('Y-m-d', $startTimestamp);
+                                
+                                // Format time display (show date if slot is on a different day)
+                                if ($showDate) {
+                                    $slotTimeDisplay = $slotStart->format('d.m. H:i') . ' – ' . $slotEnd->format('d.m. H:i') . ' Uhr';
+                                } else {
+                                    $slotTimeDisplay = $slotStart->format('H:i') . ' – ' . $slotEnd->format('H:i') . ' Uhr';
+                                }
                             ?>
                             
                             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 rounded-xl border <?php echo $slot['user_in_slot'] ? 'border-ibc-green/40 bg-ibc-green/5' : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50'; ?>">
                                 <div class="flex-1 min-w-0">
-                                    <div class="font-semibold text-gray-800 dark:text-gray-100 flex items-center gap-2">
+                                    <div class="font-semibold text-gray-800 dark:text-gray-100 flex items-center gap-2 flex-wrap">
                                         <i class="fas fa-clock text-ibc-blue text-sm"></i>
-                                        <?php echo $slotStart->format('H:i'); ?> – <?php echo $slotEnd->format('H:i'); ?> Uhr
+                                        <?php echo htmlspecialchars($slotTimeDisplay); ?>
+                                        <?php if ($isAufbau): ?>
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-ibc-blue/10 text-ibc-blue border border-ibc-blue/20">
+                                                <i class="fas fa-tools mr-1 text-xs"></i>Aufbau
+                                            </span>
+                                        <?php elseif ($isAbbau): ?>
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-ibc-accent/10 text-ibc-accent border border-ibc-accent/20">
+                                                <i class="fas fa-box mr-1 text-xs"></i>Abbau
+                                            </span>
+                                        <?php endif; ?>
                                     </div>
                                     <!-- Capacity bar -->
                                     <div class="mt-2 flex items-center gap-2">
@@ -587,7 +617,7 @@ $statusInfo = $statusLabels[$currentStatus] ?? ['label' => $currentStatus, 'icon
                 Abbrechen
             </button>
             <button type="button" onclick="submitAddStats()"
-                    class="flex-1 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">
+                    class="flex-1 px-6 py-3 bg-ibc-blue text-white rounded-lg hover:bg-ibc-blue-dark transition">
                 <i class="fas fa-save mr-2"></i>Speichern
             </button>
         </div>
@@ -597,10 +627,10 @@ $statusInfo = $statusLabels[$currentStatus] ?? ['label' => $currentStatus, 'icon
 
 <!-- Hero & Card Styles -->
 <style>
-    /* Local accent colors for stat cards (reuse if already in theme) */
+    /* Local accent colors for stat cards – use IBC brand palette */
     :root {
-        --stat-purple: #7c3aed;
-        --stat-orange: #f97316;
+        --stat-teal:   #0891b2;
+        --stat-amber:  var(--ibc-accent);
     }
 
     /* ── Quick Stats Row ────────────────────────────── */
@@ -623,9 +653,9 @@ $statusInfo = $statusLabels[$currentStatus] ?? ['label' => $currentStatus, 'icon
         border-left-width: 4px;
     }
     .event-stat-card--blue   { border-left-color: var(--ibc-blue); }
-    .event-stat-card--purple { border-left-color: var(--stat-purple); }
+    .event-stat-card--purple { border-left-color: var(--stat-teal); }
     .event-stat-card--green  { border-left-color: var(--ibc-green); }
-    .event-stat-card--orange { border-left-color: var(--stat-orange); }
+    .event-stat-card--orange { border-left-color: var(--stat-amber); }
 
     .event-stat-icon {
         width: 2.5rem;
@@ -636,10 +666,10 @@ $statusInfo = $statusLabels[$currentStatus] ?? ['label' => $currentStatus, 'icon
         justify-content: center;
         flex-shrink: 0;
     }
-    .event-stat-card--blue   .event-stat-icon { background: rgba(0,102,179,0.12); color: var(--ibc-blue); }
-    .event-stat-card--purple .event-stat-icon { background: rgba(124,58,237,0.12); color: var(--stat-purple); }
-    .event-stat-card--green  .event-stat-icon { background: rgba(0,166,81,0.12);  color: var(--ibc-green); }
-    .event-stat-card--orange .event-stat-icon { background: rgba(249,115,22,0.12); color: var(--stat-orange); }
+    .event-stat-card--blue   .event-stat-icon { background: rgba(0,102,179,0.12);   color: var(--ibc-blue); }
+    .event-stat-card--purple .event-stat-icon { background: rgba(8,145,178,0.12);   color: var(--stat-teal); }
+    .event-stat-card--green  .event-stat-icon { background: rgba(0,166,81,0.12);    color: var(--ibc-green); }
+    .event-stat-card--orange .event-stat-icon { background: rgba(255,107,53,0.12);  color: var(--stat-amber); }
 
     .event-stat-label {
         font-size: 0.7rem;
