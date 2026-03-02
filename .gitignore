@@ -4,3 +4,4 @@ composer.phar
 .env
 test_render.html
 backups/*.sql.gz
+node_modules/
