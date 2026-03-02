@@ -402,6 +402,131 @@ function dismissProfileReviewPrompt() {
 </script>
 <?php endif; ?>
 
+<?php if (empty($user['has_seen_onboarding'])): ?>
+<!-- Onboarding Welcome Modal -->
+<div id="onboarding-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
+    <div class="rounded-2xl shadow-2xl w-full max-w-lg flex flex-col overflow-hidden transform transition-all" style="background-color: var(--bg-card)">
+        <!-- Slide indicators -->
+        <div class="bg-gradient-to-r from-blue-600 via-blue-700 to-emerald-600 px-6 pt-6 pb-4">
+            <div class="flex justify-center gap-2 mb-4">
+                <span class="onboarding-dot w-2.5 h-2.5 rounded-full bg-white transition-all duration-300" data-slide="0"></span>
+                <span class="onboarding-dot w-2.5 h-2.5 rounded-full bg-white bg-opacity-40 transition-all duration-300" data-slide="1"></span>
+                <span class="onboarding-dot w-2.5 h-2.5 rounded-full bg-white bg-opacity-40 transition-all duration-300" data-slide="2"></span>
+            </div>
+            <div class="flex items-center justify-center">
+                <div id="onboarding-icon" class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                    <i id="onboarding-icon-el" class="fas fa-calendar-alt text-white text-3xl"></i>
+                </div>
+            </div>
+            <h3 id="onboarding-title" class="text-xl font-bold text-white text-center mt-3">Events &amp; Projekte</h3>
+        </div>
+
+        <!-- Slide content -->
+        <div class="px-6 py-6 flex-1" style="min-height: 160px">
+            <!-- Slide 0 -->
+            <div class="onboarding-slide" id="slide-0">
+                <p class="text-base mb-4" style="color: var(--text-main)">
+                    Entdecke kommende <strong>Events</strong> und laufende <strong>Projekte</strong> im IBC-Intranet.
+                </p>
+                <ul class="space-y-2 text-sm" style="color: var(--text-muted)">
+                    <li><i class="fas fa-check-circle text-emerald-500 mr-2"></i>Melde dich für Events an oder trag dich als Helfer ein</li>
+                    <li><i class="fas fa-check-circle text-emerald-500 mr-2"></i>Verfolge den Fortschritt laufender Projekte</li>
+                    <li><i class="fas fa-check-circle text-emerald-500 mr-2"></i>Bleib mit deinem Kalender immer auf dem neuesten Stand</li>
+                </ul>
+            </div>
+            <!-- Slide 1 -->
+            <div class="onboarding-slide hidden" id="slide-1">
+                <p class="text-base mb-4" style="color: var(--text-main)">
+                    Leih dir Equipment direkt über das <strong>Inventar</strong>-Modul aus – schnell und unkompliziert.
+                </p>
+                <ul class="space-y-2 text-sm" style="color: var(--text-muted)">
+                    <li><i class="fas fa-check-circle text-emerald-500 mr-2"></i>Durchsuche verfügbare Geräte und Materialien</li>
+                    <li><i class="fas fa-check-circle text-emerald-500 mr-2"></i>Stelle eine Ausleih-Anfrage in wenigen Klicks</li>
+                    <li><i class="fas fa-check-circle text-emerald-500 mr-2"></i>Behalte deine aktiven Ausleihen im Blick</li>
+                </ul>
+            </div>
+            <!-- Slide 2 -->
+            <div class="onboarding-slide hidden" id="slide-2">
+                <p class="text-base mb-4" style="color: var(--text-main)">
+                    Teile deine Ideen in der <strong>Ideenbox</strong> und stöbere im <strong>IBC-Shop</strong>.
+                </p>
+                <ul class="space-y-2 text-sm" style="color: var(--text-muted)">
+                    <li><i class="fas fa-check-circle text-emerald-500 mr-2"></i>Reiche Ideen ein und stimme über Vorschläge ab</li>
+                    <li><i class="fas fa-check-circle text-emerald-500 mr-2"></i>Bestelle Merchandise direkt im Shop</li>
+                    <li><i class="fas fa-check-circle text-emerald-500 mr-2"></i>Gestalte den IBC aktiv mit!</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="px-6 py-4 flex justify-between items-center" style="background-color: var(--bg-body); border-top: 1px solid var(--border-color)">
+            <span id="onboarding-step-label" class="text-xs font-medium" style="color: var(--text-muted)">Schritt 1 von 3</span>
+            <button id="onboarding-next-btn" onclick="onboardingNext()" class="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-blue-600 to-emerald-600 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-emerald-700 transition-all duration-300 shadow-md">
+                Weiter <i class="fas fa-arrow-right ml-2"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    var currentSlide = 0;
+    var slides = [
+        { icon: 'fa-calendar-alt', title: 'Events &amp; Projekte' },
+        { icon: 'fa-box-open',     title: 'Inventar-Ausleihe' },
+        { icon: 'fa-lightbulb',    title: 'Ideenbox &amp; Shop' }
+    ];
+
+    function updateSlide() {
+        // Update slides visibility
+        document.querySelectorAll('.onboarding-slide').forEach(function (el, i) {
+            el.classList.toggle('hidden', i !== currentSlide);
+        });
+        // Update dots
+        document.querySelectorAll('.onboarding-dot').forEach(function (el, i) {
+            if (i === currentSlide) {
+                el.classList.remove('bg-opacity-40');
+            } else {
+                el.classList.add('bg-opacity-40');
+            }
+        });
+        // Update header icon & title
+        document.getElementById('onboarding-icon-el').className = 'fas ' + slides[currentSlide].icon + ' text-white text-3xl';
+        document.getElementById('onboarding-title').innerHTML = slides[currentSlide].title;
+        // Update step label
+        document.getElementById('onboarding-step-label').textContent = 'Schritt ' + (currentSlide + 1) + ' von 3';
+        // Update button
+        var btn = document.getElementById('onboarding-next-btn');
+        if (currentSlide === slides.length - 1) {
+            btn.innerHTML = 'Loslegen <i class="fas fa-rocket ml-2"></i>';
+        } else {
+            btn.innerHTML = 'Weiter <i class="fas fa-arrow-right ml-2"></i>';
+        }
+    }
+
+    window.onboardingNext = function () {
+        if (currentSlide < slides.length - 1) {
+            currentSlide++;
+            updateSlide();
+        } else {
+            // Last slide – save to DB and close
+            var modal = document.getElementById('onboarding-modal');
+            fetch(window.location.origin + '/api/complete_onboarding.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ csrf_token: <?php echo json_encode(CSRFHandler::getToken()); ?> })
+            })
+            .then(function (r) { return r.json(); })
+            .catch(function (e) { console.error('Onboarding save error:', e); return {}; })
+            .finally(function () {
+                modal.style.display = 'none';
+            });
+        }
+    };
+})();
+</script>
+<?php endif; ?>
+
 <!-- Hero Section with Personalized Greeting -->
 <div class="mb-10">
     <div class="max-w-4xl mx-auto">
