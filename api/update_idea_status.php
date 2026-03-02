@@ -40,11 +40,17 @@ if ($ideaId <= 0 || empty($status)) {
     exit;
 }
 
-$result = Idea::updateStatus($ideaId, $status);
+try {
+    $result = Idea::updateStatus($ideaId, $status);
 
-if ($result) {
-    echo json_encode(['success' => true]);
-} else {
+    if ($result) {
+        echo json_encode(['success' => true]);
+    } else {
+        http_response_code(500);
+        echo json_encode(['success' => false, 'error' => 'Fehler beim Aktualisieren des Status.']);
+    }
+} catch (Exception $e) {
+    error_log('update_idea_status.php: ' . $e->getMessage());
     http_response_code(500);
-    echo json_encode(['success' => false, 'error' => 'Fehler beim Aktualisieren des Status.']);
+    echo json_encode(['success' => false, 'error' => 'Server-Fehler']);
 }

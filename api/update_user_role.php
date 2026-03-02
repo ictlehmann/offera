@@ -69,12 +69,18 @@ try {
     $entraWarning = 'Entra-Synchronisierung fehlgeschlagen: ' . $e->getMessage();
 }
 
-if (User::update($userId, ['role' => $newRole])) {
-    $response = ['success' => true, 'message' => 'Rolle erfolgreich geändert'];
-    if ($entraWarning !== null) {
-        $response['warning'] = $entraWarning;
+try {
+    if (User::update($userId, ['role' => $newRole])) {
+        $response = ['success' => true, 'message' => 'Rolle erfolgreich geändert'];
+        if ($entraWarning !== null) {
+            $response['warning'] = $entraWarning;
+        }
+        echo json_encode($response);
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Fehler beim Ändern der Rolle']);
     }
-    echo json_encode($response);
-} else {
-    echo json_encode(['success' => false, 'message' => 'Fehler beim Ändern der Rolle']);
+} catch (Exception $e) {
+    error_log('[update_user_role] User update failed: ' . $e->getMessage());
+    http_response_code(500);
+    echo json_encode(['success' => false, 'message' => 'Server-Fehler']);
 }

@@ -65,11 +65,17 @@ if ($invoice['status'] !== 'approved') {
 }
 
 // Mark invoice as paid
-$result = Invoice::markAsPaid($invoiceId, $user['id']);
+try {
+    $result = Invoice::markAsPaid($invoiceId, $user['id']);
 
-if ($result) {
-    echo json_encode(['success' => true, 'message' => 'Rechnung erfolgreich als bezahlt markiert']);
-} else {
+    if ($result) {
+        echo json_encode(['success' => true, 'message' => 'Rechnung erfolgreich als bezahlt markiert']);
+    } else {
+        http_response_code(500);
+        echo json_encode(['success' => false, 'error' => 'Fehler beim Markieren als bezahlt']);
+    }
+} catch (Exception $e) {
+    error_log('mark_invoice_paid.php: ' . $e->getMessage());
     http_response_code(500);
-    echo json_encode(['success' => false, 'error' => 'Fehler beim Markieren als bezahlt']);
+    echo json_encode(['success' => false, 'error' => 'Server-Fehler']);
 }
