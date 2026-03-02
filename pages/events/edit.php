@@ -5,8 +5,8 @@ require_once __DIR__ . '/../../includes/models/Event.php';
 require_once __DIR__ . '/../../includes/models/User.php';
 require_once __DIR__ . '/../../includes/services/MicrosoftGraphService.php';
 
-// Only board, alumni_board, head, and those with manage_projects permission can access
-if (!Auth::check() || !(Auth::hasPermission('manage_projects') || Auth::isBoard() || Auth::hasRole(['head', 'alumni_board']))) {
+// Only board, alumni_vorstand, resortleiter, and those with manage_projects permission can access
+if (!Auth::check() || !(Auth::hasPermission('manage_projects') || Auth::isBoard() || Auth::hasRole(['resortleiter', 'alumni_vorstand']))) {
     header('Location: ../auth/login.php');
     exit;
 }
@@ -97,7 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$readOnly) {
         if (in_array('board_roles', $data['allowed_roles'])) {
             $data['allowed_roles'] = array_merge(
                 array_diff($data['allowed_roles'], ['board_roles']),
-                ['board_finance', 'board_internal', 'board_external']
+                ['vorstand_finanzen', 'vorstand_intern', 'vorstand_extern']
             );
         }
         
@@ -652,7 +652,7 @@ ob_start();
                                 'board_roles' => 'Vorstand'
                             ];
                             $allowedRoles = $_POST['allowed_roles'] ?? $event['allowed_roles'] ?? [];
-                            $boardEntraRoles = ['board_finance', 'board_internal', 'board_external'];
+                            $boardEntraRoles = ['vorstand_finanzen', 'vorstand_intern', 'vorstand_extern'];
                             foreach ($roles as $roleValue => $roleLabel): 
                             $roleIdSafe = 'role_' . $roleValue;
                             $isChecked = ($roleValue === 'board_roles')

@@ -10,7 +10,7 @@ require_once __DIR__ . '/../../includes/models/Inventory.php';
 require_once __DIR__ . '/../../includes/services/EasyVereinInventory.php';
 require_once __DIR__ . '/../../includes/database.php';
 
-if (!Auth::check() || (!Auth::isBoard() && !Auth::hasRole(['alumni_auditor', 'alumni_board']))) {
+if (!Auth::check() || (!Auth::isBoard() && !Auth::hasRole(['alumni_finanzpruefer', 'alumni_vorstand']))) {
     header('Location: ../auth/login.php');
     exit;
 }

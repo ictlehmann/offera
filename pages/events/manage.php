@@ -4,8 +4,8 @@ require_once __DIR__ . '/../../includes/handlers/CSRFHandler.php';
 require_once __DIR__ . '/../../includes/models/Event.php';
 require_once __DIR__ . '/../../includes/models/User.php';
 
-// Only board, alumni_board, head, and those with manage_projects permission can access
-if (!Auth::check() || !(Auth::hasPermission('manage_projects') || Auth::isBoard() || Auth::hasRole(['head', 'alumni_board']))) {
+// Only board, alumni_vorstand, resortleiter, and those with manage_projects permission can access
+if (!Auth::check() || !(Auth::hasPermission('manage_projects') || Auth::isBoard() || Auth::hasRole(['resortleiter', 'alumni_vorstand']))) {
     header('Location: ../auth/login.php');
     exit;
 }
@@ -44,11 +44,11 @@ if (!empty($_GET['end_date'])) {
 $filters['include_helpers'] = true;
 
 // Get events
-$userRole = $_SESSION['user_role'] ?? 'member';
+$userRole = $_SESSION['user_role'] ?? 'mitglied';
 $events = Event::getEvents($filters, $userRole);
 
 // Check if user has permission to add financial statistics
-$canAddStats = in_array($userRole, array_merge(Auth::BOARD_ROLES, ['alumni_board']));
+$canAddStats = in_array($userRole, array_merge(Auth::BOARD_ROLES, ['alumni_vorstand']));
 
 $title = 'Event-Verwaltung - IBC Intranet';
 ob_start();

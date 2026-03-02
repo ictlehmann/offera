@@ -10,7 +10,7 @@ if (!Auth::check()) {
 }
 
 $user = Auth::user();
-$userRole = $_SESSION['user_role'] ?? 'member';
+$userRole = $_SESSION['user_role'] ?? 'mitglied';
 
 // Get filter parameter from URL
 $typeFilter = $_GET['type'] ?? 'all';
@@ -112,7 +112,7 @@ ob_start();
         </div>
         
         <!-- Neues Projekt Button - Board/Head/Manager only -->
-        <?php if (Auth::hasPermission('manage_projects') || Auth::isBoard() || Auth::hasRole(['head', 'alumni_board'])): ?>
+        <?php if (Auth::hasPermission('manage_projects') || Auth::isBoard() || Auth::hasRole(['resortleiter', 'alumni_vorstand'])): ?>
         <a href="manage.php?new=1" class="btn-primary">
             <i class="fas fa-plus mr-2"></i>Neues Projekt
         </a>

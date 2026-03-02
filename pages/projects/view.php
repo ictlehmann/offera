@@ -11,7 +11,7 @@ if (!Auth::check()) {
 }
 
 $user = Auth::user();
-$userRole = $_SESSION['user_role'] ?? 'member';
+$userRole = $_SESSION['user_role'] ?? 'mitglied';
 
 // Get project ID from query parameter
 $projectId = intval($_GET['id'] ?? 0);
@@ -75,7 +75,7 @@ if ($isInternalProject || $isLead || Auth::isBoard() || Auth::hasPermission('man
 
 // Load feedback contact info
 $feedbackContact = Project::getFeedbackContact($projectId);
-$feedbackContactRoles = ['alumni', 'alumni_board', 'alumni_auditor', 'honorary_member'];
+$feedbackContactRoles = ['alumni', 'alumni_vorstand', 'alumni_finanzpruefer', 'ehrenmitglied'];
 $canBecomeFeedbackContact = in_array($userRole, $feedbackContactRoles);
 $isFeedbackContact = $feedbackContact && (int)($feedbackContact['user_id'] ?? 0) === (int)$user['id'];
 

@@ -54,7 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_poll'])) {
                 // Replace the virtual 'board_roles' entry with the three concrete board roles
                 if (in_array('board_roles', $targetRoles)) {
                     $targetRoles = array_filter($targetRoles, fn($r) => $r !== 'board_roles');
-                    $targetRoles = array_merge(array_values($targetRoles), ['board_finance', 'board_internal', 'board_external']);
+                    $targetRoles = array_merge(array_values($targetRoles), ['vorstand_finanzen', 'vorstand_intern', 'vorstand_extern']);
                 }
                 $targetRolesJson = !empty($targetRoles) ? json_encode(array_values(array_unique($targetRoles))) : null;
             }
@@ -196,13 +196,13 @@ ob_start();
                     <?php
                     $roleOptions = [
                         ['label' => 'Vorstand',           'value' => 'board_roles'],
-                        ['label' => 'Alumni Finanzprüfer','value' => 'alumni_auditor'],
-                        ['label' => 'Alumni Vorstand',    'value' => 'alumni_board'],
+                        ['label' => 'Alumni Finanzprüfer','value' => 'alumni_finanzpruefer'],
+                        ['label' => 'Alumni Vorstand',    'value' => 'alumni_vorstand'],
                         ['label' => 'Alumni',             'value' => 'alumni'],
-                        ['label' => 'Ehrenmitglied',      'value' => 'honorary_member'],
-                        ['label' => 'Mitglieder',         'value' => 'member'],
-                        ['label' => 'Anwärter',           'value' => 'applicant'],
-                        ['label' => 'Resortleiter',       'value' => 'head_of_department'],
+                        ['label' => 'Ehrenmitglied',      'value' => 'ehrenmitglied'],
+                        ['label' => 'Mitglieder',         'value' => 'mitglied'],
+                        ['label' => 'Anwärter',           'value' => 'anwaerter'],
+                        ['label' => 'Resortleiter',       'value' => 'resortleiter'],
                     ];
                     $selectedTargetRoles = $_POST['target_roles'] ?? [];
                     foreach ($roleOptions as $opt):

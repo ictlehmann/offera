@@ -33,8 +33,8 @@ if (isset($_SESSION['error_message'])) {
 }
 
 // Load user's profile based on role
-// If User is 'member'/'board'/'head'/'candidate' -> Use Member::getProfileByUserId()
-// If User is 'alumni'/'alumni_board'/'honorary_member' -> Use Alumni::getProfileByUserId()
+// If User is 'mitglied'/'board'/'resortleiter'/'anwaerter' -> Use Member::getProfileByUserId()
+// If User is 'alumni'/'alumni_vorstand'/'ehrenmitglied' -> Use Alumni::getProfileByUserId()
 $profile = null;
 if (isMemberRole($userRole)) {
     $profile = Member::getProfileByUserId($user['id']);
@@ -237,10 +237,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Use the appropriate method based on role
             $updateSuccess = false;
             if (isMemberRole($userRole)) {
-                // For member roles (candidate, member, head, board), use Member::updateProfile
+                // For member roles (anwaerter, mitglied, resortleiter, board), use Member::updateProfile
                 $updateSuccess = Member::updateProfile($user['id'], $profileData);
             } elseif (isAlumniRole($userRole)) {
-                // For alumni roles (alumni, alumni_board, honorary_member), use Alumni::updateOrCreateProfile
+                // For alumni roles (alumni, alumni_vorstand, ehrenmitglied), use Alumni::updateOrCreateProfile
                 $updateSuccess = Alumni::updateOrCreateProfile($user['id'], $profileData);
             } else {
                 // Log warning for unexpected role
@@ -1163,7 +1163,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             // Check if email has changed and user is not alumni
-            const isAlumniRole = ['alumni', 'alumni_board'].includes(userRole);
+            const isAlumniRole = ['alumni', 'alumni_vorstand', 'ehrenmitglied'].includes(userRole);
             const emailChanged = emailInput.value.trim() !== originalEmail;
             
             if (emailChanged && !isAlumniRole) {

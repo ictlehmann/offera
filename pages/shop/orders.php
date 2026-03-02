@@ -6,8 +6,8 @@
  * umschalten; Ressortleiter/Alumni-Rollen haben nur Leserecht.
  *
  * Berechtigungen:
- *   canEdit = true  → board_finance, board_internal, board_external
- *   canEdit = false → head, alumni_board, alumni_auditor
+ *   canEdit = true  → vorstand_finanzen, vorstand_intern, vorstand_extern
+ *   canEdit = false → resortleiter, alumni_vorstand, alumni_finanzpruefer
  *   Kein Zugriff   → alle anderen Rollen
  */
 
@@ -25,8 +25,8 @@ if (!Auth::check()) {
 
 $userRole = $_SESSION['user_role'] ?? '';
 
-$editRoles     = ['board_finance', 'board_internal', 'board_external'];
-$readOnlyRoles = ['head', 'alumni_board', 'alumni_auditor'];
+$editRoles     = ['vorstand_finanzen', 'vorstand_intern', 'vorstand_extern'];
+$readOnlyRoles = ['resortleiter', 'alumni_vorstand', 'alumni_finanzpruefer'];
 
 if (in_array($userRole, $editRoles, true)) {
     $canEdit = true;

@@ -21,8 +21,8 @@ if (!Auth::check()) {
 $user = Auth::user();
 
 // Check if user has permission to submit invoices
-// Allowed: board members, alumni_board, alumni_auditor, head (department leaders)
-$hasInvoiceSubmitAccess = Auth::isBoard() || Auth::hasRole(['alumni_board', 'alumni_auditor', 'head']);
+// Allowed: board members, alumni_vorstand, alumni_finanzpruefer, resortleiter (department leaders)
+$hasInvoiceSubmitAccess = Auth::isBoard() || Auth::hasRole(['alumni_vorstand', 'alumni_finanzpruefer', 'resortleiter']);
 if (!$hasInvoiceSubmitAccess) {
     $_SESSION['error_message'] = 'Keine Berechtigung';
     header('Location: ' . asset('pages/dashboard/index.php'));

@@ -37,7 +37,7 @@ try {
 
     // Check if user has permission to view this event
     $user = Auth::user();
-    $userRole = $_SESSION['user_role'] ?? 'member';
+    $userRole = $_SESSION['user_role'] ?? 'mitglied';
     $allowedRoles = $event['allowed_roles'] ?? [];
     if (!empty($allowedRoles) && !in_array($userRole, $allowedRoles)) {
         http_response_code(403);

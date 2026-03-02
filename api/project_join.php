@@ -45,7 +45,7 @@ try {
 
     $user = Auth::user();
     $userId = $user['id'];
-    $userRole = $_SESSION['user_role'] ?? 'member';
+    $userRole = $_SESSION['user_role'] ?? 'mitglied';
 
     if ($userRole === 'alumni') {
         http_response_code(403);

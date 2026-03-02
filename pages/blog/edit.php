@@ -16,7 +16,7 @@ if (!Auth::check()) {
 // Get current user info
 $user = Auth::user();
 $userId = $_SESSION['user_id'];
-$userRole = $_SESSION['user_role'] ?? 'member';
+$userRole = $_SESSION['user_role'] ?? 'mitglied';
 
 // Security: Check if user is authorized to create/edit blog posts
 if (!BlogPost::canAuth($userRole)) {

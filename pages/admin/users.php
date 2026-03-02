@@ -47,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     } else if (isset($_POST['reset_2fa'])) {
         // Only Ressortleiter and Vorstand roles may reset 2FA for other users
-        $canReset2fa = in_array($_SESSION['user_role'] ?? '', ['head', 'board_finance', 'board_internal', 'board_external']);
+        $canReset2fa = in_array($_SESSION['user_role'] ?? '', ['resortleiter', 'vorstand_finanzen', 'vorstand_intern', 'vorstand_extern']);
         if (!$canReset2fa) {
             $error = 'Keine Berechtigung zum Zurücksetzen von 2FA.';
         } else {
@@ -70,7 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $entraId      = trim($_POST['entra_id'] ?? '');
         $displayName  = trim($_POST['display_name'] ?? '');
         $entraEmail   = trim($_POST['entra_email'] ?? '');
-        $role         = $_POST['role'] ?? 'member';
+        $role         = $_POST['role'] ?? 'mitglied';
         $userType     = $_POST['user_type'] ?? 'member';
 
         // Normalize and validate user_type
@@ -462,7 +462,7 @@ ob_start();
                 </thead>
                 <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-100 dark:divide-gray-700">
                     <?php
-                    // Build reverse lookup once: UUID => role key (e.g. '3ad43a76-...' => 'board_finance')
+                    // Build reverse lookup once: UUID => role key (e.g. '3ad43a76-...' => 'vorstand_finanzen')
                     $roleIdToKey = array_flip(ROLE_MAPPING);
                     foreach ($users as $user): ?>
                 <tr class="user-row hover:bg-gradient-to-r hover:from-purple-50 hover:to-indigo-50 dark:hover:from-purple-900/20 dark:hover:to-indigo-900/20 transition-all duration-200" 
@@ -616,7 +616,7 @@ ob_start();
                                 <i class="fas fa-trash mr-1.5"></i>Benutzer löschen
                             </button>
                         </form>
-                        <?php if ($user['tfa_enabled'] && in_array($_SESSION['user_role'] ?? '', ['head', 'board_finance', 'board_internal', 'board_external'])): ?>
+                        <?php if ($user['tfa_enabled'] && in_array($_SESSION['user_role'] ?? '', ['resortleiter', 'vorstand_finanzen', 'vorstand_intern', 'vorstand_extern'])): ?>
                         <form method="POST" class="inline" onsubmit="return confirm('2FA für diesen Benutzer wirklich zurücksetzen?');">
                             <input type="hidden" name="user_id" value="<?php echo $user['id']; ?>">
                             <button type="submit" name="reset_2fa" class="inline-flex items-center px-3 py-2 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 rounded-lg hover:bg-yellow-200 dark:hover:bg-yellow-900/50 transition-all shadow-sm hover:shadow-md transform hover:scale-105 text-sm font-medium">

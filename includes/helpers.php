@@ -147,24 +147,24 @@ function asset($path) {
  * Return a clean, German-formatted role name for a given database role string.
  * This is the central role display function that should be used in all frontend views.
  *
- * @param string $role Database role identifier (e.g. 'board_internal')
+ * @param string $role Database role identifier (e.g. 'vorstand_intern')
  * @return string Formatted German role name (e.g. 'Vorstand Intern')
  */
 function getFormattedRoleName(string $role): string {
     return match($role) {
-        'admin'           => 'Administrator',
-        'board_finance'   => 'Vorstand Finanzen und Recht',
-        'board_internal'  => 'Vorstand Intern',
-        'board_external'  => 'Vorstand Extern',
-        'head'            => 'Ressortleiter',
-        'member'          => 'Mitglied',
-        'alumni'          => 'Alumni',
-        'candidate'       => 'Anwärter',
-        'alumni_board'    => 'Alumni-Vorstand',
-        'alumni_auditor'  => 'Alumni-Finanzprüfer',
-        'honorary_member' => 'Ehrenmitglied',
-        'manager'         => 'Ressortleiter',
-        default           => ucfirst(str_replace('_', ' ', $role)),
+        'admin'               => 'Administrator',
+        'vorstand_finanzen'   => 'Vorstand Finanzen und Recht',
+        'vorstand_intern'     => 'Vorstand Intern',
+        'vorstand_extern'     => 'Vorstand Extern',
+        'resortleiter'        => 'Ressortleiter',
+        'mitglied'            => 'Mitglied',
+        'alumni'              => 'Alumni',
+        'anwaerter'           => 'Anwärter',
+        'alumni_vorstand'     => 'Alumni-Vorstand',
+        'alumni_finanzpruefer'=> 'Alumni-Finanzprüfer',
+        'ehrenmitglied'       => 'Ehrenmitglied',
+        'manager'             => 'Ressortleiter',
+        default               => ucfirst(str_replace('_', ' ', $role)),
     };
 }
 
@@ -177,18 +177,18 @@ function getFormattedRoleName(string $role): string {
  */
 function translateRole($role) {
     $roleTranslations = [
-        'admin' => 'Administrator',
-        'board_finance' => 'Vorstand Finanzen und Recht',
-        'board_internal' => 'Vorstand Intern',
-        'board_external' => 'Vorstand Extern',
-        'head' => 'Ressortleiter',
-        'member' => 'Mitglied',
-        'alumni' => 'Alumni',
-        'candidate' => 'Anwärter',
-        'alumni_board' => 'Alumni-Vorstand',
-        'alumni_auditor' => 'Alumni-Finanzprüfer',
-        'honorary_member' => 'Ehrenmitglied',
-        'manager' => 'Ressortleiter'
+        'admin'               => 'Administrator',
+        'vorstand_finanzen'   => 'Vorstand Finanzen und Recht',
+        'vorstand_intern'     => 'Vorstand Intern',
+        'vorstand_extern'     => 'Vorstand Extern',
+        'resortleiter'        => 'Ressortleiter',
+        'mitglied'            => 'Mitglied',
+        'alumni'              => 'Alumni',
+        'anwaerter'           => 'Anwärter',
+        'alumni_vorstand'     => 'Alumni-Vorstand',
+        'alumni_finanzpruefer'=> 'Alumni-Finanzprüfer',
+        'ehrenmitglied'       => 'Ehrenmitglied',
+        'manager'             => 'Ressortleiter'
     ];
     
     return $roleTranslations[$role] ?? ucfirst($role);
@@ -203,16 +203,16 @@ function translateRole($role) {
  */
 function translateAzureRole($azureRole) {
     $azureRoleTranslations = [
-        'anwaerter' => 'Anwärter',
-        'mitglied' => 'Mitglied',
-        'ressortleiter' => 'Ressortleiter',
-        'vorstand_finanzen' => 'Vorstand Finanzen und Recht',
-        'vorstand_intern' => 'Vorstand Intern',
-        'vorstand_extern' => 'Vorstand Extern',
-        'alumni' => 'Alumni',
-        'alumni_vorstand' => 'Alumni-Vorstand',
-        'alumni_finanz' => 'Alumni-Finanzprüfer',
-        'ehrenmitglied' => 'Ehrenmitglied'
+        'anwaerter'           => 'Anwärter',
+        'mitglied'            => 'Mitglied',
+        'resortleiter'        => 'Ressortleiter',
+        'vorstand_finanzen'   => 'Vorstand Finanzen und Recht',
+        'vorstand_intern'     => 'Vorstand Intern',
+        'vorstand_extern'     => 'Vorstand Extern',
+        'alumni'              => 'Alumni',
+        'alumni_vorstand'     => 'Alumni-Vorstand',
+        'alumni_finanzpruefer'=> 'Alumni-Finanzprüfer',
+        'ehrenmitglied'       => 'Ehrenmitglied'
     ];
     
     // If role not found in mapping, log it for manual addition and return formatted version
@@ -235,9 +235,9 @@ function translateAzureRole($azureRole) {
  * @return bool True if role is an active member role
  */
 function isMemberRole($role) {
-    // Active roles: board roles + candidate, member, head
+    // Active roles: board roles + anwaerter, mitglied, resortleiter
     // Matches Member::ACTIVE_ROLES constant
-    return in_array($role, ['candidate', 'member', 'head', 'board_finance', 'board_internal', 'board_external']);
+    return in_array($role, ['anwaerter', 'mitglied', 'resortleiter', 'vorstand_finanzen', 'vorstand_intern', 'vorstand_extern']);
 }
 
 /**
@@ -248,7 +248,7 @@ function isMemberRole($role) {
  * @return bool True if role is an alumni role
  */
 function isAlumniRole($role) {
-    return in_array($role, ['alumni', 'alumni_board', 'honorary_member']);
+    return in_array($role, ['alumni', 'alumni_vorstand', 'ehrenmitglied']);
 }
 
 /**

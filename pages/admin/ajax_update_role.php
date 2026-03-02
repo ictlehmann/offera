@@ -64,9 +64,9 @@ $isBoardMember = in_array($currentUserRole, Auth::BOARD_ROLES);
 // Check if user is trying to change their own role
 $isOwnRole = ($userId === (int)$currentUserData['id']);
 
-// If board member is demoting themselves to member or alumni, require a successor
+// If board member is demoting themselves to mitglied or alumni, require a successor
 $successor = null;
-if ($isOwnRole && $isBoardMember && in_array($newRole, ['member', 'alumni'])) {
+if ($isOwnRole && $isBoardMember && in_array($newRole, ['mitglied', 'alumni'])) {
     if (!$successorId || $successorId <= 0) {
         echo json_encode([
             'success' => false,
@@ -85,8 +85,8 @@ if ($isOwnRole && $isBoardMember && in_array($newRole, ['member', 'alumni'])) {
         exit;
     }
     
-    // Ensure successor has a 'member' or 'head' role (not already a board member or other role)
-    if (!in_array($successor['role'], ['member', 'head'])) {
+    // Ensure successor has a 'mitglied' or 'resortleiter' role (not already a board member or other role)
+    if (!in_array($successor['role'], ['mitglied', 'resortleiter'])) {
         echo json_encode([
             'success' => false,
             'message' => 'Der gewählte Nachfolger muss die Rolle "Mitglied" oder "Ressortleiter" haben'

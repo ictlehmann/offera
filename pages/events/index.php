@@ -12,7 +12,7 @@ if (!Auth::check()) {
 }
 
 $user = Auth::user();
-$userRole = $_SESSION['user_role'] ?? 'member';
+$userRole = $_SESSION['user_role'] ?? 'mitglied';
 
 // Get filter from query parameters
 $filter = $_GET['filter'] ?? 'current';
@@ -40,8 +40,8 @@ if ($filter === 'my_registrations') {
     });
 } else {
     // Hide past events for normal users (non-board, non-manager)
-    // Board members, alumni_board, alumni_auditor, and managers can see past events
-    $canViewPastEvents = Auth::isBoard() || Auth::hasRole(['alumni_board', 'alumni_auditor', 'manager']);
+    // Board members, alumni_vorstand, alumni_finanzpruefer, and managers can see past events
+    $canViewPastEvents = Auth::isBoard() || Auth::hasRole(['alumni_vorstand', 'alumni_finanzpruefer', 'manager']);
     if (!$canViewPastEvents) {
         $events = array_filter($events, function($event) use ($now) {
             return $event['end_time'] >= $now;
@@ -69,16 +69,16 @@ ob_start();
         </div>
         
         <div class="flex gap-3">
-            <!-- Statistiken Button - Board/Alumni Board only -->
-            <?php if (Auth::isBoard() || Auth::hasRole(['alumni_board'])): ?>
+            <!-- Statistiken Button - Board/Alumni Vorstand only -->
+            <?php if (Auth::isBoard() || Auth::hasRole(['alumni_vorstand'])): ?>
             <a href="statistics.php" class="px-6 py-3 bg-ibc-blue text-white rounded-lg font-semibold hover:bg-ibc-blue-dark transition-all shadow-soft hover:shadow-lg">
                 <i class="fas fa-chart-bar mr-2"></i>
                 Statistiken
             </a>
             <?php endif; ?>
             
-            <!-- Neues Event Button - Board/Head/Manager only -->
-            <?php if (Auth::hasPermission('manage_projects') || Auth::isBoard() || Auth::hasRole(['head', 'alumni_board'])): ?>
+            <!-- Neues Event Button - Board/Resortleiter/Manager only -->
+            <?php if (Auth::hasPermission('manage_projects') || Auth::isBoard() || Auth::hasRole(['resortleiter', 'alumni_vorstand'])): ?>
             <a href="edit.php?new=1" class="btn-primary">
                 <i class="fas fa-plus mr-2"></i>Neues Event
             </a>

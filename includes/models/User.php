@@ -53,7 +53,7 @@ class User {
     /**
      * Create new user
      */
-    public static function create($email, $password, $role = 'member') {
+    public static function create($email, $password, $role = 'mitglied') {
         $db = Database::getUserDB();
         $passwordHash = password_hash($password, HASH_ALGO);
         

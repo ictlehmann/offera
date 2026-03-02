@@ -549,7 +549,7 @@ class Event {
      * Users with one of these roles (admin / board / Vorstand) can review unpublished
      * events, while regular members only see their own drafts.
      */
-    const DRAFT_VIEWER_ROLES = ['board_finance', 'board_internal', 'board_external', 'alumni_board', 'head', 'manager'];
+    const DRAFT_VIEWER_ROLES = ['vorstand_finanzen', 'vorstand_intern', 'vorstand_extern', 'alumni_vorstand', 'resortleiter', 'manager'];
 
     /**
      * Get events with filters

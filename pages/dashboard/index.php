@@ -27,7 +27,7 @@ if (!$currentUser) {
 
 // Check if profile is complete - if not, redirect to profile edit page
 // Only enforce for roles that need profiles (not for test/system accounts)
-$rolesRequiringProfile = ['board_finance', 'board_internal', 'board_external', 'alumni_board', 'alumni_auditor', 'alumni', 'member', 'head', 'candidate', 'honorary_member'];
+$rolesRequiringProfile = ['vorstand_finanzen', 'vorstand_intern', 'vorstand_extern', 'alumni_vorstand', 'alumni_finanzpruefer', 'alumni', 'mitglied', 'resortleiter', 'anwaerter', 'ehrenmitglied'];
 if (in_array($currentUser['role'], $rolesRequiringProfile) && isset($currentUser['profile_complete']) && $currentUser['profile_complete'] == 0) {
     $_SESSION['profile_incomplete_message'] = 'Bitte vervollständige dein Profil (Vorname und Nachname) um fortzufahren.';
     header('Location: ../alumni/edit.php');
@@ -144,7 +144,7 @@ $canAccessInvoices = Auth::canAccessPage('invoices');
 if ($canAccessInvoices) {
     try {
         $rechDb = Database::getRechDB();
-        if (in_array($userRole, array_merge(Auth::BOARD_ROLES, ['alumni_board', 'alumni_auditor']))) {
+        if (in_array($userRole, array_merge(Auth::BOARD_ROLES, ['alumni_vorstand', 'alumni_finanzpruefer']))) {
             $iStmt = $rechDb->prepare("SELECT COUNT(*) FROM invoices WHERE status IN ('pending', 'approved')");
             $iStmt->execute();
         } else {
@@ -162,7 +162,7 @@ $recentOpenInvoices = [];
 if ($canAccessInvoices) {
     try {
         $rechDb = Database::getRechDB();
-        if (in_array($userRole, array_merge(Auth::BOARD_ROLES, ['alumni_board', 'alumni_auditor']))) {
+        if (in_array($userRole, array_merge(Auth::BOARD_ROLES, ['alumni_vorstand', 'alumni_finanzpruefer']))) {
             $iStmt = $rechDb->prepare("SELECT id, description, amount, status, created_at FROM invoices WHERE status IN ('pending', 'approved') ORDER BY created_at DESC LIMIT 5");
             $iStmt->execute();
         } else {

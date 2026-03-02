@@ -20,9 +20,9 @@ if (!Auth::check()) {
 $user = Auth::user();
 $userRole = $user['role'] ?? '';
 
-// Check if user has permission (board roles or alumni_board only)
-// This includes all board role variants: board_finance, board_internal, board_external
-$allowedRoles = array_merge(Auth::BOARD_ROLES, ['alumni_board']);
+// Check if user has permission (board roles or alumni_vorstand only)
+// This includes all board role variants: vorstand_finanzen, vorstand_intern, vorstand_extern
+$allowedRoles = array_merge(Auth::BOARD_ROLES, ['alumni_vorstand']);
 if (!in_array($userRole, $allowedRoles)) {
     http_response_code(403);
     echo json_encode(['success' => false, 'message' => 'Keine Berechtigung']);

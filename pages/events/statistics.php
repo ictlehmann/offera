@@ -10,10 +10,10 @@ if (!Auth::check()) {
 }
 
 $user = Auth::user();
-$userRole = $_SESSION['user_role'] ?? 'member';
+$userRole = $_SESSION['user_role'] ?? 'mitglied';
 
-// Check if user has permission to view documentation (board and alumni_board only)
-$allowedDocRoles = array_merge(Auth::BOARD_ROLES, ['alumni_board']);
+// Check if user has permission to view documentation (board and alumni_vorstand only)
+$allowedDocRoles = array_merge(Auth::BOARD_ROLES, ['alumni_vorstand']);
 if (!in_array($userRole, $allowedDocRoles)) {
     header('Location: index.php');
     exit;

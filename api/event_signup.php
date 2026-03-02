@@ -45,7 +45,7 @@ CSRFHandler::verifyToken($input['csrf_token'] ?? '');
 
 $user = AuthHandler::getCurrentUser();
 $userId = $user['id'];
-$userRole = $_SESSION['user_role'] ?? 'member';
+$userRole = $_SESSION['user_role'] ?? 'mitglied';
 
 try {
     switch ($action) {

@@ -57,7 +57,7 @@ ob_start();
         </div>
         
         <!-- Edit My Profile Button - Only for Alumni, Alumni-Vorstand, Alumni-Finanzprüfer, and Ehrenmitglied -->
-        <?php if (in_array($user['role'], ['alumni', 'alumni_board', 'alumni_auditor', 'honorary_member'])): ?>
+        <?php if (in_array($user['role'], ['alumni', 'alumni_vorstand', 'alumni_finanzpruefer', 'ehrenmitglied'])): ?>
         <a href="../auth/profile.php" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-purple-800 transition-all shadow-lg hover:shadow-xl">
             <i class="fas fa-user-edit mr-2"></i>
             Profil bearbeiten
@@ -133,10 +133,10 @@ ob_start();
                 <?php
                 // Determine role badge color
                 $roleBadgeColors = [
-                    'alumni'          => 'bg-gray-100 text-gray-800 border-gray-300',
-                    'alumni_board'    => 'bg-indigo-100 text-indigo-800 border-indigo-300',
-                    'alumni_auditor'  => 'bg-indigo-100 text-indigo-800 border-indigo-300',
-                    'honorary_member' => 'bg-amber-100 text-amber-800 border-amber-300',
+                    'alumni'              => 'bg-gray-100 text-gray-800 border-gray-300',
+                    'alumni_vorstand'     => 'bg-indigo-100 text-indigo-800 border-indigo-300',
+                    'alumni_finanzpruefer'=> 'bg-indigo-100 text-indigo-800 border-indigo-300',
+                    'ehrenmitglied'       => 'bg-amber-100 text-amber-800 border-amber-300',
                 ];
                 $displayRoleKey = Auth::getPrimaryEntraRoleKey($profile['entra_roles'] ?? null, $profile['role'] ?? '');
                 $badgeClass = $roleBadgeColors[$displayRoleKey] ?? 'bg-gray-100 text-gray-800 border-gray-300';

@@ -6,7 +6,7 @@ require_once __DIR__ . '/../../includes/models/Member.php';
 require_once __DIR__ . '/../../includes/helpers.php';
 require_once __DIR__ . '/../../includes/handlers/CSRFHandler.php';
 
-// Access Control: Allow 'board', 'alumni_board', 'head', 'alumni' (read-only)
+// Access Control: Allow 'board', 'alumni_vorstand', 'resortleiter', 'alumni' (read-only)
 if (!Auth::check()) {
     header('Location: ../auth/login.php');
     exit;
@@ -30,9 +30,9 @@ $canMarkAsPaid = Auth::canManageInvoices();
 // Get invoices based on role
 $invoices = Invoice::getAll($userRole, $user['id']);
 
-// Get statistics (only for board roles and alumni_board/alumni_auditor)
+// Get statistics (only for board roles and alumni_vorstand/alumni_finanzpruefer)
 $stats = null;
-$canViewStats = Auth::isBoard() || Auth::hasRole(['alumni_board', 'alumni_auditor']);
+$canViewStats = Auth::isBoard() || Auth::hasRole(['alumni_vorstand', 'alumni_finanzpruefer']);
 if ($canViewStats) {
     $stats = Invoice::getStats();
 }
@@ -217,7 +217,7 @@ ob_start();
                 Bezahlt <span class="ml-1 text-xs"><?php echo $statusCounts['paid']; ?></span>
             </button>
         </div>
-        <?php if (Auth::isBoard() || Auth::hasRole(['alumni_board', 'alumni_auditor'])): ?>
+        <?php if (Auth::isBoard() || Auth::hasRole(['alumni_vorstand', 'alumni_finanzpruefer'])): ?>
         <a
             href="<?php echo asset('api/export_invoices.php'); ?>"
             class="inline-flex items-center gap-1.5 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-xl text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-all no-underline flex-shrink-0"

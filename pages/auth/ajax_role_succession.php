@@ -97,8 +97,8 @@ try {
             exit;
         }
         
-        // Successor must have member role to be eligible
-        if ($successor['role'] !== 'member') {
+        // Successor must have mitglied role to be eligible
+        if ($successor['role'] !== 'mitglied') {
             echo json_encode([
                 'success' => false,
                 'message' => 'Nachfolger muss ein reguläres Mitglied sein'

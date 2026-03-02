@@ -16,9 +16,9 @@ if (!Auth::check()) {
 
 $user = Auth::user();
 
-// Only board members, alumni_board, and alumni_auditor can export invoices
+// Only board members, alumni_vorstand, and alumni_finanzpruefer can export invoices
 // Check if user has permission to view invoices
-$hasInvoiceAccess = Auth::isBoard() || Auth::hasRole(['alumni_board', 'alumni_auditor']);
+$hasInvoiceAccess = Auth::isBoard() || Auth::hasRole(['alumni_vorstand', 'alumni_finanzpruefer']);
 if (!$hasInvoiceAccess) {
     header('Location: ../pages/dashboard/index.php');
     exit;
