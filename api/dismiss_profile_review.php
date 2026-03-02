@@ -7,9 +7,6 @@
 // Set JSON response header
 header('Content-Type: application/json');
 
-// Disable error output in body
-ini_set('display_errors', 0);
-
 require_once __DIR__ . '/../src/Auth.php';
 require_once __DIR__ . '/../src/Database.php';
 require_once __DIR__ . '/../includes/handlers/CSRFHandler.php';

@@ -57,11 +57,17 @@ if (!in_array($status, ['pending', 'approved', 'rejected'])) {
 }
 
 // Update invoice status
-$result = Invoice::updateStatus($invoiceId, $status, $reason, $userRole);
+try {
+    $result = Invoice::updateStatus($invoiceId, $status, $reason, $userRole);
 
-if ($result) {
-    echo json_encode(['success' => true, 'message' => 'Status erfolgreich aktualisiert']);
-} else {
+    if ($result) {
+        echo json_encode(['success' => true, 'message' => 'Status erfolgreich aktualisiert']);
+    } else {
+        http_response_code(500);
+        echo json_encode(['success' => false, 'error' => 'Fehler beim Aktualisieren des Status']);
+    }
+} catch (Exception $e) {
+    error_log('update_invoice_status.php: ' . $e->getMessage());
     http_response_code(500);
-    echo json_encode(['success' => false, 'error' => 'Fehler beim Aktualisieren des Status']);
+    echo json_encode(['success' => false, 'error' => 'Server-Fehler']);
 }

@@ -41,11 +41,17 @@ if ($ideaId <= 0 || !in_array($vote, ['up', 'down'], true)) {
     exit;
 }
 
-$result = Idea::vote($ideaId, (int) $user['id'], $vote);
+try {
+    $result = Idea::vote($ideaId, (int) $user['id'], $vote);
 
-if ($result['success']) {
-    echo json_encode($result);
-} else {
+    if ($result['success']) {
+        echo json_encode($result);
+    } else {
+        http_response_code(500);
+        echo json_encode($result);
+    }
+} catch (Exception $e) {
+    error_log('vote_idea.php: ' . $e->getMessage());
     http_response_code(500);
-    echo json_encode($result);
+    echo json_encode(['success' => false, 'error' => 'Server-Fehler']);
 }

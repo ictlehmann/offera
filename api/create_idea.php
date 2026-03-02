@@ -42,26 +42,32 @@ if (empty($title) || empty($description)) {
     exit;
 }
 
-$result = Idea::create((int) $user['id'], $title, $description);
+try {
+    $result = Idea::create((int) $user['id'], $title, $description);
 
-if ($result['success']) {
-    // Send notification email
-    try {
-        $username  = explode('@', $user['email'])[0];
-        $emailBody = '<h2>Neue Idee eingereicht</h2>'
-            . '<table class="info-table">'
-            . '<tr><td class="info-label">Von:</td><td class="info-value">' . htmlspecialchars($username) . ' (' . htmlspecialchars($user['email']) . ')</td></tr>'
-            . '<tr><td class="info-label">Titel:</td><td class="info-value">' . htmlspecialchars($title) . '</td></tr>'
-            . '<tr><td class="info-label">Beschreibung:</td><td class="info-value">' . nl2br(htmlspecialchars($description)) . '</td></tr>'
-            . '<tr><td class="info-label">Datum:</td><td class="info-value">' . date('d.m.Y H:i') . ' Uhr</td></tr>'
-            . '</table>';
-        MailService::send(MAIL_IDEAS, 'Neue Idee von ' . $username, $emailBody);
-    } catch (Exception $e) {
-        error_log('create_idea.php email error: ' . $e->getMessage());
+    if ($result['success']) {
+        // Send notification email
+        try {
+            $username  = explode('@', $user['email'])[0];
+            $emailBody = '<h2>Neue Idee eingereicht</h2>'
+                . '<table class="info-table">'
+                . '<tr><td class="info-label">Von:</td><td class="info-value">' . htmlspecialchars($username) . ' (' . htmlspecialchars($user['email']) . ')</td></tr>'
+                . '<tr><td class="info-label">Titel:</td><td class="info-value">' . htmlspecialchars($title) . '</td></tr>'
+                . '<tr><td class="info-label">Beschreibung:</td><td class="info-value">' . nl2br(htmlspecialchars($description)) . '</td></tr>'
+                . '<tr><td class="info-label">Datum:</td><td class="info-value">' . date('d.m.Y H:i') . ' Uhr</td></tr>'
+                . '</table>';
+            MailService::send(MAIL_IDEAS, 'Neue Idee von ' . $username, $emailBody);
+        } catch (Exception $e) {
+            error_log('create_idea.php email error: ' . $e->getMessage());
+        }
+
+        echo json_encode(['success' => true, 'id' => $result['id']]);
+    } else {
+        http_response_code(500);
+        echo json_encode(['success' => false, 'error' => $result['error']]);
     }
-
-    echo json_encode(['success' => true, 'id' => $result['id']]);
-} else {
+} catch (Exception $e) {
+    error_log('create_idea.php: ' . $e->getMessage());
     http_response_code(500);
-    echo json_encode(['success' => false, 'error' => $result['error']]);
+    echo json_encode(['success' => false, 'error' => 'Server-Fehler']);
 }
