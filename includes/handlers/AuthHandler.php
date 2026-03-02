@@ -529,7 +529,8 @@ class AuthHandler {
         require_once __DIR__ . '/../services/MicrosoftGraphService.php';
         require_once __DIR__ . '/../models/Alumni.php';
 
-        $azureRoles = $claims['roles'] ?? [];
+        $azureRoles  = $claims['roles']  ?? [];
+        $jwtGroupIds = $claims['groups'] ?? []; // Group GUIDs from the JWT groups claim
         error_log("DEBUG AZURE ROLES FROM TOKEN: " . print_r($azureRoles, true));
 
         // Get Azure Object ID from claims for Microsoft Graph API calls
@@ -652,6 +653,19 @@ class AuthHandler {
             }
         }
         
+        // Process JWT groups claim (group GUIDs included directly in the token)
+        foreach ($jwtGroupIds as $groupId) {
+            if (isset($roleMapping[$groupId])) {
+                $internalRole = $roleMapping[$groupId];
+                $priority = $roleHierarchy[$internalRole] ?? 0;
+                if ($priority > $highestPriority) {
+                    $highestPriority = $priority;
+                    $selectedRole = $internalRole;
+                    error_log("Treffer! User erhält Rolle (JWT groups): " . $internalRole);
+                }
+            }
+        }
+
         // Process Entra groups (objects with id and displayName)
         foreach ($entraGroups as $group) {
             // Handle both object and string formats for backwards compatibility
@@ -953,6 +967,31 @@ class AuthHandler {
 
         // --- 4. Determine primary local role from ROLE_MAPPING ---
         $roleMapping = array_flip(ROLE_MAPPING);
+        // Add display name mappings so groups can be matched by name in addition to GUID.
+        // Lowercase entries cover all underscore-based variants via the case-insensitive
+        // fallback below. Space-separated entries must be listed explicitly because
+        // strtolower('Vorstand Intern') != 'vorstand_intern'.
+        $roleMapping = array_merge($roleMapping, [
+            // Lowercase app role value / group name strings
+            'anwaerter'                   => 'candidate',
+            'mitglied'                    => 'member',
+            'ressortleiter'               => 'head',
+            'vorstand_finanzen'           => 'board_finance',
+            'vorstand_intern'             => 'board_internal',
+            'vorstand_extern'             => 'board_external',
+            'vorstand'                    => 'board_internal',
+            'alumni'                      => 'alumni',
+            'alumni_vorstand'             => 'alumni_board',
+            'alumni_finanz'               => 'alumni_auditor',
+            'ehrenmitglied'               => 'honorary_member',
+            // Space-separated display names (common Azure AD group names)
+            'Vorstand Finanzen'           => 'board_finance',
+            'Vorstand Finanzen und Recht' => 'board_finance',
+            'Vorstand Intern'             => 'board_internal',
+            'Vorstand Extern'             => 'board_external',
+            'Alumni Vorstand'             => 'alumni_board',
+            'Alumni Finanz'               => 'alumni_auditor',
+        ]);
         $roleHierarchy = [
             'candidate'       => 1,
             'member'          => 2,
@@ -983,8 +1022,10 @@ class AuthHandler {
             }
 
             foreach ($candidates as $key) {
-                if (isset($roleMapping[$key])) {
-                    $internalRole = $roleMapping[$key];
+                $keyLower = strtolower($key);
+                $matched  = $roleMapping[$key] ?? $roleMapping[$keyLower] ?? null;
+                if ($matched !== null) {
+                    $internalRole = $matched;
                     $priority     = $roleHierarchy[$internalRole] ?? 0;
                     if ($priority > $highestPriority) {
                         $highestPriority = $priority;
