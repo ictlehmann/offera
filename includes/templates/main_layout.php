@@ -376,13 +376,13 @@ $_tailwindCssVersion = filemtime(__DIR__ . '/../../assets/css/tailwind.css');
                     <span>Projekte</span>
                 </a>
 
-                <!-- Rechnungen (Only vorstand_finanzen) -->
-                <?php if (Auth::canManageInvoices()): ?>
+                <!-- Rechnungen (All roles) -->
+                <?php if (Auth::canAccessPage('invoices')): ?>
                 <a href="<?php echo asset('pages/invoices/index.php'); ?>" 
                    class="flex items-center justify-start px-4 py-2 text-white hover:bg-white/10 transition-colors duration-200 <?php echo isActivePath('/invoices/') ? 'bg-white/20 text-white border-l-4 border-ibc-green' : ''; ?>"
                    <?php echo isActivePath('/invoices/') ? 'aria-current="page"' : ''; ?>>
                     <i class="fas fa-file-invoice-dollar w-5 mr-3" aria-hidden="true"></i>
-                    <span>Rechnung einreichen</span>
+                    <span>Rechnungen</span>
                 </a>
                 <?php endif; ?>
 

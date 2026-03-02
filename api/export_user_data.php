@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 if (!Auth::check()) {
-    header('Location: ../pages/auth/login.php');
+    header('Location: ' . asset('pages/auth/login.php'));
     exit;
 }
 
