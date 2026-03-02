@@ -78,8 +78,13 @@ try {
     }
 
     // Get resource owner (user) details and claims from Graph API
-    $resourceOwner = $provider->getResourceOwner($accessToken);
-    $claims = $resourceOwner->toArray();
+    try {
+        $resourceOwner = $provider->getResourceOwner($accessToken);
+        $claims = $resourceOwner->toArray();
+    } catch (Exception $roEx) {
+        error_log("[OAuth] getResourceOwner() failed: " . $roEx->getMessage());
+        throw new Exception('Benutzerdetails konnten nicht von Microsoft abgerufen werden: ' . $roEx->getMessage());
+    }
 
     // FIX: Extract JWT claims (Roles, OID, UPN) from the ID token
     $idToken = $accessToken->getValues()['id_token'] ?? null;

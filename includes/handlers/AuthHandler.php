@@ -128,8 +128,8 @@ class AuthHandler {
             return ['success' => false, 'message' => 'Ungültige Anmeldedaten'];
         }
         
-        // Check 2FA if enabled
-        if ($user['tfa_enabled']) {
+        // Check 2FA if enabled AND secret is configured
+        if ($user['tfa_enabled'] && !empty($user['tfa_secret'])) {
             if ($tfaCode === null) {
                 return ['success' => false, 'require_2fa' => true, 'user_id' => $user['id']];
             }
@@ -693,9 +693,22 @@ class AuthHandler {
         }
         
         // Check if profile is complete and 2FA status
-        $stmt = $db->prepare("SELECT profile_complete, tfa_enabled, tfa_secret, is_onboarded FROM users WHERE id = ?");
-        $stmt->execute([$userId]);
-        $userCheck = $stmt->fetch();
+        $userCheck = null;
+        try {
+            $stmt = $db->prepare("SELECT profile_complete, tfa_enabled, tfa_secret, is_onboarded FROM users WHERE id = ?");
+            $stmt->execute([$userId]);
+            $userCheck = $stmt->fetch();
+        } catch (PDOException $e) {
+            error_log("[completeMicrosoftLogin] Failed to fetch user status for user {$userId}: " . $e->getMessage());
+            // Fall back to a minimal query without tfa columns in case they don't exist yet
+            try {
+                $stmt = $db->prepare("SELECT profile_complete, is_onboarded FROM users WHERE id = ?");
+                $stmt->execute([$userId]);
+                $userCheck = $stmt->fetch();
+            } catch (PDOException $e2) {
+                error_log("[completeMicrosoftLogin] Minimal fallback query also failed: " . $e2->getMessage());
+            }
+        }
 
         // Check if 2FA is enabled AND the user has actually configured a secret - do this BEFORE setting authenticated session
         if ($userCheck && intval($userCheck['tfa_enabled']) === 1 && !empty($userCheck['tfa_secret'])) {
