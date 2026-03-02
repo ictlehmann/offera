@@ -163,6 +163,7 @@ class AuthHandler {
         $_SESSION['authenticated'] = true;
         $_SESSION['last_activity'] = time(); // Initialize activity timestamp
         $_SESSION['profile_incomplete'] = !$user['profile_complete'];
+        $_SESSION['is_onboarded'] = (bool)($user['is_onboarded'] ?? false);
         
         self::logSystemAction($user['id'], 'login_success', 'user', $user['id'], 'Successful login');
         
@@ -854,7 +855,7 @@ class AuthHandler {
         }
         
         // Check if profile is complete and 2FA status
-        $stmt = $db->prepare("SELECT profile_complete, tfa_enabled FROM users WHERE id = ?");
+        $stmt = $db->prepare("SELECT profile_complete, tfa_enabled, is_onboarded FROM users WHERE id = ?");
         $stmt->execute([$userId]);
         $userCheck = $stmt->fetch();
 
@@ -865,6 +866,7 @@ class AuthHandler {
             $_SESSION['pending_2fa_email'] = $email;
             $_SESSION['pending_2fa_role'] = $roleName;
             $_SESSION['pending_2fa_profile_complete'] = $userCheck['profile_complete'] ?? 1;
+            $_SESSION['pending_2fa_is_onboarded'] = $userCheck['is_onboarded'] ?? 0;
             
             // Log 2FA required
             self::logSystemAction($userId, 'login_2fa_required', 'user', $userId, 'Microsoft login successful, 2FA verification required');
@@ -887,6 +889,7 @@ class AuthHandler {
         } else {
             $_SESSION['profile_incomplete'] = false;
         }
+        $_SESSION['is_onboarded'] = (bool)($userCheck['is_onboarded'] ?? false);
         
         // Regenerate session ID to prevent session fixation attacks (mirrors Auth::createSession())
         session_regenerate_id(true);

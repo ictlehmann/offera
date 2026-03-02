@@ -18,6 +18,16 @@ if (Auth::check() && isset($_SESSION['profile_incomplete']) && $_SESSION['profil
     }
 }
 
+// Enforce onboarding: redirect non-onboarded users to the onboarding page
+if (isset($_SESSION['is_onboarded']) && $_SESSION['is_onboarded'] === false) {
+    $currentPage = basename($_SERVER['PHP_SELF']);
+    if ($currentPage !== 'onboarding.php' && $currentPage !== 'logout.php') {
+        $baseUrl = defined('BASE_URL') ? BASE_URL : '';
+        header('Location: ' . $baseUrl . '/pages/auth/onboarding.php');
+        exit;
+    }
+}
+
 $_themeCssVersion = filemtime(__DIR__ . '/../../assets/css/theme.css');
 $_tailwindCssVersion = filemtime(__DIR__ . '/../../assets/css/tailwind.css');
 ?>

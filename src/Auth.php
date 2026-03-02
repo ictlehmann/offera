@@ -255,6 +255,7 @@ class Auth {
         $_SESSION['user_role'] = $user['role'];
         $_SESSION['authenticated'] = true;
         $_SESSION['last_activity'] = time();
+        $_SESSION['is_onboarded'] = (bool)($user['is_onboarded'] ?? false);
         
         // Set 2FA nudge if 2FA is not enabled
         if (!$user['tfa_enabled']) {
