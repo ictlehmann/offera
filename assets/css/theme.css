@@ -1663,6 +1663,18 @@ body.dark-mode .hover\:bg-gray-100:hover {
     background-color: #4b5563 !important;
 }
 
+body.dark-mode .hover\:bg-yellow-50:hover {
+    background-color: rgba(202, 138, 4, 0.15) !important;
+}
+
+body.dark-mode .hover\:bg-orange-50:hover {
+    background-color: rgba(194, 65, 12, 0.15) !important;
+}
+
+body.dark-mode .hover\:bg-amber-50:hover {
+    background-color: rgba(180, 83, 9, 0.15) !important;
+}
+
 /* Dark Mode: Focus and Ring Colors */
 body.dark-mode .focus\:ring-purple-500:focus {
     --tw-ring-color: rgba(168, 85, 247, 0.5) !important;

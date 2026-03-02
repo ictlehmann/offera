@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../../src/Auth.php';
+require_once __DIR__ . '/../../src/Database.php';
 require_once __DIR__ . '/../../includes/handlers/CSRFHandler.php';
 require_once __DIR__ . '/../../includes/models/Inventory.php';
 
@@ -48,6 +49,25 @@ $items = Inventory::getAll($filters);
 $categories = Inventory::getCategories();
 $locations = Inventory::getLocations();
 
+// Stats: pending requests count
+$pendingRequestsCount = 0;
+$activeLoansCount = 0;
+try {
+    $db = Database::getContentDB();
+    $pendingRequestsCount = (int)$db->query("SELECT COUNT(*) FROM inventory_requests WHERE status = 'pending'")->fetchColumn();
+    // 'approved' = board has approved the request; the item is currently on loan
+    $activeLoansCount = (int)$db->query("SELECT COUNT(*) FROM inventory_requests WHERE status = 'approved'")->fetchColumn();
+} catch (Exception $e) {
+    // Silently ignore when the inventory_requests table does not yet exist
+    // (early deployments before the schema migration has been applied)
+    error_log('manage.php stats: ' . $e->getMessage());
+}
+
+$lowStockCount = count(array_filter($items, function($i) {
+    $threshold = $i['min_stock'] ?? DEFAULT_LOW_STOCK_THRESHOLD;
+    return (int)$i['quantity'] <= $threshold;
+}));
+
 $title = 'Inventar-Verwaltung - IBC Intranet';
 ob_start();
 ?>
@@ -68,6 +88,9 @@ ob_start();
             </a>
             <a href="../admin/rental_returns.php" class="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-5 py-3 rounded-xl flex items-center shadow-lg font-semibold transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
                 <i class="fas fa-clipboard-list mr-2"></i> Anfragen
+                <?php if ($pendingRequestsCount > 0): ?>
+                <span class="ml-1.5 inline-flex items-center justify-center w-5 h-5 text-xs font-bold bg-white text-green-700 rounded-full"><?php echo $pendingRequestsCount; ?></span>
+                <?php endif; ?>
             </a>
             <a href="add.php" class="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-5 py-3 rounded-xl flex items-center shadow-lg font-semibold transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
                 <i class="fas fa-plus mr-2"></i> Neuer Artikel
@@ -90,30 +113,70 @@ ob_start();
 </div>
 <?php endif; ?>
 
+<!-- Stats Section -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-md p-5 border border-gray-100 dark:border-slate-700">
+        <div class="flex items-center gap-3 mb-2">
+            <div class="w-10 h-10 bg-purple-100 dark:bg-purple-900/40 rounded-xl flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-boxes text-purple-600 text-lg"></i>
+            </div>
+            <span class="text-2xl font-extrabold text-slate-900 dark:text-white"><?php echo count($items); ?></span>
+        </div>
+        <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Artikel gesamt</p>
+    </div>
+    <a href="../admin/rental_returns.php" class="manage-stat-card bg-white dark:bg-slate-800 rounded-2xl shadow-md p-5 border border-gray-100 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">
+        <div class="flex items-center gap-3 mb-2">
+            <div class="w-10 h-10 bg-yellow-100 dark:bg-yellow-900/40 rounded-xl flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-clock text-yellow-600 text-lg"></i>
+            </div>
+            <span class="text-2xl font-extrabold text-slate-900 dark:text-white"><?php echo $pendingRequestsCount; ?></span>
+        </div>
+        <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Ausstehende Anfragen</p>
+    </a>
+    <a href="../admin/rental_returns.php#active" class="manage-stat-card bg-white dark:bg-slate-800 rounded-2xl shadow-md p-5 border border-gray-100 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">
+        <div class="flex items-center gap-3 mb-2">
+            <div class="w-10 h-10 bg-green-100 dark:bg-green-900/40 rounded-xl flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-sign-out-alt text-green-600 text-lg"></i>
+            </div>
+            <span class="text-2xl font-extrabold text-slate-900 dark:text-white"><?php echo $activeLoansCount; ?></span>
+        </div>
+        <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Aktive Ausleihen</p>
+    </a>
+    <a href="manage.php?filter=low_stock" class="manage-stat-card bg-white dark:bg-slate-800 rounded-2xl shadow-md p-5 border border-gray-100 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">
+        <div class="flex items-center gap-3 mb-2">
+            <div class="w-10 h-10 bg-red-100 dark:bg-red-900/40 rounded-xl flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-exclamation-triangle text-red-600 text-lg"></i>
+            </div>
+            <span class="text-2xl font-extrabold text-slate-900 dark:text-white"><?php echo $lowStockCount; ?></span>
+        </div>
+        <p class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wide">Niedriger Bestand</p>
+    </a>
+</div>
+
 <!-- Quick Links Section -->
 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-    <a href="add.php" class="group inventory-item-card bg-white dark:bg-slate-800 rounded-2xl shadow-md p-5 border border-gray-100 dark:border-slate-700 text-center">
+    <a href="add.php" class="group manage-quick-link bg-white dark:bg-slate-800 rounded-2xl shadow-md p-5 border border-gray-100 dark:border-slate-700 text-center hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">
         <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900/40 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-purple-200 dark:group-hover:bg-purple-900/60 transition-colors">
             <i class="fas fa-plus-circle text-purple-600 text-xl"></i>
         </div>
         <h3 class="font-bold text-slate-800 dark:text-slate-100 text-sm">Artikel hinzufügen</h3>
         <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Neuen Artikel erstellen</p>
     </a>
-    <a href="../admin/categories.php" class="group inventory-item-card bg-white dark:bg-slate-800 rounded-2xl shadow-md p-5 border border-gray-100 dark:border-slate-700 text-center">
+    <a href="../admin/categories.php" class="group manage-quick-link bg-white dark:bg-slate-800 rounded-2xl shadow-md p-5 border border-gray-100 dark:border-slate-700 text-center hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">
         <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/40 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-blue-200 dark:group-hover:bg-blue-900/60 transition-colors">
             <i class="fas fa-tags text-blue-600 text-xl"></i>
         </div>
         <h3 class="font-bold text-slate-800 dark:text-slate-100 text-sm">Kategorien</h3>
         <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Kategorien verwalten</p>
     </a>
-    <a href="../admin/locations.php" class="group inventory-item-card bg-white dark:bg-slate-800 rounded-2xl shadow-md p-5 border border-gray-100 dark:border-slate-700 text-center">
+    <a href="../admin/locations.php" class="group manage-quick-link bg-white dark:bg-slate-800 rounded-2xl shadow-md p-5 border border-gray-100 dark:border-slate-700 text-center hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">
         <div class="w-12 h-12 bg-green-100 dark:bg-green-900/40 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-green-200 dark:group-hover:bg-green-900/60 transition-colors">
             <i class="fas fa-map-marker-alt text-green-600 text-xl"></i>
         </div>
         <h3 class="font-bold text-slate-800 dark:text-slate-100 text-sm">Standorte</h3>
         <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Standorte verwalten</p>
     </a>
-    <a href="index.php" class="group inventory-item-card bg-white dark:bg-slate-800 rounded-2xl shadow-md p-5 border border-gray-100 dark:border-slate-700 text-center">
+    <a href="index.php" class="group manage-quick-link bg-white dark:bg-slate-800 rounded-2xl shadow-md p-5 border border-gray-100 dark:border-slate-700 text-center hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">
         <div class="w-12 h-12 bg-orange-100 dark:bg-orange-900/40 rounded-xl flex items-center justify-center mx-auto mb-3 group-hover:bg-orange-200 dark:group-hover:bg-orange-900/60 transition-colors">
             <i class="fas fa-boxes text-orange-600 text-xl"></i>
         </div>
@@ -330,6 +393,29 @@ ob_start();
 .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
     .animate-modal-in { animation: none; }
+}
+
+/* Quick-link and stat card tiles: keep heading & description text readable on hover in every mode.
+   The tile is an <a> anchor; theme.css forces "color: white !important" on dark-mode links, which
+   would make the h3/p labels invisible on the light hover background. We fix this by:
+   1. Pinning a readable color on the tile container itself in each mode
+   2. Using "color: inherit" (without !important) on child headings/paragraphs so they always follow
+      the container, regardless of any global link-color override.
+*/
+body:not(.dark-mode) .manage-quick-link,
+body:not(.dark-mode) .manage-stat-card {
+    color: #1e293b !important; /* slate-800 – dark text on white/light-gray backgrounds */
+}
+body.dark-mode .manage-quick-link,
+body.dark-mode .manage-stat-card {
+    color: #f1f5f9 !important; /* slate-100 – light text on dark backgrounds */
+}
+.manage-quick-link h3,
+.manage-quick-link p,
+.manage-stat-card h3,
+.manage-stat-card p,
+.manage-stat-card span {
+    color: inherit;
 }
 </style>
 
