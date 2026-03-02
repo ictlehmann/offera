@@ -88,12 +88,12 @@ ob_start();
     <!-- Back Button -->
     <div class="mb-6">
         <?php if ($returnTo === 'members'): ?>
-            <a href="../members/index.php" class="inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors">
+            <a href="../members/index.php" class="inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors font-medium">
                 <i class="fas fa-arrow-left mr-2"></i>
                 Zurück zum Mitgliederverzeichnis
             </a>
         <?php else: ?>
-            <a href="index.php" class="inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors">
+            <a href="index.php" class="inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors font-medium">
                 <i class="fas fa-arrow-left mr-2"></i>
                 Zurück zum Alumni-Verzeichnis
             </a>
@@ -102,9 +102,9 @@ ob_start();
 
     <!-- Profile Header Card -->
     <div class="card p-8 mb-6">
-        <div class="flex flex-col md:flex-row gap-6 mb-6">
+        <div class="flex flex-col md:flex-row gap-6">
             <!-- Profile Image -->
-            <div class="flex justify-center md:justify-start">
+            <div class="flex justify-center md:justify-start flex-shrink-0">
                 <?php 
                 $initials = strtoupper(substr($profile['first_name'], 0, 1) . substr($profile['last_name'], 0, 1));
                 $imagePath = asset(getProfileImageUrl($profile['image_path'] ?? '', $profileUser['entra_photo_path'] ?? null));
@@ -127,7 +127,7 @@ ob_start();
             </div>
 
             <!-- Profile Info -->
-            <div class="flex-1">
+            <div class="flex-1 min-w-0">
                 <h1 class="text-3xl font-bold text-gray-800 mb-2">
                     <?php echo htmlspecialchars($profile['first_name'] . ' ' . $profile['last_name']); ?>
                 </h1>
@@ -149,36 +149,29 @@ ob_start();
                 $displayRole = getFormattedRoleName($profileUserRole);
                 $badgeClass = $roleBadgeColors[$profileUserRole] ?? 'bg-gray-100 text-gray-800 border-gray-300';
                 ?>
-                <div class="mb-4">
-                    <span class="inline-block px-4 py-2 text-sm font-semibold rounded-full border <?php echo $badgeClass; ?>">
+                <div class="mb-3">
+                    <span class="inline-block px-4 py-1.5 text-sm font-semibold rounded-full border <?php echo $badgeClass; ?>">
                         <?php echo htmlspecialchars($displayRole); ?>
                     </span>
                 </div>
 
                 <!-- Position / Company snippet -->
                 <?php if (!empty($profile['position'])): ?>
-                <p class="text-lg text-gray-700 mb-1">
-                    <i class="fas fa-briefcase mr-2 text-gray-500"></i>
-                    <?php echo htmlspecialchars($profile['position']); ?>
+                <p class="text-base text-gray-700 mb-1 flex items-center gap-2">
+                    <i class="fas fa-briefcase text-gray-400 w-4"></i>
+                    <span><?php echo htmlspecialchars($profile['position']); ?></span>
                 </p>
                 <?php endif; ?>
                 <?php if (!empty($profile['company'])): ?>
-                <p class="text-md text-gray-600 mb-2">
-                    <i class="fas fa-building mr-2 text-gray-500"></i>
-                    <?php echo htmlspecialchars($profile['company']); ?>
+                <p class="text-sm text-gray-500 mb-1 flex items-center gap-2">
+                    <i class="fas fa-building text-gray-400 w-4"></i>
+                    <span><?php echo htmlspecialchars($profile['company']); ?></span>
                 </p>
                 <?php endif; ?>
                 <?php if (!empty($profile['industry'])): ?>
-                <p class="text-sm text-gray-600 mb-2">
-                    <i class="fas fa-industry mr-2 text-gray-500"></i>
-                    <?php echo htmlspecialchars($profile['industry']); ?>
-                </p>
-                <?php endif; ?>
-
-                <!-- About Me -->
-                <?php if (!empty($profileUser['about_me'])): ?>
-                <p class="text-sm text-gray-600 mt-2">
-                    <?php echo nl2br(htmlspecialchars($profileUser['about_me'])); ?>
+                <p class="text-sm text-gray-500 flex items-center gap-2">
+                    <i class="fas fa-industry text-gray-400 w-4"></i>
+                    <span><?php echo htmlspecialchars($profile['industry']); ?></span>
                 </p>
                 <?php endif; ?>
             </div>
@@ -186,204 +179,223 @@ ob_start();
 
         <!-- Profile Completeness (only for alumni roles) -->
         <?php if ($isAlumniProfile && $profileCompletenessPercent < 100): ?>
-        <div class="mb-4 p-4 rounded-xl" style="background-color: var(--bg-card); border-left: 4px solid #a855f7">
+        <div class="mt-6 p-4 rounded-xl" style="background-color: var(--bg-card); border-left: 4px solid #a855f7">
             <div class="flex items-center justify-between mb-1.5">
                 <span class="text-xs font-semibold text-gray-500">Profil-Fortschritt</span>
                 <span class="text-xs font-bold" style="color: #a855f7"><?php echo $profileCompletenessPercent; ?>%</span>
             </div>
-            <div class="w-full rounded-full h-3 overflow-hidden bg-gray-200">
-                <div class="h-3 rounded-full transition-all duration-500" style="width: <?php echo $profileCompletenessPercent; ?>%; background: linear-gradient(90deg, #a855f7, #ec4899)"></div>
+            <div class="w-full rounded-full h-2.5 overflow-hidden bg-gray-200">
+                <div class="h-2.5 rounded-full transition-all duration-500" style="width: <?php echo $profileCompletenessPercent; ?>%; background: linear-gradient(90deg, #a855f7, #ec4899)"></div>
             </div>
         </div>
         <?php endif; ?>
     </div>
 
-    <!-- Kontaktinformationen -->
+    <!-- Über mich -->
+    <?php if (!empty($profileUser['about_me'])): ?>
     <div class="card p-6 mb-6">
-        <h2 class="text-xl font-bold text-gray-800 mb-4">
-            <i class="fas fa-address-card mr-2 text-blue-600"></i>
-            Kontaktinformationen
+        <h2 class="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+            <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600">
+                <i class="fas fa-quote-left text-sm"></i>
+            </span>
+            Über mich
         </h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- E-Mail -->
-            <?php if (!empty($profile['email'])): ?>
-            <div class="flex items-center">
-                <div class="w-10 h-10 bg-gray-600 rounded-full flex items-center justify-center text-white mr-3">
-                    <i class="fas fa-envelope"></i>
-                </div>
-                <div>
-                    <p class="text-xs text-gray-500">E-Mail</p>
-                    <a href="mailto:<?php echo htmlspecialchars($profile['email']); ?>" class="text-blue-600 hover:text-blue-800 font-medium">
-                        <?php echo htmlspecialchars($profile['email']); ?>
-                    </a>
-                </div>
-            </div>
-            <?php endif; ?>
+        <p class="text-gray-700 leading-relaxed whitespace-pre-line"><?php echo htmlspecialchars($profileUser['about_me']); ?></p>
+    </div>
+    <?php endif; ?>
 
-            <!-- Zweite E-Mail -->
-            <?php if (!empty($profile['secondary_email'])): ?>
-            <div class="flex items-center">
-                <div class="w-10 h-10 bg-gray-400 rounded-full flex items-center justify-center text-white mr-3">
-                    <i class="fas fa-envelope"></i>
-                </div>
-                <div>
-                    <p class="text-xs text-gray-500">Zweite E-Mail</p>
-                    <a href="mailto:<?php echo htmlspecialchars($profile['secondary_email']); ?>" class="text-blue-600 hover:text-blue-800 font-medium">
-                        <?php echo htmlspecialchars($profile['secondary_email']); ?>
-                    </a>
-                </div>
-            </div>
-            <?php endif; ?>
-
-            <!-- Telefon -->
-            <?php if (!empty($profile['mobile_phone'])): ?>
-            <div class="flex items-center">
-                <div class="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center text-white mr-3">
-                    <i class="fas fa-phone"></i>
-                </div>
-                <div>
-                    <p class="text-xs text-gray-500">Telefon</p>
-                    <a href="tel:<?php echo htmlspecialchars($profile['mobile_phone']); ?>" class="text-blue-600 hover:text-blue-800 font-medium">
-                        <?php echo htmlspecialchars($profile['mobile_phone']); ?>
-                    </a>
-                </div>
-            </div>
-            <?php endif; ?>
-
-            <!-- LinkedIn -->
-            <?php if (!empty($profile['linkedin_url'])): ?>
-                <?php
-                $linkedinUrl = $profile['linkedin_url'];
-                $isValidLinkedIn = (
-                    strpos($linkedinUrl, 'https://linkedin.com') === 0 ||
-                    strpos($linkedinUrl, 'https://www.linkedin.com') === 0 ||
-                    strpos($linkedinUrl, 'http://linkedin.com') === 0 ||
-                    strpos($linkedinUrl, 'http://www.linkedin.com') === 0
-                );
-                ?>
-                <?php if ($isValidLinkedIn): ?>
-                <div class="flex items-center">
-                    <div class="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white mr-3">
-                        <i class="fab fa-linkedin-in"></i>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <!-- Kontaktinformationen -->
+        <div class="card p-6">
+            <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600">
+                    <i class="fas fa-address-card text-sm"></i>
+                </span>
+                Kontakt
+            </h2>
+            <div class="space-y-3">
+                <!-- E-Mail -->
+                <?php if (!empty($profile['email'])): ?>
+                <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50">
+                    <div class="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 flex-shrink-0">
+                        <i class="fas fa-envelope text-sm"></i>
                     </div>
-                    <div>
-                        <p class="text-xs text-gray-500">LinkedIn</p>
-                        <a href="<?php echo htmlspecialchars($linkedinUrl); ?>" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 font-medium">
-                            Profil ansehen
+                    <div class="min-w-0">
+                        <p class="text-xs text-gray-400 font-medium">E-Mail</p>
+                        <a href="mailto:<?php echo htmlspecialchars($profile['email']); ?>" class="text-blue-600 hover:text-blue-800 font-medium text-sm truncate block">
+                            <?php echo htmlspecialchars($profile['email']); ?>
                         </a>
                     </div>
                 </div>
                 <?php endif; ?>
-            <?php endif; ?>
 
-            <!-- Xing -->
-            <?php if (!empty($profile['xing_url'])): ?>
-                <?php
-                $xingUrl = $profile['xing_url'];
-                $isValidXing = (
-                    strpos($xingUrl, 'https://xing.com') === 0 ||
-                    strpos($xingUrl, 'https://www.xing.com') === 0 ||
-                    strpos($xingUrl, 'http://xing.com') === 0 ||
-                    strpos($xingUrl, 'http://www.xing.com') === 0
-                );
-                ?>
-                <?php if ($isValidXing): ?>
-                <div class="flex items-center">
-                    <div class="w-10 h-10 bg-teal-600 rounded-full flex items-center justify-center text-white mr-3">
-                        <i class="fab fa-xing"></i>
+                <!-- Zweite E-Mail -->
+                <?php if (!empty($profile['secondary_email'])): ?>
+                <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50">
+                    <div class="w-9 h-9 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 flex-shrink-0">
+                        <i class="fas fa-envelope text-sm"></i>
                     </div>
-                    <div>
-                        <p class="text-xs text-gray-500">Xing</p>
-                        <a href="<?php echo htmlspecialchars($xingUrl); ?>" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 font-medium">
-                            Profil ansehen
+                    <div class="min-w-0">
+                        <p class="text-xs text-gray-400 font-medium">Zweite E-Mail</p>
+                        <a href="mailto:<?php echo htmlspecialchars($profile['secondary_email']); ?>" class="text-blue-600 hover:text-blue-800 font-medium text-sm truncate block">
+                            <?php echo htmlspecialchars($profile['secondary_email']); ?>
                         </a>
                     </div>
                 </div>
                 <?php endif; ?>
-            <?php endif; ?>
 
-            <!-- Geburtstag (only if show_birthday) -->
-            <?php if (!empty($profileUser['birthday']) && !empty($profileUser['show_birthday'])): ?>
-            <div class="flex items-center">
-                <div class="w-10 h-10 bg-pink-500 rounded-full flex items-center justify-center text-white mr-3">
-                    <i class="fas fa-birthday-cake"></i>
+                <!-- Telefon -->
+                <?php if (!empty($profile['mobile_phone'])): ?>
+                <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50">
+                    <div class="w-9 h-9 rounded-full bg-green-100 flex items-center justify-center text-green-600 flex-shrink-0">
+                        <i class="fas fa-phone text-sm"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <p class="text-xs text-gray-400 font-medium">Telefon</p>
+                        <a href="tel:<?php echo htmlspecialchars($profile['mobile_phone']); ?>" class="text-blue-600 hover:text-blue-800 font-medium text-sm">
+                            <?php echo htmlspecialchars($profile['mobile_phone']); ?>
+                        </a>
+                    </div>
                 </div>
-                <div>
-                    <p class="text-xs text-gray-500">Geburtstag</p>
-                    <p class="font-medium text-gray-800">
-                        <?php echo date('d.m.Y', strtotime($profileUser['birthday'])); ?>
-                    </p>
+                <?php endif; ?>
+
+                <!-- Geburtstag (only if show_birthday) -->
+                <?php if (!empty($profileUser['birthday']) && !empty($profileUser['show_birthday'])): ?>
+                <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50">
+                    <div class="w-9 h-9 rounded-full bg-pink-100 flex items-center justify-center text-pink-600 flex-shrink-0">
+                        <i class="fas fa-birthday-cake text-sm"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-400 font-medium">Geburtstag</p>
+                        <p class="font-medium text-gray-800 text-sm"><?php echo date('d.m.Y', strtotime($profileUser['birthday'])); ?></p>
+                    </div>
                 </div>
+                <?php endif; ?>
+
+                <!-- LinkedIn -->
+                <?php if (!empty($profile['linkedin_url'])):
+                    $linkedinUrl = $profile['linkedin_url'];
+                    $isValidLinkedIn = (
+                        strpos($linkedinUrl, 'https://linkedin.com') === 0 ||
+                        strpos($linkedinUrl, 'https://www.linkedin.com') === 0 ||
+                        strpos($linkedinUrl, 'http://linkedin.com') === 0 ||
+                        strpos($linkedinUrl, 'http://www.linkedin.com') === 0
+                    );
+                    if ($isValidLinkedIn): ?>
+                <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50">
+                    <div class="w-9 h-9 rounded-full bg-blue-700 flex items-center justify-center text-white flex-shrink-0">
+                        <i class="fab fa-linkedin-in text-sm"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-400 font-medium">LinkedIn</p>
+                        <a href="<?php echo htmlspecialchars($linkedinUrl); ?>" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 font-medium text-sm">
+                            Profil ansehen <i class="fas fa-external-link-alt text-xs ml-1"></i>
+                        </a>
+                    </div>
+                </div>
+                    <?php endif; ?>
+                <?php endif; ?>
+
+                <!-- Xing -->
+                <?php if (!empty($profile['xing_url'])):
+                    $xingUrl = $profile['xing_url'];
+                    $isValidXing = (
+                        strpos($xingUrl, 'https://xing.com') === 0 ||
+                        strpos($xingUrl, 'https://www.xing.com') === 0 ||
+                        strpos($xingUrl, 'http://xing.com') === 0 ||
+                        strpos($xingUrl, 'http://www.xing.com') === 0
+                    );
+                    if ($isValidXing): ?>
+                <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50">
+                    <div class="w-9 h-9 rounded-full bg-teal-600 flex items-center justify-center text-white flex-shrink-0">
+                        <i class="fab fa-xing text-sm"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-400 font-medium">Xing</p>
+                        <a href="<?php echo htmlspecialchars($xingUrl); ?>" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 font-medium text-sm">
+                            Profil ansehen <i class="fas fa-external-link-alt text-xs ml-1"></i>
+                        </a>
+                    </div>
+                </div>
+                    <?php endif; ?>
+                <?php endif; ?>
+
+                <?php if (empty($profile['email']) && empty($profile['mobile_phone']) && empty($profile['linkedin_url']) && empty($profile['secondary_email']) && empty($profile['xing_url']) && (empty($profileUser['birthday']) || empty($profileUser['show_birthday']))): ?>
+                <p class="text-sm text-gray-400 italic">Keine Kontaktinformationen hinterlegt</p>
+                <?php endif; ?>
             </div>
-            <?php endif; ?>
         </div>
+
+        <!-- Berufliche Informationen -->
+        <?php if (!empty($profile['company']) || !empty($profile['position']) || !empty($profile['industry'])): ?>
+        <div class="card p-6">
+            <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+                <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-orange-100 text-orange-600">
+                    <i class="fas fa-briefcase text-sm"></i>
+                </span>
+                Berufliches
+            </h2>
+            <div class="space-y-3">
+                <?php if (!empty($profile['company'])): ?>
+                <div class="p-3 rounded-xl bg-gray-50">
+                    <p class="text-xs text-gray-400 font-medium mb-0.5">Arbeitgeber</p>
+                    <p class="font-semibold text-gray-800 text-sm"><?php echo htmlspecialchars($profile['company']); ?></p>
+                </div>
+                <?php endif; ?>
+
+                <?php if (!empty($profile['position'])): ?>
+                <div class="p-3 rounded-xl bg-gray-50">
+                    <p class="text-xs text-gray-400 font-medium mb-0.5">Position</p>
+                    <p class="font-semibold text-gray-800 text-sm"><?php echo htmlspecialchars($profile['position']); ?></p>
+                </div>
+                <?php endif; ?>
+
+                <?php if (!empty($profile['industry'])): ?>
+                <div class="p-3 rounded-xl bg-gray-50">
+                    <p class="text-xs text-gray-400 font-medium mb-0.5">Branche</p>
+                    <p class="font-semibold text-gray-800 text-sm"><?php echo htmlspecialchars($profile['industry']); ?></p>
+                </div>
+                <?php endif; ?>
+            </div>
+        </div>
+        <?php endif; ?>
     </div>
 
     <!-- Absolviertes Studium -->
     <?php if (!empty($profile['study_program']) || !empty($profile['semester']) || !empty($profile['angestrebter_abschluss']) || !empty($profile['graduation_year'])): ?>
     <div class="card p-6 mb-6">
-        <h2 class="text-xl font-bold text-gray-800 mb-4">
-            <i class="fas fa-graduation-cap mr-2 text-blue-600"></i>
+        <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+            <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-indigo-100 text-indigo-600">
+                <i class="fas fa-graduation-cap text-sm"></i>
+            </span>
             Absolviertes Studium
         </h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <?php if (!empty($profile['study_program'])): ?>
-            <div>
-                <p class="text-xs text-gray-500 mb-1">Bachelor-Studiengang</p>
-                <p class="font-medium text-gray-800"><?php echo htmlspecialchars($profile['study_program']); ?></p>
+            <div class="p-3 rounded-xl bg-gray-50">
+                <p class="text-xs text-gray-400 font-medium mb-0.5">Bachelor-Studiengang</p>
+                <p class="font-semibold text-gray-800 text-sm"><?php echo htmlspecialchars($profile['study_program']); ?></p>
             </div>
             <?php endif; ?>
 
             <?php if (!empty($profile['semester'])): ?>
-            <div>
-                <p class="text-xs text-gray-500 mb-1">Bachelor-Abschlussjahr</p>
-                <p class="font-medium text-gray-800"><?php echo htmlspecialchars($profile['semester']); ?></p>
+            <div class="p-3 rounded-xl bg-gray-50">
+                <p class="text-xs text-gray-400 font-medium mb-0.5">Bachelor-Abschlussjahr</p>
+                <p class="font-semibold text-gray-800 text-sm"><?php echo htmlspecialchars($profile['semester']); ?></p>
             </div>
             <?php endif; ?>
 
             <?php if (!empty($profile['angestrebter_abschluss'])): ?>
-            <div>
-                <p class="text-xs text-gray-500 mb-1">Master-Studiengang</p>
-                <p class="font-medium text-gray-800"><?php echo htmlspecialchars($profile['angestrebter_abschluss']); ?></p>
+            <div class="p-3 rounded-xl bg-gray-50">
+                <p class="text-xs text-gray-400 font-medium mb-0.5">Master-Studiengang</p>
+                <p class="font-semibold text-gray-800 text-sm"><?php echo htmlspecialchars($profile['angestrebter_abschluss']); ?></p>
             </div>
             <?php endif; ?>
 
             <?php if (!empty($profile['graduation_year'])): ?>
-            <div>
-                <p class="text-xs text-gray-500 mb-1">Master-Abschlussjahr</p>
-                <p class="font-medium text-gray-800"><?php echo htmlspecialchars($profile['graduation_year']); ?></p>
-            </div>
-            <?php endif; ?>
-        </div>
-    </div>
-    <?php endif; ?>
-
-    <!-- Berufliche Informationen (optional, shown when any field is set) -->
-    <?php if (!empty($profile['company']) || !empty($profile['position']) || !empty($profile['industry'])): ?>
-    <div class="card p-6 mb-6">
-        <h2 class="text-xl font-bold text-gray-800 mb-4">
-            <i class="fas fa-briefcase mr-2 text-blue-600"></i>
-            Berufliche Informationen
-        </h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <?php if (!empty($profile['company'])): ?>
-            <div>
-                <p class="text-xs text-gray-500 mb-1">Aktueller Arbeitgeber</p>
-                <p class="font-medium text-gray-800"><?php echo htmlspecialchars($profile['company']); ?></p>
-            </div>
-            <?php endif; ?>
-
-            <?php if (!empty($profile['position'])): ?>
-            <div>
-                <p class="text-xs text-gray-500 mb-1">Position</p>
-                <p class="font-medium text-gray-800"><?php echo htmlspecialchars($profile['position']); ?></p>
-            </div>
-            <?php endif; ?>
-
-            <?php if (!empty($profile['industry'])): ?>
-            <div class="md:col-span-2">
-                <p class="text-xs text-gray-500 mb-1">Branche</p>
-                <p class="font-medium text-gray-800"><?php echo htmlspecialchars($profile['industry']); ?></p>
+            <div class="p-3 rounded-xl bg-gray-50">
+                <p class="text-xs text-gray-400 font-medium mb-0.5">Master-Abschlussjahr</p>
+                <p class="font-semibold text-gray-800 text-sm"><?php echo htmlspecialchars($profile['graduation_year']); ?></p>
             </div>
             <?php endif; ?>
         </div>

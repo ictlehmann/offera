@@ -77,7 +77,15 @@ try {
         echo json_encode(['success' => false, 'message' => 'Nachname ist erforderlich']);
         exit;
     }
-    if (!empty($birthday) && strtotime($birthday) > strtotime('-16 years', strtotime('today'))) {
+    if (empty($mobilePhone)) {
+        echo json_encode(['success' => false, 'message' => 'Mobiltelefon ist ein Pflichtfeld.']);
+        exit;
+    }
+    if (empty($birthday)) {
+        echo json_encode(['success' => false, 'message' => 'Geburtsdatum ist ein Pflichtfeld.']);
+        exit;
+    }
+    if (strtotime($birthday) > strtotime('-16 years', strtotime('today'))) {
         echo json_encode(['success' => false, 'message' => 'Du musst mindestens 16 Jahre alt sein']);
         exit;
     }
@@ -86,7 +94,7 @@ try {
         'first_name'   => $firstName,
         'last_name'    => $lastName,
         'email'        => $email,
-        'mobile_phone' => !empty($mobilePhone) ? $mobilePhone : null,
+        'mobile_phone' => $mobilePhone,
     ];
 
     // Save profile via the appropriate model

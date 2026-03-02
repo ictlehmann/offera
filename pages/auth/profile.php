@@ -82,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'last_name' => trim($_POST['last_name'] ?? ''),
                 'email' => trim($_POST['profile_email'] ?? ''),
                 'secondary_email' => trim($_POST['secondary_email'] ?? ''),
-                'mobile_phone' => trim($_POST['mobile_phone'] ?? '') ?: null,
+                'mobile_phone' => trim($_POST['mobile_phone'] ?? ''),
                 'linkedin_url' => trim($_POST['linkedin_url'] ?? ''),
                 'xing_url' => trim($_POST['xing_url'] ?? ''),
                 'about_me' => mb_substr(trim($_POST['about_me'] ?? ''), 0, 400), // Limit to 400 chars
@@ -104,6 +104,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             if (!filter_var($profileData['email'], FILTER_VALIDATE_EMAIL)) {
                 throw new Exception('E-Mail-Adresse ist ungültig');
+            }
+            if (empty($profileData['mobile_phone'])) {
+                throw new Exception('Telefonnummer ist ein Pflichtfeld.');
             }
             if (empty($profileData['birthday'])) {
                 throw new Exception('Das Geburtsdatum ist ein Pflichtfeld.');
@@ -597,10 +600,11 @@ ob_start();
                     </div>
                     
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Telefon</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Telefon <span class="text-red-500">*</span></label>
                         <input 
                             type="tel" 
                             name="mobile_phone" 
+                            required
                             value="<?php echo htmlspecialchars($profile['mobile_phone'] ?? ''); ?>"
                             class="w-full px-4 py-2 bg-white border border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 rounded-lg"
                             placeholder="+49 123 456789"
