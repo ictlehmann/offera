@@ -1,10 +1,9 @@
 // IBC Intranet – Service Worker
 // Caches static assets (CSS, JS, images) for offline availability.
 
-const CACHE_NAME = 'ibc-intranet-v1';
+const CACHE_NAME = 'ibc-intranet-v2';
 
 const STATIC_ASSETS = [
-    '/assets/css/theme.css',
     '/assets/img/cropped_maskottchen_32x32.webp',
     '/assets/img/cropped_maskottchen_180x180.webp',
     '/assets/img/cropped_maskottchen_192x192.webp',
