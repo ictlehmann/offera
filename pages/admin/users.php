@@ -275,7 +275,7 @@ ob_start();
                         <h1 class="text-3xl md:text-4xl font-bold text-white mb-1">
                             Benutzerverwaltung
                         </h1>
-                        <p class="text-purple-100"><?php echo count($users); ?> Benutzer im System</p>
+                        <p class="text-white opacity-90"><?php echo count($users); ?> Benutzer im System</p>
                     </div>
                 </div>
             </div>

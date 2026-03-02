@@ -23,8 +23,8 @@ ErrorDocument 404 /pages/errors/404.php
     </IfModule>
 </FilesMatch>
 
-# Kritische Dateien blockieren
-<FilesMatch "(^#.*#|\.(sql|md|log|json|lock|git|yml|yaml|twig)$|composer\.(json|lock))">
+# Kritische Dateien blockieren (außer manifest.json, das für PWA zugänglich sein muss)
+<FilesMatch "(^#.*#|\.(sql|md|log|lock|git|yml|yaml|twig)$|composer\.(json|lock))">
     <IfModule mod_authz_core.c>
         Require all denied
     </IfModule>
@@ -34,16 +34,17 @@ ErrorDocument 404 /pages/errors/404.php
     </IfModule>
 </FilesMatch>
 
-# Ausnahme: manifest.json muss für den Browser zugänglich sein (Web App Manifest)
-<Files "manifest.json">
+# Alle .json-Dateien blockieren, außer manifest.json (Web App Manifest für PWA)
+# Hinweis: Negativer Lookahead (?!...) wird von Apache 2.4 (PCRE) unterstützt
+<FilesMatch "^(?!manifest\.json$).*\.json$">
     <IfModule mod_authz_core.c>
-        Require all granted
+        Require all denied
     </IfModule>
     <IfModule !mod_authz_core.c>
-        Order allow,deny
-        Allow from all
+        Order deny,allow
+        Deny from all
     </IfModule>
-</Files>
+</FilesMatch>
 
 # ----------------------------------------------------------------------
 # 3. Ordner-Schutz

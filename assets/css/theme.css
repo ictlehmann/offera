@@ -829,6 +829,11 @@ body:not(.dark-mode) h6 {
     color: #1f2937 !important;
 }
 
+/* Explizite weiße Textfarbe (z.B. auf dunklen Gradienten) soll auch im Lightmode weiß bleiben */
+body:not(.dark-mode) .text-white {
+    color: #ffffff !important;
+}
+
 body:not(.dark-mode) p {
     color: #374151;
 }
