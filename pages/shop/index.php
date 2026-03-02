@@ -954,6 +954,36 @@ ob_start();
 
                     <!-- Shipping address (shown when mail is selected) -->
                     <div id="shipping-address-field" class="hidden mb-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                            Lieferadresse <span class="text-red-500">*</span>
+                        </label>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                            <i class="fas fa-info-circle mr-1"></i>Tippe deine Adresse ein – wir machen dir passende Vorschläge und berechnen die Versandkosten automatisch.
+                        </p>
+                        <div class="relative mb-4">
+                            <input type="text" id="shipping-address-search"
+                                   autocomplete="off"
+                                   aria-label="Lieferadresse suchen"
+                                   aria-expanded="false"
+                                   aria-controls="shipping-address-suggestions"
+                                   aria-autocomplete="list"
+                                   placeholder="Straße, Hausnummer, PLZ, Ort …"
+                                   class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-shadow pr-10">
+                            <span id="shipping-address-spinner" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-gray-400">
+                                <i class="fas fa-spinner fa-spin"></i>
+                            </span>
+                            <ul id="shipping-address-suggestions"
+                                role="listbox"
+                                class="hidden absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg max-h-60 overflow-y-auto text-sm">
+                            </ul>
+                        </div>
+                        <!-- Hidden field submitted with the form -->
+                        <input type="hidden" name="shipping_address" id="shipping-address-input">
+                        <div id="shipping-address-preview" class="hidden mb-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded-lg text-sm text-green-800 dark:text-green-300">
+                            <i class="fas fa-check-circle mr-1"></i>
+                            <span id="shipping-address-preview-text"></span>
+                            <button type="button" id="shipping-address-clear" class="ml-2 text-gray-500 hover:text-red-500 text-xs underline">Ändern</button>
+                        </div>
                         <div class="mb-4">
                             <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1" for="shipping-country-select">
                                 Versandland <span class="text-red-500">*</span>
@@ -990,12 +1020,6 @@ ob_start();
                                 <option value="SK">Slowakei</option>
                             </select>
                         </div>
-                        <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                            Lieferadresse <span class="text-red-500">*</span>
-                        </label>
-                        <textarea name="shipping_address" id="shipping-address-input" rows="3"
-                                  placeholder="Straße und Hausnummer, PLZ Ort"
-                                  class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-shadow resize-none"></textarea>
                     </div>
 
                     <!-- Payment method selection -->
@@ -1295,7 +1319,23 @@ document.addEventListener('DOMContentLoaded', function () {
     var checkoutForm = document.getElementById('checkout-form');
     var submitBtn    = document.getElementById('checkout-submit-btn');
     if (checkoutForm && submitBtn) {
-        checkoutForm.addEventListener('submit', function () {
+        checkoutForm.addEventListener('submit', function (e) {
+            var methodEl = document.querySelector('input[name="shipping_method"]:checked');
+            if (methodEl && methodEl.value === 'mail') {
+                var addrHidden = document.getElementById('shipping-address-input');
+                if (!addrHidden || addrHidden.value.trim() === '') {
+                    e.preventDefault();
+                    var searchEl = document.getElementById('shipping-address-search');
+                    if (searchEl) {
+                        searchEl.focus();
+                        searchEl.classList.add('ring-2', 'ring-red-500', 'border-red-500');
+                        setTimeout(function() {
+                            searchEl.classList.remove('ring-2', 'ring-red-500', 'border-red-500');
+                        }, 3000);
+                    }
+                    return;
+                }
+            }
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Wird gesendet...';
         });
@@ -1307,14 +1347,181 @@ document.addEventListener('DOMContentLoaded', function() {
     var CART_TOTAL = <?php echo json_encode((float) $cartTotalAmt); ?>;
     var GET_SHIPPING_COST_URL = <?php echo json_encode(asset('api/shop/get_shipping_cost.php')); ?>;
 
-    var shippingRadios  = document.querySelectorAll('input[name="shipping_method"]');
-    var countrySelect   = document.getElementById('shipping-country-select');
-    var addressField    = document.getElementById('shipping-address-field');
-    var addressInput    = document.getElementById('shipping-address-input');
-    var summaryShipping = document.getElementById('summary-shipping-cost');
-    var summaryTotal    = document.getElementById('summary-total');
-    var checkoutDisplay = document.getElementById('checkout-total-display');
+    var shippingRadios      = document.querySelectorAll('input[name="shipping_method"]');
+    var countrySelect       = document.getElementById('shipping-country-select');
+    var addressField        = document.getElementById('shipping-address-field');
+    var addressInput        = document.getElementById('shipping-address-input');   // hidden field
+    var summaryShipping     = document.getElementById('summary-shipping-cost');
+    var summaryTotal        = document.getElementById('summary-total');
+    var checkoutDisplay     = document.getElementById('checkout-total-display');
     var deliveryMethodField = document.getElementById('selected-delivery-method');
+
+    // ── Address autocomplete (Nominatim / OpenStreetMap) ─────────────────────
+    var searchInput    = document.getElementById('shipping-address-search');
+    var spinner        = document.getElementById('shipping-address-spinner');
+    var suggestionList = document.getElementById('shipping-address-suggestions');
+    var previewBox     = document.getElementById('shipping-address-preview');
+    var previewText    = document.getElementById('shipping-address-preview-text');
+    var clearBtn       = document.getElementById('shipping-address-clear');
+
+    // ISO alpha-2 → value mapping for the country <select>
+    var countryMap = {
+        'DE':'DE','AT':'AT','CH':'CH','BE':'BE','BG':'BG','CY':'CY','CZ':'CZ',
+        'DK':'DK','EE':'EE','ES':'ES','FI':'FI','FR':'FR','GR':'GR','HR':'HR',
+        'HU':'HU','IE':'IE','IT':'IT','LT':'LT','LU':'LU','LV':'LV','MT':'MT',
+        'NL':'NL','PL':'PL','PT':'PT','RO':'RO','SE':'SE','SI':'SI','SK':'SK'
+    };
+
+    var nominatimTimer = null;
+    var activeIndex    = -1;
+
+    function closeSuggestions() {
+        if (suggestionList) {
+            suggestionList.innerHTML = '';
+            suggestionList.classList.add('hidden');
+        }
+        if (searchInput) searchInput.setAttribute('aria-expanded', 'false');
+        activeIndex = -1;
+    }
+
+    function selectAddress(displayName, countryCode) {
+        var code = (countryCode || '').toUpperCase();
+        // Fill hidden form field
+        if (addressInput) addressInput.value = displayName;
+        // Show confirmation preview
+        if (previewText) previewText.textContent = displayName;
+        if (previewBox)  previewBox.classList.remove('hidden');
+        if (searchInput) {
+            searchInput.value = '';
+            searchInput.classList.add('hidden');
+        }
+        // Sync country selector and trigger live shipping cost
+        if (countrySelect && countryMap[code]) {
+            countrySelect.value = code;
+            countrySelect.dispatchEvent(new Event('change'));
+        } else if (countrySelect) {
+            countrySelect.dispatchEvent(new Event('change'));
+        }
+        closeSuggestions();
+    }
+
+    function renderSuggestions(results) {
+        if (!suggestionList) return;
+        suggestionList.innerHTML = '';
+        activeIndex = -1;
+        if (!results || results.length === 0) {
+            suggestionList.classList.add('hidden');
+            if (searchInput) searchInput.setAttribute('aria-expanded', 'false');
+            return;
+        }
+        results.forEach(function(item) {
+            var li = document.createElement('li');
+            li.className = 'px-4 py-2 cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/30 text-gray-800 dark:text-gray-100 border-b border-gray-100 dark:border-gray-700 last:border-0';
+            li.setAttribute('role', 'option');
+            var icon = '<i class="fas fa-map-marker-alt text-blue-400 mr-2 flex-shrink-0"></i>';
+            var addr = item.display_name || '';
+            li.innerHTML = '<span class="flex items-start gap-1">' + icon + '<span>' + escapeHtml(addr) + '</span></span>';
+            li.addEventListener('mousedown', function(e) {
+                e.preventDefault(); // keep focus on input during selection
+                var cc = (item.address && item.address.country_code)
+                    ? item.address.country_code.toUpperCase()
+                    : '';
+                selectAddress(addr, cc);
+            });
+            suggestionList.appendChild(li);
+        });
+        suggestionList.classList.remove('hidden');
+        if (searchInput) searchInput.setAttribute('aria-expanded', 'true');
+    }
+
+    function escapeHtml(str) {
+        return str
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
+    function searchNominatim(query) {
+        if (!query || query.trim().length < 3) { closeSuggestions(); return; }
+        if (spinner) spinner.classList.remove('hidden');
+        var url = 'https://nominatim.openstreetmap.org/search'
+            + '?format=json&addressdetails=1&limit=5'
+            + '&q=' + encodeURIComponent(query.trim());
+        fetch(url, {
+            headers: {
+                'Accept-Language': 'de',
+                'User-Agent': 'offera-intranet-shop/1.0'
+            }
+        })
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                renderSuggestions(data);
+            })
+            .catch(function() {
+                closeSuggestions();
+                // Show non-intrusive hint that suggestions are unavailable
+                if (suggestionList) {
+                    suggestionList.innerHTML = '<li class="px-4 py-2 text-gray-500 dark:text-gray-400 text-xs italic">'
+                        + '<i class="fas fa-exclamation-circle mr-1"></i>Adressvorschläge momentan nicht verfügbar.</li>';
+                    suggestionList.classList.remove('hidden');
+                    if (searchInput) searchInput.setAttribute('aria-expanded', 'true');
+                }
+            })
+            .finally(function() {
+                if (spinner) spinner.classList.add('hidden');
+            });
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            clearTimeout(nominatimTimer);
+            var q = searchInput.value;
+            if (q.length < 3) { closeSuggestions(); return; }
+            nominatimTimer = setTimeout(function() { searchNominatim(q); }, 400);
+        });
+
+        // Keyboard navigation
+        searchInput.addEventListener('keydown', function(e) {
+            var items = suggestionList ? suggestionList.querySelectorAll('li[role="option"]') : [];
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                activeIndex = Math.min(activeIndex + 1, items.length - 1);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                activeIndex = Math.max(activeIndex - 1, 0);
+            } else if (e.key === 'Enter' && activeIndex >= 0 && items[activeIndex]) {
+                e.preventDefault();
+                items[activeIndex].dispatchEvent(new MouseEvent('mousedown'));
+                return;
+            } else if (e.key === 'Escape') {
+                closeSuggestions();
+                return;
+            }
+            items.forEach(function(li, i) {
+                li.classList.toggle('bg-blue-50', i === activeIndex);
+                li.classList.toggle('dark:bg-blue-900/30', i === activeIndex);
+            });
+        });
+
+        searchInput.addEventListener('blur', function() {
+            // Delay closing so mousedown on a suggestion fires before blur hides the list
+            setTimeout(closeSuggestions, 200);
+        });
+    }
+
+    if (clearBtn) {
+        clearBtn.addEventListener('click', function() {
+            if (addressInput) addressInput.value = '';
+            if (previewBox)   previewBox.classList.add('hidden');
+            if (searchInput) {
+                searchInput.value = '';
+                searchInput.classList.remove('hidden');
+                searchInput.focus();
+            }
+        });
+    }
+    // ── End address autocomplete ─────────────────────────────────────────────
 
     function formatMoney(val) {
         return val.toFixed(2).replace('.', ',');
@@ -1350,7 +1557,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (addressField) {
             addressField.classList.toggle('hidden', !isMail);
-            if (addressInput) addressInput.required = isMail;
             if (countrySelect) countrySelect.required = isMail;
         }
 
