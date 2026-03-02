@@ -27,8 +27,9 @@ $userRole = $user['role'] ?? '';
 // Group 1 (submit only):  alumni, ehrenmitglied, anwaerter, mitglied, ressortleiter
 // Group 2 (read only):    vorstand_intern, vorstand_extern, alumni_finanz, alumni_vorstand
 // Group 3 (full access):  vorstand_finanzen
-$canViewTable    = in_array($userRole, ['vorstand_intern', 'vorstand_extern', 'alumni_finanz', 'alumni_vorstand', 'vorstand_finanzen']);
-$canEditInvoices = ($userRole === 'vorstand_finanzen');
+$canViewTable      = in_array($userRole, ['vorstand_intern', 'vorstand_extern', 'alumni_finanz', 'alumni_vorstand', 'vorstand_finanzen']);
+$canEditInvoices   = ($userRole === 'vorstand_finanzen');
+$canSubmitInvoice  = in_array($userRole, ['alumni', 'ehrenmitglied', 'anwaerter', 'mitglied', 'ressortleiter', 'vorstand_finanzen']);
 
 // Only vorstand_finanzen can mark invoices as paid
 $canMarkAsPaid = $canEditInvoices;
@@ -131,6 +132,7 @@ ob_start();
             </div>
             <p class="text-gray-500 dark:text-gray-400 text-sm ml-0.5">Belege einreichen und Erstattungen verfolgen</p>
         </div>
+        <?php if ($canSubmitInvoice): ?>
         <button
             id="openSubmissionModal"
             class="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl shadow-sm hover:shadow-md transition-all text-sm flex-shrink-0"
@@ -138,6 +140,7 @@ ob_start();
             <i class="fas fa-plus"></i>
             Beleg einreichen
         </button>
+        <?php endif; ?>
     </div>
 
     <?php if ($canViewTable): ?>
@@ -242,10 +245,12 @@ ob_start();
                 </div>
                 <p class="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">Keine Rechnungen vorhanden</p>
                 <p class="text-gray-500 dark:text-gray-400 mb-5">Erstelle Deine erste Einreichung</p>
+                <?php if ($canSubmitInvoice): ?>
                 <button onclick="document.getElementById('openSubmissionModal').click()"
                     class="inline-flex items-center px-5 py-2.5 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 transition-all shadow-md">
                     <i class="fas fa-plus mr-2"></i>Neue Einreichung
                 </button>
+                <?php endif; ?>
             </div>
         <?php else: ?>
             <div class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-card overflow-hidden">
@@ -628,6 +633,7 @@ ob_start();
 </div>
 <?php endif; ?>
 
+<?php if ($canSubmitInvoice): ?>
 <!-- Submission Modal -->
 <div id="submissionModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] flex flex-col overflow-hidden">
@@ -750,6 +756,7 @@ ob_start();
         </form>
     </div>
 </div>
+<?php endif; ?>
 
 <script>
 <?php if ($canViewTable): ?>
@@ -882,6 +889,7 @@ function confirmReject() {
 }
 
 <?php endif; ?>
+<?php if ($canSubmitInvoice): ?>
 // ── Submission Modal ────────────────────────────────────────────────────────
 const modal = document.getElementById('submissionModal');
 const openBtn = document.getElementById('openSubmissionModal');
@@ -956,6 +964,7 @@ function updateFileInfo() {
     }
 }
 
+<?php endif; ?>
 // ── Status filter tabs ──────────────────────────────────────────────────────
 function filterByStatus(status) {
     document.querySelectorAll('.filter-tab').forEach(btn => {

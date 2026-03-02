@@ -30,7 +30,7 @@ $hasInvoiceSubmitAccess = in_array($user['role'], [
 ]);
 if (!$hasInvoiceSubmitAccess) {
     $_SESSION['error_message'] = 'Keine Berechtigung';
-    header('Location: ' . asset('pages/dashboard/index.php'));
+    header('Location: ' . asset('pages/invoices/index.php'));
     exit;
 }
 
