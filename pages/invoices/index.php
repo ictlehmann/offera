@@ -6,7 +6,7 @@ require_once __DIR__ . '/../../includes/models/Member.php';
 require_once __DIR__ . '/../../includes/helpers.php';
 require_once __DIR__ . '/../../includes/handlers/CSRFHandler.php';
 
-// Access Control: Allow 'board', 'alumni_vorstand', 'resortleiter', 'alumni' (read-only)
+// Access Control: Allow 'board', 'alumni_vorstand', 'ressortleiter', 'alumni' (read-only)
 if (!Auth::check()) {
     header('Location: ../auth/login.php');
     exit;
@@ -24,10 +24,10 @@ if (!$hasInvoiceAccess) {
 $userRole = $user['role'] ?? '';
 
 // Role-based visibility groups:
-// Group 1 (submit only):  alumni, ehrenmitglied, anwaerter, mitglied, resortleiter
-// Group 2 (read only):    vorstand_intern, vorstand_extern, alumni_finanzpruefer, alumni_vorstand
+// Group 1 (submit only):  alumni, ehrenmitglied, anwaerter, mitglied, ressortleiter
+// Group 2 (read only):    vorstand_intern, vorstand_extern, alumni_finanz, alumni_vorstand
 // Group 3 (full access):  vorstand_finanzen
-$canViewTable    = in_array($userRole, ['vorstand_intern', 'vorstand_extern', 'alumni_finanzpruefer', 'alumni_vorstand', 'vorstand_finanzen']);
+$canViewTable    = in_array($userRole, ['vorstand_intern', 'vorstand_extern', 'alumni_finanz', 'alumni_vorstand', 'vorstand_finanzen']);
 $canEditInvoices = ($userRole === 'vorstand_finanzen');
 
 // Only vorstand_finanzen can mark invoices as paid
@@ -222,7 +222,7 @@ ob_start();
                 Bezahlt <span class="ml-1 text-xs"><?php echo $statusCounts['paid']; ?></span>
             </button>
         </div>
-        <?php if (Auth::isBoard() || Auth::hasRole(['alumni_vorstand', 'alumni_finanzpruefer'])): ?>
+        <?php if (Auth::isBoard() || Auth::hasRole(['alumni_vorstand', 'alumni_finanz'])): ?>
         <a
             href="<?php echo asset('api/export_invoices.php'); ?>"
             class="inline-flex items-center gap-1.5 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-xl text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-all no-underline flex-shrink-0"

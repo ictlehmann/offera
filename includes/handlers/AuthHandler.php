@@ -213,10 +213,10 @@ class AuthHandler {
         }
         
         // Role hierarchy: alumni and mitglied have read-only access (level 1)
-        // resortleiter can edit inventory (level 2)
+        // ressortleiter can edit inventory (level 2)
         // board roles and alumni_vorstand have full board access (level 3)
         // Note: 'admin', 'board', and 'manager' kept for backward compatibility with legacy code paths.
-        // 'manager' is DEPRECATED in favor of 'resortleiter' but kept for existing users
+        // 'manager' is DEPRECATED in favor of 'ressortleiter' but kept for existing users
         // 'board' is a placeholder level 3 role used for permission checks
         // 'admin' is DEPRECATED and not assignable to new users
         $roleHierarchy = [
@@ -224,10 +224,11 @@ class AuthHandler {
             'alumni'              => 1,
             'mitglied'            => 1,
             'ehrenmitglied'       => 1,
-            'manager'             => 2,  // DEPRECATED: Use 'resortleiter' instead. Kept for existing users.
-            'resortleiter'        => 2,
+            'manager'             => 2,  // DEPRECATED: Use 'ressortleiter' instead. Kept for existing users.
+            'resortleiter'        => 2,  // DEPRECATED: Use 'ressortleiter' instead. Kept for existing users.
+            'ressortleiter'       => 2,
             'alumni_vorstand'     => 3,
-            'alumni_finanzpruefer'=> 3,  // Same level as alumni_vorstand
+            'alumni_finanz'       => 3,  // Same level as alumni_vorstand
             'vorstand_finanzen'   => 3,
             'vorstand_intern'     => 3,
             'vorstand_extern'     => 3,
@@ -326,7 +327,7 @@ class AuthHandler {
     /**
      * Check if user can manage users
      * 
-     * @return bool True if user has any board role, alumni_vorstand, or alumni_finanzpruefer
+     * @return bool True if user has any board role, alumni_vorstand, or alumni_finanz
      */
     public static function canManageUsers() {
         return Auth::canManageUsers();
@@ -530,198 +531,42 @@ class AuthHandler {
         require_once __DIR__ . '/../services/MicrosoftGraphService.php';
         require_once __DIR__ . '/../models/Alumni.php';
 
-        $azureRoles  = $claims['roles']  ?? [];
-        $jwtGroupIds = $claims['groups'] ?? []; // Group GUIDs from the JWT groups claim
+        $azureRoles = $claims['roles'] ?? [];
         error_log("DEBUG AZURE ROLES FROM TOKEN: " . print_r($azureRoles, true));
 
         // Get Azure Object ID from claims for Microsoft Graph API calls
         $azureOid = $claims['oid'] ?? $claims['sub'] ?? null;
 
-        // Fetch user's group memberships from Microsoft Graph API
-        $entraGroups = [];
-        if ($azureOid) {
-            try {
-                // Initialize Microsoft Graph Service (uses service account access token)
-                $graphService = new MicrosoftGraphService();
-                
-                // Get user profile (includes groups)
-                $profileData = $graphService->getUserProfile($azureOid);
-                $entraGroups = $profileData['groups'] ?? [];
-                
-                // Debug logging for role matching
-                error_log('DEBUG ENTRA - Gefundene Gruppen (Raw): ' . print_r($entraGroups, true));
-                
-                // Log groups for debugging
-                if (!empty($entraGroups)) {
-                    error_log("Microsoft Entra groups fetched for user {$azureOid}: " . json_encode($entraGroups));
-                } else {
-                    error_log("No Microsoft Entra groups found for user {$azureOid}");
-                }
-            } catch (Exception $e) {
-                error_log("Failed to fetch user groups from Microsoft Graph during login: " . $e->getMessage());
-                // Continue with empty groups - will use JWT roles or default
-            }
-        }
-        
-        // Define role mapping from Azure group IDs to internal role names
-        // This mapping works for both:
-        // 1. App Roles from JWT token (roles claim)
-        // 2. Group IDs from Microsoft Entra (Graph API)
-        // 
-        // Start with Microsoft Entra Group IDs from global ROLE_MAPPING constant
-        // Flip the mapping so Group IDs become keys and internal role names become values
-        $roleMapping = array_flip(ROLE_MAPPING);
-        
-        // Add direct mappings for App Roles and display names using new role keys
-        $roleMapping = array_merge($roleMapping, [
-            // Entra App Role values (what JWT sends in roles claim)
-            'vorstand_intern'         => 'vorstand_intern',
-            'vorstand_extern'         => 'vorstand_extern',
-            'vorstand_finanzen'       => 'vorstand_finanzen',
-            'resortleiter'            => 'resortleiter',
-            'mitglied'                => 'mitglied',
-            'anwaerter'               => 'anwaerter',
-            'alumni'                  => 'alumni',
-            'alumni_vorstand'         => 'alumni_vorstand',
-            'alumni_finanzpruefer'    => 'alumni_finanzpruefer',
-            'ehrenmitglied'           => 'ehrenmitglied',
-            // Display name variants (Entra group display names)
-            'Vorstand Intern'             => 'vorstand_intern',
-            'Vorstand Extern'             => 'vorstand_extern',
-            'Vorstand Finanzen'           => 'vorstand_finanzen',
-            'Vorstand Finanzen und Recht' => 'vorstand_finanzen',
-            'Ressortleiter'               => 'resortleiter',
-            'Mitglied'                    => 'mitglied',
-            'Anwärter'                    => 'anwaerter',
-            'Anwaerter'                   => 'anwaerter',
-            'Alumni'                      => 'alumni',
-            'Alumni Vorstand'             => 'alumni_vorstand',
-            'Alumni-Vorstand'             => 'alumni_vorstand',
-            'Alumni Finanz'               => 'alumni_finanzpruefer',
-            'Alumni-Finanzprüfer'         => 'alumni_finanzpruefer',
-            'Ehrenmitglied'               => 'ehrenmitglied',
-        ]);
-        
-        // Debug logging for expected role keys
-        error_log('DEBUG ENTRA - Erwartete Rollen-Keys: ' . print_r(array_keys($roleMapping), true));
-        
-        // Define role hierarchy for priority selection (higher value = higher priority)
-        $roleHierarchy = [
-            'anwaerter'           => 1,
-            'mitglied'            => 2,
-            'resortleiter'        => 3,
-            'alumni'              => 4,
-            'ehrenmitglied'       => 5,
-            'vorstand_finanzen'   => 6,
-            'vorstand_intern'     => 7,
-            'vorstand_extern'     => 8,
-            'alumni_vorstand'     => 9,
-            'alumni_finanzpruefer'=> 10
+        // Select role directly from Entra App Roles (stored 1:1 in the database).
+        // Roles come from $idToken['roles'] and reflect the Entra enterprise-app role assignments.
+        // Priority ensures the most-privileged role wins when a user has multiple roles.
+        $validEntraRoles = [
+            'anwaerter'         => 1,
+            'mitglied'          => 2,
+            'ressortleiter'     => 3,
+            'alumni'            => 4,
+            'ehrenmitglied'     => 5,
+            'vorstand_finanzen' => 6,
+            'vorstand_intern'   => 7,
+            'vorstand_extern'   => 8,
+            'alumni_vorstand'   => 9,
+            'alumni_finanz'     => 10,
         ];
-        
-        // Find the role with the highest priority from all sources
+
         $highestPriority = 0;
-        $selectedRole = 'mitglied'; // Default to mitglied if no valid role found
-        
-        // Process JWT roles (simple strings)
-        foreach ($azureRoles as $roleSource) {
-            // Check both exact match and lowercase match for compatibility
-            $roleLower = strtolower($roleSource);
-            
-            if (isset($roleMapping[$roleSource])) {
-                $internalRole = $roleMapping[$roleSource];
-                $priority = $roleHierarchy[$internalRole] ?? 0;
-                
-                if ($priority > $highestPriority) {
-                    $highestPriority = $priority;
-                    $selectedRole = $internalRole;
-                    error_log("Treffer! User erhält Rolle: " . $internalRole);
-                }
-            } elseif (isset($roleMapping[$roleLower])) {
-                $internalRole = $roleMapping[$roleLower];
-                $priority = $roleHierarchy[$internalRole] ?? 0;
-                
-                if ($priority > $highestPriority) {
-                    $highestPriority = $priority;
-                    $selectedRole = $internalRole;
-                    error_log("Treffer! User erhält Rolle: " . $internalRole);
-                }
-            }
-        }
-        
-        // Process JWT groups claim (group GUIDs included directly in the token)
-        foreach ($jwtGroupIds as $groupId) {
-            if (isset($roleMapping[$groupId])) {
-                $internalRole = $roleMapping[$groupId];
-                $priority = $roleHierarchy[$internalRole] ?? 0;
-                if ($priority > $highestPriority) {
-                    $highestPriority = $priority;
-                    $selectedRole = $internalRole;
-                    error_log("Treffer! User erhält Rolle (JWT groups): " . $internalRole);
-                }
+        $selectedRole = 'mitglied'; // Default if no valid App Role found
+
+        foreach ($azureRoles as $roleValue) {
+            if (isset($validEntraRoles[$roleValue]) && $validEntraRoles[$roleValue] > $highestPriority) {
+                $highestPriority = $validEntraRoles[$roleValue];
+                $selectedRole = $roleValue;
             }
         }
 
-        // Process Entra groups (objects with id and displayName)
-        foreach ($entraGroups as $group) {
-            // Handle both object and string formats for backwards compatibility
-            if (is_array($group)) {
-                $displayName = $group['displayName'] ?? null;
-                $groupId = $group['id'] ?? null;
-                
-                // Check displayName against roleMapping
-                if ($displayName && isset($roleMapping[$displayName])) {
-                    $internalRole = $roleMapping[$displayName];
-                    $priority = $roleHierarchy[$internalRole] ?? 0;
-                    
-                    if ($priority > $highestPriority) {
-                        $highestPriority = $priority;
-                        $selectedRole = $internalRole;
-                        error_log("Treffer! User erhält Rolle: " . $internalRole);
-                    }
-                }
-                
-                // Check group ID against roleMapping
-                if ($groupId && isset($roleMapping[$groupId])) {
-                    $internalRole = $roleMapping[$groupId];
-                    $priority = $roleHierarchy[$internalRole] ?? 0;
-                    
-                    if ($priority > $highestPriority) {
-                        $highestPriority = $priority;
-                        $selectedRole = $internalRole;
-                        error_log("Treffer! User erhält Rolle: " . $internalRole);
-                    }
-                }
-            } else {
-                // Fallback for string format (backwards compatibility)
-                $roleLower = strtolower($group);
-                
-                if (isset($roleMapping[$group])) {
-                    $internalRole = $roleMapping[$group];
-                    $priority = $roleHierarchy[$internalRole] ?? 0;
-                    
-                    if ($priority > $highestPriority) {
-                        $highestPriority = $priority;
-                        $selectedRole = $internalRole;
-                        error_log("Treffer! User erhält Rolle: " . $internalRole);
-                    }
-                } elseif (isset($roleMapping[$roleLower])) {
-                    $internalRole = $roleMapping[$roleLower];
-                    $priority = $roleHierarchy[$internalRole] ?? 0;
-                    
-                    if ($priority > $highestPriority) {
-                        $highestPriority = $priority;
-                        $selectedRole = $internalRole;
-                        error_log("Treffer! User erhält Rolle: " . $internalRole);
-                    }
-                }
-            }
-        }
-        
         $roleName = $selectedRole;
-        
+
         // Log the selected role for debugging
-        error_log("Selected role for user {$azureOid}: {$roleName} (priority: {$highestPriority})");
+        error_log("Selected role for user {$azureOid}: {$roleName}");
         
         // Get user email from claims
         // Priority: email -> preferred_username -> upn
@@ -831,23 +676,16 @@ class AuthHandler {
                 // Store job title and company in users table
                 $jobTitle = $profileData['jobTitle'] ?? null;
                 $companyName = $profileData['companyName'] ?? null;
-                $groups = $profileData['groups'] ?? [];
-                
-                // Convert groups array to JSON string for entra_roles
-                // Groups are displayName from Microsoft Graph, already human-readable
-                try {
-                    $entraRolesJson = !empty($groups) ? json_encode($groups, JSON_THROW_ON_ERROR) : null;
-                } catch (JsonException $e) {
-                    error_log("Failed to JSON encode groups during profile sync for user ID " . intval($userId) . ": " . $e->getMessage());
-                    $entraRolesJson = null; // Fallback to null if encoding fails
-                }
-                
+
+                // Store Entra App Roles (from JWT) in entra_roles field
+                $entraRolesJson = !empty($azureRoles) ? json_encode($azureRoles) : null;
+
                 // Update user record with profile data
                 $stmt = $db->prepare("UPDATE users SET job_title = ?, company = ?, entra_roles = ? WHERE id = ?");
                 $stmt->execute([$jobTitle, $companyName, $entraRolesJson, $userId]);
-                
+
                 // Store Entra roles in session for display
-                $_SESSION['entra_roles'] = $groups;
+                $_SESSION['entra_roles'] = $azureRoles;
             }
         } catch (Exception $e) {
             error_log("Failed to sync profile data from Microsoft Graph: " . $e->getMessage());
@@ -912,11 +750,11 @@ class AuthHandler {
      * Performs the following steps:
      *  1. Updates displayName (first_name, last_name) and mail from the supplied claims.
      *  2. Fetches the user's current group memberships from Microsoft Graph API.
-     *  3. Overwrites the entra_roles JSON field with the current group list.
-     *  4. Derives the primary local role from ROLE_MAPPING and updates it.
+     *  3. Overwrites the entra_roles JSON field with the current App Roles.
+     *  4. Derives the primary local role from Entra App Roles and updates it.
      *
      * @param int    $userId   Local database user ID.
-     * @param array  $userData Claims array from Microsoft Entra ID / OAuth token.
+     * @param array  $userData Claims array from Microsoft Entra ID / OAuth token (must include 'roles').
      * @param string $azureOid Azure Object Identifier used for Graph API calls.
      */
     public static function syncEntraData(int $userId, array $userData, string $azureOid): void {
@@ -939,100 +777,41 @@ class AuthHandler {
         // Prefer explicit email/mail over UPN which may carry an #EXT# suffix
         $mail = $userData['email'] ?? $userData['mail'] ?? $userData['preferred_username'] ?? null;
 
-        // --- 2. Fetch current group memberships from Microsoft Graph ---
-        $entraGroups = [];
-        try {
-            $graphService = new MicrosoftGraphService();
-            $profileData  = $graphService->getUserProfile($azureOid);
-            $entraGroups  = $profileData['groups'] ?? [];
-            error_log(sprintf('[syncEntraData] Fetched %d groups for user %d (azure_oid: %s)', count($entraGroups), $userId, $azureOid));
-        } catch (Exception $e) {
-            error_log('[syncEntraData] Failed to fetch groups for user ' . $userId . ': ' . $e->getMessage());
-        }
+        // --- 2. Determine role from Entra App Roles (passed via $userData['roles']) ---
+        // Roles come directly from $idToken['roles'] and are stored 1:1 in the database.
+        $appRoles = $userData['roles'] ?? [];
 
-        // --- 3. Overwrite entra_roles JSON field ---
-        try {
-            $entraRolesJson = json_encode($entraGroups, JSON_THROW_ON_ERROR);
-        } catch (JsonException $e) {
-            error_log('[syncEntraData] Failed to JSON-encode entra_groups for user ' . $userId . ': ' . $e->getMessage());
-            $entraRolesJson = '[]';
-        }
-
-        // --- 4. Determine primary local role from ROLE_MAPPING ---
-        $roleMapping = array_flip(ROLE_MAPPING);
-        // Add display name mappings so groups can be matched by name in addition to GUID.
-        // Lowercase entries cover all underscore-based variants via the case-insensitive
-        // fallback below. Space-separated entries must be listed explicitly because
-        // strtolower('Vorstand Intern') != 'vorstand_intern'.
-        $roleMapping = array_merge($roleMapping, [
-            // Direct mappings for new role keys
-            'vorstand_intern'         => 'vorstand_intern',
-            'vorstand_extern'         => 'vorstand_extern',
-            'vorstand_finanzen'       => 'vorstand_finanzen',
-            'resortleiter'            => 'resortleiter',
-            'mitglied'                => 'mitglied',
-            'anwaerter'               => 'anwaerter',
-            'alumni'                  => 'alumni',
-            'alumni_vorstand'         => 'alumni_vorstand',
-            'alumni_finanzpruefer'    => 'alumni_finanzpruefer',
-            'ehrenmitglied'           => 'ehrenmitglied',
-            // Space-separated display names (common Azure AD group names)
-            'Vorstand Intern'             => 'vorstand_intern',
-            'Vorstand Extern'             => 'vorstand_extern',
-            'Vorstand Finanzen'           => 'vorstand_finanzen',
-            'Vorstand Finanzen und Recht' => 'vorstand_finanzen',
-            'Ressortleiter'               => 'resortleiter',
-            'Mitglied'                    => 'mitglied',
-            'Anwärter'                    => 'anwaerter',
-            'Anwaerter'                   => 'anwaerter',
-            'Alumni'                      => 'alumni',
-            'Alumni Vorstand'             => 'alumni_vorstand',
-            'Alumni-Vorstand'             => 'alumni_vorstand',
-            'Alumni Finanz'               => 'alumni_finanzpruefer',
-            'Alumni-Finanzprüfer'         => 'alumni_finanzpruefer',
-            'Ehrenmitglied'               => 'ehrenmitglied',
-        ]);
-        $roleHierarchy = [
-            'anwaerter'           => 1,
-            'mitglied'            => 2,
-            'resortleiter'        => 3,
-            'alumni'              => 4,
-            'ehrenmitglied'       => 5,
-            'vorstand_finanzen'   => 6,
-            'vorstand_intern'     => 7,
-            'vorstand_extern'     => 8,
-            'alumni_vorstand'     => 9,
-            'alumni_finanzpruefer'=> 10,
+        $validEntraRoles = [
+            'anwaerter'         => 1,
+            'mitglied'          => 2,
+            'ressortleiter'     => 3,
+            'alumni'            => 4,
+            'ehrenmitglied'     => 5,
+            'vorstand_finanzen' => 6,
+            'vorstand_intern'   => 7,
+            'vorstand_extern'   => 8,
+            'alumni_vorstand'   => 9,
+            'alumni_finanz'     => 10,
         ];
 
         $highestPriority = 0;
-        $selectedRole    = 'mitglied'; // Default to mitglied when no group matches ROLE_MAPPING
+        $selectedRole    = 'mitglied'; // Default when no valid App Role found
 
-        foreach ($entraGroups as $group) {
-            $candidates = [];
-            if (is_array($group)) {
-                if (!empty($group['displayName'])) {
-                    $candidates[] = $group['displayName'];
-                }
-                if (!empty($group['id'])) {
-                    $candidates[] = $group['id'];
-                }
-            } else {
-                $candidates[] = (string) $group;
+        foreach ($appRoles as $roleValue) {
+            if (isset($validEntraRoles[$roleValue]) && $validEntraRoles[$roleValue] > $highestPriority) {
+                $highestPriority = $validEntraRoles[$roleValue];
+                $selectedRole    = $roleValue;
             }
+        }
 
-            foreach ($candidates as $key) {
-                $keyLower = strtolower($key);
-                $matched  = $roleMapping[$key] ?? $roleMapping[$keyLower] ?? null;
-                if ($matched !== null) {
-                    $internalRole = $matched;
-                    $priority     = $roleHierarchy[$internalRole] ?? 0;
-                    if ($priority > $highestPriority) {
-                        $highestPriority = $priority;
-                        $selectedRole    = $internalRole;
-                    }
-                }
-            }
+        error_log(sprintf('[syncEntraData] Role for user %d: %s (from App Roles: %s)', $userId, $selectedRole, implode(', ', $appRoles)));
+
+        // --- 3. Overwrite entra_roles JSON field with App Roles from token ---
+        try {
+            $entraRolesJson = json_encode($appRoles, JSON_THROW_ON_ERROR);
+        } catch (JsonException $e) {
+            error_log('[syncEntraData] Failed to JSON-encode entra_roles for user ' . $userId . ': ' . $e->getMessage());
+            $entraRolesJson = '[]';
         }
 
         // --- Build and execute UPDATE statement ---
@@ -1087,10 +866,10 @@ class AuthHandler {
         }
 
         error_log(sprintf(
-            '[syncEntraData] Synced user %d: role=%s, entra_roles=%d groups, first_name=%s, mail=%s',
+            '[syncEntraData] Synced user %d: role=%s, entra_roles=%d roles, first_name=%s, mail=%s',
             $userId,
             $selectedRole ?? '(unchanged)',
-            count($entraGroups),
+            count($appRoles),
             $firstName ?? '(not updated)',
             $mail       ?? '(not updated)'
         ));

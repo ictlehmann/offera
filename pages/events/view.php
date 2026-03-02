@@ -96,7 +96,7 @@ $canAddStats = in_array($userRole, array_merge(Auth::BOARD_ROLES, ['alumni_vorst
 
 // Load feedback contact info
 $feedbackContact = Event::getFeedbackContact((int)$eventId);
-$feedbackContactRoles = ['alumni', 'alumni_vorstand', 'alumni_finanzpruefer', 'ehrenmitglied'];
+$feedbackContactRoles = ['alumni', 'alumni_vorstand', 'alumni_finanz', 'ehrenmitglied'];
 $canBecomeFeedbackContact = in_array($userRole, $feedbackContactRoles);
 $isFeedbackContact = $feedbackContact && (int)($feedbackContact['user_id'] ?? 0) === (int)$user['id'];
 
@@ -152,7 +152,7 @@ $statusInfo = $statusLabels[$currentStatus] ?? ['label' => $currentStatus, 'icon
             <i class="fas fa-arrow-left mr-2"></i>
             Zurück zur Übersicht
         </a>
-        <?php if (Auth::hasPermission('manage_projects') || Auth::isBoard() || Auth::hasRole(['resortleiter', 'alumni_vorstand'])): ?>
+        <?php if (Auth::hasPermission('manage_projects') || Auth::isBoard() || Auth::hasRole(['ressortleiter', 'alumni_vorstand'])): ?>
         <a href="edit.php?id=<?php echo (int)$eventId; ?>" class="inline-flex items-center px-4 py-2 bg-ibc-blue text-white rounded-xl font-semibold text-sm hover:bg-ibc-blue-dark ease-premium shadow-soft">
             <i class="fas fa-edit mr-2"></i>
             Event bearbeiten

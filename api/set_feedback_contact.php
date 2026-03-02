@@ -15,7 +15,7 @@ require_once __DIR__ . '/../includes/handlers/CSRFHandler.php';
 header('Content-Type: application/json');
 
 // Roles that are allowed to become feedback contacts
-const FEEDBACK_CONTACT_ROLES = ['alumni', 'alumni_vorstand', 'alumni_finanzpruefer', 'ehrenmitglied'];
+const FEEDBACK_CONTACT_ROLES = ['alumni', 'alumni_vorstand', 'alumni_finanz', 'ehrenmitglied'];
 
 try {
     if (!Auth::check()) {

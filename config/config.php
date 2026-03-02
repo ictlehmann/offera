@@ -141,10 +141,10 @@ define('ROLE_MAPPING', [
     'vorstand_intern'         => 'f61e99e2-2717-4aff-b3f5-ef2ec489b598',
     'vorstand_extern'         => 'bf17e26b-e5f1-4a63-ae56-91ab69ae33ca',
     'alumni_vorstand'         => '8a45c6aa-e791-422e-b964-986d8bdd2ed8',
-    'alumni_finanzpruefer'    => '39597941-0a22-4922-9587-e3d62ab986d6',
+    'alumni_finanz'           => '39597941-0a22-4922-9587-e3d62ab986d6',
     'alumni'                  => '7ffd9c73-a828-4e34-a9f4-10f4ed00f796',
     'ehrenmitglied'           => '09686b92-dbc8-4e66-a851-2dafea64df89',
-    'resortleiter'            => '9456552d-0f49-42ff-bbde-495a60e61e61',
+    'ressortleiter'           => '9456552d-0f49-42ff-bbde-495a60e61e61',
     'mitglied'                => '70f07477-ea4e-4edc-b0e6-7e25968f16c0',
     'anwaerter'               => '75edcb0a-c610-4ceb-82f2-457a9dde4fc0'
 ]);

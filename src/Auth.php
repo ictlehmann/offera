@@ -13,11 +13,11 @@ class Auth {
      * Role constants - exactly 10 allowed roles
      */
     const ROLE_ALUMNI = 'alumni';
-    const ROLE_ALUMNI_AUDITOR = 'alumni_finanzpruefer';
+    const ROLE_ALUMNI_AUDITOR = 'alumni_finanz';
     const ROLE_ALUMNI_BOARD = 'alumni_vorstand';
     const ROLE_CANDIDATE = 'anwaerter';
     const ROLE_MEMBER = 'mitglied';
-    const ROLE_HEAD = 'resortleiter';
+    const ROLE_HEAD = 'ressortleiter';
     const ROLE_HONORARY_MEMBER = 'ehrenmitglied';
     const ROLE_BOARD_FINANCE = 'vorstand_finanzen';
     const ROLE_BOARD_EXTERNAL = 'vorstand_extern';
@@ -28,11 +28,11 @@ class Auth {
      */
     const VALID_ROLES = [
         'alumni',
-        'alumni_finanzpruefer',
+        'alumni_finanz',
         'alumni_vorstand',
         'anwaerter',
         'mitglied',
-        'resortleiter',
+        'ressortleiter',
         'ehrenmitglied',
         'vorstand_finanzen',
         'vorstand_intern',
@@ -56,8 +56,8 @@ class Auth {
         'vorstand_intern',
         'vorstand_extern',
         'alumni_vorstand',
-        'alumni_finanzpruefer',
-        'resortleiter'
+        'alumni_finanz',
+        'ressortleiter'
     ];
 
     /**
@@ -415,7 +415,7 @@ class Auth {
     /**
      * Check if user can manage users
      * 
-     * @return bool True if user has any board role, alumni_vorstand, or alumni_finanzpruefer
+     * @return bool True if user has any board role, alumni_vorstand, or alumni_finanz
      */
     public static function canManageUsers() {
         if (!self::check()) {
@@ -423,7 +423,7 @@ class Auth {
         }
         
         $userRole = $_SESSION['user_role'] ?? '';
-        return in_array($userRole, array_merge(self::BOARD_ROLES, ['alumni_vorstand', 'alumni_finanzpruefer']));
+        return in_array($userRole, array_merge(self::BOARD_ROLES, ['alumni_vorstand', 'alumni_finanz']));
     }
     
     /**
@@ -452,7 +452,7 @@ class Auth {
     /**
      * Check if user can approve inventory returns
      * 
-     * @return bool True if user is vorstand_intern, vorstand_extern, vorstand_finanzen, or resortleiter
+     * @return bool True if user is vorstand_intern, vorstand_extern, vorstand_finanzen, or ressortleiter
      */
     public static function canApproveReturns() {
         if (!self::check()) {
@@ -460,7 +460,7 @@ class Auth {
         }
         
         $userRole = $_SESSION['user_role'] ?? '';
-        return in_array($userRole, array_merge(self::BOARD_ROLES, ['resortleiter']));
+        return in_array($userRole, array_merge(self::BOARD_ROLES, ['ressortleiter']));
     }
 
     /**
@@ -480,7 +480,7 @@ class Auth {
     /**
      * Check if user can create basic content (Events, Blog)
      * 
-     * @return bool True if user has any board role or is resortleiter (Ressortleiter)
+     * @return bool True if user has any board role or is ressortleiter (Ressortleiter)
      */
     public static function canCreateBasicContent() {
         if (!self::check()) {
@@ -488,13 +488,13 @@ class Auth {
         }
         
         $userRole = $_SESSION['user_role'] ?? '';
-        return in_array($userRole, array_merge(self::BOARD_ROLES, ['resortleiter']));
+        return in_array($userRole, array_merge(self::BOARD_ROLES, ['ressortleiter']));
     }
     
     /**
      * Check if user can view admin stats
      * 
-     * @return bool True for all 3 Boards + alumni_vorstand + alumni_finanzpruefer
+     * @return bool True for all 3 Boards + alumni_vorstand + alumni_finanz
      */
     public static function canViewAdminStats() {
         if (!self::check()) {
@@ -502,7 +502,7 @@ class Auth {
         }
         
         $userRole = $_SESSION['user_role'] ?? '';
-        return in_array($userRole, array_merge(self::BOARD_ROLES, ['alumni_vorstand', 'alumni_finanzpruefer']));
+        return in_array($userRole, array_merge(self::BOARD_ROLES, ['alumni_vorstand', 'alumni_finanz']));
     }
     
     /**
@@ -522,7 +522,7 @@ class Auth {
     /**
      * Check if user can access system settings
      * 
-     * @return bool True for vorstand_finanzen, vorstand_intern, vorstand_extern, alumni_vorstand, and alumni_finanzpruefer
+     * @return bool True for vorstand_finanzen, vorstand_intern, vorstand_extern, alumni_vorstand, and alumni_finanz
      */
     public static function canAccessSystemSettings() {
         if (!self::check()) {
@@ -530,7 +530,7 @@ class Auth {
         }
         
         $userRole = $_SESSION['user_role'] ?? '';
-        return in_array($userRole, array_merge(self::BOARD_ROLES, ['alumni_vorstand', 'alumni_finanzpruefer']));
+        return in_array($userRole, array_merge(self::BOARD_ROLES, ['alumni_vorstand', 'alumni_finanz']));
     }
     
     /**
@@ -550,9 +550,9 @@ class Auth {
             'alumni'              => 1,
             'mitglied'            => 1,
             'ehrenmitglied'       => 1,
-            'resortleiter'        => 2,
+            'ressortleiter'       => 2,
             'alumni_vorstand'     => 3,
-            'alumni_finanzpruefer'=> 3,
+            'alumni_finanz'       => 3,
             'vorstand_finanzen'   => 3,
             'vorstand_intern'     => 3,
             'vorstand_extern'     => 3
@@ -583,11 +583,11 @@ class Auth {
         
         // Define page access permissions
         $pagePermissions = [
-            'members'          => ['vorstand_finanzen', 'vorstand_intern', 'vorstand_extern', 'resortleiter', 'mitglied', 'anwaerter'],
-            'invoices'         => ['vorstand_finanzen', 'vorstand_intern', 'vorstand_extern', 'alumni', 'alumni_vorstand', 'alumni_finanzpruefer', 'ehrenmitglied', 'anwaerter', 'mitglied', 'resortleiter'],
-            'ideas'            => ['vorstand_finanzen', 'vorstand_intern', 'vorstand_extern', 'mitglied', 'anwaerter', 'resortleiter'],
-            'training_requests'=> ['alumni', 'alumni_vorstand', 'alumni_finanzpruefer'],
-            'polls'            => ['vorstand_finanzen', 'vorstand_intern', 'vorstand_extern', 'resortleiter', 'mitglied', 'anwaerter', 'alumni', 'alumni_vorstand', 'alumni_finanzpruefer', 'ehrenmitglied']
+            'members'          => ['vorstand_finanzen', 'vorstand_intern', 'vorstand_extern', 'ressortleiter', 'mitglied', 'anwaerter'],
+            'invoices'         => ['vorstand_finanzen', 'vorstand_intern', 'vorstand_extern', 'alumni', 'alumni_vorstand', 'alumni_finanz', 'ehrenmitglied', 'anwaerter', 'mitglied', 'ressortleiter'],
+            'ideas'            => ['vorstand_finanzen', 'vorstand_intern', 'vorstand_extern', 'mitglied', 'anwaerter', 'ressortleiter'],
+            'training_requests'=> ['alumni', 'alumni_vorstand', 'alumni_finanz'],
+            'polls'            => ['vorstand_finanzen', 'vorstand_intern', 'vorstand_extern', 'ressortleiter', 'mitglied', 'anwaerter', 'alumni', 'alumni_vorstand', 'alumni_finanz', 'ehrenmitglied']
         ];
         
         // Check if page exists in permissions map
@@ -694,11 +694,11 @@ class Auth {
     public static function getRoleLabel($role) {
         $roleLabels = [
             'alumni'              => 'Alumni',
-            'alumni_finanzpruefer'=> 'Alumni-Finanzprüfer',
+            'alumni_finanz'       => 'Alumni-Finanzprüfer',
             'alumni_vorstand'     => 'Alumni-Vorstand',
             'anwaerter'           => 'Anwärter',
             'mitglied'            => 'Mitglied',
-            'resortleiter'        => 'Ressortleiter',
+            'ressortleiter'       => 'Ressortleiter',
             'ehrenmitglied'       => 'Ehrenmitglied',
             'vorstand_finanzen'   => 'Vorstand Finanzen und Recht',
             'vorstand_extern'     => 'Vorstand Extern',

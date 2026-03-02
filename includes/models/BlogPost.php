@@ -385,7 +385,7 @@ class BlogPost {
      * @return bool True if role is authorized (board roles, head), false otherwise
      */
     public static function canAuth($userRole) {
-        $authorizedRoles = array_merge(Auth::BOARD_ROLES, ['resortleiter']);
+        $authorizedRoles = array_merge(Auth::BOARD_ROLES, ['ressortleiter']);
         return in_array($userRole, $authorizedRoles);
     }
 }

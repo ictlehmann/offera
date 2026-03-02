@@ -7,7 +7,7 @@
  *
  * Berechtigungen:
  *   canEdit = true  → vorstand_finanzen, vorstand_intern, vorstand_extern
- *   canEdit = false → resortleiter, alumni_vorstand, alumni_finanzpruefer
+ *   canEdit = false → ressortleiter, alumni_vorstand, alumni_finanz
  *   Kein Zugriff   → alle anderen Rollen
  */
 
@@ -26,7 +26,7 @@ if (!Auth::check()) {
 $userRole = $_SESSION['user_role'] ?? '';
 
 $editRoles     = ['vorstand_finanzen', 'vorstand_intern', 'vorstand_extern'];
-$readOnlyRoles = ['resortleiter', 'alumni_vorstand', 'alumni_finanzpruefer'];
+$readOnlyRoles = ['ressortleiter', 'alumni_vorstand', 'alumni_finanz'];
 
 if (in_array($userRole, $editRoles, true)) {
     $canEdit = true;

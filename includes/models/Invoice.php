@@ -223,8 +223,8 @@ class Invoice {
     public static function getAll($userRole, $currentUserId) {
         $db = Database::getConnection('rech');
         
-        // Board roles (vorstand_finanzen, vorstand_intern, vorstand_extern), alumni_vorstand, and alumni_finanzpruefer see all invoices
-        if (in_array($userRole, array_merge(Auth::BOARD_ROLES, ['alumni_vorstand', 'alumni_finanzpruefer']))) {
+        // Board roles (vorstand_finanzen, vorstand_intern, vorstand_extern), alumni_vorstand, and alumni_finanz see all invoices
+        if (in_array($userRole, array_merge(Auth::BOARD_ROLES, ['alumni_vorstand', 'alumni_finanz']))) {
             // Join with users table from user database
             $userDb = Database::getUserDB();
             
@@ -266,7 +266,7 @@ class Invoice {
         }
         
         // Resortleiter role sees only their own invoices
-        if ($userRole === 'resortleiter') {
+        if ($userRole === 'ressortleiter') {
             $stmt = $db->prepare("
                 SELECT 
                     id,

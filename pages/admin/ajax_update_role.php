@@ -85,8 +85,8 @@ if ($isOwnRole && $isBoardMember && in_array($newRole, ['mitglied', 'alumni'])) 
         exit;
     }
     
-    // Ensure successor has a 'mitglied' or 'resortleiter' role (not already a board member or other role)
-    if (!in_array($successor['role'], ['mitglied', 'resortleiter'])) {
+    // Ensure successor has a 'mitglied' or 'ressortleiter' role (not already a board member or other role)
+    if (!in_array($successor['role'], ['mitglied', 'ressortleiter'])) {
         echo json_encode([
             'success' => false,
             'message' => 'Der gewählte Nachfolger muss die Rolle "Mitglied" oder "Ressortleiter" haben'

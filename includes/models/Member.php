@@ -16,9 +16,9 @@ class Member {
     /**
      * Active member roles (excludes 'alumni', 'alumni_vorstand', 'ehrenmitglied')
      * Includes all board role variants: 'vorstand_finanzen', 'vorstand_intern', 'vorstand_extern'
-     * Plus: 'resortleiter' (Ressortleiter), 'mitglied' (Mitglied), 'anwaerter' (Anwärter)
+     * Plus: 'ressortleiter' (Ressortleiter), 'mitglied' (Mitglied), 'anwaerter' (Anwärter)
      */
-    const ACTIVE_ROLES = ['vorstand_finanzen', 'vorstand_intern', 'vorstand_extern', 'resortleiter', 'mitglied', 'anwaerter'];
+    const ACTIVE_ROLES = ['vorstand_finanzen', 'vorstand_intern', 'vorstand_extern', 'ressortleiter', 'mitglied', 'anwaerter'];
     
     /**
      * Get all active members with optional search and role filtering
@@ -266,7 +266,7 @@ class Member {
             if ($currentUser['id'] !== $userId) {
                 throw new Exception("Keine Berechtigung zum Aktualisieren anderer Mitgliederprofile");
             }
-        } elseif (!in_array($currentRole, array_merge(Auth::BOARD_ROLES, ['resortleiter']))) {
+        } elseif (!in_array($currentRole, array_merge(Auth::BOARD_ROLES, ['ressortleiter']))) {
             throw new Exception("Keine Berechtigung zum Aktualisieren des Mitgliederprofils");
         }
         
