@@ -684,11 +684,11 @@ $_tailwindCssVersion = filemtime(__DIR__ . '/../../assets/css/tailwind.css');
                     <p class='text-[11px] text-white/70 truncate leading-snug' title='<?php echo htmlspecialchars($email); ?>'>
                         <?php echo htmlspecialchars($email); ?>
                     </p>
-                    <?php foreach ($displayRoles as $sidebarRole): ?>
-                    <span class='bg-teal-700 text-white font-semibold px-2 py-1 rounded-md text-xs inline-block mt-1' title='<?php echo htmlspecialchars($sidebarRole); ?>' aria-label='Rolle: <?php echo htmlspecialchars($sidebarRole); ?>'>
-                        <?php echo htmlspecialchars($sidebarRole); ?>
+                    <?php if (!empty($role) && $role !== 'User'): ?>
+                    <span class='text-[10px] text-white/60 bg-white/10 px-2 py-0.5 rounded-full inline-block mt-1 truncate max-w-full' title='<?php echo htmlspecialchars(getFormattedRoleName($role)); ?>' aria-label='Rolle: <?php echo htmlspecialchars(getFormattedRoleName($role)); ?>'>
+                        <?php echo htmlspecialchars(getFormattedRoleName($role)); ?>
                     </span>
-                    <?php endforeach; ?>
+                    <?php endif; ?>
                 </div>
             </div>
             
