@@ -224,7 +224,7 @@ ob_start();
 
                     <!-- Card Body -->
                     <div class="flex flex-col flex-1 p-5">
-                        <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100 mb-3 leading-snug line-clamp-2">
+                        <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100 mb-3 leading-snug line-clamp-2 break-words">
                             <?php echo htmlspecialchars($event['title']); ?>
                         </h3>
 
@@ -260,7 +260,7 @@ ob_start();
 
                         <!-- Description Preview -->
                         <?php if (!empty($event['description'])): ?>
-                            <p class="text-gray-600 dark:text-gray-400 text-sm line-clamp-2 flex-1 mb-4">
+                            <p class="text-gray-600 dark:text-gray-400 text-sm line-clamp-2 flex-1 mb-4 break-words">
                                 <?php echo htmlspecialchars(substr($event['description'], 0, 120)); ?><?php echo strlen($event['description']) > 120 ? '…' : ''; ?>
                             </p>
                         <?php else: ?>

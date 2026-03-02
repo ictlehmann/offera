@@ -1305,7 +1305,7 @@ try {
                 padding: 17px;
                 font-size: 15px;
                 gap: 12px;
-                white-space: nowrap;
+                white-space: normal;
             }
 
             .microsoft-logo {
@@ -1367,7 +1367,7 @@ try {
                 padding: 13px 10px;
                 font-size: 13px;
                 gap: 8px;
-                white-space: nowrap;
+                white-space: normal;
             }
 
             .microsoft-logo {

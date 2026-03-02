@@ -273,7 +273,7 @@ $statusInfo = $statusLabels[$currentStatus] ?? ['label' => $currentStatus, 'icon
                     </span>
                     Beschreibung
                 </h2>
-                <p class="text-gray-700 dark:text-gray-300 whitespace-pre-line leading-relaxed break-words"><?php echo htmlspecialchars($event['description']); ?></p>
+                <p class="text-gray-700 dark:text-gray-300 whitespace-pre-line leading-relaxed break-words event-description"><?php echo htmlspecialchars($event['description']); ?></p>
             </div>
             <?php endif; ?>
 
