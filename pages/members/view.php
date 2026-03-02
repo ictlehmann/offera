@@ -4,9 +4,14 @@ require_once __DIR__ . '/../../includes/models/Alumni.php';
 require_once __DIR__ . '/../../includes/models/User.php';
 require_once __DIR__ . '/../../includes/helpers.php';
 
-// Access Control: Allow all logged-in users
+// Access Control: Allow all logged-in users with members page access
 if (!Auth::check()) {
     header('Location: ../auth/login.php');
+    exit;
+}
+
+if (!Auth::canAccessPage('members')) {
+    header('Location: ../dashboard/index.php');
     exit;
 }
 
@@ -15,32 +20,12 @@ $user = Auth::user();
 // Get profile ID from URL
 $profileId = $_GET['id'] ?? null;
 
-// Get return location (default to alumni index)
-// Check GET parameter return_to first, then check referrer URL
-$returnTo = 'alumni'; // Default value
-
-// Check GET parameter return_to
-if (isset($_GET['return_to'])) {
-    // If return_to is explicitly set, use it (only 'members' is valid, anything else defaults to 'alumni')
-    $returnTo = ($_GET['return_to'] === 'members') ? 'members' : 'alumni';
-} 
-// Check referrer URL if return_to parameter is not set
-elseif (isset($_SERVER['HTTP_REFERER'])) {
-    $referer = $_SERVER['HTTP_REFERER'];
-    $parsedUrl = parse_url($referer);
-    // Check if parse_url succeeded and the path contains '/pages/members/' to ensure it's specifically the members page
-    if ($parsedUrl !== false && isset($parsedUrl['path']) && 
-        strpos($parsedUrl['path'], '/pages/members/') !== false) {
-        $returnTo = 'members';
-    }
-}
-
 if (!$profileId) {
     header('Location: index.php');
     exit;
 }
 
-// Get profile data
+// Get profile data (members and alumni share the same alumni_profiles table)
 $profile = Alumni::getProfileById((int)$profileId);
 
 if (!$profile) {
@@ -68,17 +53,10 @@ ob_start();
 <div class="max-w-4xl mx-auto">
     <!-- Back Button -->
     <div class="mb-6">
-        <?php if ($returnTo === 'members'): ?>
-            <a href="../members/index.php" class="inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors">
-                <i class="fas fa-arrow-left mr-2"></i>
-                Zurück zum Mitgliederverzeichnis
-            </a>
-        <?php else: ?>
-            <a href="index.php" class="inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors">
-                <i class="fas fa-arrow-left mr-2"></i>
-                Zurück zum Alumni-Verzeichnis
-            </a>
-        <?php endif; ?>
+        <a href="index.php" class="inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors">
+            <i class="fas fa-arrow-left mr-2"></i>
+            Zurück zum Mitgliederverzeichnis
+        </a>
     </div>
 
     <!-- Profile Card -->
@@ -130,13 +108,12 @@ ob_start();
                     'honorary_member' => 'bg-amber-100 text-amber-800 border-amber-300',
                 ];
                 
-                // Resolve display_role: prioritize Entra roles, fall back to database role
+                // Resolve display role: prioritize Entra roles, fall back to database role
                 $displayRole = null;
                 $displayRoleKey = Auth::getPrimaryEntraRoleKey($profileUserEntraRoles, $profileUserRole);
                 if (!empty($profileUserEntraRoles)) {
                     $entraRolesArray = json_decode($profileUserEntraRoles, true);
                     if (json_last_error() === JSON_ERROR_NONE && is_array($entraRolesArray) && !empty($entraRolesArray)) {
-                        // Build display names from all Entra roles
                         $displayNames = [];
                         foreach ($entraRolesArray as $entraRole) {
                             if (is_array($entraRole) && isset($entraRole['displayName'])) {
@@ -179,6 +156,27 @@ ob_start();
                 </div>
                 <?php endif; ?>
 
+                <!-- Study Info -->
+                <?php if (!empty($profile['study_program']) || !empty($profile['semester'])): ?>
+                <div class="mb-4">
+                    <?php if (!empty($profile['study_program'])): ?>
+                    <p class="text-sm text-gray-600 mb-1">
+                        <i class="fas fa-graduation-cap mr-2 text-gray-500"></i>
+                        <?php echo htmlspecialchars($profile['study_program']); ?>
+                        <?php if (!empty($profile['angestrebter_abschluss'])): ?>
+                            &ndash; <?php echo htmlspecialchars($profile['angestrebter_abschluss']); ?>
+                        <?php endif; ?>
+                    </p>
+                    <?php endif; ?>
+                    <?php if (!empty($profile['semester'])): ?>
+                    <p class="text-sm text-gray-600">
+                        <i class="fas fa-book mr-2 text-gray-500"></i>
+                        <?php echo htmlspecialchars($profile['semester']); ?>. Semester
+                    </p>
+                    <?php endif; ?>
+                </div>
+                <?php endif; ?>
+
                 <!-- Industry -->
                 <?php if (!empty($profile['industry'])): ?>
                 <p class="text-sm text-gray-600 mb-4">
@@ -216,7 +214,6 @@ ob_start();
                 <!-- LinkedIn -->
                 <?php if (!empty($profile['linkedin_url'])): ?>
                     <?php
-                    // Validate LinkedIn URL
                     $linkedinUrl = $profile['linkedin_url'];
                     $isValidLinkedIn = (
                         strpos($linkedinUrl, 'https://linkedin.com') === 0 ||
@@ -233,6 +230,35 @@ ob_start();
                         <div>
                             <p class="text-xs text-gray-500">LinkedIn</p>
                             <a href="<?php echo htmlspecialchars($linkedinUrl); ?>" 
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               class="text-blue-600 hover:text-blue-800 font-medium">
+                                Profil ansehen
+                            </a>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+                <?php endif; ?>
+
+                <!-- Xing -->
+                <?php if (!empty($profile['xing_url'])): ?>
+                    <?php
+                    $xingUrl = $profile['xing_url'];
+                    $isValidXing = (
+                        strpos($xingUrl, 'https://xing.com') === 0 ||
+                        strpos($xingUrl, 'https://www.xing.com') === 0 ||
+                        strpos($xingUrl, 'http://xing.com') === 0 ||
+                        strpos($xingUrl, 'http://www.xing.com') === 0
+                    );
+                    ?>
+                    <?php if ($isValidXing): ?>
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-teal-600 rounded-full flex items-center justify-center text-white mr-3">
+                            <i class="fab fa-xing"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500">Xing</p>
+                            <a href="<?php echo htmlspecialchars($xingUrl); ?>" 
                                target="_blank"
                                rel="noopener noreferrer"
                                class="text-blue-600 hover:text-blue-800 font-medium">

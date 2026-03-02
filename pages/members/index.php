@@ -301,7 +301,7 @@ ob_start();
                         
                         <!-- Action: 'Profil ansehen' Button -->
                         <a 
-                            href="../alumni/view.php?id=<?php echo $member['profile_id']; ?>&return_to=members"
+                            href="view.php?id=<?php echo $member['profile_id']; ?>"
                             class="btn btn-primary w-100 fw-semibold shadow-sm"
                         >
                             <i class="fas fa-user me-2"></i>
