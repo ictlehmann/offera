@@ -100,9 +100,6 @@ $feedbackContactRoles = ['alumni', 'alumni_vorstand', 'alumni_finanz', 'ehrenmit
 $canBecomeFeedbackContact = in_array($userRole, $feedbackContactRoles);
 $isFeedbackContact = $feedbackContact && (int)($feedbackContact['user_id'] ?? 0) === (int)$user['id'];
 
-// Whether application text is required for signup
-$requiresApplication = (bool)($event['requires_application'] ?? false);
-
 $title = htmlspecialchars($event['title']) . ' - Events';
 
 // Open Graph meta tags for link preview
@@ -198,7 +195,7 @@ $statusInfo = $statusLabels[$currentStatus] ?? ['label' => $currentStatus, 'icon
                 <?php endif; ?>
             </div>
 
-            <h1 class="text-3xl md:text-4xl font-bold text-white drop-shadow-lg leading-tight">
+            <h1 id="eventHeroTitle" class="text-3xl md:text-4xl font-bold text-white drop-shadow-lg leading-tight">
                 <?php echo htmlspecialchars($event['title']); ?>
             </h1>
         </div>
@@ -402,7 +399,7 @@ $statusInfo = $statusLabels[$currentStatus] ?? ['label' => $currentStatus, 'icon
                         <?php endif; ?>
                     <?php else: ?>
                         <?php if (!$isRegistered && !$userSlotId): ?>
-                            <button onclick="<?php echo $requiresApplication ? 'openApplicationModal()' : 'signupForEvent(' . intval($eventId) . ')'; ?>"
+                            <button onclick="signupForEvent(<?php echo intval($eventId); ?>)"
                                     class="inline-flex items-center justify-center px-5 py-3 bg-ibc-green text-white rounded-xl font-semibold hover:shadow-glow-green ease-premium w-full">
                                 <i class="fas fa-user-plus mr-2"></i>
                                 Jetzt anmelden
@@ -693,37 +690,6 @@ $statusInfo = $statusLabels[$currentStatus] ?? ['label' => $currentStatus, 'icon
             <button type="button" onclick="submitAddStats()"
                     class="flex-1 px-6 py-3 bg-ibc-blue text-white rounded-lg hover:bg-ibc-blue-dark transition">
                 <i class="fas fa-save mr-2"></i>Speichern
-            </button>
-        </div>
-    </div>
-</div>
-<?php endif; ?>
-
-<?php if ($requiresApplication): ?>
-<!-- Application Modal (requires_application = 1) -->
-<div id="applicationModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-gray-800 rounded-xl w-full max-w-md shadow-2xl overflow-hidden">
-        <div class="p-6">
-            <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2 flex items-center gap-2">
-                <i class="fas fa-file-alt text-purple-600"></i>
-                Bewerbung für dieses Event
-            </h3>
-            <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">
-                Bitte schreibe kurz, warum du an diesem Event teilnehmen möchtest.
-            </p>
-            <textarea id="applicationMotivation" rows="4" maxlength="1000"
-                      class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white dark:bg-gray-700 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 resize-none"
-                      placeholder="Bewerbungstext..."></textarea>
-            <div id="applicationError" class="hidden mt-2 p-3 bg-red-100 border border-red-300 text-red-700 rounded-lg text-sm"></div>
-        </div>
-        <div class="px-6 pb-6 flex gap-3">
-            <button type="button" onclick="closeApplicationModal()"
-                    class="flex-1 px-4 py-2.5 bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition font-semibold">
-                Abbrechen
-            </button>
-            <button type="button" onclick="submitApplication()"
-                    class="flex-1 px-4 py-2.5 bg-ibc-green text-white rounded-lg hover:bg-ibc-green-dark transition font-semibold">
-                <i class="fas fa-paper-plane mr-1.5"></i>Bewerben & Anmelden
             </button>
         </div>
     </div>
@@ -1084,55 +1050,6 @@ document.getElementById('addStatsModal')?.addEventListener('click', (e) => {
 });
 <?php endif; ?>
 
-// ── Application Modal (requires_application = 1) ──────────────────────────────
-<?php if ($requiresApplication): ?>
-function openApplicationModal() {
-    document.getElementById('applicationModal').classList.remove('hidden');
-    document.getElementById('applicationMotivation').value = '';
-    document.getElementById('applicationError').classList.add('hidden');
-}
-function closeApplicationModal() {
-    document.getElementById('applicationModal').classList.add('hidden');
-}
-function submitApplication() {
-    const motivation = document.getElementById('applicationMotivation').value.trim();
-    const errorDiv = document.getElementById('applicationError');
-    if (!motivation) {
-        errorDiv.textContent = 'Bitte schreibe einen Bewerbungstext.';
-        errorDiv.classList.remove('hidden');
-        return;
-    }
-    errorDiv.classList.add('hidden');
-    const eventId = <?php echo intval($eventId); ?>;
-    // The motivation text is validated client-side to ensure users provide context before signing up.
-    // The signup itself uses the standard event_signup endpoint.
-    fetch('../../api/event_signup.php', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({action: 'signup', event_id: eventId, csrf_token: csrfToken, motivation: motivation})
-    })
-    .then(r => r.json())
-    .then(data => {
-        if (data.success) {
-            closeApplicationModal();
-            showMessage('Erfolgreich angemeldet!', 'success');
-            setTimeout(() => location.reload(), 1500);
-        } else {
-            errorDiv.textContent = data.message || 'Fehler bei der Anmeldung';
-            errorDiv.classList.remove('hidden');
-        }
-    })
-    .catch(() => {
-        errorDiv.textContent = 'Netzwerkfehler';
-        errorDiv.classList.remove('hidden');
-    });
-}
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeApplicationModal(); });
-document.getElementById('applicationModal')?.addEventListener('click', (e) => {
-    if (e.target.id === 'applicationModal') closeApplicationModal();
-});
-<?php endif; ?>
-
 // ── Feedback Contact ──────────────────────────────────────────────────────────
 function sendFeedbackContactAction(action, btn) {
     btn.disabled = true;
@@ -1164,6 +1081,61 @@ document.getElementById('removeFeedbackContactBtn')?.addEventListener('click', f
         sendFeedbackContactAction('remove', this);
     }
 });
+
+// ── Dynamic title colour based on hero image brightness ───────────────────────
+(function () {
+    const heroImg   = document.querySelector('.event-hero-image img');
+    const heroTitle = document.getElementById('eventHeroTitle');
+    const overlay   = document.querySelector('.event-hero-overlay');
+
+    if (!heroImg || !heroTitle) return;
+
+    function applyTitleColor() {
+        try {
+            const w = heroImg.naturalWidth;
+            const h = heroImg.naturalHeight;
+            if (!w || !h) return;
+
+            // Sample the bottom 35% of the image – where the title overlaps
+            const sampleY = Math.floor(h * 0.65);
+            const sampleH = h - sampleY;
+
+            const canvas = document.createElement('canvas');
+            canvas.width = w;
+            canvas.height = sampleH;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(heroImg, 0, sampleY, w, sampleH, 0, 0, w, sampleH);
+
+            const data = ctx.getImageData(0, 0, w, sampleH).data;
+            let sum = 0;
+            for (let i = 0; i < data.length; i += 4) {
+                // Perceived brightness (ITU-R BT.601)
+                sum += (data[i] * 299 + data[i + 1] * 587 + data[i + 2] * 114) / 1000;
+            }
+            const avgBrightness = sum / (w * sampleH);
+
+            if (avgBrightness > 128) {
+                // Light image – switch to dark title and a light overlay
+                heroTitle.classList.remove('text-white', 'drop-shadow-lg');
+                heroTitle.style.color = '#111827';
+                heroTitle.style.textShadow = '0 1px 4px rgba(255,255,255,0.6)';
+                if (overlay) {
+                    overlay.style.background =
+                        'linear-gradient(to top, rgba(255,255,255,0.70) 0%, rgba(255,255,255,0.30) 50%, transparent 100%)';
+                }
+            }
+            // Dark image: keep default white text
+        } catch (e) {
+            // Canvas security error or browser limitation – keep white text
+        }
+    }
+
+    if (heroImg.complete && heroImg.naturalWidth) {
+        applyTitleColor();
+    } else {
+        heroImg.addEventListener('load', applyTitleColor);
+    }
+})();
 
 </script>
 
