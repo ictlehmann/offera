@@ -14,6 +14,7 @@ SET time_zone = "+00:00";
 -- NOTE: For existing databases, run:
 --   ALTER TABLE users ADD COLUMN has_seen_onboarding BOOLEAN NOT NULL DEFAULT 0 COMMENT 'Whether user has seen the onboarding modal';
 --   ALTER TABLE users ADD COLUMN entra_photo_path VARCHAR(500) DEFAULT NULL COMMENT 'Cached profile photo path fetched from Microsoft Entra ID';
+--   ALTER TABLE users ADD COLUMN is_onboarded BOOLEAN NOT NULL DEFAULT 0 COMMENT 'Whether user has completed the mandatory first-login onboarding workflow';
 -- ================================================
 CREATE TABLE IF NOT EXISTS `users` (
   `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -36,6 +37,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `entra_photo_path` VARCHAR(500) DEFAULT NULL COMMENT 'Cached profile photo path fetched from Microsoft Entra ID',
   `profile_complete` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'Flag to track if user has completed initial profile setup',
   `has_seen_onboarding` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'Whether user has seen the onboarding welcome modal',
+  `is_onboarded` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'Whether user has completed the mandatory first-login onboarding workflow',
   `tfa_secret` VARCHAR(255) DEFAULT NULL COMMENT 'Two-factor authentication secret key',
   `tfa_enabled` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'Whether two-factor authentication is enabled',
   `is_alumni_validated` BOOLEAN NOT NULL DEFAULT 1 COMMENT 'Whether alumni user is validated by board (0=needs approval, 1=approved)',

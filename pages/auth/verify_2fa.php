@@ -65,12 +65,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['verify_2fa'])) {
                     
                     // Set profile_incomplete flag from pending session data
                     $_SESSION['profile_incomplete'] = (intval($_SESSION['pending_2fa_profile_complete'] ?? 1) === 0);
+                    // Set is_onboarded flag from pending session data
+                    $_SESSION['is_onboarded'] = (bool)($_SESSION['pending_2fa_is_onboarded'] ?? false);
 
                     // Clear pending 2FA data
                     unset($_SESSION['pending_2fa_user_id']);
                     unset($_SESSION['pending_2fa_email']);
                     unset($_SESSION['pending_2fa_role']);
                     unset($_SESSION['pending_2fa_profile_complete']);
+                    unset($_SESSION['pending_2fa_is_onboarded']);
 
                     // Update last login
                     $stmt = $db->prepare("UPDATE users SET last_login = NOW() WHERE id = ?");
