@@ -328,69 +328,134 @@ ob_start();
     </div>
     <?php else: ?>
 
-    <!-- ── Availability filter pills ── -->
-    <div class="mb-3 flex flex-wrap gap-2" id="filter-bar">
-        <button type="button" data-filter="all"
-                class="filter-pill px-4 py-1.5 rounded-full text-sm font-medium transition-all bg-purple-600 text-white shadow-sm">
-            Alle
-        </button>
-        <button type="button" data-filter="available"
-                class="filter-pill px-4 py-1.5 rounded-full text-sm font-medium transition-all bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-purple-600 hover:text-white">
-            Verfügbar
-        </button>
-        <button type="button" data-filter="soldout"
-                class="filter-pill px-4 py-1.5 rounded-full text-sm font-medium transition-all bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-purple-600 hover:text-white">
-            Ausverkauft
-        </button>
-    </div>
-
-    <!-- ── Gender filter pills ── -->
+    <!-- ── Filter Panel ── -->
     <?php
     $availableGenders = array_unique(array_filter(array_column($products, 'gender'), function($g) {
         return !empty($g) && $g !== 'Keine';
     }));
     sort($availableGenders);
-    if (!empty($availableGenders)):
-    ?>
-    <div class="mb-3 flex flex-wrap gap-2" id="gender-filter-bar">
-        <button type="button" data-gender="all"
-                class="gender-pill px-4 py-1.5 rounded-full text-sm font-medium transition-all bg-blue-600 text-white shadow-sm">
-            Alle
-        </button>
-        <?php foreach (['Herren', 'Damen', 'Unisex'] as $g): ?>
-        <?php if (in_array($g, $availableGenders, true)): ?>
-        <button type="button" data-gender="<?php echo htmlspecialchars($g); ?>"
-                class="gender-pill px-4 py-1.5 rounded-full text-sm font-medium transition-all bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-blue-600 hover:text-white">
-            <?php echo htmlspecialchars($g); ?>
-        </button>
-        <?php endif; ?>
-        <?php endforeach; ?>
-    </div>
-    <?php endif; ?>
-
-    <!-- ── Category filter pills ── -->
-    <?php
     $availableCategories = array_unique(array_filter(array_column($products, 'category')));
     sort($availableCategories);
-    if (!empty($availableCategories)):
     ?>
-    <div class="mb-6 flex flex-wrap gap-2" id="category-filter-bar">
-        <button type="button" data-category="all"
-                class="category-pill px-4 py-1.5 rounded-full text-sm font-medium transition-all bg-green-600 text-white shadow-sm">
-            Alle Kategorien
-        </button>
-        <?php foreach ($availableCategories as $cat): ?>
-        <button type="button" data-category="<?php echo htmlspecialchars($cat); ?>"
-                class="category-pill px-4 py-1.5 rounded-full text-sm font-medium transition-all bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-green-600 hover:text-white">
-            <?php echo htmlspecialchars($cat); ?>
-        </button>
-        <?php endforeach; ?>
-    </div>
-    <?php else: ?>
-    <div class="mb-6"></div>
-    <?php endif; ?>
+    <div class="mb-8 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+        <!-- Filter header -->
+        <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+            <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center">
+                    <i class="fas fa-sliders text-blue-600 dark:text-blue-400 text-sm"></i>
+                </div>
+                <span class="font-semibold text-gray-800 dark:text-gray-100">Filter &amp; Suche</span>
+                <span id="filter-active-count" class="hidden ml-1 px-2 py-0.5 bg-blue-600 text-white text-xs font-bold rounded-full"></span>
+            </div>
+            <button id="filter-toggle" type="button"
+                    class="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+                    aria-label="Filter ein-/ausklappen">
+                <i class="fas fa-chevron-up text-sm" id="filter-toggle-icon"></i>
+            </button>
+        </div>
 
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8" id="product-grid">
+        <!-- Filter body -->
+        <div id="filter-body" class="p-5">
+            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
+
+                <!-- Search -->
+                <div class="sm:col-span-2 xl:col-span-1">
+                    <p class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
+                        <i class="fas fa-magnifying-glass"></i> Suche
+                    </p>
+                    <div class="relative">
+                        <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm pointer-events-none"></i>
+                        <input type="text" id="search-input" placeholder="Produkte suchen…"
+                               class="w-full pl-9 pr-9 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 text-sm placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all">
+                        <button type="button" id="search-clear"
+                                class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
+                            <i class="fas fa-times text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Availability -->
+                <div>
+                    <p class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
+                        <i class="fas fa-circle-check text-emerald-500"></i> Verfügbarkeit
+                    </p>
+                    <div class="flex flex-wrap gap-1.5" id="filter-bar">
+                        <button type="button" data-filter="all"
+                                class="filter-pill px-3.5 py-1.5 rounded-xl text-sm font-medium transition-all bg-blue-600 text-white shadow-sm">
+                            Alle
+                        </button>
+                        <button type="button" data-filter="available"
+                                class="filter-pill px-3.5 py-1.5 rounded-xl text-sm font-medium transition-all bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-emerald-500 hover:text-white">
+                            <i class="fas fa-circle-check mr-1 text-xs"></i>Verfügbar
+                        </button>
+                        <button type="button" data-filter="soldout"
+                                class="filter-pill px-3.5 py-1.5 rounded-xl text-sm font-medium transition-all bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-500 hover:text-white">
+                            <i class="fas fa-ban mr-1 text-xs"></i>Ausverkauft
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Gender -->
+                <?php if (!empty($availableGenders)): ?>
+                <div id="gender-filter-wrap">
+                    <p class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
+                        <i class="fas fa-person text-blue-400"></i> Zielgruppe
+                    </p>
+                    <div class="flex flex-wrap gap-1.5" id="gender-filter-bar">
+                        <button type="button" data-gender="all"
+                                class="gender-pill px-3.5 py-1.5 rounded-xl text-sm font-medium transition-all bg-blue-600 text-white shadow-sm">
+                            Alle
+                        </button>
+                        <?php foreach (['Herren', 'Damen', 'Unisex'] as $g): ?>
+                        <?php if (in_array($g, $availableGenders, true)): ?>
+                        <button type="button" data-gender="<?php echo htmlspecialchars($g); ?>"
+                                class="gender-pill px-3.5 py-1.5 rounded-xl text-sm font-medium transition-all bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-blue-500 hover:text-white">
+                            <?php echo htmlspecialchars($g); ?>
+                        </button>
+                        <?php endif; ?>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                <?php endif; ?>
+
+                <!-- Category -->
+                <?php if (!empty($availableCategories)): ?>
+                <div id="category-filter-wrap">
+                    <p class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
+                        <i class="fas fa-shapes text-purple-400"></i> Kategorie
+                    </p>
+                    <div class="flex flex-wrap gap-1.5" id="category-filter-bar">
+                        <button type="button" data-category="all"
+                                class="category-pill px-3.5 py-1.5 rounded-xl text-sm font-medium transition-all bg-blue-600 text-white shadow-sm">
+                            Alle
+                        </button>
+                        <?php foreach ($availableCategories as $cat): ?>
+                        <button type="button" data-category="<?php echo htmlspecialchars($cat); ?>"
+                                class="category-pill px-3.5 py-1.5 rounded-xl text-sm font-medium transition-all bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-purple-500 hover:text-white">
+                            <?php echo htmlspecialchars($cat); ?>
+                        </button>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                <?php endif; ?>
+
+            </div>
+
+            <!-- Results count -->
+            <div class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between">
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                    <span id="results-count" class="font-semibold text-gray-700 dark:text-gray-200"><?php echo count($products); ?></span>
+                    von <?php echo count($products); ?> Produkten
+                </p>
+                <button type="button" id="reset-filters"
+                        class="hidden text-sm text-blue-600 dark:text-blue-400 hover:underline font-medium flex items-center gap-1.5 transition-colors">
+                    <i class="fas fa-rotate-left text-xs"></i> Filter zurücksetzen
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5" id="product-grid">
         <?php foreach ($products as $product):
             $productOutOfStock = !empty($product['variants']) && array_sum(array_column($product['variants'], 'stock_quantity')) === 0;
             $isBulk = !empty($product['is_bulk_order']);
@@ -401,13 +466,15 @@ ob_start();
                 $allImages = [['image_path' => $product['image_path']]];
             }
             $sliderId = 'slider-grid-' . $product['id'];
+            $productUrl = asset('pages/shop/view.php?id=' . $product['id']);
         ?>
-        <div class="bg-white rounded-lg overflow-hidden flex flex-col group hover:shadow-lg transition-shadow duration-300 <?php echo $productOutOfStock ? 'opacity-60' : ''; ?>"
+        <div class="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden flex flex-col group hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-700 hover:border-blue-200 dark:hover:border-blue-800 <?php echo $productOutOfStock ? 'opacity-70' : ''; ?>"
              data-instock="<?php echo $productOutOfStock ? '0' : '1'; ?>"
              data-gender="<?php echo htmlspecialchars($product['gender'] ?? ''); ?>"
-             data-category="<?php echo htmlspecialchars($product['category'] ?? ''); ?>">
+             data-category="<?php echo htmlspecialchars($product['category'] ?? ''); ?>"
+             data-name="<?php echo htmlspecialchars(mb_strtolower($product['name'])); ?>">
             <!-- Product image (square) -->
-            <div class="relative aspect-square overflow-hidden bg-gray-100" id="<?php echo $sliderId; ?>">
+            <a href="<?php echo $productUrl; ?>" class="block relative aspect-square overflow-hidden bg-gray-50 dark:bg-gray-900" id="<?php echo $sliderId; ?>">
                 <?php if (!empty($allImages)): ?>
                     <?php foreach ($allImages as $idx => $img): ?>
                     <img src="<?php echo asset($img['image_path']); ?>"
@@ -418,39 +485,48 @@ ob_start();
                     <?php endforeach; ?>
                     <?php if (count($allImages) > 1): ?>
                     <button type="button" onclick="slideImg('<?php echo $sliderId; ?>',-1)" aria-label="Vorheriges Bild"
-                            class="absolute left-1 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white rounded-full w-7 h-7 flex items-center justify-center z-10 transition-colors">
+                            class="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 dark:bg-gray-800/80 hover:bg-white dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-full w-8 h-8 flex items-center justify-center z-10 shadow transition-all opacity-0 group-hover:opacity-100">
                         <i class="fas fa-chevron-left text-xs"></i>
                     </button>
                     <button type="button" onclick="slideImg('<?php echo $sliderId; ?>',1)" aria-label="Nächstes Bild"
-                            class="absolute right-1 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white rounded-full w-7 h-7 flex items-center justify-center z-10 transition-colors">
+                            class="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 dark:bg-gray-800/80 hover:bg-white dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-full w-8 h-8 flex items-center justify-center z-10 shadow transition-all opacity-0 group-hover:opacity-100">
                         <i class="fas fa-chevron-right text-xs"></i>
                     </button>
                     <?php endif; ?>
                 <?php else: ?>
-                <div class="absolute inset-0 flex items-center justify-center">
+                <div class="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
                     <i class="fas fa-box text-gray-300 dark:text-gray-600 text-5xl"></i>
                 </div>
                 <?php endif; ?>
-                <?php if ($productOutOfStock): ?>
-                <span class="absolute top-3 left-3 px-3 py-1 bg-gray-800 bg-opacity-75 text-white text-xs font-bold rounded-full uppercase tracking-wide">
-                    Ausverkauft
-                </span>
-                <?php endif; ?>
-                <?php if ($isBulk): ?>
-                <span class="absolute top-3 right-3 px-2 py-0.5 bg-purple-600 bg-opacity-90 text-white text-xs font-bold rounded-full">
-                    Sammelbestellung
-                </span>
-                <?php endif; ?>
-            </div>
+                <!-- Badges -->
+                <div class="absolute top-2.5 left-2.5 flex flex-col gap-1.5 z-10">
+                    <?php if ($productOutOfStock): ?>
+                    <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-gray-900/80 backdrop-blur-sm text-white text-xs font-bold rounded-full uppercase tracking-wide">
+                        <i class="fas fa-ban text-xs"></i> Ausverkauft
+                    </span>
+                    <?php endif; ?>
+                    <?php if ($isBulk): ?>
+                    <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-purple-600/90 backdrop-blur-sm text-white text-xs font-bold rounded-full">
+                        <i class="fas fa-layer-group text-xs"></i> Sammelbestellung
+                    </span>
+                    <?php endif; ?>
+                </div>
+                <!-- Quick view hint on hover -->
+                <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 dark:group-hover:bg-black/20 transition-all duration-300 flex items-end justify-center pb-4 opacity-0 group-hover:opacity-100">
+                    <span class="px-3 py-1.5 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm text-gray-800 dark:text-gray-100 text-xs font-semibold rounded-full shadow">
+                        <i class="fas fa-eye mr-1.5 text-blue-600"></i>Details ansehen
+                    </span>
+                </div>
+            </a>
 
             <!-- Product info -->
             <div class="p-4 flex flex-col flex-1">
-                <h3 class="font-bold text-gray-900 dark:text-gray-100 text-base mb-1 line-clamp-2">
-                    <a href="<?php echo asset('pages/shop/index.php?action=detail&product_id=' . $product['id']); ?>" class="no-underline text-inherit hover:underline">
+                <h3 class="font-bold text-gray-900 dark:text-gray-100 text-sm mb-1 line-clamp-2 leading-snug">
+                    <a href="<?php echo $productUrl; ?>" class="no-underline text-inherit hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                         <?php echo htmlspecialchars($product['name']); ?>
                     </a>
                 </h3>
-                <p class="text-gray-500 dark:text-gray-400 text-sm mb-3 flex-1">
+                <p class="text-blue-600 dark:text-blue-400 font-bold text-base mb-3 flex-1">
                     <?php echo number_format((float) $product['base_price'], 2, ',', '.'); ?> €
                 </p>
 
@@ -458,8 +534,8 @@ ob_start();
                 <!-- Bulk order progress bar -->
                 <div class="mb-3">
                     <?php $pct = min(100, (int) round($bulkProgress / $bulkGoal * 100)); ?>
-                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5 mb-1">
-                        <div class="bg-purple-500 h-1.5 rounded-full transition-all" style="width:<?php echo $pct; ?>%"></div>
+                    <div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-1.5 mb-1 overflow-hidden">
+                        <div class="bg-gradient-to-r from-purple-500 to-purple-600 h-1.5 rounded-full transition-all" style="width:<?php echo $pct; ?>%"></div>
                     </div>
                     <p class="text-xs text-gray-400 dark:text-gray-500"><?php echo $bulkProgress; ?>/<?php echo $bulkGoal; ?> (<?php echo $pct; ?>%)</p>
                     <?php if (!empty($product['bulk_end_date'])): ?>
@@ -472,7 +548,7 @@ ob_start();
 
                 <?php if ($productOutOfStock): ?>
                 <button type="button" disabled
-                        class="w-full py-2.5 bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 text-sm font-semibold rounded-lg cursor-not-allowed select-none">
+                        class="w-full py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 text-sm font-semibold rounded-xl cursor-not-allowed select-none">
                     <i class="fas fa-ban mr-1"></i>Ausverkauft
                 </button>
                 <?php elseif (empty($product['variants']) && empty($product['variants_csv'])): ?>
@@ -481,14 +557,14 @@ ob_start();
                     <input type="hidden" name="product_id" value="<?php echo $product['id']; ?>">
                     <input type="hidden" name="quantity" value="1">
                     <button type="submit"
-                            class="w-full py-2.5 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-sm font-semibold rounded-lg hover:bg-gray-700 dark:hover:bg-gray-300 transition-colors">
-                        <i class="fas fa-cart-plus mr-1"></i>In den Warenkorb
+                            class="w-full py-2.5 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-sm font-semibold rounded-xl hover:bg-gray-700 dark:hover:bg-gray-300 transition-colors flex items-center justify-center gap-1.5">
+                        <i class="fas fa-cart-plus text-sm"></i>In den Warenkorb
                     </button>
                 </form>
                 <?php else: ?>
-                <a href="<?php echo asset('pages/shop/index.php?action=detail&product_id=' . $product['id']); ?>"
-                   class="w-full block text-center py-2.5 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-sm font-semibold rounded-lg hover:bg-gray-700 dark:hover:bg-gray-300 transition-colors no-underline">
-                    <i class="fas fa-cart-plus mr-1"></i>In den Warenkorb
+                <a href="<?php echo $productUrl; ?>"
+                   class="w-full block text-center py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-semibold rounded-xl transition-all no-underline flex items-center justify-center gap-1.5 shadow-sm hover:shadow-md">
+                    <i class="fas fa-cart-plus text-sm"></i>Auswählen &amp; kaufen
                 </a>
                 <?php endif; ?>
             </div>
@@ -1066,7 +1142,7 @@ function adjustQty(delta) {
     input.value = Math.max(1, Math.min(99, val));
 }
 
-// ── Filter pills ─────────────────────────────────────────────────────────────
+// ── Filter pills + search + toggle ───────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', function() {
     var grid = document.getElementById('product-grid');
     if (!grid) return;
@@ -1074,29 +1150,56 @@ document.addEventListener('DOMContentLoaded', function() {
     var activeStock    = 'all';
     var activeGender   = 'all';
     var activeCategory = 'all';
+    var activeSearch   = '';
+    var totalProducts  = grid.querySelectorAll('[data-instock]').length;
+
+    var resultsCount   = document.getElementById('results-count');
+    var resetBtn       = document.getElementById('reset-filters');
+    var activeCountBadge = document.getElementById('filter-active-count');
+
+    function isFiltered() {
+        return activeStock !== 'all' || activeGender !== 'all' || activeCategory !== 'all' || activeSearch !== '';
+    }
+
+    function updateUI(visibleCount) {
+        if (resultsCount) resultsCount.textContent = visibleCount;
+        if (resetBtn) resetBtn.classList.toggle('hidden', !isFiltered());
+        var activeCount = (activeStock !== 'all' ? 1 : 0) + (activeGender !== 'all' ? 1 : 0)
+                        + (activeCategory !== 'all' ? 1 : 0) + (activeSearch !== '' ? 1 : 0);
+        if (activeCountBadge) {
+            activeCountBadge.textContent = activeCount;
+            activeCountBadge.classList.toggle('hidden', activeCount === 0);
+        }
+    }
 
     function applyFilters() {
+        var visible = 0;
         grid.querySelectorAll('[data-instock]').forEach(function(card) {
-            var inStock     = card.dataset.instock   === '1';
-            var cardGender  = card.dataset.gender    || '';
-            var cardCat     = card.dataset.category  || '';
+            var inStock    = card.dataset.instock   === '1';
+            var cardGender = card.dataset.gender    || '';
+            var cardCat    = card.dataset.category  || '';
+            var cardName   = card.dataset.name      || '';
 
             var stockOk  = activeStock    === 'all'
                         || (activeStock   === 'available' && inStock)
                         || (activeStock   === 'soldout'   && !inStock);
             var genderOk = activeGender   === 'all' || cardGender  === activeGender;
             var catOk    = activeCategory === 'all' || cardCat      === activeCategory;
+            var searchOk = activeSearch   === ''    || cardName.includes(activeSearch);
 
-            card.style.display = (stockOk && genderOk && catOk) ? '' : 'none';
+            var show = stockOk && genderOk && catOk && searchOk;
+            card.style.display = show ? '' : 'none';
+            if (show) visible++;
         });
+        updateUI(visible);
     }
 
-    var PILL_ACTIVE   = 'filter-pill px-4 py-1.5 rounded-full text-sm font-medium transition-all bg-purple-600 text-white shadow-sm';
-    var PILL_INACTIVE = 'filter-pill px-4 py-1.5 rounded-full text-sm font-medium transition-all bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-purple-600 hover:text-white';
-    var GENDER_ACTIVE   = 'gender-pill px-4 py-1.5 rounded-full text-sm font-medium transition-all bg-blue-600 text-white shadow-sm';
-    var GENDER_INACTIVE = 'gender-pill px-4 py-1.5 rounded-full text-sm font-medium transition-all bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-blue-600 hover:text-white';
-    var CAT_ACTIVE   = 'category-pill px-4 py-1.5 rounded-full text-sm font-medium transition-all bg-green-600 text-white shadow-sm';
-    var CAT_INACTIVE = 'category-pill px-4 py-1.5 rounded-full text-sm font-medium transition-all bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-green-600 hover:text-white';
+    var PILL_ACTIVE   = 'filter-pill px-3.5 py-1.5 rounded-xl text-sm font-medium transition-all bg-blue-600 text-white shadow-sm';
+    var PILL_INACTIVE = 'filter-pill px-3.5 py-1.5 rounded-xl text-sm font-medium transition-all bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-emerald-500 hover:text-white';
+    var GENDER_ACTIVE   = 'gender-pill px-3.5 py-1.5 rounded-xl text-sm font-medium transition-all bg-blue-600 text-white shadow-sm';
+    var GENDER_INACTIVE = 'gender-pill px-3.5 py-1.5 rounded-xl text-sm font-medium transition-all bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-blue-500 hover:text-white';
+    var CAT_ACTIVE   = 'category-pill px-3.5 py-1.5 rounded-xl text-sm font-medium transition-all bg-blue-600 text-white shadow-sm';
+    var CAT_INACTIVE = 'category-pill px-3.5 py-1.5 rounded-xl text-sm font-medium transition-all bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-purple-500 hover:text-white';
 
     document.querySelectorAll('.filter-pill').forEach(function(pill) {
         pill.addEventListener('click', function() {
@@ -1127,6 +1230,64 @@ document.addEventListener('DOMContentLoaded', function() {
             applyFilters();
         });
     });
+
+    // Search input
+    var searchInput = document.getElementById('search-input');
+    var searchClear = document.getElementById('search-clear');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            activeSearch = this.value.trim().toLowerCase();
+            if (searchClear) searchClear.classList.toggle('hidden', activeSearch === '');
+            applyFilters();
+        });
+    }
+    if (searchClear) {
+        searchClear.addEventListener('click', function() {
+            if (searchInput) { searchInput.value = ''; }
+            activeSearch = '';
+            this.classList.add('hidden');
+            applyFilters();
+        });
+    }
+
+    // Reset all filters
+    if (resetBtn) {
+        resetBtn.addEventListener('click', function() {
+            activeStock    = 'all';
+            activeGender   = 'all';
+            activeCategory = 'all';
+            activeSearch   = '';
+            if (searchInput) searchInput.value = '';
+            if (searchClear) searchClear.classList.add('hidden');
+            document.querySelectorAll('.filter-pill').forEach(function(p) {
+                p.className = (p.dataset.filter === 'all') ? PILL_ACTIVE : PILL_INACTIVE;
+            });
+            document.querySelectorAll('.gender-pill').forEach(function(p) {
+                p.className = (p.dataset.gender === 'all') ? GENDER_ACTIVE : GENDER_INACTIVE;
+            });
+            document.querySelectorAll('.category-pill').forEach(function(p) {
+                p.className = (p.dataset.category === 'all') ? CAT_ACTIVE : CAT_INACTIVE;
+            });
+            applyFilters();
+        });
+    }
+
+    // Filter panel toggle
+    var filterToggle = document.getElementById('filter-toggle');
+    var filterBody   = document.getElementById('filter-body');
+    var filterIcon   = document.getElementById('filter-toggle-icon');
+    if (filterToggle && filterBody) {
+        filterToggle.addEventListener('click', function() {
+            var collapsed = filterBody.classList.toggle('hidden');
+            if (filterIcon) {
+                filterIcon.className = collapsed
+                    ? 'fas fa-chevron-down text-sm'
+                    : 'fas fa-chevron-up text-sm';
+            }
+        });
+    }
+
+    updateUI(totalProducts);
 });
 
 // ── Checkout: loading spinner on submit ──────────────────────────────────────
