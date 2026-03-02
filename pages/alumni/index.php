@@ -115,10 +115,17 @@ ob_start();
 
     <!-- Alumni Profiles Grid -->
     <?php if (empty($profiles)): ?>
-        <div class="card p-12 text-center">
-            <i class="fas fa-user-slash text-6xl text-gray-300 mb-4"></i>
-            <p class="text-xl text-gray-600 mb-2">Keine Profile gefunden</p>
-            <p class="text-gray-500">Bitte Suchfilter anpassen</p>
+        <div class="card p-12 text-center rounded-2xl border border-dashed border-gray-300 dark:border-gray-600">
+            <img src="<?php echo htmlspecialchars(BASE_URL); ?>/assets/img/cropped_maskottchen_270x270.webp"
+                 alt="Keine Profile"
+                 class="w-32 h-32 mx-auto mb-5 opacity-60">
+            <?php if (!empty($searchKeyword) || !empty($industryFilter)): ?>
+                <p class="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">Keine Profile gefunden</p>
+                <p class="text-sm text-gray-400 dark:text-gray-500">Bitte passe Deinen Suchfilter an.</p>
+            <?php else: ?>
+                <p class="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">Noch keine Alumni-Profile vorhanden.</p>
+                <p class="text-sm text-gray-400 dark:text-gray-500">Schau später wieder vorbei!</p>
+            <?php endif; ?>
         </div>
     <?php else: ?>
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
