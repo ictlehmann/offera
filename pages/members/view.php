@@ -179,7 +179,7 @@ ob_start();
             </span>
             Über mich
         </h2>
-        <p class="text-gray-700 leading-relaxed whitespace-pre-line"><?php echo htmlspecialchars($profileUser['about_me']); ?></p>
+        <p class="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line break-words"><?php echo htmlspecialchars($profileUser['about_me']); ?></p>
     </div>
     <?php endif; ?>
 

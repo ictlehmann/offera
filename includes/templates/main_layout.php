@@ -239,15 +239,18 @@ $_tailwindCssVersion = filemtime(__DIR__ . '/../../assets/css/tailwind.css');
             
             if (savedTheme === 'dark') {
                 document.body.classList.add('dark-mode', 'dark');
+                document.documentElement.classList.add('dark-mode', 'dark');
                 document.documentElement.setAttribute('data-theme', 'dark');
                 document.documentElement.style.colorScheme = 'dark';
             } else if (savedTheme === 'light') {
                 document.body.classList.remove('dark-mode', 'dark');
+                document.documentElement.classList.remove('dark-mode', 'dark');
                 document.documentElement.setAttribute('data-theme', 'light');
                 document.documentElement.style.colorScheme = 'light';
             } else { // auto
                 if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
                     document.body.classList.add('dark-mode', 'dark');
+                    document.documentElement.classList.add('dark-mode', 'dark');
                     document.documentElement.setAttribute('data-theme', 'dark');
                     document.documentElement.style.colorScheme = 'dark';
                 }
@@ -954,6 +957,7 @@ $_tailwindCssVersion = filemtime(__DIR__ . '/../../assets/css/tailwind.css');
             const isDark = theme === 'dark' || (theme !== 'light' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
             if (isDark) {
                 document.body.classList.add('dark-mode', 'dark');
+                document.documentElement.classList.add('dark-mode', 'dark');
                 document.documentElement.setAttribute('data-theme', 'dark');
                 document.documentElement.style.colorScheme = 'dark';
                 if (themeIcon) { themeIcon.classList.remove('fa-moon'); themeIcon.classList.add('fa-sun'); }
@@ -962,6 +966,7 @@ $_tailwindCssVersion = filemtime(__DIR__ . '/../../assets/css/tailwind.css');
                 if (mobileThemeToggle) mobileThemeToggle.setAttribute('aria-label', 'Zu Lightmode wechseln');
             } else {
                 document.body.classList.remove('dark-mode', 'dark');
+                document.documentElement.classList.remove('dark-mode', 'dark');
                 document.documentElement.setAttribute('data-theme', 'light');
                 document.documentElement.style.colorScheme = 'light';
                 if (themeIcon) { themeIcon.classList.remove('fa-sun'); themeIcon.classList.add('fa-moon'); }
@@ -979,6 +984,7 @@ $_tailwindCssVersion = filemtime(__DIR__ . '/../../assets/css/tailwind.css');
             const isDarkMode = document.body.classList.contains('dark-mode');
             if (isDarkMode) {
                 document.body.classList.remove('dark-mode', 'dark');
+                document.documentElement.classList.remove('dark-mode', 'dark');
                 document.documentElement.setAttribute('data-theme', 'light');
                 document.documentElement.style.colorScheme = 'light';
                 localStorage.setItem('theme', 'light');
@@ -988,6 +994,7 @@ $_tailwindCssVersion = filemtime(__DIR__ . '/../../assets/css/tailwind.css');
                 if (mobileThemeToggle) mobileThemeToggle.setAttribute('aria-label', 'Zu Darkmode wechseln');
             } else {
                 document.body.classList.add('dark-mode', 'dark');
+                document.documentElement.classList.add('dark-mode', 'dark');
                 document.documentElement.setAttribute('data-theme', 'dark');
                 document.documentElement.style.colorScheme = 'dark';
                 localStorage.setItem('theme', 'dark');

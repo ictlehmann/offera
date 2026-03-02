@@ -1259,21 +1259,25 @@ select:focus {
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.05em;
-        color: #6b7280;
+        color: #374151;
         min-width: 7rem;
         flex-shrink: 0;
         padding-top: 0.2rem;
     }
 
-    .dark #usersTable td {
+    .dark #usersTable td,
+    .dark-mode #usersTable td {
         border-bottom-color: #374151;
     }
 
-    .dark #usersTable tr {
+    .dark #usersTable tr,
+    .dark-mode #usersTable tr {
         border-color: #374151;
+        background-color: #1f2937;
     }
 
-    .dark #usersTable td::before {
+    .dark #usersTable td::before,
+    .dark-mode #usersTable td::before {
         color: #9ca3af;
     }
 
