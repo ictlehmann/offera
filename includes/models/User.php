@@ -16,7 +16,7 @@ class User {
      */
     public static function getById($id) {
         $db = Database::getUserDB();
-        $sql = "SELECT id, email, role, entra_roles, entra_photo_path, tfa_enabled, is_alumni_validated, last_login, created_at FROM users WHERE id = ?";
+        $sql = "SELECT id, email, role, entra_roles, entra_photo_path, tfa_enabled, is_alumni_validated, last_login, created_at, about_me, gender, birthday, show_birthday, job_title FROM users WHERE id = ?";
         try {
             $stmt = $db->prepare($sql);
             $stmt->execute([$id]);

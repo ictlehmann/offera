@@ -230,7 +230,7 @@ class Alumni extends Database {
     
     /**
      * Search profiles with filters
-     * Returns ONLY profiles where the linked User has role 'alumni', 'alumni_vorstand', or 'ehrenmitglied'
+     * Returns ONLY profiles where the linked User has role 'alumni', 'alumni_vorstand', 'alumni_finanzpruefer', or 'ehrenmitglied'
      * 
      * @param array $filters Array of filters: search (name/position/company/industry), industry
      * @return array Array of matching profiles
@@ -319,8 +319,8 @@ class Alumni extends Database {
                     $userData = $userDataMap[$userId] ?? null;
                     $userRole = $userData['role'] ?? null;
                     
-                    // Only include profiles where user has role 'alumni', 'alumni_vorstand', or 'ehrenmitglied'
-                    if (in_array($userRole, ['alumni', 'alumni_vorstand', 'ehrenmitglied'])) {
+                    // Only include profiles where user has role 'alumni', 'alumni_vorstand', 'alumni_finanzpruefer', or 'ehrenmitglied'
+                    if (in_array($userRole, ['alumni', 'alumni_vorstand', 'alumni_finanzpruefer', 'ehrenmitglied'])) {
                         $profile['role'] = $userRole;
                         $profile['entra_photo_path'] = $userData['entra_photo_path'] ?? null;
                         

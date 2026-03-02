@@ -86,11 +86,7 @@ ob_start();
                     <option value="">Alle</option>
                     <option value="anwaerter" <?php echo $roleFilter === 'anwaerter' ? 'selected' : ''; ?>>Anwärter</option>
                     <option value="mitglied" <?php echo $roleFilter === 'mitglied' ? 'selected' : ''; ?>>Mitglieder</option>
-                    <option value="ehrenmitglied" <?php echo $roleFilter === 'ehrenmitglied' ? 'selected' : ''; ?>>Ehrenmitglieder</option>
                     <option value="resortleiter" <?php echo $roleFilter === 'resortleiter' ? 'selected' : ''; ?>>Ressortleiter</option>
-                    <option value="alumni" <?php echo $roleFilter === 'alumni' ? 'selected' : ''; ?>>Alumni</option>
-                    <option value="alumni_vorstand" <?php echo $roleFilter === 'alumni_vorstand' ? 'selected' : ''; ?>>Alumni-Vorstand</option>
-                    <option value="alumni_finanzpruefer" <?php echo $roleFilter === 'alumni_finanzpruefer' ? 'selected' : ''; ?>>Alumni-Finanzprüfer</option>
                     <option value="vorstand_finanzen" <?php echo $roleFilter === 'vorstand_finanzen' ? 'selected' : ''; ?>>Vorstand Finanzen und Recht</option>
                     <option value="vorstand_intern" <?php echo $roleFilter === 'vorstand_intern' ? 'selected' : ''; ?>>Vorstand Intern</option>
                     <option value="vorstand_extern" <?php echo $roleFilter === 'vorstand_extern' ? 'selected' : ''; ?>>Vorstand Extern</option>
