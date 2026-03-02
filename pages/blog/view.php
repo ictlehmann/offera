@@ -157,6 +157,16 @@ $canEdit = ($post['author_id'] === $userId) || BlogPost::canAuth($userRole);
 $canDeleteAnyComment = in_array($userRole, Auth::BOARD_ROLES);
 
 $title = htmlspecialchars($post['title']) . ' - IBC Intranet';
+
+// Open Graph meta tags for link preview
+$og_title       = $post['title'];
+$og_type        = 'article';
+$og_url         = url('pages/blog/view.php?id=' . (int)$post['id']);
+$og_description = !empty($post['content'])
+    ? mb_strimwidth(strip_tags($post['content']), 0, 200, '...')
+    : '';
+$og_image       = asset($post['image_path'] ?? BlogPost::DEFAULT_IMAGE);
+
 ob_start();
 ?>
 
