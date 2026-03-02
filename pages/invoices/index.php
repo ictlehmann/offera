@@ -23,17 +23,21 @@ if (!$hasInvoiceAccess) {
 
 $userRole = $user['role'] ?? '';
 
-// Check if user has permission to mark invoices as paid
-// Only board_finance members can mark invoices as paid
-$canMarkAsPaid = Auth::canManageInvoices();
+// Role-based visibility groups:
+// Group 1 (submit only):  alumni, ehrenmitglied, anwaerter, mitglied, resortleiter
+// Group 2 (read only):    vorstand_intern, vorstand_extern, alumni_finanzpruefer, alumni_vorstand
+// Group 3 (full access):  vorstand_finanzen
+$canViewTable    = in_array($userRole, ['vorstand_intern', 'vorstand_extern', 'alumni_finanzpruefer', 'alumni_vorstand', 'vorstand_finanzen']);
+$canEditInvoices = ($userRole === 'vorstand_finanzen');
 
-// Get invoices based on role
-$invoices = Invoice::getAll($userRole, $user['id']);
+// Only vorstand_finanzen can mark invoices as paid
+$canMarkAsPaid = $canEditInvoices;
 
-// Get statistics (only for board roles and alumni_vorstand/alumni_finanzpruefer)
+// Get invoices and stats only for roles that can view the table
+$invoices = [];
 $stats = null;
-$canViewStats = Auth::isBoard() || Auth::hasRole(['alumni_vorstand', 'alumni_finanzpruefer']);
-if ($canViewStats) {
+if ($canViewTable) {
+    $invoices = Invoice::getAll($userRole, $user['id']);
     $stats = Invoice::getStats();
 }
 
@@ -136,6 +140,7 @@ ob_start();
         </button>
     </div>
 
+    <?php if ($canViewTable): ?>
     <!-- Summary Stats -->
     <div class="grid grid-cols-1 sm:grid-cols-3 <?php echo $stats ? 'lg:grid-cols-4' : ''; ?> gap-3 mb-8 no-print">
         <!-- Offen -->
@@ -342,7 +347,7 @@ ob_start();
                                     </div>
                                 <?php endif; ?>
                             </div>
-                            <?php if (Auth::isBoard() && $invoice['status'] === 'pending'): ?>
+                            <?php if ($canEditInvoices && $invoice['status'] === 'pending'): ?>
                             <div class="flex gap-2 mt-3" onclick="event.stopPropagation()">
                                 <button onclick="updateInvoiceStatus(<?php echo $invoice['id']; ?>, 'approved')"
                                     class="flex-1 px-3 py-1.5 bg-green-600 text-white rounded-xl text-xs font-medium hover:bg-green-700 shadow-sm hover:shadow-md hover:-translate-y-0.5 transform transition-all duration-200">
@@ -353,7 +358,7 @@ ob_start();
                                     <i class="fas fa-times mr-1"></i>Ablehnen
                                 </button>
                             </div>
-                            <?php elseif (Auth::isBoard() && $invoice['status'] === 'approved' && $canMarkAsPaid): ?>
+                            <?php elseif ($canEditInvoices && $invoice['status'] === 'approved' && $canMarkAsPaid): ?>
                             <div class="mt-3" onclick="event.stopPropagation()">
                                 <button onclick="markInvoiceAsPaid(<?php echo $invoice['id']; ?>)"
                                     class="w-full px-3 py-1.5 bg-blue-600 text-white rounded-xl text-xs font-medium hover:bg-blue-700 shadow-sm hover:shadow-md hover:-translate-y-0.5 transform transition-all duration-200">
@@ -376,7 +381,7 @@ ob_start();
                             <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Betrag</th>
                             <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Beleg</th>
                             <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
-                            <?php if (Auth::isBoard()): ?>
+                            <?php if ($canEditInvoices): ?>
                             <th class="px-6 py-3.5 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider invoice-actions-col">Aktionen</th>
                             <?php endif; ?>
                         </tr>
@@ -460,7 +465,7 @@ ob_start();
                                         <?php echo htmlspecialchars($statusLabel); ?>
                                     </span>
                                 </td>
-                                <?php if (Auth::isBoard()): ?>
+                                <?php if ($canEditInvoices): ?>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm invoice-actions-col" onclick="event.stopPropagation()">
                                     <?php if ($invoice['status'] === 'pending'): ?>
                                         <div class="flex gap-2">
@@ -494,8 +499,10 @@ ob_start();
             </div>
         <?php endif; ?>
     </div>
+    <?php endif; ?>
 </div>
 
+<?php if ($canViewTable): ?>
 <!-- Invoice Detail Modal -->
 <div id="invoiceDetailModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-2xl w-full max-h-[85vh] flex flex-col overflow-hidden">
@@ -564,7 +571,7 @@ ob_start();
         </div>
         <!-- Footer -->
         <div class="px-5 pb-5 space-y-3">
-            <?php if (Auth::isBoard()): ?>
+            <?php if ($canEditInvoices): ?>
             <!-- Board action buttons (shown/hidden dynamically by JS) -->
             <div id="detail-actions-pending" class="hidden flex gap-2">
                 <button onclick="updateInvoiceStatusFromDetail('approved')"
@@ -619,6 +626,7 @@ ob_start();
         </div>
     </div>
 </div>
+<?php endif; ?>
 
 <!-- Submission Modal -->
 <div id="submissionModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
@@ -744,6 +752,7 @@ ob_start();
 </div>
 
 <script>
+<?php if ($canViewTable): ?>
 // ── Invoice Detail Modal ────────────────────────────────────────────────────
 const detailModal = document.getElementById('invoiceDetailModal');
 let currentDetailInvoiceId = null;
@@ -872,6 +881,7 @@ function confirmReject() {
     _doUpdateStatus(invoiceId, 'rejected', reason);
 }
 
+<?php endif; ?>
 // ── Submission Modal ────────────────────────────────────────────────────────
 const modal = document.getElementById('submissionModal');
 const openBtn = document.getElementById('openSubmissionModal');

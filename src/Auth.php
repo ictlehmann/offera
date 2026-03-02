@@ -584,7 +584,7 @@ class Auth {
         // Define page access permissions
         $pagePermissions = [
             'members'          => ['vorstand_finanzen', 'vorstand_intern', 'vorstand_extern', 'resortleiter', 'mitglied', 'anwaerter'],
-            'invoices'         => ['vorstand_finanzen', 'vorstand_intern', 'vorstand_extern', 'alumni', 'alumni_vorstand', 'alumni_finanzpruefer', 'ehrenmitglied'],
+            'invoices'         => ['vorstand_finanzen', 'vorstand_intern', 'vorstand_extern', 'alumni', 'alumni_vorstand', 'alumni_finanzpruefer', 'ehrenmitglied', 'anwaerter', 'mitglied', 'resortleiter'],
             'ideas'            => ['vorstand_finanzen', 'vorstand_intern', 'vorstand_extern', 'mitglied', 'anwaerter', 'resortleiter'],
             'training_requests'=> ['alumni', 'alumni_vorstand', 'alumni_finanzpruefer'],
             'polls'            => ['vorstand_finanzen', 'vorstand_intern', 'vorstand_extern', 'resortleiter', 'mitglied', 'anwaerter', 'alumni', 'alumni_vorstand', 'alumni_finanzpruefer', 'ehrenmitglied']
