@@ -561,17 +561,25 @@ ob_start();
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap" data-label="Status">
                         <div class="flex flex-col space-y-2">
-                            <?php if (!empty($user['azure_oid'])): ?>
-                            <span class="inline-flex items-center px-2.5 py-1 text-xs bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-900/50 dark:to-emerald-900/50 text-green-700 dark:text-green-300 rounded-lg font-semibold shadow-sm">
-                                <i class="fas fa-circle mr-1.5 text-green-500"></i>Aktiv
+                            <?php
+                            $isLocked = !empty($user['is_locked_permanently'])
+                                || (!empty($user['locked_until']) && ($lockedTs = strtotime($user['locked_until'])) !== false && $lockedTs > time());
+                            ?>
+                            <?php if ($isLocked): ?>
+                            <span class="inline-flex items-center px-2.5 py-1 text-xs bg-red-600 text-white rounded-lg font-semibold shadow-sm">
+                                <i class="fas fa-ban mr-1.5"></i>Inaktiv
+                            </span>
+                            <?php elseif (!empty($user['azure_oid'])): ?>
+                            <span class="inline-flex items-center px-2.5 py-1 text-xs bg-green-600 text-white rounded-lg font-semibold shadow-sm">
+                                <i class="fas fa-circle mr-1.5"></i>Aktiv
                             </span>
                             <?php else: ?>
-                            <span class="inline-flex items-center px-2.5 py-1 text-xs bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-lg font-semibold shadow-sm">
+                            <span class="inline-flex items-center px-2.5 py-1 text-xs bg-gray-500 text-white rounded-lg font-semibold shadow-sm">
                                 <i class="fas fa-envelope mr-1.5"></i>Eingeladen
                             </span>
                             <?php endif; ?>
                             <?php if ($user['tfa_enabled']): ?>
-                            <span class="inline-flex items-center px-2.5 py-1 text-xs bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-900/50 dark:to-emerald-900/50 text-green-700 dark:text-green-300 rounded-lg font-semibold shadow-sm">
+                            <span class="inline-flex items-center px-2.5 py-1 text-xs bg-blue-600 text-white rounded-lg font-semibold shadow-sm">
                                 <i class="fas fa-shield-alt mr-1.5"></i>2FA Aktiv
                             </span>
                             <?php endif; ?>

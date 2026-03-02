@@ -19,10 +19,7 @@ if (!Auth::check()) {
     exit;
 }
 
-if (!CSRFHandler::verifyToken($_POST['csrf_token'] ?? '')) {
-    header('HTTP/1.1 403 Forbidden');
-    exit;
-}
+CSRFHandler::verifyToken($_POST['csrf_token'] ?? '');
 
 $user = Auth::user();
 $userId = (int)$user['id'];
