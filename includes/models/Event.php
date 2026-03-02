@@ -246,8 +246,8 @@ class Event {
                 INSERT INTO events (title, description, location, maps_link, start_time, end_time, 
                                   registration_start, registration_end, status, 
                                   is_external, external_link, registration_link, needs_helpers,
-                                  requires_application, image_path, created_by)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                  image_path, created_by)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ");
             
             $stmt->execute([
@@ -264,7 +264,6 @@ class Event {
                 $data['external_link'] ?? null,
                 $data['registration_link'] ?? null,
                 $data['needs_helpers'] ?? false,
-                isset($data['requires_application']) ? intval($data['requires_application']) : 0,
                 $imagePath,
                 $userId
             ]);
