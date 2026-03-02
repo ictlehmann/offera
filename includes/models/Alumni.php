@@ -294,8 +294,20 @@ class Alumni extends Database {
                 
                 // Fetch all user roles and entra_roles in a single query
                 $placeholders = implode(',', array_fill(0, count($userIds), '?'));
-                $userStmt = $userDb->prepare("SELECT id, role, entra_roles, entra_photo_path FROM users WHERE id IN ($placeholders)");
-                $userStmt->execute($userIds);
+                $userSql = "SELECT id, role, entra_roles, entra_photo_path FROM users WHERE id IN ($placeholders)";
+                try {
+                    $userStmt = $userDb->prepare($userSql);
+                    $userStmt->execute($userIds);
+                } catch (PDOException $pdoEx) {
+                    // SQLSTATE 42S22 = unknown column; fall back if entra_photo_path doesn't exist yet
+                    if ($pdoEx->getCode() === '42S22' && strpos($pdoEx->getMessage(), 'entra_photo_path') !== false) {
+                        $userSql = str_replace('entra_photo_path', 'NULL AS entra_photo_path', $userSql);
+                        $userStmt = $userDb->prepare($userSql);
+                        $userStmt->execute($userIds);
+                    } else {
+                        throw $pdoEx;
+                    }
+                }
                 $userDataMap = [];
                 foreach ($userStmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
                     $userDataMap[$row['id']] = $row;

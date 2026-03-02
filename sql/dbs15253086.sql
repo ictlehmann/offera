@@ -13,6 +13,7 @@ SET time_zone = "+00:00";
 -- TABLE: users
 -- NOTE: For existing databases, run:
 --   ALTER TABLE users ADD COLUMN has_seen_onboarding BOOLEAN NOT NULL DEFAULT 0 COMMENT 'Whether user has seen the onboarding modal';
+--   ALTER TABLE users ADD COLUMN entra_photo_path VARCHAR(500) DEFAULT NULL COMMENT 'Cached profile photo path fetched from Microsoft Entra ID';
 -- ================================================
 CREATE TABLE IF NOT EXISTS `users` (
   `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
