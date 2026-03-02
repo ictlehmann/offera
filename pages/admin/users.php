@@ -66,6 +66,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
         }
+    } else if (isset($_POST['toggle_lock_user'])) {
+        $userId = intval($_POST['user_id'] ?? 0);
+        if ($userId == $_SESSION['user_id']) {
+            $error = 'Du kannst Dich nicht selbst sperren';
+        } else {
+            $db = Database::getUserDB();
+            $stmt = $db->prepare("SELECT is_locked_permanently FROM users WHERE id = ?");
+            $stmt->execute([$userId]);
+            $lockRow = $stmt->fetch();
+            if ($lockRow !== false) {
+                $newLockState = empty($lockRow['is_locked_permanently']) ? 1 : 0;
+                $updateStmt = $db->prepare("UPDATE users SET is_locked_permanently = ? WHERE id = ?");
+                if ($updateStmt->execute([$newLockState, $userId])) {
+                    $message = $newLockState ? 'Benutzer wurde gesperrt.' : 'Benutzer wurde entsperrt.';
+                } else {
+                    $error = 'Fehler beim Ändern des Sperrstatus.';
+                }
+            } else {
+                $error = 'Benutzer nicht gefunden.';
+            }
+        }
     } else if (isset($_POST['import_entra_user'])) {
         $entraId      = trim($_POST['entra_id'] ?? '');
         $displayName  = trim($_POST['display_name'] ?? '');
@@ -486,16 +507,19 @@ ob_start();
                     data-login="<?php echo $user['last_login'] ? strtotime($user['last_login']) : 0; ?>">
                     <td class="px-6 py-4 whitespace-nowrap" data-label="Profil">
                         <?php
-                        $avatarImageUrl = asset(getProfileImageUrl(
+                        $defaultImg = defined('DEFAULT_PROFILE_IMAGE') ? DEFAULT_PROFILE_IMAGE : 'assets/img/default_profil.png';
+                        $resolvedImg = getProfileImageUrl(
                             $profileImagePaths[(int)$user['id']] ?? null,
                             $user['entra_photo_path'] ?? null
-                        ));
+                        );
+                        $avatarImageUrl = ($resolvedImg !== $defaultImg) ? asset($resolvedImg) : null;
                         $avatarInitials = getMemberInitials($user['first_name'] ?? '', $user['last_name'] ?? '');
                         if ($avatarInitials === '?') {
                             $avatarInitials = strtoupper(mb_substr($user['email'] ?? '', 0, 2, 'UTF-8')) ?: '?';
                         }
                         ?>
                         <div class="h-10 w-10 rounded-full overflow-hidden bg-gradient-to-br from-purple-400 to-indigo-500 dark:from-purple-700 dark:to-indigo-800 flex items-center justify-center shadow-md shrink-0">
+                            <?php if ($avatarImageUrl): ?>
                             <img src="<?php echo htmlspecialchars($avatarImageUrl); ?>"
                                  alt="<?php echo htmlspecialchars($avatarInitials); ?>"
                                  class="w-full h-full object-cover"
@@ -503,6 +527,11 @@ ob_start();
                             <div style="display:none;" class="w-full h-full flex items-center justify-center text-white text-xs font-bold">
                                 <?php echo htmlspecialchars($avatarInitials ?: '?'); ?>
                             </div>
+                            <?php else: ?>
+                            <div class="w-full h-full flex items-center justify-center text-white text-xs font-bold">
+                                <?php echo htmlspecialchars($avatarInitials ?: '?'); ?>
+                            </div>
+                            <?php endif; ?>
                         </div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap" data-label="Benutzer">
@@ -577,6 +606,16 @@ ob_start();
                             <span class="inline-flex items-center px-2.5 py-1 text-xs bg-gray-500 text-white rounded-lg font-semibold shadow-sm">
                                 <i class="fas fa-envelope mr-1.5"></i>Eingeladen
                             </span>
+                            <?php endif; ?>
+                            <?php if ($user['id'] != $_SESSION['user_id']): ?>
+                            <?php $confirmMsg = $isLocked ? 'Benutzer wirklich entsperren?' : 'Benutzer wirklich sperren?'; ?>
+                            <form method="POST" class="inline mt-1" onsubmit="return confirm('<?php echo htmlspecialchars($confirmMsg, ENT_QUOTES, 'UTF-8'); ?>');">
+                                <input type="hidden" name="user_id" value="<?php echo $user['id']; ?>">
+                                <button type="submit" name="toggle_lock_user" class="inline-flex items-center px-2.5 py-1 text-xs <?php echo $isLocked ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'; ?> rounded-lg font-semibold shadow-sm hover:shadow-md transition-all">
+                                    <i class="fas <?php echo $isLocked ? 'fa-unlock' : 'fa-lock'; ?> mr-1.5"></i>
+                                    <?php echo $isLocked ? 'Entsperren' : 'Sperren'; ?>
+                                </button>
+                            </form>
                             <?php endif; ?>
                             <?php if ($user['tfa_enabled']): ?>
                             <span class="inline-flex items-center px-2.5 py-1 text-xs bg-blue-600 text-white rounded-lg font-semibold shadow-sm">
