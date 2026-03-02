@@ -170,6 +170,7 @@ ob_start();
                         <?php if (!empty($post['image_path'])): ?>
                             <img src="/<?php echo htmlspecialchars($post['image_path']); ?>" 
                                  alt="<?php echo htmlspecialchars($post['title']); ?>"
+                                 loading="lazy"
                                  class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                         <?php else: ?>
                             <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900">

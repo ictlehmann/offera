@@ -198,6 +198,7 @@ ob_start();
                                 <img
                                     src="<?php echo htmlspecialchars($imageSrc); ?>"
                                     alt="<?php echo htmlspecialchars($member['first_name'] . ' ' . $member['last_name']); ?>"
+                                    loading="lazy"
                                     style="width:100%;height:100%;object-fit:cover;"
                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
                                 >

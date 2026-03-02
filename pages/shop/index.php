@@ -413,6 +413,7 @@ ob_start();
                     <img src="<?php echo asset($img['image_path']); ?>"
                          alt="<?php echo htmlspecialchars($product['name']); ?>"
                          data-slide="<?php echo $idx; ?>"
+                         loading="<?php echo $idx === 0 ? 'eager' : 'lazy'; ?>"
                          class="slider-img absolute inset-0 w-full h-full object-cover transition-all duration-500 group-hover:scale-105 <?php echo $idx === 0 ? 'opacity-100' : 'opacity-0'; ?>">
                     <?php endforeach; ?>
                     <?php if (count($allImages) > 1): ?>
@@ -520,6 +521,7 @@ ob_start();
                     <img src="<?php echo asset($img['image_path']); ?>"
                          alt="<?php echo htmlspecialchars($currentProduct['name']); ?>"
                          data-slide="<?php echo $idx; ?>"
+                         loading="<?php echo $idx === 0 ? 'eager' : 'lazy'; ?>"
                          class="slider-img absolute inset-0 w-full h-full object-cover transition-opacity duration-300 <?php echo $idx === 0 ? 'opacity-100' : 'opacity-0'; ?>">
                     <?php endforeach; ?>
                     <?php if (count($detailImages) > 1): ?>
@@ -546,7 +548,7 @@ ob_start();
                     <?php foreach ($detailImages as $thumbIdx => $thumbImgData): ?>
                     <button type="button" onclick="goToSlide('<?php echo $detailSliderId; ?>', <?php echo $thumbIdx; ?>)"
                             class="thumb-btn flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 transition-all <?php echo $thumbIdx === 0 ? 'border-blue-500' : 'border-gray-200 dark:border-gray-600 opacity-70 hover:opacity-100'; ?>">
-                        <img src="<?php echo asset($thumbImgData['image_path']); ?>" alt="" class="w-full h-full object-cover pointer-events-none">
+                        <img src="<?php echo asset($thumbImgData['image_path']); ?>" alt="" loading="<?php echo $thumbIdx === 0 ? 'eager' : 'lazy'; ?>" class="w-full h-full object-cover pointer-events-none">
                     </button>
                     <?php endforeach; ?>
                 </div>

@@ -151,6 +151,7 @@ ob_start();
                         <?php if ($hasImage): ?>
                             <img src="<?php echo htmlspecialchars(BASE_URL . '/' . $event['image_path']); ?>"
                                  alt="<?php echo htmlspecialchars($event['title']); ?>"
+                                 loading="lazy"
                                  class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
                         <?php else: ?>
                             <div class="w-full h-full flex flex-col items-center justify-center event-card-placeholder">
