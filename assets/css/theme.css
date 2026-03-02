@@ -4954,11 +4954,52 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Better paragraph spacing */
 p {
+    overflow-wrap: break-word;
+    word-break: break-word;
     -webkit-hyphens: auto;
     -ms-hyphens: auto;
     hyphens: auto;
     orphans: 3;
     widows: 3;
+}
+
+/* Prevent long unbreakable strings (URLs, hashes) from overflowing any element */
+* {
+    overflow-wrap: break-word;
+}
+
+/* Long-text content areas: event descriptions, blog posts, profile "About me" */
+.event-description,
+.profile-about,
+.blog-content,
+.long-text {
+    overflow-wrap: break-word;
+    word-break: break-word;
+    -webkit-hyphens: auto;
+    -ms-hyphens: auto;
+    hyphens: auto;
+    line-height: 1.7;
+}
+
+/* Mobile-specific refinements for long-text content (≤ 640px) */
+@media (max-width: 640px) {
+    .event-description,
+    .profile-about,
+    .blog-content,
+    .long-text {
+        line-height: 1.65;
+        padding-left: 0.25rem;
+        padding-right: 0.25rem;
+    }
+
+    /* Ensure any anchor or inline element inside long-text containers also wraps */
+    .event-description a,
+    .profile-about a,
+    .blog-content a,
+    .long-text a {
+        overflow-wrap: break-word;
+        word-break: break-all;
+    }
 }
 
 /* ============================================================
