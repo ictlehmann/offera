@@ -38,15 +38,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['verify_2fa'])) {
         
         // Fetch user's 2FA secret
         $db = Database::getUserDB();
-        $stmt = $db->prepare("SELECT tfa_secret, two_factor_secret FROM users WHERE id = ?");
+        $stmt = $db->prepare("SELECT tfa_secret FROM users WHERE id = ?");
         $stmt->execute([$userId]);
         $user = $stmt->fetch();
         
         if (!$user) {
             $error = 'Benutzer nicht gefunden.';
         } else {
-            // Use tfa_secret or two_factor_secret (whichever is set)
-            $tfaSecret = $user['tfa_secret'] ?? $user['two_factor_secret'] ?? null;
+            $tfaSecret = $user['tfa_secret'] ?? null;
             
             if (empty($tfaSecret)) {
                 $error = '2FA ist nicht korrekt konfiguriert. Bitte kontaktieren Sie den Administrator.';
