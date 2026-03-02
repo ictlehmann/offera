@@ -147,11 +147,29 @@ class User {
     public static function getAll($role = null) {
         $db = Database::getUserDB();
         
-        if ($role) {
-            $stmt = $db->prepare("SELECT id, email, first_name, last_name, role, user_type, tfa_enabled, is_alumni_validated, last_login, created_at, entra_roles FROM users WHERE role = ? ORDER BY created_at DESC");
-            $stmt->execute([$role]);
-        } else {
-            $stmt = $db->query("SELECT id, email, first_name, last_name, role, user_type, tfa_enabled, is_alumni_validated, last_login, created_at, entra_roles FROM users ORDER BY created_at DESC");
+        $sql = $role
+            ? "SELECT id, email, first_name, last_name, role, user_type, tfa_enabled, is_alumni_validated, last_login, created_at, entra_roles, entra_photo_path FROM users WHERE role = ? ORDER BY created_at DESC"
+            : "SELECT id, email, first_name, last_name, role, user_type, tfa_enabled, is_alumni_validated, last_login, created_at, entra_roles, entra_photo_path FROM users ORDER BY created_at DESC";
+        try {
+            if ($role) {
+                $stmt = $db->prepare($sql);
+                $stmt->execute([$role]);
+            } else {
+                $stmt = $db->query($sql);
+            }
+        } catch (PDOException $e) {
+            // SQLSTATE 42S22 = unknown column; fall back if entra_photo_path doesn't exist yet
+            if ($e->getCode() === '42S22' && strpos($e->getMessage(), 'entra_photo_path') !== false) {
+                $sql = str_replace('entra_photo_path', 'NULL AS entra_photo_path', $sql);
+                if ($role) {
+                    $stmt = $db->prepare($sql);
+                    $stmt->execute([$role]);
+                } else {
+                    $stmt = $db->query($sql);
+                }
+            } else {
+                throw $e;
+            }
         }
         
         return $stmt->fetchAll();

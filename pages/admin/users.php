@@ -238,8 +238,22 @@ $users = User::getAll();
 $currentUser = Auth::user();
 $currentUserRole = $currentUser['role'] ?? '';
 
-// Pre-calculate base path for profile photos (used in table rendering)
-$profilePhotosBasePath = realpath(__DIR__ . '/../../uploads/profile_photos');
+// Pre-fetch profile image paths from alumni_profiles for all users (content DB)
+$profileImagePaths = [];
+try {
+    if (!empty($users)) {
+        $contentDb = Database::getContentDB();
+        $userIds = array_column($users, 'id');
+        $placeholders = implode(',', array_fill(0, count($userIds), '?'));
+        $stmt = $contentDb->prepare("SELECT user_id, image_path FROM alumni_profiles WHERE user_id IN ($placeholders)");
+        $stmt->execute($userIds);
+        foreach ($stmt->fetchAll() as $row) {
+            $profileImagePaths[(int)$row['user_id']] = $row['image_path'];
+        }
+    }
+} catch (Exception $e) {
+    // Silently ignore – avatars will fall back to default
+}
 
 $title = 'Benutzerverwaltung - IBC Intranet';
 ob_start();
@@ -471,35 +485,25 @@ ob_start();
                     data-id="<?php echo $user['id']; ?>"
                     data-login="<?php echo $user['last_login'] ? strtotime($user['last_login']) : 0; ?>">
                     <td class="px-6 py-4 whitespace-nowrap" data-label="Profil">
-                        <?php 
-                        // Validate user ID is a positive integer to prevent path traversal
-                        $userId = intval($user['id']);
-                        if ($userId > 0 && $userId <= 999999) { // Reasonable ID range check
-                            $profilePhotoPath = __DIR__ . '/../../uploads/profile_photos/user_' . $userId . '.jpg';
-                            $profilePhotoUrl = '/uploads/profile_photos/user_' . $userId . '.jpg';
-                            
-                            // Ensure the path is within the expected directory
-                            $realProfilePath = realpath($profilePhotoPath);
-                            
-                            if ($realProfilePath && $profilePhotosBasePath && strpos($realProfilePath, $profilePhotosBasePath) === 0) {
+                        <?php
+                        $avatarImageUrl = asset(getProfileImageUrl(
+                            $profileImagePaths[(int)$user['id']] ?? null,
+                            $user['entra_photo_path'] ?? null
+                        ));
+                        $avatarInitials = getMemberInitials($user['first_name'] ?? '', $user['last_name'] ?? '');
+                        if ($avatarInitials === '?') {
+                            $avatarInitials = strtoupper(mb_substr($user['email'] ?? '', 0, 2, 'UTF-8')) ?: '?';
+                        }
                         ?>
-                            <img src="<?php echo htmlspecialchars($profilePhotoUrl); ?>" 
-                                 alt="Profilbild" 
-                                 class="h-12 w-12 rounded-xl object-cover border-2 border-purple-300 dark:border-purple-700 shadow-md">
-                        <?php 
-                            } else {
-                        ?>
-                            <div class="h-12 w-12 bg-gradient-to-br from-purple-400 to-indigo-500 dark:from-purple-700 dark:to-indigo-800 rounded-xl flex items-center justify-center shadow-md">
-                                <i class="fas fa-user text-white text-lg"></i>
+                        <div class="h-10 w-10 rounded-full overflow-hidden bg-gradient-to-br from-purple-400 to-indigo-500 dark:from-purple-700 dark:to-indigo-800 flex items-center justify-center shadow-md shrink-0">
+                            <img src="<?php echo htmlspecialchars($avatarImageUrl); ?>"
+                                 alt="<?php echo htmlspecialchars($avatarInitials); ?>"
+                                 class="w-full h-full object-cover"
+                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                            <div style="display:none;" class="w-full h-full flex items-center justify-center text-white text-xs font-bold">
+                                <?php echo htmlspecialchars($avatarInitials ?: '?'); ?>
                             </div>
-                        <?php 
-                            }
-                        } else {
-                        ?>
-                            <div class="h-12 w-12 bg-gradient-to-br from-purple-400 to-indigo-500 dark:from-purple-700 dark:to-indigo-800 rounded-xl flex items-center justify-center shadow-md">
-                                <i class="fas fa-user text-white text-lg"></i>
-                            </div>
-                        <?php } ?>
+                        </div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap" data-label="Benutzer">
                         <div class="flex items-center">

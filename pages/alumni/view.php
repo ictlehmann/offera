@@ -146,28 +146,8 @@ ob_start();
                     'alumni_finanzpruefer'=> 'bg-indigo-100 text-indigo-800 border-indigo-300',
                     'ehrenmitglied'       => 'bg-amber-100 text-amber-800 border-amber-300',
                 ];
-                $displayRole = null;
-                $displayRoleKey = Auth::getPrimaryEntraRoleKey($profileUserEntraRoles, $profileUserRole);
-                if (!empty($profileUserEntraRoles)) {
-                    $entraRolesArray = json_decode($profileUserEntraRoles, true);
-                    if (json_last_error() === JSON_ERROR_NONE && is_array($entraRolesArray) && !empty($entraRolesArray)) {
-                        $displayNames = [];
-                        foreach ($entraRolesArray as $entraRole) {
-                            if (is_array($entraRole) && isset($entraRole['displayName'])) {
-                                $displayNames[] = $entraRole['displayName'];
-                            } elseif (is_array($entraRole) && isset($entraRole['id'])) {
-                                $displayNames[] = Auth::getRoleLabel($entraRole['id']);
-                            } elseif (is_string($entraRole)) {
-                                $displayNames[] = Auth::getRoleLabel($entraRole);
-                            }
-                        }
-                        if (!empty($displayNames)) {
-                            $displayRole = implode(', ', $displayNames);
-                        }
-                    }
-                }
-                $displayRole = $displayRole ?? getFormattedRoleName($profileUserRole);
-                $badgeClass = $roleBadgeColors[$displayRoleKey] ?? 'bg-gray-100 text-gray-800 border-gray-300';
+                $displayRole = getFormattedRoleName($profileUserRole);
+                $badgeClass = $roleBadgeColors[$profileUserRole] ?? 'bg-gray-100 text-gray-800 border-gray-300';
                 ?>
                 <div class="mb-4">
                     <span class="inline-block px-4 py-2 text-sm font-semibold rounded-full border <?php echo $badgeClass; ?>">
