@@ -103,11 +103,16 @@ ob_start();
     <!-- Events Grid -->
     <?php if (empty($events)): ?>
         <div class="card p-12 text-center rounded-2xl border border-dashed border-gray-300 dark:border-gray-600">
-            <div class="w-20 h-20 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mx-auto mb-5">
-                <i class="fas fa-calendar-times text-4xl text-gray-400 dark:text-gray-500"></i>
-            </div>
-            <p class="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">Keine Events gefunden</p>
-            <p class="text-sm text-gray-400 dark:text-gray-500">Aktuell gibt es keine Events in dieser Kategorie.</p>
+            <img src="<?php echo htmlspecialchars(BASE_URL); ?>/assets/img/cropped_maskottchen_270x270.webp"
+                 alt="Keine Events"
+                 class="w-32 h-32 mx-auto mb-5 opacity-60">
+            <?php if ($filter === 'my_registrations'): ?>
+                <p class="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">Keine Anmeldungen gefunden</p>
+                <p class="text-sm text-gray-400 dark:text-gray-500">Du hast Dich noch für keine Events angemeldet.</p>
+            <?php else: ?>
+                <p class="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">Aktuell stehen keine Events an.</p>
+                <p class="text-sm text-gray-400 dark:text-gray-500">Schau später wieder vorbei!</p>
+            <?php endif; ?>
         </div>
     <?php else: ?>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

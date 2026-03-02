@@ -115,11 +115,19 @@ ob_start();
     <?php if (empty($filteredPolls)): ?>
     <!-- No polls message -->
     <div class="card p-12 text-center rounded-2xl border border-dashed border-gray-300 dark:border-gray-600">
-        <div class="w-20 h-20 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mx-auto mb-5">
-            <i class="fas fa-poll text-gray-400 dark:text-gray-500 text-4xl"></i>
-        </div>
-        <h3 class="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">Keine aktiven Umfragen</h3>
-        <p class="text-sm text-gray-400 dark:text-gray-500">Es sind derzeit keine Umfragen in dieser Kategorie verfügbar.</p>
+        <img src="<?php echo htmlspecialchars(BASE_URL); ?>/assets/img/cropped_maskottchen_270x270.webp"
+             alt="Keine Umfragen"
+             class="w-32 h-32 mx-auto mb-5 opacity-60">
+        <?php if ($voteFilter === 'voted'): ?>
+            <h3 class="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">Noch keine Umfragen abgestimmt</h3>
+            <p class="text-sm text-gray-400 dark:text-gray-500">Stimme bei offenen Umfragen ab, um sie hier zu sehen.</p>
+        <?php elseif ($voteFilter === 'open'): ?>
+            <h3 class="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">Aktuell gibt es keine offenen Umfragen.</h3>
+            <p class="text-sm text-gray-400 dark:text-gray-500">Schau später wieder vorbei!</p>
+        <?php else: ?>
+            <h3 class="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">Aktuell sind keine Umfragen aktiv.</h3>
+            <p class="text-sm text-gray-400 dark:text-gray-500">Schau später wieder vorbei!</p>
+        <?php endif; ?>
     </div>
     <?php else: ?>
 
