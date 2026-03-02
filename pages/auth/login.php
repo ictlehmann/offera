@@ -1267,6 +1267,10 @@ try {
                 border-radius: 22px;
             }
 
+            .logo-container {
+                margin-bottom: 35px;
+            }
+
             .ibc-logo {
                 width: 110px;
             }
@@ -1274,6 +1278,10 @@ try {
             .logo-glow {
                 width: 160px;
                 height: 160px;
+            }
+
+            .welcome-text {
+                margin-bottom: 30px;
             }
 
             .welcome-title {
@@ -1319,6 +1327,10 @@ try {
             .login-container {
                 padding: 35px 22px;
                 border-radius: 20px;
+            }
+
+            .logo-container {
+                margin-bottom: 25px;
             }
 
             .ibc-logo {
@@ -1442,17 +1454,14 @@ try {
             }
         }
 
-        /* Mobile keyboard fix: allow scrolling when virtual keyboard pushes content */
+        /* Safe area support for notched devices, keep container centered */
         @media (max-width: 640px) {
             body {
-                align-items: flex-start;
-                padding: env(safe-area-inset-top, 1rem) env(safe-area-inset-right, 0) env(safe-area-inset-bottom, 1rem) env(safe-area-inset-left, 0);
+                padding: max(1.5rem, env(safe-area-inset-top)) max(0px, env(safe-area-inset-right)) max(1.5rem, env(safe-area-inset-bottom)) max(0px, env(safe-area-inset-left));
             }
             .login-container {
                 margin-left: auto;
                 margin-right: auto;
-                margin-top: max(2rem, env(safe-area-inset-top, 2rem));
-                margin-bottom: max(2rem, env(safe-area-inset-bottom, 2rem));
             }
         }
 
