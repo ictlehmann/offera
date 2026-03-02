@@ -104,6 +104,16 @@ $isFeedbackContact = $feedbackContact && (int)($feedbackContact['user_id'] ?? 0)
 $requiresApplication = (bool)($event['requires_application'] ?? false);
 
 $title = htmlspecialchars($event['title']) . ' - Events';
+
+// Open Graph meta tags for link preview
+$og_title       = $event['title'];
+$og_type        = 'website';
+$og_url         = url('pages/events/view.php?id=' . (int)$event['id']);
+$og_description = !empty($event['description'])
+    ? mb_strimwidth(strip_tags($event['description']), 0, 200, '...')
+    : '';
+$og_image       = asset($event['image_path'] ?? Event::DEFAULT_IMAGE);
+
 ob_start();
 ?>
 

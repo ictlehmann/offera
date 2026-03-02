@@ -40,6 +40,20 @@ $_notifCsrfToken = CSRFHandler::getToken();
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <title><?php echo $title ?? 'IBC Intranet'; ?></title>
+    <?php if (!empty($og_title)): ?>
+    <meta property="og:title" content="<?php echo htmlspecialchars($og_title); ?>">
+    <meta property="og:type" content="<?php echo htmlspecialchars($og_type ?? 'website'); ?>">
+    <?php if (!empty($og_url)): ?>
+    <meta property="og:url" content="<?php echo htmlspecialchars($og_url); ?>">
+    <?php endif; ?>
+    <?php if (!empty($og_description)): ?>
+    <meta property="og:description" content="<?php echo htmlspecialchars($og_description); ?>">
+    <?php endif; ?>
+    <?php if (!empty($og_image)): ?>
+    <meta property="og:image" content="<?php echo htmlspecialchars($og_image); ?>">
+    <?php endif; ?>
+    <meta name="twitter:card" content="<?php echo !empty($og_image) ? 'summary_large_image' : 'summary'; ?>">
+    <?php endif; ?>
     <link rel="icon" type="image/webp" href="<?php echo asset('assets/img/cropped_maskottchen_32x32.webp'); ?>">
     <link rel="apple-touch-icon" href="<?php echo asset('assets/img/cropped_maskottchen_180x180.webp'); ?>">
     <link rel="manifest" href="<?php echo asset('manifest.json'); ?>">
