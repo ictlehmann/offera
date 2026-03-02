@@ -45,37 +45,7 @@ class Idea {
      */
     public static function getAll(int $currentUserId): array {
         try {
-            $db = Database::getContentDB();
-
-            // Ensure tables exist (graceful degradation)
-            $db->exec(
-                'CREATE TABLE IF NOT EXISTS `ideas` (
-                    `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-                    `user_id` INT UNSIGNED NOT NULL,
-                    `title` VARCHAR(200) NOT NULL,
-                    `description` TEXT NOT NULL,
-                    `status` ENUM(\'new\',\'in_review\',\'accepted\',\'rejected\',\'implemented\') DEFAULT \'new\',
-                    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                    INDEX `idx_user_id` (`user_id`),
-                    INDEX `idx_status` (`status`),
-                    INDEX `idx_created_at` (`created_at`)
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci'
-            );
-            $db->exec(
-                'CREATE TABLE IF NOT EXISTS `idea_votes` (
-                    `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-                    `idea_id` INT UNSIGNED NOT NULL,
-                    `user_id` INT UNSIGNED NOT NULL,
-                    `vote` ENUM(\'up\',\'down\') NOT NULL,
-                    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    UNIQUE KEY `uq_user_idea` (`idea_id`, `user_id`),
-                    INDEX `idx_idea_id` (`idea_id`),
-                    INDEX `idx_user_id` (`user_id`),
-                    FOREIGN KEY (`idea_id`) REFERENCES `ideas`(`id`) ON DELETE CASCADE
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci'
-            );
-
+            $db   = Database::getContentDB();
             $stmt = $db->prepare(
                 'SELECT i.*,
                         COALESCE(SUM(v.vote = \'up\'),   0) AS upvotes,

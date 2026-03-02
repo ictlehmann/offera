@@ -299,6 +299,7 @@ submitBtn.addEventListener('click', async () => {
     }
 
     submitBtn.disabled = true;
+    submitBtn.setAttribute('aria-busy', 'true');
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Wird eingereicht…';
 
     try {
@@ -322,6 +323,7 @@ submitBtn.addEventListener('click', async () => {
         formError.classList.remove('hidden');
     } finally {
         submitBtn.disabled = false;
+        submitBtn.setAttribute('aria-busy', 'false');
         submitBtn.innerHTML = '<i class="fas fa-paper-plane mr-1"></i>Einreichen';
     }
 });
