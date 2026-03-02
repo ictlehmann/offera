@@ -303,8 +303,8 @@ class Invoice {
      * @return bool Success status
      */
     public static function updateStatus($invoiceId, $status, $reason = null, $userRole = null) {
-        // Only board members can update status
-        if (!in_array($userRole, Auth::BOARD_ROLES)) {
+        // Only vorstand_finanzen can update status
+        if ($userRole !== 'vorstand_finanzen') {
             error_log("Unauthorized attempt to update invoice status by role: " . ($userRole ?? 'unknown'));
             return false;
         }
