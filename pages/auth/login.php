@@ -385,6 +385,8 @@ try {
             -webkit-animation: containerAppear 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
             animation: containerAppear 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
             border: 1px solid rgba(108, 183, 62, 0.1);
+            overflow-wrap: break-word;
+            word-break: break-word;
         }
 
         @-webkit-keyframes containerAppear {
@@ -875,12 +877,16 @@ try {
             margin-bottom: 12px;
             font-weight: 700;
             letter-spacing: -0.5px;
+            overflow-wrap: break-word;
+            word-break: break-word;
         }
 
         .welcome-subtitle {
             color: #ffffff !important;
             font-size: 16px;
             font-weight: 400;
+            overflow-wrap: break-word;
+            word-break: break-word;
         }
 
         /* MICROSOFT BUTTON - MEGA IMPRESSIVE */
@@ -1122,6 +1128,8 @@ try {
             animation: alertSlideDown 0.5s ease-out;
             font-size: 15px;
             font-weight: 500;
+            overflow-wrap: break-word;
+            word-break: break-word;
         }
 
         @-webkit-keyframes alertSlideDown {
@@ -1487,6 +1495,36 @@ try {
         body .welcome-text h1.welcome-title { color: #ffffff !important; }
         body .welcome-text p.welcome-subtitle { color: #ffffff !important; }
         .text-white { color: #ffffff !important; }
+
+        /* Extra small phones (375-479px): fine-tune spacing */
+        @media (max-width: 479px) and (min-width: 361px) {
+            .login-container {
+                padding: 36px 24px;
+                border-radius: 20px;
+            }
+            .logo-container {
+                margin-bottom: 28px;
+            }
+            .ibc-logo {
+                width: 105px;
+            }
+            .logo-glow {
+                width: 155px;
+                height: 155px;
+            }
+            .welcome-title {
+                font-size: 24px;
+                margin-bottom: 8px;
+            }
+            .welcome-subtitle {
+                font-size: 13.5px;
+            }
+            .microsoft-button {
+                padding: 15px 16px;
+                font-size: 14px;
+                gap: 10px;
+            }
+        }
     </style>
 </head>
 

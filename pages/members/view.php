@@ -106,26 +106,26 @@ ob_start();
 
             <!-- Profile Info -->
             <div class="flex-1 min-w-0">
-                <h1 class="text-3xl font-bold text-gray-800 mb-2">
+                <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-2">
                     <?php echo htmlspecialchars($profile['first_name'] . ' ' . $profile['last_name']); ?>
                 </h1>
 
                 <!-- Role Badge -->
                 <?php
                 $roleBadgeColors = [
-                    'vorstand_finanzen'   => 'bg-purple-100 text-purple-800 border-purple-300',
-                    'vorstand_intern'     => 'bg-purple-100 text-purple-800 border-purple-300',
-                    'vorstand_extern'     => 'bg-purple-100 text-purple-800 border-purple-300',
-                    'ressortleiter'       => 'bg-blue-100 text-blue-800 border-blue-300',
-                    'mitglied'            => 'bg-green-100 text-green-800 border-green-300',
-                    'anwaerter'           => 'bg-yellow-100 text-yellow-800 border-yellow-300',
-                    'alumni'              => 'bg-purple-100 text-purple-800 border-purple-300',
-                    'alumni_vorstand'     => 'bg-indigo-100 text-indigo-800 border-indigo-300',
-                    'alumni_finanz'       => 'bg-indigo-100 text-indigo-800 border-indigo-300',
-                    'ehrenmitglied'       => 'bg-amber-100 text-amber-800 border-amber-300',
+                    'vorstand_finanzen'   => 'bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-900 dark:text-purple-200 dark:border-purple-700',
+                    'vorstand_intern'     => 'bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-900 dark:text-purple-200 dark:border-purple-700',
+                    'vorstand_extern'     => 'bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-900 dark:text-purple-200 dark:border-purple-700',
+                    'ressortleiter'       => 'bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-900 dark:text-blue-200 dark:border-blue-700',
+                    'mitglied'            => 'bg-green-100 text-green-800 border-green-300 dark:bg-green-900 dark:text-green-200 dark:border-green-700',
+                    'anwaerter'           => 'bg-yellow-100 text-yellow-800 border-yellow-300 dark:bg-yellow-900 dark:text-yellow-200 dark:border-yellow-700',
+                    'alumni'              => 'bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-900 dark:text-purple-200 dark:border-purple-700',
+                    'alumni_vorstand'     => 'bg-indigo-100 text-indigo-800 border-indigo-300 dark:bg-indigo-900 dark:text-indigo-300 dark:border-indigo-500',
+                    'alumni_finanz'       => 'bg-indigo-100 text-indigo-800 border-indigo-300 dark:bg-indigo-900 dark:text-indigo-300 dark:border-indigo-500',
+                    'ehrenmitglied'       => 'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-900 dark:text-amber-200 dark:border-amber-700',
                 ];
                 $displayRole = getFormattedRoleName($profileUserRole);
-                $badgeClass = $roleBadgeColors[$profileUserRole] ?? 'bg-gray-100 text-gray-800 border-gray-300';
+                $badgeClass = $roleBadgeColors[$profileUserRole] ?? 'bg-gray-100 text-gray-800 border-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600';
                 ?>
                 <div class="mb-3">
                     <span class="inline-block px-4 py-1.5 text-sm font-semibold rounded-full border <?php echo $badgeClass; ?>">
@@ -135,7 +135,7 @@ ob_start();
 
                 <!-- Position / Company snippet -->
                 <?php if (!empty($profile['position']) || !empty($profileUser['job_title'])): ?>
-                <p class="text-base text-gray-700 mb-1 flex items-center gap-2">
+                <p class="text-base text-gray-700 dark:text-gray-300 mb-1 flex items-center gap-2">
                     <i class="fas fa-briefcase text-gray-400 w-4"></i>
                     <span><?php echo htmlspecialchars($profile['position'] ?? $profileUser['job_title'] ?? ''); ?></span>
                 </p>
@@ -173,20 +173,20 @@ ob_start();
     <!-- Über mich -->
     <?php if (!empty($profileUser['about_me'])): ?>
     <div class="card p-6 mb-6">
-        <h2 class="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
+        <h2 class="text-lg font-bold text-gray-800 dark:text-gray-100 mb-3 flex items-center gap-2">
             <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600">
                 <i class="fas fa-quote-left text-sm"></i>
             </span>
             Über mich
         </h2>
-        <p class="text-gray-700 leading-relaxed whitespace-pre-line"><?php echo htmlspecialchars($profileUser['about_me']); ?></p>
+        <p class="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line break-words"><?php echo htmlspecialchars($profileUser['about_me']); ?></p>
     </div>
     <?php endif; ?>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <!-- Kontaktinformationen -->
         <div class="card p-6">
-            <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+            <h2 class="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
                 <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600">
                     <i class="fas fa-address-card text-sm"></i>
                 </span>
@@ -246,7 +246,7 @@ ob_start();
                     </div>
                     <div>
                         <p class="text-xs text-gray-400 font-medium">Geburtstag</p>
-                        <p class="font-medium text-gray-800 text-sm"><?php echo date('d.m.Y', strtotime($profileUser['birthday'])); ?></p>
+                        <p class="font-medium text-gray-800 dark:text-gray-200 text-sm"><?php echo date('d.m.Y', strtotime($profileUser['birthday'])); ?></p>
                     </div>
                 </div>
                 <?php endif; ?>
@@ -308,7 +308,7 @@ ob_start();
         <!-- Aktuelles Studium -->
         <?php if (!empty($profile['study_program']) || !empty($profile['semester']) || !empty($profile['angestrebter_abschluss']) || !empty($profile['graduation_year'])): ?>
         <div class="card p-6">
-            <h2 class="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
+            <h2 class="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
                 <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-indigo-100 text-indigo-600">
                     <i class="fas fa-graduation-cap text-sm"></i>
                 </span>
@@ -318,28 +318,28 @@ ob_start();
                 <?php if (!empty($profile['study_program'])): ?>
                 <div class="p-3 rounded-xl bg-gray-50">
                     <p class="text-xs text-gray-400 font-medium mb-0.5">Bachelor-Studiengang</p>
-                    <p class="font-semibold text-gray-800 text-sm"><?php echo htmlspecialchars($profile['study_program']); ?></p>
+                    <p class="font-semibold text-gray-800 dark:text-gray-200 text-sm"><?php echo htmlspecialchars($profile['study_program']); ?></p>
                 </div>
                 <?php endif; ?>
 
                 <?php if (!empty($profile['semester'])): ?>
                 <div class="p-3 rounded-xl bg-gray-50">
                     <p class="text-xs text-gray-400 font-medium mb-0.5">Bachelor-Semester</p>
-                    <p class="font-semibold text-gray-800 text-sm"><?php echo htmlspecialchars($profile['semester']); ?></p>
+                    <p class="font-semibold text-gray-800 dark:text-gray-200 text-sm"><?php echo htmlspecialchars($profile['semester']); ?></p>
                 </div>
                 <?php endif; ?>
 
                 <?php if (!empty($profile['angestrebter_abschluss'])): ?>
                 <div class="p-3 rounded-xl bg-gray-50">
                     <p class="text-xs text-gray-400 font-medium mb-0.5">Master-Studiengang</p>
-                    <p class="font-semibold text-gray-800 text-sm"><?php echo htmlspecialchars($profile['angestrebter_abschluss']); ?></p>
+                    <p class="font-semibold text-gray-800 dark:text-gray-200 text-sm"><?php echo htmlspecialchars($profile['angestrebter_abschluss']); ?></p>
                 </div>
                 <?php endif; ?>
 
                 <?php if (!empty($profile['graduation_year'])): ?>
                 <div class="p-3 rounded-xl bg-gray-50">
                     <p class="text-xs text-gray-400 font-medium mb-0.5">Master-Semester</p>
-                    <p class="font-semibold text-gray-800 text-sm"><?php echo htmlspecialchars($profile['graduation_year']); ?></p>
+                    <p class="font-semibold text-gray-800 dark:text-gray-200 text-sm"><?php echo htmlspecialchars($profile['graduation_year']); ?></p>
                 </div>
                 <?php endif; ?>
             </div>
