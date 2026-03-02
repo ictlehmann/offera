@@ -15,6 +15,7 @@ SET time_zone = "+00:00";
 --   ALTER TABLE users ADD COLUMN has_seen_onboarding BOOLEAN NOT NULL DEFAULT 0 COMMENT 'Whether user has seen the onboarding modal';
 --   ALTER TABLE users ADD COLUMN entra_photo_path VARCHAR(500) DEFAULT NULL COMMENT 'Cached profile photo path fetched from Microsoft Entra ID';
 --   ALTER TABLE users ADD COLUMN is_onboarded BOOLEAN NOT NULL DEFAULT 0 COMMENT 'Whether user has completed the mandatory first-login onboarding workflow';
+--   ALTER TABLE users ADD COLUMN session_token VARCHAR(255) DEFAULT NULL COMMENT 'Random token for single-session enforcement; regenerated on every login';
 -- ================================================
 CREATE TABLE IF NOT EXISTS `users` (
   `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -46,6 +47,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `blog_newsletter` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'Receive email notifications for new blog posts',
   `theme_preference` ENUM('auto', 'light', 'dark') DEFAULT 'auto' COMMENT 'User interface theme preference',
   `current_session_id` VARCHAR(255) DEFAULT NULL COMMENT 'Active session ID for single-session enforcement; NULL if no active session',
+  `session_token` VARCHAR(255) DEFAULT NULL COMMENT 'Random token for single-session enforcement; regenerated on every login',
   `deleted_at` DATETIME DEFAULT NULL COMMENT 'Timestamp when the user was soft deleted (NULL = active)',
   `last_reminder_sent_at` DATETIME DEFAULT NULL COMMENT 'Timestamp when the last profile reminder email was sent to the user',
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

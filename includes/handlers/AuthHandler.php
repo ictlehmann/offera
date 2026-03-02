@@ -749,9 +749,14 @@ class AuthHandler {
         
         // Regenerate session ID to prevent session fixation attacks (mirrors Auth::createSession())
         session_regenerate_id(true);
-        // Store current session ID in database for single-session enforcement (mirrors Auth::createSession())
-        $stmt = $db->prepare("UPDATE users SET current_session_id = ? WHERE id = ?");
-        $stmt->execute([session_id(), $userId]);
+        // Generate a cryptographically random session token for single-session enforcement
+        $sessionToken = bin2hex(random_bytes(32));
+        // Store session token in database (invalidates all other active sessions for this user).
+        // current_session_id is kept for backward compatibility with existing deployments.
+        $stmt = $db->prepare("UPDATE users SET current_session_id = ?, session_token = ? WHERE id = ?");
+        $stmt->execute([session_id(), $sessionToken, $userId]);
+        // Store session token in session for subsequent verification
+        $_SESSION['session_token'] = $sessionToken;
 
         // Log successful login
         self::logSystemAction($userId, 'login_success_microsoft', 'user', $userId, 'Successful Microsoft Entra ID login');

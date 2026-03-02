@@ -121,12 +121,12 @@ class Auth {
             self::$sessionVerified = true;
             try {
                 $db = Database::getUserDB();
-                $stmt = $db->prepare("SELECT current_session_id FROM users WHERE id = ?");
+                $stmt = $db->prepare("SELECT session_token FROM users WHERE id = ?");
                 $stmt->execute([$_SESSION['user_id']]);
                 $row = $stmt->fetch();
                 
-                if ($row && $row['current_session_id'] !== null && $row['current_session_id'] !== session_id()) {
-                    // Session ID mismatch – user logged in from another device
+                if ($row && $row['session_token'] !== null && (!isset($_SESSION['session_token']) || $_SESSION['session_token'] !== $row['session_token'])) {
+                    // Token mismatch – user logged in from another device
                     session_unset();
                     session_destroy();
                     // Clear the session cookie so the browser doesn't reuse the old session ID
@@ -245,9 +245,13 @@ class Auth {
         // Regenerate session ID to prevent session fixation attacks
         session_regenerate_id(true);
         
-        // Store current session ID in database for single-session enforcement
-        $stmt = $db->prepare("UPDATE users SET current_session_id = ? WHERE id = ?");
-        $stmt->execute([session_id(), $user['id']]);
+        // Generate a cryptographically random session token for single-session enforcement
+        $sessionToken = bin2hex(random_bytes(32));
+        
+        // Store session token in database (invalidates all other active sessions for this user).
+        // current_session_id is kept for backward compatibility with existing deployments.
+        $stmt = $db->prepare("UPDATE users SET current_session_id = ?, session_token = ? WHERE id = ?");
+        $stmt->execute([session_id(), $sessionToken, $user['id']]);
         
         // Set session variables
         $_SESSION['user_id'] = $user['id'];
@@ -256,6 +260,7 @@ class Auth {
         $_SESSION['authenticated'] = true;
         $_SESSION['last_activity'] = time();
         $_SESSION['is_onboarded'] = (bool)($user['is_onboarded'] ?? false);
+        $_SESSION['session_token'] = $sessionToken;
         
         // Set 2FA nudge if 2FA is not enabled
         if (!$user['tfa_enabled']) {
@@ -323,11 +328,11 @@ class Auth {
         // Initialize session with secure parameters if not already started
         init_session();
         
-        // Clear current_session_id in database so no stale session ID remains
+        // Clear session_token (primary enforcement) and current_session_id (legacy) so no stale session remains
         if (isset($_SESSION['user_id'])) {
             try {
                 $db = Database::getUserDB();
-                $stmt = $db->prepare("UPDATE users SET current_session_id = NULL WHERE id = ?");
+                $stmt = $db->prepare("UPDATE users SET current_session_id = NULL, session_token = NULL WHERE id = ?");
                 $stmt->execute([$_SESSION['user_id']]);
             } catch (Exception $e) {
                 error_log("Failed to clear session ID on logout: " . $e->getMessage());
