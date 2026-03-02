@@ -312,7 +312,7 @@ class Project {
         $allowedFields = [
             'title', 'description', 'client_name', 'client_contact_details',
             'priority', 'type', 'status', 'max_consultants', 'requires_application',
-            'start_date', 'end_date', 'image_path', 'documentation'
+            'start_date', 'end_date', 'image_path', 'documentation', 'feedback_contact_user_id'
         ];
         
         foreach ($data as $key => $value) {
@@ -803,5 +803,44 @@ class Project {
         $stmt->execute([$projectId, $userId]);
 
         return $stmt->rowCount() > 0;
+    }
+
+    /**
+     * Set or remove the feedback contact (alumni Ansprechpartner) for a project.
+     *
+     * @param int $projectId Project ID
+     * @param int|null $userId User ID to set as contact, or null to remove
+     * @return bool True on success
+     */
+    public static function setFeedbackContact(int $projectId, ?int $userId): bool {
+        $db = Database::getContentDB();
+        $stmt = $db->prepare("UPDATE projects SET feedback_contact_user_id = ? WHERE id = ?");
+        return $stmt->execute([$userId, $projectId]);
+    }
+
+    /**
+     * Get the feedback contact user profile for a project.
+     *
+     * @param int $projectId Project ID
+     * @return array|null Profile data (first_name, last_name, image_path, position, company) or null
+     */
+    public static function getFeedbackContact(int $projectId): ?array {
+        $db = Database::getContentDB();
+        $stmt = $db->prepare("SELECT feedback_contact_user_id FROM projects WHERE id = ?");
+        $stmt->execute([$projectId]);
+        $row = $stmt->fetch();
+        if (!$row || empty($row['feedback_contact_user_id'])) {
+            return null;
+        }
+        $userId = (int)$row['feedback_contact_user_id'];
+
+        // Get profile from alumni_profiles
+        $stmt = $db->prepare("SELECT user_id, first_name, last_name, image_path, position, company FROM alumni_profiles WHERE user_id = ?");
+        $stmt->execute([$userId]);
+        $profile = $stmt->fetch();
+        if (!$profile) {
+            return ['user_id' => $userId, 'first_name' => '', 'last_name' => '', 'image_path' => null, 'position' => null, 'company' => null];
+        }
+        return $profile;
     }
 }

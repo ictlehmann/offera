@@ -245,8 +245,9 @@ class Event {
             $stmt = $db->prepare("
                 INSERT INTO events (title, description, location, maps_link, start_time, end_time, 
                                   registration_start, registration_end, status, 
-                                  is_external, external_link, registration_link, needs_helpers, image_path, created_by)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                  is_external, external_link, registration_link, needs_helpers,
+                                  requires_application, image_path, created_by)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ");
             
             $stmt->execute([
@@ -263,6 +264,7 @@ class Event {
                 $data['external_link'] ?? null,
                 $data['registration_link'] ?? null,
                 $data['needs_helpers'] ?? false,
+                isset($data['requires_application']) ? intval($data['requires_application']) : 0,
                 $imagePath,
                 $userId
             ]);
@@ -1383,5 +1385,44 @@ class Event {
             error_log("Error updating event statuses: " . $e->getMessage());
             return $updates;
         }
+    }
+
+    /**
+     * Set or remove the feedback contact (alumni Ansprechpartner) for an event.
+     *
+     * @param int $eventId Event ID
+     * @param int|null $userId User ID to set as contact, or null to remove
+     * @return bool True on success
+     */
+    public static function setFeedbackContact(int $eventId, ?int $userId): bool {
+        $db = Database::getContentDB();
+        $stmt = $db->prepare("UPDATE events SET feedback_contact_user_id = ? WHERE id = ?");
+        return $stmt->execute([$userId, $eventId]);
+    }
+
+    /**
+     * Get the feedback contact user profile for an event.
+     *
+     * @param int $eventId Event ID
+     * @return array|null Profile data (first_name, last_name, image_path, position, company) or null
+     */
+    public static function getFeedbackContact(int $eventId): ?array {
+        $db = Database::getContentDB();
+        $stmt = $db->prepare("SELECT feedback_contact_user_id FROM events WHERE id = ?");
+        $stmt->execute([$eventId]);
+        $row = $stmt->fetch();
+        if (!$row || empty($row['feedback_contact_user_id'])) {
+            return null;
+        }
+        $userId = (int)$row['feedback_contact_user_id'];
+
+        // Get profile from alumni_profiles
+        $stmt = $db->prepare("SELECT user_id, first_name, last_name, image_path, position, company FROM alumni_profiles WHERE user_id = ?");
+        $stmt->execute([$userId]);
+        $profile = $stmt->fetch();
+        if (!$profile) {
+            return ['user_id' => $userId, 'first_name' => '', 'last_name' => '', 'image_path' => null, 'position' => null, 'company' => null];
+        }
+        return $profile;
     }
 }

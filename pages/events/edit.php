@@ -89,6 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !$readOnly) {
             'external_link' => trim($_POST['external_link'] ?? ''),
             'registration_link' => trim($_POST['registration_link'] ?? ''),
             'needs_helpers' => isset($_POST['needs_helpers']) ? 1 : 0,
+            'requires_application' => isset($_POST['requires_application']) ? 1 : 0,
             'allowed_roles' => $_POST['allowed_roles'] ?? []
         ];
         
@@ -585,6 +586,27 @@ ob_start();
                             class="w-5 h-5 text-purple-600 bg-white border-gray-300 rounded focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:focus:ring-blue-500"
                         >
                         <span class="text-sm font-medium text-gray-700">Helfer benötigt</span>
+                    </label>
+
+                    <label class="flex items-center space-x-2">
+                        <input
+                            type="checkbox"
+                            name="requires_application"
+                            <?php
+                            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                                echo isset($_POST['requires_application']) ? 'checked' : '';
+                            } else {
+                                echo ($event['requires_application'] ?? false) ? 'checked' : '';
+                            }
+                            ?>
+                            <?php echo $readOnly ? 'disabled' : ''; ?>
+                            class="w-5 h-5 text-purple-600 bg-white border-gray-300 rounded focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:focus:ring-blue-500"
+                        >
+                        <span class="text-sm font-medium text-gray-700">
+                            <i class="fas fa-file-alt text-purple-500 mr-1"></i>
+                            Bewerbung erforderlich
+                            <span class="block text-xs text-gray-500 font-normal mt-0.5">Teilnehmer müssen vor der Anmeldung einen Bewerbungstext schreiben</span>
+                        </span>
                     </label>
                 </div>
 

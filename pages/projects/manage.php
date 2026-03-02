@@ -49,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_project'])) {
             'type' => $isInternal ? 'internal' : 'external',
             'status' => $status,
             'max_consultants' => $isInternal ? null : max(1, intval($_POST['max_consultants'] ?? 1)),
-            'requires_application' => $isInternal ? 0 : intval($_POST['requires_application'] ?? 1),
+            'requires_application' => intval($_POST['requires_application'] ?? ($isInternal ? 0 : 1)),
             'start_date' => !empty($_POST['start_date']) ? $_POST['start_date'] : null,
             'end_date' => !empty($_POST['end_date']) ? $_POST['end_date'] : null,
             'created_by' => Auth::user()['id'] ?? null,
@@ -539,9 +539,30 @@ document.getElementById('deleteModal')?.addEventListener('click', (e) => {
                 <label for="is_internal_checkbox" class="ml-3 text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer">
                     <i class="fas fa-building text-indigo-500 mr-1"></i>
                     Internes Projekt
-                    <span class="block text-xs text-gray-500 dark:text-gray-400 mt-0.5">Mitglieder können direkt teilnehmen, keine Bewerbung nötig</span>
+                    <span class="block text-xs text-gray-500 dark:text-gray-400 mt-0.5">Internes Vereinsprojekt</span>
                 </label>
             </div>
+        </div>
+
+        <!-- Bewerbung erforderlich -->
+        <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <i class="fas fa-file-alt text-purple-500 mr-1"></i>
+                Bewerbung erforderlich
+            </label>
+            <select
+                name="requires_application"
+                class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+            >
+                <?php
+                $reqApp = isset($_POST['save_project'])
+                    ? intval($_POST['requires_application'] ?? 1)
+                    : intval($project['requires_application'] ?? 1);
+                ?>
+                <option value="1" <?php echo $reqApp ? 'selected' : ''; ?>>Ja – Bewerbungstext erforderlich</option>
+                <option value="0" <?php echo !$reqApp ? 'selected' : ''; ?>>Nein – Direktes Beitreten ohne Text</option>
+            </select>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Bei internen Projekten ohne Bewerbungspflicht können Mitglieder direkt beitreten.</p>
         </div>
 
         <!-- Status -->

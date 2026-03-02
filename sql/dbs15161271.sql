@@ -14,6 +14,8 @@ SET time_zone = "+00:00";
 -- NOTE: For existing databases, run:
 --   ALTER TABLE events MODIFY COLUMN status ENUM('draft','planned','open','closed','running','past') DEFAULT 'planned';
 --   (The created_by column already exists in the schema; no action needed for it.)
+--   ALTER TABLE events ADD COLUMN requires_application TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Whether participants must submit an application text (0 = direct join, 1 = application required)' AFTER needs_helpers;
+--   ALTER TABLE events ADD COLUMN feedback_contact_user_id INT UNSIGNED DEFAULT NULL COMMENT 'User ID of the alumni who volunteered as feedback contact' AFTER requires_application;
 -- ================================================
 CREATE TABLE IF NOT EXISTS `events` (
   `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -30,6 +32,8 @@ CREATE TABLE IF NOT EXISTS `events` (
   `external_link` TEXT DEFAULT NULL COMMENT 'Link to external event page',
   `registration_link` VARCHAR(500) DEFAULT NULL COMMENT 'External registration link',
   `needs_helpers` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'Flag indicating if the event needs helpers',
+  `requires_application` TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Whether participants must submit an application text (0 = direct join, 1 = application required)',
+  `feedback_contact_user_id` INT UNSIGNED DEFAULT NULL COMMENT 'User ID of the alumni who volunteered as feedback contact',
   `image_path` VARCHAR(500) DEFAULT NULL COMMENT 'Path to event image',
   `contact_person` VARCHAR(255) NULL COMMENT 'Contact person for the event',
   `locked_by` INT UNSIGNED DEFAULT NULL COMMENT 'User ID who locked the event for editing',
@@ -281,6 +285,8 @@ COMMENT='Audit trail for event changes';
 
 -- ================================================
 -- TABLE: projects
+-- NOTE: For existing databases, run:
+--   ALTER TABLE projects ADD COLUMN feedback_contact_user_id INT UNSIGNED DEFAULT NULL COMMENT 'User ID of the alumni who volunteered as feedback contact' AFTER documentation;
 -- ================================================
 CREATE TABLE IF NOT EXISTS `projects` (
   `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -297,6 +303,7 @@ CREATE TABLE IF NOT EXISTS `projects` (
   `end_date` DATE DEFAULT NULL,
   `image_path` VARCHAR(500) DEFAULT NULL,
   `documentation` VARCHAR(500) DEFAULT NULL COMMENT 'Path to project documentation PDF',
+  `feedback_contact_user_id` INT UNSIGNED DEFAULT NULL COMMENT 'User ID of the alumni who volunteered as feedback contact',
   `created_by` INT UNSIGNED DEFAULT NULL COMMENT 'User who created the project',
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
