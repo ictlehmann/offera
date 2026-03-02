@@ -116,12 +116,12 @@ $_notifCsrfToken = CSRFHandler::getToken();
                 hyphens: auto;
             }
 
-            /* Better spacing on mobile - add top padding for topbar */
+            /* Better spacing on mobile - add top padding for floating menu button */
             main {
                 padding-left: 1rem !important;
                 padding-right: 1rem !important;
                 padding-bottom: 1rem !important;
-                padding-top: calc(var(--topbar-height) + 1.25rem) !important;
+                padding-top: 4.5rem !important;
                 margin-left: 0 !important;
             }
 
@@ -270,31 +270,14 @@ $_notifCsrfToken = CSRFHandler::getToken();
     <!-- Mobile Menu Overlay -->
     <div id="sidebar-overlay" class="sidebar-overlay"></div>
 
-    <!-- Mobile Top Navbar (visible only below md breakpoint) -->
-    <nav class="mobile-topbar md:hidden fixed top-0 left-0 right-0 flex items-center justify-between px-4 py-3 shadow-lg" aria-label="Mobile Navigation">
-        <button id="mobile-menu-btn" class="flex items-center justify-center w-10 h-10 rounded-lg bg-white/10 hover:bg-white/20 transition-all duration-200 active:scale-95 border border-white/20" aria-label="Menü öffnen" aria-expanded="false" aria-controls="sidebar">
-            <svg class="w-6 h-6 text-white" id="menu-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                <path id="menu-icon-top" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16" class="transition-all duration-300"></path>
-                <path id="menu-icon-middle" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 12h16" class="transition-all duration-300"></path>
-                <path id="menu-icon-bottom" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 18h16" class="transition-all duration-300"></path>
-            </svg>
-        </button>
-        <img src="<?php echo asset('assets/img/ibc_logo_original_navbar.webp'); ?>" alt="IBC Logo" class="h-8 w-auto drop-shadow-md">
-        <div class="flex items-center gap-2">
-            <!-- Notification Bell (mobile) -->
-            <button id="mobile-notif-btn" class="relative flex items-center justify-center w-10 h-10 rounded-lg bg-white/10 hover:bg-white/20 transition-all duration-200 border border-white/20" aria-label="Benachrichtigungen" aria-expanded="false">
-                <i class="fas fa-bell text-white text-sm" aria-hidden="true"></i>
-                <?php if ($_notifUnreadCount > 0): ?>
-                <span id="mobile-notif-badge" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 leading-none"><?php echo $_notifUnreadCount >= 99 ? '99+' : $_notifUnreadCount; ?></span>
-                <?php else: ?>
-                <span id="mobile-notif-badge" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 leading-none hidden"></span>
-                <?php endif; ?>
-            </button>
-            <button id="mobile-theme-toggle" class="flex items-center justify-center w-10 h-10 rounded-lg bg-white/10 hover:bg-white/20 transition-all duration-200 border border-white/20" aria-label="Zu Darkmode wechseln">
-                <i id="mobile-theme-icon" class="fas fa-moon text-white text-sm" aria-hidden="true"></i>
-            </button>
-        </div>
-    </nav>
+    <!-- Mobile Floating Menu Button (replaces the full topbar on small screens) -->
+    <button id="mobile-menu-btn" class="md:hidden fixed top-4 left-4 z-[1061] flex items-center justify-center w-11 h-11 rounded-full shadow-lg transition-all duration-200 active:scale-95" style="background: var(--ibc-blue); border: 1px solid rgba(255,255,255,0.2);" aria-label="Menü öffnen" aria-expanded="false" aria-controls="sidebar">
+        <svg class="w-5 h-5 text-white" id="menu-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path id="menu-icon-top" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16" class="transition-all duration-300"></path>
+            <path id="menu-icon-middle" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 12h16" class="transition-all duration-300"></path>
+            <path id="menu-icon-bottom" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 18h16" class="transition-all duration-300"></path>
+        </svg>
+    </button>
 
     <!-- Sidebar -->
     <aside id="sidebar" class="sidebar fixed left-0 top-0 h-screen w-64 md:w-72 transform -translate-x-full md:translate-x-0 transition-transform duration-300 z-40 text-white shadow-2xl flex flex-col" aria-label="Seitenleiste">
@@ -359,27 +342,21 @@ $_notifCsrfToken = CSRFHandler::getToken();
                 </a>
                 <?php endif; ?>
 
-                <!-- Inventar (All) - Parent with submenu -->
-                <div class="menu-item-with-submenu">
-                    <a href="<?php echo asset('pages/inventory/index.php'); ?>" 
-                       class="flex items-center justify-start px-4 py-2 text-white hover:bg-white/10 transition-colors duration-200 <?php echo isActivePath('/inventory/') ? 'bg-white/20 text-white border-l-4 border-ibc-green' : ''; ?>"
-                       <?php echo isActivePath('/inventory/') ? 'aria-current="page"' : ''; ?>>
-                        <i class="fas fa-box w-5 mr-3" aria-hidden="true"></i>
-                        <span class="flex-1">Inventar</span>
-                        <i class="fas fa-chevron-down text-xs transition-transform duration-200 submenu-chevron" aria-hidden="true"></i>
-                    </a>
+                <!-- Inventar (All) -->
+                <a href="<?php echo asset('pages/inventory/index.php'); ?>" 
+                   class="flex items-center justify-start px-4 py-2 text-white hover:bg-white/10 transition-colors duration-200 <?php echo isActivePath('/inventory/') && !isActivePath('/my_rentals.php') ? 'bg-white/20 text-white border-l-4 border-ibc-green' : ''; ?>"
+                   <?php echo isActivePath('/inventory/') && !isActivePath('/my_rentals.php') ? 'aria-current="page"' : ''; ?>>
+                    <i class="fas fa-box w-5 mr-3" aria-hidden="true"></i>
+                    <span>Inventar</span>
+                </a>
 
-                    <!-- Submenu -->
-                    <div class="submenu">
-                        <!-- Meine Ausleihen (All) - Indented -->
-                        <a href="<?php echo asset('pages/inventory/my_rentals.php'); ?>" 
-                           class="flex items-center justify-start px-4 pr-4 py-2 text-white hover:bg-white/10 transition-colors duration-200 submenu-item <?php echo isActivePath('/my_rentals.php') ? 'bg-white/20 text-white border-l-4 border-ibc-green' : ''; ?>"
-                           <?php echo isActivePath('/my_rentals.php') ? 'aria-current="page"' : ''; ?>>
-                            <i class="fas fa-clipboard-list w-5 mr-3" aria-hidden="true"></i>
-                            <span>Meine Ausleihen</span>
-                        </a>
-                    </div>
-                </div>
+                <!-- Ausleihe (All) -->
+                <a href="<?php echo asset('pages/inventory/my_rentals.php'); ?>" 
+                   class="flex items-center justify-start px-4 py-2 text-white hover:bg-white/10 transition-colors duration-200 <?php echo isActivePath('/my_rentals.php') ? 'bg-white/20 text-white border-l-4 border-ibc-green' : ''; ?>"
+                   <?php echo isActivePath('/my_rentals.php') ? 'aria-current="page"' : ''; ?>>
+                    <i class="fas fa-clipboard-list w-5 mr-3" aria-hidden="true"></i>
+                    <span>Ausleihe</span>
+                </a>
 
                 <!-- Mitglieder (Board, Head, Member, Candidate) -->
                 <?php if (Auth::canAccessPage('members')): ?>
@@ -778,7 +755,7 @@ $_notifCsrfToken = CSRFHandler::getToken();
 
 
     <!-- Main Content -->
-    <main id="main-content" role="main" class="md:ml-64 lg:ml-72 min-h-screen p-4 pt-20 md:p-6 lg:p-10" style="padding-bottom: max(1rem, env(safe-area-inset-bottom, 0))">
+    <main id="main-content" role="main" class="md:ml-64 lg:ml-72 min-h-screen p-4 pt-16 md:p-6 lg:p-10" style="padding-bottom: max(1rem, env(safe-area-inset-bottom, 0))">
         <?php if (isset($_SESSION['show_2fa_nudge']) && $_SESSION['show_2fa_nudge']): ?>
         <!-- 2FA Nudge Modal -->
         <div id="tfa-nudge-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[1070] p-4" role="dialog" aria-modal="true" aria-labelledby="tfa-nudge-title">
@@ -948,41 +925,26 @@ $_notifCsrfToken = CSRFHandler::getToken();
             }, { passive: true });
         });
         
-        // Submenu toggle functionality
-        document.querySelectorAll('.menu-item-with-submenu > a').forEach(menuItem => {
-            menuItem.addEventListener('click', (e) => {
-                const parent = menuItem.closest('.menu-item-with-submenu');
-                const isCurrentlyExpanded = parent.classList.contains('expanded');
-                
-                // If the submenu is collapsed, prevent navigation and expand it
-                if (!isCurrentlyExpanded) {
-                    e.preventDefault();
-                    
-                    // Close all other submenus
-                    document.querySelectorAll('.menu-item-with-submenu').forEach(item => {
-                        if (item !== parent) {
-                            item.classList.remove('expanded');
-                        }
-                    });
-                    
-                    // Expand current submenu
-                    parent.classList.add('expanded');
-                }
-                // If already expanded, allow navigation to proceed normally
-            });
-        });
-        
-        // Auto-expand submenu if current page is a child item
-        // Note: This executes immediately (IIFE) since the script runs after DOM is loaded,
-        // and DOMContentLoaded would never fire at this point
+        // Sidebar scroll position: restore on load, save on scroll and before unload
         (function() {
-            const activeSubmenuItem = document.querySelector('.submenu a.bg-white\\/20, .submenu a[class*="border-ibc-green"]');
-            if (activeSubmenuItem) {
-                const parent = activeSubmenuItem.closest('.menu-item-with-submenu');
-                if (parent) {
-                    parent.classList.add('expanded');
-                }
+            const sidebarScroll = document.querySelector('.sidebar-scroll');
+            if (!sidebarScroll) return;
+            var savedPos = localStorage.getItem('sidebarScrollPos');
+            if (savedPos !== null) {
+                requestAnimationFrame(function() {
+                    sidebarScroll.scrollTop = parseInt(savedPos, 10);
+                });
             }
+            var _scrollSaveTimer = null;
+            sidebarScroll.addEventListener('scroll', function() {
+                clearTimeout(_scrollSaveTimer);
+                _scrollSaveTimer = setTimeout(function() {
+                    localStorage.setItem('sidebarScrollPos', sidebarScroll.scrollTop);
+                }, 100);
+            }, { passive: true });
+            window.addEventListener('beforeunload', function() {
+                localStorage.setItem('sidebarScrollPos', sidebarScroll.scrollTop);
+            });
         })();
         
         // Dark/Light Mode Toggle

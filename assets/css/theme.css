@@ -3121,7 +3121,7 @@ body.dark-mode .sidebar {
     /* Main Content Area - Better mobile spacing */
     main {
         padding: 1rem 1.5rem !important;
-        padding-top: calc(var(--topbar-height) + 1.25rem) !important; /* Space for mobile header */
+        padding-top: 4.5rem !important; /* Space for floating menu button */
     }
     
     /* Custom dialogs (non-Bootstrap) - Full screen on mobile */
@@ -3190,7 +3190,7 @@ body.dark-mode .sidebar {
     
     main {
         padding: 1.5rem !important;
-        padding-top: calc(var(--topbar-height) + 1.25rem) !important;
+        padding-top: 4.5rem !important;
     }
     
     /* Buttons can be inline on small tablets */
@@ -4483,10 +4483,10 @@ body.dark-mode {
 @media (max-width: 767px) {
     .sidebar {
         position: fixed;
-        top: var(--topbar-height); /* Start below mobile topbar */
+        top: 0;
         left: 0;
-        height: calc(100vh - var(--topbar-height)) !important;
-        height: calc(100dvh - var(--topbar-height)) !important;
+        height: 100vh !important;
+        height: 100dvh !important;
         width: 85%;
         max-width: 320px;
         z-index: 1050 !important; /* Must be above overlay (1040); !important overrides Tailwind z-40 */
@@ -4711,9 +4711,9 @@ main {
 /* Mobile full-height sidebar fix for iOS */
 @media (max-width: 767px) {
     .sidebar {
-        height: calc(100vh - var(--topbar-height)) !important; /* fallback */
-        height: calc(100dvh - var(--topbar-height)) !important; /* modern browsers */
-        height: calc(100svh - var(--topbar-height)) !important; /* iOS Safari small viewport */
+        height: 100vh !important; /* fallback */
+        height: 100dvh !important; /* modern browsers */
+        height: 100svh !important; /* iOS Safari small viewport */
     }
 }
 
@@ -5434,10 +5434,10 @@ label,
     body::before {
         content: '';
         position: fixed;
-        top: var(--topbar-height); /* below mobile topbar */
+        top: 0;
         left: 0;
         width: 10px;
-        height: calc(100% - var(--topbar-height));
+        height: 100%;
         z-index: 1039; /* below sidebar overlay */
         /* Invisible touch zone - no visual */
         pointer-events: none;
