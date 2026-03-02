@@ -45,8 +45,8 @@ if (isMemberRole($userRole)) {
 // If profile not found, initialize empty profile to show "Profil erstellen" form
 if (!$profile) {
     $profile = [
-        'first_name' => '',
-        'last_name' => '',
+        'first_name' => $user['first_name'] ?? '',
+        'last_name' => $user['last_name'] ?? '',
         'email' => $user['email'],
         'secondary_email' => '',
         'mobile_phone' => '',
@@ -469,13 +469,17 @@ ob_start();
             // Display role: Priority order is entra_roles > azure_roles > internal role
             $displayRoles = [];
             
-            // 1. Check for entra_roles (JSON array from Microsoft Graph)
-            // Note: entra_roles contains displayName from Microsoft Graph groups, already human-readable
+            // 1. Check for entra_roles (JSON array of App Roles from JWT or Graph groups)
             if (!empty($user['entra_roles'])):
                 $entraRoles = json_decode($user['entra_roles'], true);
                 if (json_last_error() === JSON_ERROR_NONE && is_array($entraRoles)) {
-                    // Extract displayName from each group object (groups now contain both id and displayName)
-                    $displayRoles = extractGroupDisplayNames($entraRoles);
+                    // Each entry is either an object with 'displayName' (Graph groups) or a plain role string (App Roles)
+                    $displayRoles = array_values(array_filter(array_map(function($role) {
+                        if (is_array($role) && isset($role['displayName'])) {
+                            return $role['displayName'];
+                        }
+                        return translateAzureRole((string)$role);
+                    }, $entraRoles)));
                 } else {
                     error_log("Failed to decode entra_roles for user ID " . intval($user['id']) . ": " . json_last_error_msg());
                 }
