@@ -5,7 +5,7 @@ require_once __DIR__ . '/../handlers/AuthHandler.php';
 require_once __DIR__ . '/../handlers/CSRFHandler.php';
 
 // DEBUG: Uncomment to force role for testing
-// $_SESSION['user_role'] = 'board_finance';
+// $_SESSION['user_role'] = 'vorstand_finanzen';
 
 // Check if profile is incomplete and redirect to profile page (unless already on profile page)
 if (Auth::check() && isset($_SESSION['profile_incomplete']) && $_SESSION['profile_incomplete'] === true) {
@@ -18,9 +18,6 @@ if (Auth::check() && isset($_SESSION['profile_incomplete']) && $_SESSION['profil
     }
 }
 
-// Notification unread count for navbar badge
-$_notifUnreadCount = 0;
-$_notifCsrfToken = CSRFHandler::getToken();
 $_themeCssVersion = filemtime(__DIR__ . '/../../assets/css/theme.css');
 ?>
 <!DOCTYPE html>
@@ -1073,7 +1070,6 @@ $_themeCssVersion = filemtime(__DIR__ . '/../../assets/css/theme.css');
         }
     </script>
 
-    <!-- Notification Dropdown removed -->
 
 </body>
 </html>

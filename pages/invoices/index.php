@@ -6,7 +6,7 @@ require_once __DIR__ . '/../../includes/models/Member.php';
 require_once __DIR__ . '/../../includes/helpers.php';
 require_once __DIR__ . '/../../includes/handlers/CSRFHandler.php';
 
-// Access Control: Allow 'board', 'alumni_board', 'head', 'alumni' (read-only)
+// Access Control: Allow 'board', 'alumni_vorstand', 'resortleiter', 'alumni' (read-only)
 if (!Auth::check()) {
     header('Location: ../auth/login.php');
     exit;
