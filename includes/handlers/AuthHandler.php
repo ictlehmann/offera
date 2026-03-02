@@ -553,13 +553,22 @@ class AuthHandler {
             'alumni_finanz'     => 10,
         ];
 
+        // UUID fallback: if Entra sends App Role IDs (UUIDs) instead of value strings,
+        // translate them to role names using the ROLE_MAPPING constant.
+        if (!defined('ROLE_MAPPING')) {
+            error_log('[completeMicrosoftLogin] ROLE_MAPPING constant is not defined – UUID-based role translation unavailable.');
+        }
+        $roleUuidToName = defined('ROLE_MAPPING') ? array_flip(ROLE_MAPPING) : [];
+
         $highestPriority = 0;
         $selectedRole = 'mitglied'; // Default if no valid App Role found
 
         foreach ($azureRoles as $roleValue) {
-            if (isset($validEntraRoles[$roleValue]) && $validEntraRoles[$roleValue] > $highestPriority) {
-                $highestPriority = $validEntraRoles[$roleValue];
-                $selectedRole = $roleValue;
+            // Normalize: translate UUID to role name if needed
+            $normalizedRole = isset($roleUuidToName[$roleValue]) ? $roleUuidToName[$roleValue] : $roleValue;
+            if (isset($validEntraRoles[$normalizedRole]) && $validEntraRoles[$normalizedRole] > $highestPriority) {
+                $highestPriority = $validEntraRoles[$normalizedRole];
+                $selectedRole = $normalizedRole;
             }
         }
 
@@ -817,13 +826,22 @@ class AuthHandler {
             'alumni_finanz'     => 10,
         ];
 
+        // UUID fallback: if Entra sends App Role IDs (UUIDs) instead of value strings,
+        // translate them to role names using the ROLE_MAPPING constant.
+        if (!defined('ROLE_MAPPING')) {
+            error_log('[syncEntraData] ROLE_MAPPING constant is not defined – UUID-based role translation unavailable.');
+        }
+        $roleUuidToName = defined('ROLE_MAPPING') ? array_flip(ROLE_MAPPING) : [];
+
         $highestPriority = 0;
         $selectedRole    = 'mitglied'; // Default when no valid App Role found
 
         foreach ($appRoles as $roleValue) {
-            if (isset($validEntraRoles[$roleValue]) && $validEntraRoles[$roleValue] > $highestPriority) {
-                $highestPriority = $validEntraRoles[$roleValue];
-                $selectedRole    = $roleValue;
+            // Normalize: translate UUID to role name if needed
+            $normalizedRole = isset($roleUuidToName[$roleValue]) ? $roleUuidToName[$roleValue] : $roleValue;
+            if (isset($validEntraRoles[$normalizedRole]) && $validEntraRoles[$normalizedRole] > $highestPriority) {
+                $highestPriority = $validEntraRoles[$normalizedRole];
+                $selectedRole    = $normalizedRole;
             }
         }
 
