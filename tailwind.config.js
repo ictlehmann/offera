@@ -31,5 +31,14 @@ module.exports = {
       },
     },
   },
+  safelist: [
+    'break-words',
+    'break-all',
+    'hyphens-auto',
+    'hyphens-manual',
+    'hyphens-none',
+    'leading-relaxed',
+    'leading-loose',
+  ],
   plugins: [],
 };
