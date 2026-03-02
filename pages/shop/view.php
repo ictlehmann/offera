@@ -583,8 +583,10 @@ ob_start();
     function goTo(idx) {
         if (total < 2) return;
         idx = ((idx % total) + total) % total;
-        images[currentIndex].classList.replace('opacity-100', 'opacity-0');
-        images[idx].classList.replace('opacity-0', 'opacity-100');
+        images[currentIndex].classList.remove('opacity-100');
+        images[currentIndex].classList.add('opacity-0');
+        images[idx].classList.remove('opacity-0');
+        images[idx].classList.add('opacity-100');
 
         // dots
         dots.forEach(function(d, i) {

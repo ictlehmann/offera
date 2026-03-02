@@ -484,11 +484,11 @@ ob_start();
                          class="slider-img absolute inset-0 w-full h-full object-cover transition-all duration-500 group-hover:scale-105 <?php echo $idx === 0 ? 'opacity-100' : 'opacity-0'; ?>">
                     <?php endforeach; ?>
                     <?php if (count($allImages) > 1): ?>
-                    <button type="button" onclick="event.preventDefault();slideImg('<?php echo $sliderId; ?>',-1)" aria-label="Vorheriges Bild"
+                    <button type="button" onclick="slideImg('<?php echo $sliderId; ?>',-1)" aria-label="Vorheriges Bild"
                             class="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 dark:bg-gray-800/80 hover:bg-white dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-full w-8 h-8 flex items-center justify-center z-10 shadow transition-all opacity-0 group-hover:opacity-100">
                         <i class="fas fa-chevron-left text-xs"></i>
                     </button>
-                    <button type="button" onclick="event.preventDefault();slideImg('<?php echo $sliderId; ?>',1)" aria-label="Nächstes Bild"
+                    <button type="button" onclick="slideImg('<?php echo $sliderId; ?>',1)" aria-label="Nächstes Bild"
                             class="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 dark:bg-gray-800/80 hover:bg-white dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-full w-8 h-8 flex items-center justify-center z-10 shadow transition-all opacity-0 group-hover:opacity-100">
                         <i class="fas fa-chevron-right text-xs"></i>
                     </button>
@@ -1185,7 +1185,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         || (activeStock   === 'soldout'   && !inStock);
             var genderOk = activeGender   === 'all' || cardGender  === activeGender;
             var catOk    = activeCategory === 'all' || cardCat      === activeCategory;
-            var searchOk = activeSearch   === ''    || cardName.indexOf(activeSearch) !== -1;
+            var searchOk = activeSearch   === ''    || cardName.includes(activeSearch);
 
             var show = stockOk && genderOk && catOk && searchOk;
             card.style.display = show ? '' : 'none';
