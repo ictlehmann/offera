@@ -144,6 +144,31 @@ function asset($path) {
 }
 
 /**
+ * Return a clean, German-formatted role name for a given database role string.
+ * This is the central role display function that should be used in all frontend views.
+ *
+ * @param string $role Database role identifier (e.g. 'board_internal')
+ * @return string Formatted German role name (e.g. 'Vorstand Intern')
+ */
+function getFormattedRoleName(string $role): string {
+    return match($role) {
+        'admin'           => 'Administrator',
+        'board_finance'   => 'Vorstand Finanzen und Recht',
+        'board_internal'  => 'Vorstand Intern',
+        'board_external'  => 'Vorstand Extern',
+        'head'            => 'Ressortleiter',
+        'member'          => 'Mitglied',
+        'alumni'          => 'Alumni',
+        'candidate'       => 'Anwärter',
+        'alumni_board'    => 'Alumni-Vorstand',
+        'alumni_auditor'  => 'Alumni-Finanzprüfer',
+        'honorary_member' => 'Ehrenmitglied',
+        'manager'         => 'Ressortleiter',
+        default           => ucfirst(str_replace('_', ' ', $role)),
+    };
+}
+
+/**
  * Translate role from English to German
  * All board sub-roles (vorstand_*) are displayed as 'Vorstand'
  * 

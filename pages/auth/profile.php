@@ -504,7 +504,7 @@ ob_start();
             
             // 3. If still no roles, use internal role as fallback
             if (empty($displayRoles) && !empty($user['role'])):
-                $displayRoles = [translateRole($user['role'])];
+                $displayRoles = [getFormattedRoleName($user['role'])];
             endif;
             
             // Display roles if we have any
