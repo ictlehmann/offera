@@ -16,9 +16,21 @@ class User {
      */
     public static function getById($id) {
         $db = Database::getUserDB();
-        $stmt = $db->prepare("SELECT id, email, role, entra_roles, entra_photo_path, tfa_enabled, is_alumni_validated, last_login, created_at FROM users WHERE id = ?");
-        $stmt->execute([$id]);
-        return $stmt->fetch();
+        $sql = "SELECT id, email, role, entra_roles, entra_photo_path, tfa_enabled, is_alumni_validated, last_login, created_at FROM users WHERE id = ?";
+        try {
+            $stmt = $db->prepare($sql);
+            $stmt->execute([$id]);
+            return $stmt->fetch();
+        } catch (PDOException $e) {
+            // SQLSTATE 42S22 = unknown column; fall back if entra_photo_path doesn't exist yet
+            if ($e->getCode() === '42S22' && strpos($e->getMessage(), 'entra_photo_path') !== false) {
+                $sql = str_replace('entra_photo_path,', 'NULL AS entra_photo_path,', $sql);
+                $stmt = $db->prepare($sql);
+                $stmt->execute([$id]);
+                return $stmt->fetch();
+            }
+            throw $e;
+        }
     }
 
     /**
