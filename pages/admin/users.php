@@ -45,6 +45,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $error = 'Fehler beim Löschen des Benutzers';
         }
+    } else if (isset($_POST['reset_2fa'])) {
+        // Only Ressortleiter and Vorstand roles may reset 2FA for other users
+        $canReset2fa = in_array($_SESSION['user_role'] ?? '', ['head', 'board_finance', 'board_internal', 'board_external']);
+        if (!$canReset2fa) {
+            $error = 'Keine Berechtigung zum Zurücksetzen von 2FA.';
+        } else {
+            $userId = intval($_POST['user_id'] ?? 0);
+            if ($userId <= 0) {
+                $error = 'Ungültige Benutzer-ID.';
+            } elseif ($userId === (int)$_SESSION['user_id']) {
+                $error = 'Du kannst deine eigene 2FA nicht über diese Seite zurücksetzen.';
+            } else {
+                $db = Database::getUserDB();
+                $stmt = $db->prepare("UPDATE users SET tfa_enabled = 0, tfa_secret = NULL, two_factor_secret = NULL WHERE id = ?");
+                if ($stmt->execute([$userId])) {
+                    $message = '2FA für den Benutzer wurde erfolgreich zurückgesetzt.';
+                } else {
+                    $error = 'Fehler beim Zurücksetzen der 2FA.';
+                }
+            }
+        }
     } else if (isset($_POST['import_entra_user'])) {
         $entraId      = trim($_POST['entra_id'] ?? '');
         $displayName  = trim($_POST['display_name'] ?? '');
@@ -588,12 +609,22 @@ ob_start();
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-center" data-label="Aktionen">
                         <?php if ($user['id'] != $_SESSION['user_id']): ?>
+                        <div class="flex flex-col items-center gap-2">
                         <form method="POST" class="inline" onsubmit="return confirm('Bist Du sicher, dass Du diesen Benutzer löschen möchtest? Das Profil in alumni_profiles wird ebenfalls entfernt.');">
                             <input type="hidden" name="user_id" value="<?php echo $user['id']; ?>">
                             <button type="submit" name="delete_user" class="inline-flex items-center px-3 py-2 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-200 dark:hover:bg-red-900/50 transition-all shadow-sm hover:shadow-md transform hover:scale-105 text-sm font-medium">
                                 <i class="fas fa-trash mr-1.5"></i>Benutzer löschen
                             </button>
                         </form>
+                        <?php if ($user['tfa_enabled'] && in_array($_SESSION['user_role'] ?? '', ['head', 'board_finance', 'board_internal', 'board_external'])): ?>
+                        <form method="POST" class="inline" onsubmit="return confirm('2FA für diesen Benutzer wirklich zurücksetzen?');">
+                            <input type="hidden" name="user_id" value="<?php echo $user['id']; ?>">
+                            <button type="submit" name="reset_2fa" class="inline-flex items-center px-3 py-2 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 rounded-lg hover:bg-yellow-200 dark:hover:bg-yellow-900/50 transition-all shadow-sm hover:shadow-md transform hover:scale-105 text-sm font-medium">
+                                <i class="fas fa-shield-alt mr-1.5"></i>2FA zurücksetzen
+                            </button>
+                        </form>
+                        <?php endif; ?>
+                        </div>
                         <?php else: ?>
                         <div class="inline-flex items-center justify-center w-10 h-10 bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500 rounded-lg">
                             <i class="fas fa-lock"></i>

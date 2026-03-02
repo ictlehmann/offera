@@ -79,6 +79,20 @@ class Auth {
         
         // Check if user is authenticated
         if (!isset($_SESSION['authenticated']) || $_SESSION['authenticated'] !== true) {
+            // If a 2FA verification is still pending, redirect to the 2FA page instead
+            // of the login page so the user cannot bypass 2FA by navigating away.
+            if (isset($_SESSION['pending_2fa_user_id'])) {
+                $verify2faUrl = '/pages/auth/verify_2fa.php';
+                if (defined('BASE_URL') && BASE_URL) {
+                    $verify2faUrl = BASE_URL . $verify2faUrl;
+                }
+                // Avoid redirect loops when already on the verify_2fa page
+                $currentScript = $_SERVER['SCRIPT_NAME'] ?? '';
+                if (strpos($currentScript, 'verify_2fa.php') === false) {
+                    header('Location: ' . $verify2faUrl);
+                    exit;
+                }
+            }
             return false;
         }
         
