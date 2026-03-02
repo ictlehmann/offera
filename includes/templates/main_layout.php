@@ -18,12 +18,12 @@ if (Auth::check() && isset($_SESSION['profile_incomplete']) && $_SESSION['profil
     }
 }
 
-// Enforce onboarding: redirect non-onboarded users to the onboarding page
+// Enforce onboarding: redirect non-onboarded users to the profile page
 if (isset($_SESSION['is_onboarded']) && $_SESSION['is_onboarded'] === false) {
     $currentPage = basename($_SERVER['PHP_SELF']);
-    if ($currentPage !== 'onboarding.php' && $currentPage !== 'logout.php') {
+    if ($currentPage !== 'profile.php' && $currentPage !== 'logout.php') {
         $baseUrl = defined('BASE_URL') ? BASE_URL : '';
-        header('Location: ' . $baseUrl . '/pages/auth/onboarding.php');
+        header('Location: ' . $baseUrl . '/pages/auth/profile.php');
         exit;
     }
 }

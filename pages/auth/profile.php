@@ -259,10 +259,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     !empty($profileData['mobile_phone'])) {
                     try {
                         $userDb = Database::getUserDB();
-                        $stmt = $userDb->prepare("UPDATE users SET profile_complete = 1 WHERE id = ?");
+                        $stmt = $userDb->prepare("UPDATE users SET profile_complete = 1, is_onboarded = 1, has_seen_onboarding = 1 WHERE id = ?");
                         $stmt->execute([$user['id']]);
-                        // Clear the profile_incomplete session flag
+                        // Clear the profile_incomplete and is_onboarded session flags
                         unset($_SESSION['profile_incomplete']);
+                        $_SESSION['is_onboarded'] = true;
                     } catch (Exception $e) {
                         error_log("Failed to mark profile as complete: " . $e->getMessage());
                     }

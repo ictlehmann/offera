@@ -741,6 +741,11 @@ class AuthHandler {
             $_SESSION['profile_incomplete'] = false;
         }
         $_SESSION['is_onboarded'] = (bool)($userCheck['is_onboarded'] ?? false);
+
+        // Show 2FA nudge popup if 2FA is not enabled
+        if ($userCheck && intval($userCheck['tfa_enabled'] ?? 0) !== 1) {
+            $_SESSION['show_2fa_nudge'] = true;
+        }
         
         // Regenerate session ID to prevent session fixation attacks (mirrors Auth::createSession())
         session_regenerate_id(true);
