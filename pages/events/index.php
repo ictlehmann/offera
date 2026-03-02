@@ -40,8 +40,8 @@ if ($filter === 'my_registrations') {
     });
 } else {
     // Hide past events for normal users (non-board, non-manager)
-    // Board members, alumni_vorstand, alumni_finanzpruefer, and managers can see past events
-    $canViewPastEvents = Auth::isBoard() || Auth::hasRole(['alumni_vorstand', 'alumni_finanzpruefer', 'manager']);
+    // Board members, alumni_vorstand, alumni_finanz, and managers can see past events
+    $canViewPastEvents = Auth::isBoard() || Auth::hasRole(['alumni_vorstand', 'alumni_finanz', 'manager']);
     if (!$canViewPastEvents) {
         $events = array_filter($events, function($event) use ($now) {
             return $event['end_time'] >= $now;
@@ -78,7 +78,7 @@ ob_start();
             <?php endif; ?>
             
             <!-- Neues Event Button - Board/Resortleiter/Manager only -->
-            <?php if (Auth::hasPermission('manage_projects') || Auth::isBoard() || Auth::hasRole(['resortleiter', 'alumni_vorstand'])): ?>
+            <?php if (Auth::hasPermission('manage_projects') || Auth::isBoard() || Auth::hasRole(['ressortleiter', 'alumni_vorstand'])): ?>
             <a href="edit.php?new=1" class="btn-primary">
                 <i class="fas fa-plus mr-2"></i>Neues Event
             </a>

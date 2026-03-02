@@ -112,7 +112,7 @@ ob_start();
         </div>
         
         <!-- Neues Projekt Button - Board/Head/Manager only -->
-        <?php if (Auth::hasPermission('manage_projects') || Auth::isBoard() || Auth::hasRole(['resortleiter', 'alumni_vorstand'])): ?>
+        <?php if (Auth::hasPermission('manage_projects') || Auth::isBoard() || Auth::hasRole(['ressortleiter', 'alumni_vorstand'])): ?>
         <a href="manage.php?new=1" class="btn-primary">
             <i class="fas fa-plus mr-2"></i>Neues Projekt
         </a>

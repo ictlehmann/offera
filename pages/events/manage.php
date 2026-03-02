@@ -5,7 +5,7 @@ require_once __DIR__ . '/../../includes/models/Event.php';
 require_once __DIR__ . '/../../includes/models/User.php';
 
 // Only board, alumni_vorstand, resortleiter, and those with manage_projects permission can access
-if (!Auth::check() || !(Auth::hasPermission('manage_projects') || Auth::isBoard() || Auth::hasRole(['resortleiter', 'alumni_vorstand']))) {
+if (!Auth::check() || !(Auth::hasPermission('manage_projects') || Auth::isBoard() || Auth::hasRole(['ressortleiter', 'alumni_vorstand']))) {
     header('Location: ../auth/login.php');
     exit;
 }

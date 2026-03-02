@@ -33,7 +33,7 @@ if (isset($_SESSION['error_message'])) {
 }
 
 // Load user's profile based on role
-// If User is 'mitglied'/'board'/'resortleiter'/'anwaerter' -> Use Member::getProfileByUserId()
+// If User is 'mitglied'/'board'/'ressortleiter'/'anwaerter' -> Use Member::getProfileByUserId()
 // If User is 'alumni'/'alumni_vorstand'/'ehrenmitglied' -> Use Alumni::getProfileByUserId()
 $profile = null;
 if (isMemberRole($userRole)) {

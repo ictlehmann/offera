@@ -47,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     } else if (isset($_POST['reset_2fa'])) {
         // Only Ressortleiter and Vorstand roles may reset 2FA for other users
-        $canReset2fa = in_array($_SESSION['user_role'] ?? '', ['resortleiter', 'vorstand_finanzen', 'vorstand_intern', 'vorstand_extern']);
+        $canReset2fa = in_array($_SESSION['user_role'] ?? '', ['ressortleiter', 'vorstand_finanzen', 'vorstand_intern', 'vorstand_extern']);
         if (!$canReset2fa) {
             $error = 'Keine Berechtigung zum Zurücksetzen von 2FA.';
         } else {
@@ -620,7 +620,7 @@ ob_start();
                                 <i class="fas fa-trash mr-1.5"></i>Benutzer löschen
                             </button>
                         </form>
-                        <?php if ($user['tfa_enabled'] && in_array($_SESSION['user_role'] ?? '', ['resortleiter', 'vorstand_finanzen', 'vorstand_intern', 'vorstand_extern'])): ?>
+                        <?php if ($user['tfa_enabled'] && in_array($_SESSION['user_role'] ?? '', ['ressortleiter', 'vorstand_finanzen', 'vorstand_intern', 'vorstand_extern'])): ?>
                         <form method="POST" class="inline" onsubmit="return confirm('2FA für diesen Benutzer wirklich zurücksetzen?');">
                             <input type="hidden" name="user_id" value="<?php echo $user['id']; ?>">
                             <button type="submit" name="reset_2fa" class="inline-flex items-center px-3 py-2 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 rounded-lg hover:bg-yellow-200 dark:hover:bg-yellow-900/50 transition-all shadow-sm hover:shadow-md transform hover:scale-105 text-sm font-medium">

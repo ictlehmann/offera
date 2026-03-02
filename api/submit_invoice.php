@@ -25,7 +25,7 @@ $user = Auth::user();
 // Group 3 (full access): vorstand_finanzen
 // (Group 2 / read-only roles are not permitted to submit invoices)
 $hasInvoiceSubmitAccess = in_array($user['role'], [
-    'alumni', 'ehrenmitglied', 'anwaerter', 'mitglied', 'resortleiter',
+    'alumni', 'ehrenmitglied', 'anwaerter', 'mitglied', 'ressortleiter',
     'vorstand_finanzen'
 ]);
 if (!$hasInvoiceSubmitAccess) {

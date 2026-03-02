@@ -56,7 +56,7 @@ ob_start();
         </div>
         
         <!-- Edit My Profile Button - Only for Vorstand (all types), Resortleiter, Mitglied, Anwärter -->
-        <?php if (Auth::isBoard() || Auth::hasRole(['resortleiter', 'mitglied', 'anwaerter'])): ?>
+        <?php if (Auth::isBoard() || Auth::hasRole(['ressortleiter', 'mitglied', 'anwaerter'])): ?>
         <a href="../auth/profile.php" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg hover:shadow-xl">
             <i class="fas fa-user-edit mr-2"></i>
             Profil bearbeiten
@@ -86,7 +86,7 @@ ob_start();
                     <option value="">Alle</option>
                     <option value="anwaerter" <?php echo $roleFilter === 'anwaerter' ? 'selected' : ''; ?>>Anwärter</option>
                     <option value="mitglied" <?php echo $roleFilter === 'mitglied' ? 'selected' : ''; ?>>Mitglieder</option>
-                    <option value="resortleiter" <?php echo $roleFilter === 'resortleiter' ? 'selected' : ''; ?>>Ressortleiter</option>
+                    <option value="ressortleiter" <?php echo $roleFilter === 'ressortleiter' ? 'selected' : ''; ?>>Ressortleiter</option>
                     <option value="vorstand_finanzen" <?php echo $roleFilter === 'vorstand_finanzen' ? 'selected' : ''; ?>>Vorstand Finanzen und Recht</option>
                     <option value="vorstand_intern" <?php echo $roleFilter === 'vorstand_intern' ? 'selected' : ''; ?>>Vorstand Intern</option>
                     <option value="vorstand_extern" <?php echo $roleFilter === 'vorstand_extern' ? 'selected' : ''; ?>>Vorstand Extern</option>
@@ -136,12 +136,12 @@ ob_start();
                     'vorstand_finanzen'   => 'bg-purple-100 text-purple-800 border-purple-300',
                     'vorstand_intern'     => 'bg-purple-100 text-purple-800 border-purple-300',
                     'vorstand_extern'     => 'bg-purple-100 text-purple-800 border-purple-300',
-                    'resortleiter'        => 'bg-blue-100 text-blue-800 border-blue-300',
+                    'ressortleiter'        => 'bg-blue-100 text-blue-800 border-blue-300',
                     'mitglied'            => 'bg-green-100 text-green-800 border-green-300',
                     'anwaerter'           => 'bg-yellow-100 text-yellow-800 border-yellow-300',
                     'alumni'              => 'bg-gray-100 text-gray-800 border-gray-300',
                     'alumni_vorstand'     => 'bg-indigo-100 text-indigo-800 border-indigo-300',
-                    'alumni_finanzpruefer'=> 'bg-indigo-100 text-indigo-800 border-indigo-300',
+                    'alumni_finanz'=> 'bg-indigo-100 text-indigo-800 border-indigo-300',
                     'ehrenmitglied'       => 'bg-amber-100 text-amber-800 border-amber-300',
                 ];
                 

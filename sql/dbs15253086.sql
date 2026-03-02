@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `show_birthday` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'Whether to display birthday publicly on profile',
   `about_me` TEXT DEFAULT NULL COMMENT 'User biography or about me section',
   `gender` VARCHAR(50) DEFAULT NULL COMMENT 'User gender',
-  `role` ENUM('anwaerter', 'alumni', 'mitglied', 'ehrenmitglied', 'resortleiter', 'alumni_vorstand', 'alumni_finanzpruefer', 'vorstand_finanzen', 'vorstand_intern', 'vorstand_extern', 'admin', 'manager') NOT NULL DEFAULT 'mitglied',
+  `role` ENUM('anwaerter', 'alumni', 'mitglied', 'ehrenmitglied', 'ressortleiter', 'alumni_vorstand', 'alumni_finanz', 'vorstand_finanzen', 'vorstand_intern', 'vorstand_extern', 'admin', 'manager') NOT NULL DEFAULT 'mitglied',
   `azure_roles` JSON DEFAULT NULL COMMENT 'Original Microsoft Entra ID roles from Azure AD authentication',
   `azure_oid` VARCHAR(255) DEFAULT NULL COMMENT 'Azure Object Identifier (OID) from Microsoft Entra ID authentication',
   `user_type` ENUM('member', 'guest') DEFAULT NULL COMMENT 'Microsoft Entra ID user type: member (internal) or guest (external/invited)',

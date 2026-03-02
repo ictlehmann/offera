@@ -124,12 +124,12 @@ class Alumni extends Database {
         $currentRole = $currentUser['role'] ?? '';
         
         // Alumni, ehrenmitglied, and active members (mitglied, anwaerter, resortleiter) can update their own profile
-        // alumni_vorstand/alumni_finanzpruefer/board roles (all types) can update any
-        if (in_array($currentRole, ['alumni', 'ehrenmitglied', 'mitglied', 'anwaerter', 'resortleiter'])) {
+        // alumni_vorstand/alumni_finanz/board roles (all types) can update any
+        if (in_array($currentRole, ['alumni', 'ehrenmitglied', 'mitglied', 'anwaerter', 'ressortleiter'])) {
             if ($currentUser['id'] !== $userId) {
                 throw new Exception("Keine Berechtigung zum Aktualisieren anderer Alumni-Profile");
             }
-        } elseif (!in_array($currentRole, array_merge(Auth::BOARD_ROLES, ['alumni_vorstand', 'alumni_finanzpruefer']))) {
+        } elseif (!in_array($currentRole, array_merge(Auth::BOARD_ROLES, ['alumni_vorstand', 'alumni_finanz']))) {
             throw new Exception("Keine Berechtigung zum Aktualisieren des Alumni-Profils");
         }
         
@@ -230,7 +230,7 @@ class Alumni extends Database {
     
     /**
      * Search profiles with filters
-     * Returns ONLY profiles where the linked User has role 'alumni', 'alumni_vorstand', 'alumni_finanzpruefer', or 'ehrenmitglied'
+     * Returns ONLY profiles where the linked User has role 'alumni', 'alumni_vorstand', 'alumni_finanz', or 'ehrenmitglied'
      * 
      * @param array $filters Array of filters: search (name/position/company/industry), industry
      * @return array Array of matching profiles
@@ -319,8 +319,8 @@ class Alumni extends Database {
                     $userData = $userDataMap[$userId] ?? null;
                     $userRole = $userData['role'] ?? null;
                     
-                    // Only include profiles where user has role 'alumni', 'alumni_vorstand', 'alumni_finanzpruefer', or 'ehrenmitglied'
-                    if (in_array($userRole, ['alumni', 'alumni_vorstand', 'alumni_finanzpruefer', 'ehrenmitglied'])) {
+                    // Only include profiles where user has role 'alumni', 'alumni_vorstand', 'alumni_finanz', or 'ehrenmitglied'
+                    if (in_array($userRole, ['alumni', 'alumni_vorstand', 'alumni_finanz', 'ehrenmitglied'])) {
                         $profile['role'] = $userRole;
                         $profile['entra_photo_path'] = $userData['entra_photo_path'] ?? null;
                         

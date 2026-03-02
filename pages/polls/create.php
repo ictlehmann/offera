@@ -196,13 +196,13 @@ ob_start();
                     <?php
                     $roleOptions = [
                         ['label' => 'Vorstand',           'value' => 'board_roles'],
-                        ['label' => 'Alumni Finanzprüfer','value' => 'alumni_finanzpruefer'],
+                        ['label' => 'Alumni Finanzprüfer','value' => 'alumni_finanz'],
                         ['label' => 'Alumni Vorstand',    'value' => 'alumni_vorstand'],
                         ['label' => 'Alumni',             'value' => 'alumni'],
                         ['label' => 'Ehrenmitglied',      'value' => 'ehrenmitglied'],
                         ['label' => 'Mitglieder',         'value' => 'mitglied'],
                         ['label' => 'Anwärter',           'value' => 'anwaerter'],
-                        ['label' => 'Resortleiter',       'value' => 'resortleiter'],
+                        ['label' => 'Resortleiter',       'value' => 'ressortleiter'],
                     ];
                     $selectedTargetRoles = $_POST['target_roles'] ?? [];
                     foreach ($roleOptions as $opt):

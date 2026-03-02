@@ -10,7 +10,7 @@ if (!Auth::check()) {
     exit;
 }
 
-$allowedRoles = ['vorstand_finanzen', 'vorstand_intern', 'vorstand_extern', 'alumni_vorstand', 'alumni_finanzpruefer'];
+$allowedRoles = ['vorstand_finanzen', 'vorstand_intern', 'vorstand_extern', 'alumni_vorstand', 'alumni_finanz'];
 $currentUser = Auth::user();
 if (!$currentUser || !in_array($currentUser['role'] ?? '', $allowedRoles)) {
     header('Location: /index.php');

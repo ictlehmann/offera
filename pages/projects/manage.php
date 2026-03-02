@@ -11,7 +11,7 @@ if (!Auth::check()) {
     exit;
 }
 
-$canManageProjects = Auth::hasPermission('manage_projects') || Auth::isBoard() || Auth::hasRole(['resortleiter', 'alumni_vorstand']);
+$canManageProjects = Auth::hasPermission('manage_projects') || Auth::isBoard() || Auth::hasRole(['ressortleiter', 'alumni_vorstand']);
 if (!$canManageProjects) {
     header('Location: ../dashboard/index.php');
     exit;

@@ -356,7 +356,7 @@ $_tailwindCssVersion = filemtime(__DIR__ . '/../../assets/css/tailwind.css');
                 <?php endif; ?>
 
                 <!-- Nützliche Links (Board + Alumni Vorstand + Alumni Finanzprüfer) -->
-                <?php if (in_array($userRole, ['vorstand_finanzen', 'vorstand_intern', 'vorstand_extern', 'alumni_vorstand', 'alumni_finanzpruefer'])): ?>
+                <?php if (in_array($userRole, ['vorstand_finanzen', 'vorstand_intern', 'vorstand_extern', 'alumni_vorstand', 'alumni_finanz'])): ?>
                 <a href="<?php echo asset('pages/links/index.php'); ?>" 
                    class="flex items-center justify-start px-4 py-2 text-white hover:bg-white/10 transition-colors duration-200 <?php echo isActivePath('/links/') ? 'bg-white/20 text-white border-l-4 border-ibc-green' : ''; ?>"
                    <?php echo isActivePath('/links/') ? 'aria-current="page"' : ''; ?>>
@@ -451,7 +451,7 @@ $_tailwindCssVersion = filemtime(__DIR__ . '/../../assets/css/tailwind.css');
                 <?php endif; ?>
 
                 <!-- Inventarverwaltung -->
-                <?php if (Auth::hasRole(['vorstand_finanzen', 'vorstand_intern', 'vorstand_extern', 'resortleiter']) || Auth::isAdmin()): ?>
+                <?php if (Auth::hasRole(['vorstand_finanzen', 'vorstand_intern', 'vorstand_extern', 'ressortleiter']) || Auth::isAdmin()): ?>
                 <a href="<?php echo asset('pages/admin/rental_returns.php'); ?>" 
                    class="flex items-center justify-start px-4 py-2 text-white hover:bg-white/10 transition-colors duration-200 <?php echo isActivePath('/admin/rental_returns.php') ? 'bg-white/20 text-white border-l-4 border-ibc-green' : ''; ?>"
                    <?php echo isActivePath('/admin/rental_returns.php') ? 'aria-current="page"' : ''; ?>>
@@ -481,7 +481,7 @@ $_tailwindCssVersion = filemtime(__DIR__ . '/../../assets/css/tailwind.css');
                 <?php endif; ?>
 
                 <!-- Shop-Verwaltung (Board + Resortleiter) -->
-                <?php if (Auth::hasRole(['vorstand_finanzen', 'vorstand_intern', 'vorstand_extern', 'resortleiter'])): ?>
+                <?php if (Auth::hasRole(['vorstand_finanzen', 'vorstand_intern', 'vorstand_extern', 'ressortleiter'])): ?>
                 <a href="<?php echo asset('pages/admin/shop_manage.php'); ?>"
                    class="flex items-center justify-start px-4 py-2 text-white hover:bg-white/10 transition-colors duration-200 <?php echo isActivePath('/admin/shop_manage.php') ? 'bg-white/20 text-white border-l-4 border-ibc-green' : ''; ?>"
                    <?php echo isActivePath('/admin/shop_manage.php') ? 'aria-current="page"' : ''; ?>>
@@ -490,7 +490,7 @@ $_tailwindCssVersion = filemtime(__DIR__ . '/../../assets/css/tailwind.css');
                 </a>
                 <?php endif; ?>
 
-                <!-- Systemeinstellungen (Board roles + alumni_vorstand + alumni_finanzpruefer) -->
+                <!-- Systemeinstellungen (Board roles + alumni_vorstand + alumni_finanz) -->
                 <?php if (Auth::canAccessSystemSettings()): ?>
                 <a href="<?php echo asset('pages/admin/settings.php'); ?>" 
                    class="flex items-center justify-start px-4 py-2 text-white hover:bg-white/10 transition-colors duration-200 <?php echo isActivePath('/admin/settings.php') ? 'bg-white/20 text-white border-l-4 border-ibc-green' : ''; ?>"
@@ -501,7 +501,7 @@ $_tailwindCssVersion = filemtime(__DIR__ . '/../../assets/css/tailwind.css');
                 <?php endif; ?>
 
                 <!-- Statistiken Section Divider -->
-                <?php if (Auth::isAdmin() || Auth::hasRole(['vorstand_finanzen', 'vorstand_intern', 'vorstand_extern', 'resortleiter'])): ?>
+                <?php if (Auth::isAdmin() || Auth::hasRole(['vorstand_finanzen', 'vorstand_intern', 'vorstand_extern', 'ressortleiter'])): ?>
                 <div class="my-3 mx-4">
                     <div class="border-t border-white/10"></div>
                     <p class="text-[11px] font-semibold uppercase tracking-widest text-white/40 mt-3 px-2 text-left">Statistiken</p>
@@ -519,7 +519,7 @@ $_tailwindCssVersion = filemtime(__DIR__ . '/../../assets/css/tailwind.css');
                 <?php endif; ?>
 
                 <!-- Shop-Statistiken (Board + Resortleiter) -->
-                <?php if (Auth::hasRole(['vorstand_finanzen', 'vorstand_intern', 'vorstand_extern', 'resortleiter'])): ?>
+                <?php if (Auth::hasRole(['vorstand_finanzen', 'vorstand_intern', 'vorstand_extern', 'ressortleiter'])): ?>
                 <a href="<?php echo asset('pages/admin/shop_stats.php'); ?>"
                    class="flex items-center justify-start px-4 py-2 text-white hover:bg-white/10 transition-colors duration-200 <?php echo isActivePath('/admin/shop_stats.php') ? 'bg-white/20 text-white border-l-4 border-ibc-green' : ''; ?>"
                    <?php echo isActivePath('/admin/shop_stats.php') ? 'aria-current="page"' : ''; ?>>

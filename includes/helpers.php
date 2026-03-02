@@ -156,12 +156,12 @@ function getFormattedRoleName(string $role): string {
         'vorstand_finanzen'   => 'Vorstand Finanzen und Recht',
         'vorstand_intern'     => 'Vorstand Intern',
         'vorstand_extern'     => 'Vorstand Extern',
-        'resortleiter'        => 'Ressortleiter',
+        'ressortleiter'       => 'Ressortleiter',
         'mitglied'            => 'Mitglied',
         'alumni'              => 'Alumni',
         'anwaerter'           => 'Anwärter',
         'alumni_vorstand'     => 'Alumni-Vorstand',
-        'alumni_finanzpruefer'=> 'Alumni-Finanzprüfer',
+        'alumni_finanz'       => 'Alumni-Finanzprüfer',
         'ehrenmitglied'       => 'Ehrenmitglied',
         'manager'             => 'Ressortleiter',
         default               => ucfirst(str_replace('_', ' ', $role)),
@@ -181,12 +181,12 @@ function translateRole($role) {
         'vorstand_finanzen'   => 'Vorstand Finanzen und Recht',
         'vorstand_intern'     => 'Vorstand Intern',
         'vorstand_extern'     => 'Vorstand Extern',
-        'resortleiter'        => 'Ressortleiter',
+        'ressortleiter'       => 'Ressortleiter',
         'mitglied'            => 'Mitglied',
         'alumni'              => 'Alumni',
         'anwaerter'           => 'Anwärter',
         'alumni_vorstand'     => 'Alumni-Vorstand',
-        'alumni_finanzpruefer'=> 'Alumni-Finanzprüfer',
+        'alumni_finanz'       => 'Alumni-Finanzprüfer',
         'ehrenmitglied'       => 'Ehrenmitglied',
         'manager'             => 'Ressortleiter'
     ];
@@ -205,13 +205,13 @@ function translateAzureRole($azureRole) {
     $azureRoleTranslations = [
         'anwaerter'           => 'Anwärter',
         'mitglied'            => 'Mitglied',
-        'resortleiter'        => 'Ressortleiter',
+        'ressortleiter'       => 'Ressortleiter',
         'vorstand_finanzen'   => 'Vorstand Finanzen und Recht',
         'vorstand_intern'     => 'Vorstand Intern',
         'vorstand_extern'     => 'Vorstand Extern',
         'alumni'              => 'Alumni',
         'alumni_vorstand'     => 'Alumni-Vorstand',
-        'alumni_finanzpruefer'=> 'Alumni-Finanzprüfer',
+        'alumni_finanz'       => 'Alumni-Finanzprüfer',
         'ehrenmitglied'       => 'Ehrenmitglied'
     ];
     
@@ -235,9 +235,9 @@ function translateAzureRole($azureRole) {
  * @return bool True if role is an active member role
  */
 function isMemberRole($role) {
-    // Active roles: board roles + anwaerter, mitglied, resortleiter
+    // Active roles: board roles + anwaerter, mitglied, ressortleiter
     // Matches Member::ACTIVE_ROLES constant
-    return in_array($role, ['anwaerter', 'mitglied', 'resortleiter', 'vorstand_finanzen', 'vorstand_intern', 'vorstand_extern']);
+    return in_array($role, ['anwaerter', 'mitglied', 'ressortleiter', 'vorstand_finanzen', 'vorstand_intern', 'vorstand_extern']);
 }
 
 /**
@@ -248,7 +248,7 @@ function isMemberRole($role) {
  * @return bool True if role is an alumni role
  */
 function isAlumniRole($role) {
-    return in_array($role, ['alumni', 'alumni_vorstand', 'alumni_finanzpruefer', 'ehrenmitglied']);
+    return in_array($role, ['alumni', 'alumni_vorstand', 'alumni_finanz', 'ehrenmitglied']);
 }
 
 /**
