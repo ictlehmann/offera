@@ -6,6 +6,7 @@ require_once __DIR__ . '/../../includes/models/Invoice.php';
 require_once __DIR__ . '/../../includes/helpers.php';
 require_once __DIR__ . '/../../includes/poll_helpers.php';
 require_once __DIR__ . '/../../includes/handlers/CSRFHandler.php';
+require_once __DIR__ . '/../../includes/models/BlogPost.php';
 
 // Update event statuses (pseudo-cron)
 require_once __DIR__ . '/../../includes/pseudo_cron.php';
@@ -68,7 +69,7 @@ $events = [];
 try {
     $contentDb = Database::getContentDB();
     $stmt = $contentDb->prepare(
-        "SELECT id, title, start_time, location FROM events WHERE status IN ('planned', 'open', 'closed') AND start_time >= NOW() ORDER BY start_time ASC LIMIT 5"
+        "SELECT id, title, start_time, end_time, location, status, image_path, is_external FROM events WHERE status IN ('planned', 'open', 'closed') AND start_time >= NOW() ORDER BY start_time ASC LIMIT 5"
     );
     $stmt->execute();
     $events = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -155,9 +156,173 @@ if ($canAccessInvoices) {
     }
 }
 
+// Get recent open invoices for status-badge display
+$recentOpenInvoices = [];
+if ($canAccessInvoices) {
+    try {
+        $rechDb = Database::getRechDB();
+        if (in_array($userRole, array_merge(Auth::BOARD_ROLES, ['alumni_board', 'alumni_auditor']))) {
+            $iStmt = $rechDb->prepare("SELECT id, description, amount, status, created_at FROM invoices WHERE status IN ('pending', 'approved') ORDER BY created_at DESC LIMIT 5");
+            $iStmt->execute();
+        } else {
+            $iStmt = $rechDb->prepare("SELECT id, description, amount, status, created_at FROM invoices WHERE user_id = ? AND status IN ('pending', 'approved') ORDER BY created_at DESC LIMIT 5");
+            $iStmt->execute([$userId]);
+        }
+        $recentOpenInvoices = $iStmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Exception $e) {
+        error_log('dashboard: recent open invoices fetch failed: ' . $e->getMessage());
+    }
+}
+
+// Get recent blog posts
+$recentBlogPosts = [];
+try {
+    $recentBlogPosts = BlogPost::getAll(3, 0);
+} catch (Exception $e) {
+    error_log('dashboard: recent blog posts query failed: ' . $e->getMessage());
+}
+
 $title = 'Dashboard - IBC Intranet';
 ob_start();
 ?>
+
+<style>
+    /* ── Dashboard Event Cards ──────────────────────────── */
+    .dash-event-card {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        border-radius: 1rem;
+        border: 1.5px solid var(--border-color);
+        background-color: var(--bg-card);
+        transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+        text-decoration: none !important;
+        color: inherit;
+    }
+    .dash-event-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-card-hover);
+        border-color: var(--ibc-blue) !important;
+        text-decoration: none !important;
+    }
+    .dash-event-card-accent {
+        height: 4px;
+        flex-shrink: 0;
+        background: var(--ibc-blue);
+    }
+    .dash-event-card--open    .dash-event-card-accent { background: var(--ibc-green); }
+    .dash-event-card--closed  .dash-event-card-accent { background: var(--ibc-warning); }
+    .dash-event-card--planned .dash-event-card-accent { background: var(--ibc-blue); }
+
+    .dash-event-date-chip {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: var(--bg-card);
+        border: 1.5px solid var(--border-color);
+        border-radius: 0.75rem;
+        padding: 0.4rem 0.7rem;
+        min-width: 48px;
+        text-align: center;
+        line-height: 1;
+        flex-shrink: 0;
+    }
+    .dash-event-date-month {
+        font-size: 0.6rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--ibc-blue);
+        line-height: 1;
+    }
+    .dash-event-date-day {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--text-main);
+        line-height: 1.1;
+    }
+
+    /* ── Invoice Status Badges ──────────────────────────── */
+    .invoice-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.3rem;
+        padding: 0.2rem 0.65rem;
+        border-radius: 9999px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+    .invoice-badge-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+    .invoice-badge--pending  { background: rgba(245,158,11,0.12); color: #92400e; }
+    .invoice-badge--approved { background: rgba(234,179,8,0.12);  color: #78350f; }
+    .invoice-badge--pending .invoice-badge-dot  { background: #f59e0b; }
+    .invoice-badge--approved .invoice-badge-dot { background: #eab308; }
+    .dark-mode .invoice-badge--pending  { background: rgba(245,158,11,0.18); color: #fde68a; }
+    .dark-mode .invoice-badge--approved { background: rgba(234,179,8,0.18);  color: #fef08a; }
+
+    /* ── Dashboard Hover Cards (generic) ───────────────── */
+    .dash-hover-card {
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+    .dash-hover-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-card-hover);
+    }
+
+    /* ── Blog Cards ─────────────────────────────────────── */
+    .dash-blog-card {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        border-radius: 1rem;
+        border: 1.5px solid var(--border-color);
+        background-color: var(--bg-card);
+        transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+        text-decoration: none !important;
+        color: inherit;
+    }
+    .dash-blog-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-card-hover);
+        border-color: var(--ibc-blue) !important;
+        text-decoration: none !important;
+    }
+    .dash-blog-img {
+        height: 160px;
+        background: linear-gradient(135deg, var(--ibc-blue) 0%, var(--ibc-blue-dark) 60%, #001f3a 100%);
+        overflow: hidden;
+        flex-shrink: 0;
+        position: relative;
+    }
+    .dash-blog-img img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.4s ease;
+    }
+    .dash-blog-card:hover .dash-blog-img img {
+        transform: scale(1.05);
+    }
+    .line-clamp-2 {
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    .line-clamp-3 {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+</style>
 
 <?php if (!empty($user['prompt_profile_review']) && $user['prompt_profile_review'] == 1): ?>
 <!-- Profile Review Prompt Modal -->
@@ -373,7 +538,7 @@ function dismissProfileReviewPrompt() {
     </div>
 </div>
 
-<!-- Next Events Detail Section -->
+<!-- Meine nächsten Events Section -->
 <?php if (!empty($events)): ?>
 <div class="max-w-6xl mx-auto mb-10">
     <div class="flex flex-wrap items-center justify-between gap-2 mb-6">
@@ -381,38 +546,136 @@ function dismissProfileReviewPrompt() {
             <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center mr-3 shadow-md shrink-0">
                 <i class="fas fa-calendar-alt text-white text-sm"></i>
             </div>
-            <h2 class="text-2xl font-bold" style="color: var(--text-main)">Anstehende Events</h2>
+            <h2 class="text-2xl font-bold" style="color: var(--text-main)">Meine nächsten Events</h2>
         </div>
         <a href="../events/index.php" class="text-blue-600 hover:text-blue-700 font-semibold text-sm shrink-0">
             Alle Events <i class="fas fa-arrow-right ml-1"></i>
         </a>
     </div>
-    <div class="card p-6 rounded-2xl shadow-lg" style="background-color: var(--bg-card)">
-        <?php $monthAbbrs = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez']; ?>
-        <div class="space-y-3">
-            <?php foreach ($events as $event): ?>
+    <?php
+        $monthAbbrs = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+        $eventStatusLabels = [
+            'open'    => ['label' => 'Anmeldung offen',    'color' => 'text-green-700 bg-green-100 dark:bg-green-900/40 dark:text-green-300'],
+            'planned' => ['label' => 'Geplant',            'color' => 'text-blue-700 bg-blue-100 dark:bg-blue-900/40 dark:text-blue-300'],
+            'closed'  => ['label' => 'Anmeldung geschlossen', 'color' => 'text-amber-700 bg-amber-100 dark:bg-amber-900/40 dark:text-amber-300'],
+        ];
+    ?>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <?php foreach ($events as $event): ?>
+        <?php
+            $ts = strtotime($event['start_time']);
+            $monthAbbr = $monthAbbrs[(int)date('n', $ts) - 1];
+            $eventStatus = $event['status'] ?? 'planned';
+            $statusInfo = $eventStatusLabels[$eventStatus] ?? $eventStatusLabels['planned'];
+            // Countdown
+            $diffSecs = $ts - time();
+            $countdown = '';
+            if ($diffSecs > 0) {
+                $days = floor($diffSecs / 86400);
+                $hours = floor(($diffSecs % 86400) / 3600);
+                $countdown = $days > 0 ? "Noch {$days} Tag" . ($days != 1 ? 'e' : '') . ", {$hours} Std" : "Noch {$hours} Std";
+            }
+        ?>
+        <a href="../events/view.php?id=<?php echo (int)$event['id']; ?>" class="dash-event-card dash-event-card--<?php echo htmlspecialchars($eventStatus); ?>">
+            <!-- Status accent strip -->
+            <div class="dash-event-card-accent"></div>
+            <!-- Card header: gradient background with date chip -->
+            <div class="relative flex items-start gap-4 p-5 pb-4">
+                <!-- Date chip -->
+                <div class="dash-event-date-chip">
+                    <span class="dash-event-date-month"><?php echo $monthAbbr; ?></span>
+                    <span class="dash-event-date-day"><?php echo date('d', $ts); ?></span>
+                </div>
+                <!-- Title & meta -->
+                <div class="flex-1 min-w-0">
+                    <h3 class="font-bold text-base leading-snug line-clamp-2 mb-1.5" style="color: var(--text-main)">
+                        <?php echo htmlspecialchars($event['title']); ?>
+                    </h3>
+                    <div class="space-y-1 text-xs" style="color: var(--text-muted)">
+                        <div class="flex items-center gap-1.5">
+                            <i class="fas fa-clock text-blue-400 w-3 text-center"></i>
+                            <span><?php echo date('H:i', $ts); ?> Uhr</span>
+                        </div>
+                        <?php if (!empty($event['location'])): ?>
+                        <div class="flex items-center gap-1.5">
+                            <i class="fas fa-map-marker-alt text-blue-400 w-3 text-center"></i>
+                            <span class="truncate"><?php echo htmlspecialchars($event['location']); ?></span>
+                        </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+            <!-- Footer: status badge + countdown -->
+            <div class="px-5 pb-4 flex items-center justify-between gap-2" style="border-top: 1px solid var(--border-color)">
+                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold <?php echo $statusInfo['color']; ?>">
+                    <?php echo $statusInfo['label']; ?>
+                </span>
+                <?php if ($countdown): ?>
+                <span class="text-xs font-medium" style="color: var(--text-muted)">
+                    <i class="fas fa-hourglass-half mr-1 text-amber-400"></i><?php echo $countdown; ?>
+                </span>
+                <?php else: ?>
+                <span class="inline-flex items-center gap-1 text-blue-600 font-semibold text-xs">
+                    Details <i class="fas fa-arrow-right"></i>
+                </span>
+                <?php endif; ?>
+            </div>
+        </a>
+        <?php endforeach; ?>
+    </div>
+</div>
+<?php endif; ?>
+
+<!-- Offene Rechnungen Section -->
+<?php if ($canAccessInvoices && !empty($recentOpenInvoices)): ?>
+<div class="max-w-6xl mx-auto mb-10">
+    <div class="flex flex-wrap items-center justify-between gap-2 mb-6">
+        <div class="flex items-center">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center mr-3 shadow-md shrink-0">
+                <i class="fas fa-file-invoice-dollar text-white text-sm"></i>
+            </div>
+            <h2 class="text-2xl font-bold" style="color: var(--text-main)">Offene Rechnungen</h2>
+        </div>
+        <a href="/pages/invoices/index.php" class="text-emerald-600 hover:text-emerald-700 font-semibold text-sm shrink-0">
+            Alle Rechnungen <i class="fas fa-arrow-right ml-1"></i>
+        </a>
+    </div>
+    <?php
+        $invStatusLabels = [
+            'pending'  => 'In Prüfung',
+            'approved' => 'Offen',
+        ];
+    ?>
+    <div class="card rounded-2xl shadow-lg overflow-hidden" style="background-color: var(--bg-card)">
+        <div class="divide-y" style="border-color: var(--border-color)">
+            <?php foreach ($recentOpenInvoices as $inv): ?>
             <?php
-                $ts = strtotime($event['start_time']);
-                $monthAbbr = $monthAbbrs[(int)date('n', $ts) - 1];
+                $invStatus = $inv['status'];
+                $badgeLbl  = $invStatusLabels[$invStatus] ?? ucfirst($invStatus);
             ?>
-            <div class="flex items-center gap-4 pb-3 border-b last:border-b-0 last:pb-0" style="border-color: var(--border-color)">
-                <div class="flex-shrink-0 w-14 rounded-xl overflow-hidden shadow-md text-center select-none">
-                    <div class="bg-blue-600 text-white text-xs font-bold uppercase tracking-widest py-1"><?php echo $monthAbbr; ?></div>
-                    <div class="text-blue-600 text-2xl font-extrabold leading-tight py-1" style="background-color: var(--bg-card)"><?php echo date('d', $ts); ?></div>
+            <a href="/pages/invoices/index.php" class="flex items-center gap-4 px-5 py-4 dash-hover-card" style="color: inherit; text-decoration: none;">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+                    <i class="fas fa-receipt text-white text-xs"></i>
                 </div>
                 <div class="flex-1 min-w-0">
-                    <h4 class="font-semibold truncate" style="color: var(--text-main)"><?php echo htmlspecialchars($event['title']); ?></h4>
+                    <p class="font-semibold text-sm truncate" style="color: var(--text-main)">
+                        <?php echo htmlspecialchars($inv['description'] ?: 'Keine Beschreibung'); ?>
+                    </p>
                     <p class="text-xs mt-0.5" style="color: var(--text-muted)">
-                        <i class="fas fa-clock mr-1 text-blue-400"></i><?php echo date('H:i', $ts); ?> Uhr
-                        <?php if (!empty($event['location'])): ?>
-                        &nbsp;·&nbsp;<i class="fas fa-map-marker-alt mr-1 text-blue-400"></i><?php echo htmlspecialchars($event['location']); ?>
-                        <?php endif; ?>
+                        <i class="fas fa-calendar-alt mr-1 text-emerald-500"></i>
+                        <?php echo date('d.m.Y', strtotime($inv['created_at'])); ?>
                     </p>
                 </div>
-                <a href="../events/view.php?id=<?php echo $event['id']; ?>" class="flex-shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-600 font-semibold text-xs transition-colors shadow-sm">
-                    Details <i class="fas fa-arrow-right"></i>
-                </a>
-            </div>
+                <div class="flex items-center gap-3 flex-shrink-0">
+                    <span class="font-bold text-sm text-emerald-700 dark:text-emerald-400">
+                        <?php echo number_format((float)$inv['amount'], 2, ',', '.'); ?>&nbsp;€
+                    </span>
+                    <span class="invoice-badge invoice-badge--<?php echo $invStatus; ?>">
+                        <span class="invoice-badge-dot"></span>
+                        <?php echo $badgeLbl; ?>
+                    </span>
+                </div>
+            </a>
             <?php endforeach; ?>
         </div>
     </div>
@@ -472,6 +735,80 @@ function dismissProfileReviewPrompt() {
     </div>
     <?php endif; ?>
 </div>
+
+<!-- Neuigkeiten aus dem Blog Section -->
+<?php if (!empty($recentBlogPosts)): ?>
+<div class="max-w-6xl mx-auto mb-10">
+    <div class="flex flex-wrap items-center justify-between gap-2 mb-6">
+        <div class="flex items-center">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center mr-3 shadow-md shrink-0">
+                <i class="fas fa-newspaper text-white text-sm"></i>
+            </div>
+            <h2 class="text-2xl font-bold" style="color: var(--text-main)">Neuigkeiten aus dem Blog</h2>
+        </div>
+        <a href="../blog/index.php" class="text-indigo-600 hover:text-indigo-700 font-semibold text-sm shrink-0">
+            Alle Artikel <i class="fas fa-arrow-right ml-1"></i>
+        </a>
+    </div>
+    <?php
+        $blogCategoryColors = [
+            'Allgemein'          => 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
+            'IT'                 => 'bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300',
+            'Marketing'          => 'bg-purple-100 text-purple-800 dark:bg-purple-900/40 dark:text-purple-300',
+            'Human Resources'    => 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300',
+            'Qualitätsmanagement'=> 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300',
+            'Akquise'            => 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300',
+        ];
+    ?>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <?php foreach ($recentBlogPosts as $post): ?>
+        <?php
+            $catColor = $blogCategoryColors[$post['category'] ?? ''] ?? $blogCategoryColors['Allgemein'];
+            $postDate = new DateTime($post['created_at']);
+            $excerpt  = strip_tags($post['content'] ?? '');
+            $excerpt  = strlen($excerpt) > 120 ? substr($excerpt, 0, 120) . '…' : $excerpt;
+        ?>
+        <a href="../blog/view.php?id=<?php echo (int)$post['id']; ?>" class="dash-blog-card">
+            <!-- Image / placeholder -->
+            <div class="dash-blog-img">
+                <?php if (!empty($post['image_path']) && $post['image_path'] !== BlogPost::DEFAULT_IMAGE): ?>
+                    <img src="/<?php echo htmlspecialchars(ltrim($post['image_path'], '/')); ?>"
+                         alt="<?php echo htmlspecialchars($post['title']); ?>">
+                <?php else: ?>
+                    <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-600">
+                        <i class="fas fa-newspaper text-white/30 text-4xl"></i>
+                    </div>
+                <?php endif; ?>
+            </div>
+            <!-- Content -->
+            <div class="p-4 flex-1 flex flex-col">
+                <div class="mb-2">
+                    <span class="px-2.5 py-1 text-xs font-semibold rounded-full <?php echo $catColor; ?>">
+                        <?php echo htmlspecialchars($post['category'] ?? 'Allgemein'); ?>
+                    </span>
+                </div>
+                <h3 class="font-bold text-base leading-snug line-clamp-2 mb-1.5" style="color: var(--text-main)">
+                    <?php echo htmlspecialchars($post['title']); ?>
+                </h3>
+                <p class="text-xs mb-2" style="color: var(--text-muted)">
+                    <i class="fas fa-calendar-alt mr-1 text-indigo-400"></i>
+                    <?php echo $postDate->format('d.m.Y'); ?>
+                </p>
+                <p class="text-sm flex-1 line-clamp-3" style="color: var(--text-muted)">
+                    <?php echo htmlspecialchars($excerpt); ?>
+                </p>
+                <div class="mt-3 pt-3 flex items-center justify-between text-xs" style="border-top: 1px solid var(--border-color); color: var(--text-muted)">
+                    <span class="truncate"><i class="fas fa-user-circle mr-1 text-indigo-400"></i><?php echo htmlspecialchars(explode('@', $post['author_email'])[0]); ?></span>
+                    <span class="inline-flex items-center gap-1 text-indigo-600 font-semibold flex-shrink-0">
+                        Lesen <i class="fas fa-arrow-right"></i>
+                    </span>
+                </div>
+            </div>
+        </a>
+        <?php endforeach; ?>
+    </div>
+</div>
+<?php endif; ?>
 
 <!-- Polls Widget Section -->
 <div class="max-w-6xl mx-auto mb-12">
