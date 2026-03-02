@@ -205,7 +205,7 @@ ob_start();
                     </thead>
                     <tbody class="divide-y divide-gray-200" id="pending-tbody">
                         <?php foreach ($pendingRequests as $req): ?>
-                        <tr id="pending-row-<?php echo (int)$req['id']; ?>" class="hover:bg-yellow-50">
+                        <tr id="pending-row-<?php echo (int)$req['id']; ?>" class="hover:bg-yellow-50 dark:hover:bg-yellow-900/20">
                             <td class="px-4 py-3 text-sm font-semibold text-gray-800" data-label="Artikel">
                                 <?php
                                 $itemName = $itemNames[(string)$req['inventory_object_id']] ?? '';
@@ -288,7 +288,7 @@ ob_start();
                     </thead>
                     <tbody class="divide-y divide-gray-200" id="pending-return-tbody">
                         <?php foreach ($pendingReturnLoans as $loan): ?>
-                        <tr id="pending-return-row-<?php echo (int)$loan['id']; ?>" class="hover:bg-orange-50">
+                        <tr id="pending-return-row-<?php echo (int)$loan['id']; ?>" class="hover:bg-orange-50 dark:hover:bg-orange-900/20">
                             <td class="px-4 py-3 text-sm font-semibold text-gray-800" data-label="Artikel">
                                 <?php
                                 $itemName = $itemNames[(string)$loan['inventory_object_id']] ?? '';
@@ -323,7 +323,7 @@ ob_start();
                         </tr>
                         <?php endforeach; ?>
                         <?php foreach ($pendingRentalReturns as $rental): ?>
-                        <tr id="rental-return-row-<?php echo (int)$rental['id']; ?>" class="hover:bg-orange-50">
+                        <tr id="rental-return-row-<?php echo (int)$rental['id']; ?>" class="hover:bg-orange-50 dark:hover:bg-orange-900/20">
                             <td class="px-4 py-3 text-sm font-semibold text-gray-800" data-label="Artikel">
                                 <?php
                                 $itemName = $itemNames[(string)$rental['inventory_object_id']] ?? '';
