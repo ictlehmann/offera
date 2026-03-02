@@ -1,12 +1,7 @@
 <?php
 // index.php - Haupt-Einstiegspunkt (Bulletproof Version)
 
-// 1. Härtestes Error-Reporting für den Start
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
-// 2. Buffer starten (Verhindert "Headers already sent" Fehler)
+// 1. Buffer starten (Verhindert "Headers already sent" Fehler)
 ob_start();
 
 try {
@@ -69,17 +64,33 @@ try {
     }
 
 } catch (Exception $e) {
-    // Fehlerbehandlung: Zeige den Fehler an, statt einer weißen Seite
     ob_end_clean(); // Puffer verwerfen
-    echo "<div style='font-family:sans-serif; padding:20px; background:#ffebee; border:1px solid #c62828; color:#b71c1c;'>";
-    echo "<h2>⚠️ System Fehler (500 Avoidance)</h2>";
-    echo "<p><strong>Fehler:</strong> " . htmlspecialchars($e->getMessage()) . "</p>";
-    echo "<p><strong>Datei:</strong> " . $e->getFile() . " (Zeile " . $e->getLine() . ")</p>";
-    echo "</div>";
-    
-    // Fallback-Link anzeigen
-    if (defined('BASE_URL')) {
-        echo "<p><a href='" . BASE_URL . "/pages/auth/login.php'>Versuche direkten Login-Link</a></p>";
+
+    $isProduction = !defined('ENVIRONMENT') || ENVIRONMENT === 'production';
+
+    if ($isProduction) {
+        // Log silently to error log, show no details to the user
+        $logFile = __DIR__ . '/logs/error.log';
+        $timestamp = date('Y-m-d H:i:s');
+        @file_put_contents(
+            $logFile,
+            "[$timestamp] " . $e->getMessage() . " in " . $e->getFile() . " on line " . $e->getLine() . PHP_EOL,
+            FILE_APPEND | LOCK_EX
+        );
+        http_response_code(500);
+        echo "<p>Ein interner Fehler ist aufgetreten. Bitte versuche es später erneut.</p>";
+    } else {
+        // Fehlerbehandlung: Zeige den Fehler an, statt einer weißen Seite
+        echo "<div style='font-family:sans-serif; padding:20px; background:#ffebee; border:1px solid #c62828; color:#b71c1c;'>";
+        echo "<h2>⚠️ System Fehler (500 Avoidance)</h2>";
+        echo "<p><strong>Fehler:</strong> " . htmlspecialchars($e->getMessage()) . "</p>";
+        echo "<p><strong>Datei:</strong> " . $e->getFile() . " (Zeile " . $e->getLine() . ")</p>";
+        echo "</div>";
+
+        // Fallback-Link anzeigen
+        if (defined('BASE_URL')) {
+            echo "<p><a href='" . BASE_URL . "/pages/auth/login.php'>Versuche direkten Login-Link</a></p>";
+        }
     }
     exit;
 }
