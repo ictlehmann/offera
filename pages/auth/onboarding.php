@@ -335,15 +335,15 @@ if ($showQRCode) {
                 </div>
 
                 <div class="form-group">
-                    <label for="mobile_phone">Mobiltelefon</label>
+                    <label for="mobile_phone">Mobiltelefon<span class="required">*</span></label>
                     <input type="tel" id="mobile_phone" name="mobile_phone"
-                           placeholder="+49 123 456789">
+                           placeholder="+49 123 456789" required>
                 </div>
 
                 <div class="form-group">
-                    <label for="birthday">Geburtsdatum</label>
+                    <label for="birthday">Geburtsdatum<span class="required">*</span></label>
                     <input type="date" id="birthday" name="birthday"
-                           max="<?php echo date('Y-m-d', strtotime('-16 years')); ?>">
+                           max="<?php echo date('Y-m-d', strtotime('-16 years')); ?>" required>
                 </div>
 
                 <button type="submit" class="btn btn-primary" style="width:100%;" id="submit-btn">
@@ -376,6 +376,35 @@ document.getElementById('profile-form').addEventListener('submit', async functio
         mobile_phone: document.getElementById('mobile_phone').value.trim(),
         birthday:     document.getElementById('birthday').value,
     };
+
+    if (!data.first_name) {
+        errBox.textContent = 'Vorname ist erforderlich.';
+        errBox.style.display = 'block';
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-check me-1"></i> Profil speichern &amp; loslegen';
+        return;
+    }
+    if (!data.last_name) {
+        errBox.textContent = 'Nachname ist erforderlich.';
+        errBox.style.display = 'block';
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-check me-1"></i> Profil speichern &amp; loslegen';
+        return;
+    }
+    if (!data.mobile_phone) {
+        errBox.textContent = 'Mobiltelefon ist ein Pflichtfeld.';
+        errBox.style.display = 'block';
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-check me-1"></i> Profil speichern &amp; loslegen';
+        return;
+    }
+    if (!data.birthday) {
+        errBox.textContent = 'Geburtsdatum ist ein Pflichtfeld.';
+        errBox.style.display = 'block';
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-check me-1"></i> Profil speichern &amp; loslegen';
+        return;
+    }
 
     try {
         const resp = await fetch('<?php echo $baseUrl; ?>/api/complete_onboarding.php', {
