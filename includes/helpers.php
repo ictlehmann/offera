@@ -248,7 +248,7 @@ function isMemberRole($role) {
  * @return bool True if role is an alumni role
  */
 function isAlumniRole($role) {
-    return in_array($role, ['alumni', 'alumni_vorstand', 'ehrenmitglied']);
+    return in_array($role, ['alumni', 'alumni_vorstand', 'alumni_finanzpruefer', 'ehrenmitglied']);
 }
 
 /**
