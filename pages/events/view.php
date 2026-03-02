@@ -94,6 +94,15 @@ $canCancel = strtotime($signupDeadline) > time();
 // Check if user has permission to add financial statistics
 $canAddStats = in_array($userRole, array_merge(Auth::BOARD_ROLES, ['alumni_board']));
 
+// Load feedback contact info
+$feedbackContact = Event::getFeedbackContact((int)$eventId);
+$feedbackContactRoles = ['alumni', 'alumni_board', 'alumni_auditor', 'honorary_member'];
+$canBecomeFeedbackContact = in_array($userRole, $feedbackContactRoles);
+$isFeedbackContact = $feedbackContact && (int)($feedbackContact['user_id'] ?? 0) === (int)$user['id'];
+
+// Whether application text is required for signup
+$requiresApplication = (bool)($event['requires_application'] ?? false);
+
 $title = htmlspecialchars($event['title']) . ' - Events';
 ob_start();
 ?>
@@ -383,7 +392,7 @@ $statusInfo = $statusLabels[$currentStatus] ?? ['label' => $currentStatus, 'icon
                         <?php endif; ?>
                     <?php else: ?>
                         <?php if (!$isRegistered && !$userSlotId): ?>
-                            <button onclick="signupForEvent(<?php echo $eventId; ?>)"
+                            <button onclick="<?php echo $requiresApplication ? 'openApplicationModal()' : 'signupForEvent(' . intval($eventId) . ')'; ?>"
                                     class="inline-flex items-center justify-center px-5 py-3 bg-ibc-green text-white rounded-xl font-semibold hover:shadow-glow-green ease-premium w-full">
                                 <i class="fas fa-user-plus mr-2"></i>
                                 Jetzt anmelden
@@ -549,6 +558,61 @@ $statusInfo = $statusLabels[$currentStatus] ?? ['label' => $currentStatus, 'icon
             <?php endforeach; ?>
         </div>
     <?php endif; ?>
+
+    <!-- Feedback Ansprechpartner Section -->
+    <?php if ($feedbackContact): ?>
+    <div class="mt-6">
+        <div class="bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-2xl p-6 border border-purple-100 dark:border-purple-800 shadow-soft">
+            <h2 class="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
+                <span class="w-8 h-8 rounded-lg bg-purple-600/10 flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-comment-dots text-purple-600 text-sm"></i>
+                </span>
+                Feedback Ansprechpartner
+            </h2>
+            <div class="flex items-center gap-4">
+                <?php if (!empty($feedbackContact['image_path'])): ?>
+                <img src="/<?php echo htmlspecialchars($feedbackContact['image_path']); ?>"
+                     alt="<?php echo htmlspecialchars(trim($feedbackContact['first_name'] . ' ' . $feedbackContact['last_name'])); ?>"
+                     class="w-16 h-16 rounded-full object-cover border-2 border-purple-300 shadow-md flex-shrink-0">
+                <?php else: ?>
+                <div class="w-16 h-16 rounded-full bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center flex-shrink-0 border-2 border-purple-300">
+                    <i class="fas fa-user text-purple-600 text-xl"></i>
+                </div>
+                <?php endif; ?>
+                <div>
+                    <div class="font-bold text-gray-900 dark:text-white text-base">
+                        <?php echo htmlspecialchars(trim($feedbackContact['first_name'] . ' ' . $feedbackContact['last_name'])); ?>
+                    </div>
+                    <?php if (!empty($feedbackContact['position']) || !empty($feedbackContact['company'])): ?>
+                    <div class="text-sm text-gray-600 dark:text-gray-300 mt-0.5">
+                        <?php
+                        $parts = array_filter([$feedbackContact['position'] ?? '', $feedbackContact['company'] ?? '']);
+                        echo htmlspecialchars(implode(' · ', $parts));
+                        ?>
+                    </div>
+                    <?php endif; ?>
+                    <div class="text-xs text-purple-600 dark:text-purple-400 mt-1 font-medium">
+                        <i class="fas fa-star mr-1"></i>Stellt sich für Feedback zur Verfügung
+                    </div>
+                </div>
+                <?php if ($isFeedbackContact): ?>
+                <button id="removeFeedbackContactBtn"
+                        class="ml-auto px-4 py-2 bg-red-100 text-red-700 rounded-lg font-semibold hover:bg-red-200 transition text-sm">
+                    <i class="fas fa-times mr-1"></i>Zurückziehen
+                </button>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+    <?php elseif ($canBecomeFeedbackContact): ?>
+    <div class="mt-6">
+        <button id="becomeFeedbackContactBtn"
+                class="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-indigo-700 transition shadow-md text-sm">
+            <i class="fas fa-comment-dots mr-2"></i>
+            Feedback Ansprechpartner werden
+        </button>
+    </div>
+    <?php endif; ?>
 </div>
 
 <?php if ($canAddStats && in_array($currentStatus, ['closed', 'past'])): ?>
@@ -619,6 +683,37 @@ $statusInfo = $statusLabels[$currentStatus] ?? ['label' => $currentStatus, 'icon
             <button type="button" onclick="submitAddStats()"
                     class="flex-1 px-6 py-3 bg-ibc-blue text-white rounded-lg hover:bg-ibc-blue-dark transition">
                 <i class="fas fa-save mr-2"></i>Speichern
+            </button>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
+<?php if ($requiresApplication): ?>
+<!-- Application Modal (requires_application = 1) -->
+<div id="applicationModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-xl w-full max-w-md shadow-2xl overflow-hidden">
+        <div class="p-6">
+            <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2 flex items-center gap-2">
+                <i class="fas fa-file-alt text-purple-600"></i>
+                Bewerbung für dieses Event
+            </h3>
+            <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                Bitte schreibe kurz, warum du an diesem Event teilnehmen möchtest.
+            </p>
+            <textarea id="applicationMotivation" rows="4" maxlength="1000"
+                      class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white dark:bg-gray-700 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 resize-none"
+                      placeholder="Bewerbungstext..."></textarea>
+            <div id="applicationError" class="hidden mt-2 p-3 bg-red-100 border border-red-300 text-red-700 rounded-lg text-sm"></div>
+        </div>
+        <div class="px-6 pb-6 flex gap-3">
+            <button type="button" onclick="closeApplicationModal()"
+                    class="flex-1 px-4 py-2.5 bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition font-semibold">
+                Abbrechen
+            </button>
+            <button type="button" onclick="submitApplication()"
+                    class="flex-1 px-4 py-2.5 bg-ibc-green text-white rounded-lg hover:bg-ibc-green-dark transition font-semibold">
+                <i class="fas fa-paper-plane mr-1.5"></i>Bewerben & Anmelden
             </button>
         </div>
     </div>
@@ -978,6 +1073,87 @@ document.getElementById('addStatsModal')?.addEventListener('click', (e) => {
     if (e.target.id === 'addStatsModal') closeAddStatsModal();
 });
 <?php endif; ?>
+
+// ── Application Modal (requires_application = 1) ──────────────────────────────
+<?php if ($requiresApplication): ?>
+function openApplicationModal() {
+    document.getElementById('applicationModal').classList.remove('hidden');
+    document.getElementById('applicationMotivation').value = '';
+    document.getElementById('applicationError').classList.add('hidden');
+}
+function closeApplicationModal() {
+    document.getElementById('applicationModal').classList.add('hidden');
+}
+function submitApplication() {
+    const motivation = document.getElementById('applicationMotivation').value.trim();
+    const errorDiv = document.getElementById('applicationError');
+    if (!motivation) {
+        errorDiv.textContent = 'Bitte schreibe einen Bewerbungstext.';
+        errorDiv.classList.remove('hidden');
+        return;
+    }
+    errorDiv.classList.add('hidden');
+    const eventId = <?php echo intval($eventId); ?>;
+    // The motivation text is validated client-side to ensure users provide context before signing up.
+    // The signup itself uses the standard event_signup endpoint.
+    fetch('../../api/event_signup.php', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({action: 'signup', event_id: eventId, csrf_token: csrfToken, motivation: motivation})
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            closeApplicationModal();
+            showMessage('Erfolgreich angemeldet!', 'success');
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            errorDiv.textContent = data.message || 'Fehler bei der Anmeldung';
+            errorDiv.classList.remove('hidden');
+        }
+    })
+    .catch(() => {
+        errorDiv.textContent = 'Netzwerkfehler';
+        errorDiv.classList.remove('hidden');
+    });
+}
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeApplicationModal(); });
+document.getElementById('applicationModal')?.addEventListener('click', (e) => {
+    if (e.target.id === 'applicationModal') closeApplicationModal();
+});
+<?php endif; ?>
+
+// ── Feedback Contact ──────────────────────────────────────────────────────────
+function sendFeedbackContactAction(action, btn) {
+    btn.disabled = true;
+    fetch('/api/set_feedback_contact.php', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({type: 'event', id: <?php echo intval($eventId); ?>, action: action, csrf_token: csrfToken})
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            showMessage(data.message || 'Ein Fehler ist aufgetreten', 'error');
+            btn.disabled = false;
+        }
+    })
+    .catch(() => {
+        showMessage('Netzwerkfehler', 'error');
+        btn.disabled = false;
+    });
+}
+
+document.getElementById('becomeFeedbackContactBtn')?.addEventListener('click', function() {
+    sendFeedbackContactAction('set', this);
+});
+document.getElementById('removeFeedbackContactBtn')?.addEventListener('click', function() {
+    if (confirm('Möchtest du dich als Feedback-Ansprechpartner zurückziehen?')) {
+        sendFeedbackContactAction('remove', this);
+    }
+});
 
 </script>
 

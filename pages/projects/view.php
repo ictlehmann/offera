@@ -55,6 +55,9 @@ $teamPercentage = $maxConsultants > 0 ? min(100, round(($teamSize / $maxConsulta
 // Internal project flag
 $isInternalProject = ($project['type'] ?? 'internal') === 'internal';
 
+// Requires application flag
+$requiresApplication = (bool)($project['requires_application'] ?? 1);
+
 // Check if user is already a participant (for internal projects)
 $isParticipant = false;
 if ($isInternalProject && $userRole !== 'alumni') {
@@ -69,6 +72,12 @@ $participants = [];
 if ($isInternalProject || $isLead || Auth::isBoard() || Auth::hasPermission('manage_projects')) {
     $participants = Project::getParticipants($projectId);
 }
+
+// Load feedback contact info
+$feedbackContact = Project::getFeedbackContact($projectId);
+$feedbackContactRoles = ['alumni', 'alumni_board', 'alumni_auditor', 'honorary_member'];
+$canBecomeFeedbackContact = in_array($userRole, $feedbackContactRoles);
+$isFeedbackContact = $feedbackContact && (int)($feedbackContact['user_id'] ?? 0) === (int)$user['id'];
 
 // Handle application submission
 $message = '';
@@ -115,19 +124,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['apply'])) {
         $error = 'Bewerbungen für dieses Projekt sind nicht möglich';
     } else {
         try {
-            // Validate motivation
             $motivation = trim($_POST['motivation'] ?? '');
-            if (empty($motivation)) {
+
+            // Validate motivation only when application text is required
+            if ($requiresApplication && empty($motivation)) {
                 throw new Exception('Bitte gib Deine Motivation an');
             }
             
-            // Validate experience count confirmation checkbox
-            if (!isset($_POST['experience_confirmed']) || $_POST['experience_confirmed'] !== '1') {
+            // Validate experience count confirmation checkbox (only when application required)
+            if ($requiresApplication && (!isset($_POST['experience_confirmed']) || $_POST['experience_confirmed'] !== '1')) {
                 throw new Exception('Bitte bestätigen Sie, dass Sie die Anzahl bisheriger Projekte korrekt angegeben haben');
             }
             
-            // Validate GDPR consent checkbox
-            if (!isset($_POST['gdpr_consent']) || $_POST['gdpr_consent'] !== '1') {
+            // Validate GDPR consent checkbox (only when application required)
+            if ($requiresApplication && (!isset($_POST['gdpr_consent']) || $_POST['gdpr_consent'] !== '1')) {
                 throw new Exception('Sie müssen der Datenverarbeitung gemäß DSGVO zustimmen');
             }
             
@@ -431,8 +441,8 @@ ob_start();
         <?php if (($project['status'] === 'open' || $project['status'] === 'applying' || $project['status'] === 'running') && $userRole !== 'alumni'): ?>
         <div class="border-t border-gray-200 pt-6 mt-6">
 
-            <?php if ($isInternalProject): ?>
-                <!-- Internal project: direct join/leave button -->
+            <?php if ($isInternalProject && !$requiresApplication): ?>
+                <!-- Internal project with no application required: direct join/leave button -->
                 <?php if ($isParticipant): ?>
                 <div class="flex items-center gap-4">
                     <div class="flex items-center text-green-700 bg-green-50 border border-green-200 rounded-lg px-4 py-3">
@@ -454,8 +464,31 @@ ob_start();
                 </button>
                 <?php endif; ?>
 
+            <?php elseif (!$requiresApplication): ?>
+                <!-- External project with no application required: direct join button -->
+                <?php if ($userApplication): ?>
+                <div class="flex items-center text-green-700 bg-green-50 border border-green-200 rounded-lg px-4 py-3">
+                    <i class="fas fa-check-circle mr-2"></i>
+                    Du hast Dich für dieses Projekt registriert
+                </div>
+                <?php elseif ($project['status'] === 'open' || $project['status'] === 'applying'): ?>
+                <form method="POST" action="view.php?id=<?php echo (int)$project['id']; ?>">
+                    <input type="hidden" name="csrf_token" value="<?php echo CSRFHandler::getToken(); ?>">
+                    <input type="hidden" name="apply" value="1">
+                    <input type="hidden" name="motivation" value="">
+                    <input type="hidden" name="experience_count" value="0">
+                    <input type="hidden" name="experience_confirmed" value="1">
+                    <input type="hidden" name="gdpr_consent" value="1">
+                    <button type="submit"
+                            class="inline-flex items-center px-6 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition shadow-md">
+                        <i class="fas fa-user-plus mr-2"></i>
+                        Jetzt teilnehmen
+                    </button>
+                </form>
+                <?php endif; ?>
+
             <?php else: ?>
-                <!-- External project: existing application workflow -->
+                <!-- Application required (internal or external with requires_application=1) -->
                 <?php if ($project['status'] === 'open' || $project['status'] === 'applying'): ?>
                 <?php if ($userApplication): ?>
                     <!-- Show Application Status -->
@@ -604,6 +637,61 @@ ob_start();
                 <?php endif; ?>
             <?php endif; ?>
 
+        </div>
+        <?php endif; ?>
+
+        <!-- Feedback Ansprechpartner Section -->
+        <?php if ($feedbackContact): ?>
+        <div class="border-t border-gray-200 pt-6 mt-6">
+            <div class="bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-2xl p-6 border border-purple-100 dark:border-purple-800">
+                <h2 class="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
+                    <span class="w-8 h-8 rounded-lg bg-purple-600/10 flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-comment-dots text-purple-600 text-sm"></i>
+                    </span>
+                    Feedback Ansprechpartner
+                </h2>
+                <div class="flex items-center gap-4">
+                    <?php if (!empty($feedbackContact['image_path'])): ?>
+                    <img src="/<?php echo htmlspecialchars($feedbackContact['image_path']); ?>"
+                         alt="<?php echo htmlspecialchars(trim($feedbackContact['first_name'] . ' ' . $feedbackContact['last_name'])); ?>"
+                         class="w-16 h-16 rounded-full object-cover border-2 border-purple-300 shadow-md flex-shrink-0">
+                    <?php else: ?>
+                    <div class="w-16 h-16 rounded-full bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center flex-shrink-0 border-2 border-purple-300">
+                        <i class="fas fa-user text-purple-600 text-xl"></i>
+                    </div>
+                    <?php endif; ?>
+                    <div>
+                        <div class="font-bold text-gray-900 dark:text-white text-base">
+                            <?php echo htmlspecialchars(trim($feedbackContact['first_name'] . ' ' . $feedbackContact['last_name'])); ?>
+                        </div>
+                        <?php if (!empty($feedbackContact['position']) || !empty($feedbackContact['company'])): ?>
+                        <div class="text-sm text-gray-600 dark:text-gray-300 mt-0.5">
+                            <?php
+                            $parts = array_filter([$feedbackContact['position'] ?? '', $feedbackContact['company'] ?? '']);
+                            echo htmlspecialchars(implode(' · ', $parts));
+                            ?>
+                        </div>
+                        <?php endif; ?>
+                        <div class="text-xs text-purple-600 dark:text-purple-400 mt-1 font-medium">
+                            <i class="fas fa-star mr-1"></i>Stellt sich für Feedback zur Verfügung
+                        </div>
+                    </div>
+                    <?php if ($isFeedbackContact): ?>
+                    <button id="removeFeedbackContactBtn"
+                            class="ml-auto px-4 py-2 bg-red-100 text-red-700 rounded-lg font-semibold hover:bg-red-200 transition text-sm">
+                        <i class="fas fa-times mr-1"></i>Zurückziehen
+                    </button>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+        <?php elseif ($canBecomeFeedbackContact): ?>
+        <div class="border-t border-gray-200 pt-6 mt-6">
+            <button id="becomeFeedbackContactBtn"
+                    class="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-indigo-700 transition shadow-md text-sm">
+                <i class="fas fa-comment-dots mr-2"></i>
+                Feedback Ansprechpartner werden
+            </button>
         </div>
         <?php endif; ?>
 
@@ -786,6 +874,44 @@ ob_start();
         leaveBtn.addEventListener('click', function () {
             if (confirm('Möchtest du das Projekt wirklich verlassen?')) {
                 sendProjectAction('leave', this);
+            }
+        });
+    }
+
+    function sendFeedbackContactAction(action, btn) {
+        btn.disabled = true;
+        fetch('/api/set_feedback_contact.php', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({type: 'project', id: projectId, action: action, csrf_token: csrfToken})
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                window.location.reload();
+            } else {
+                alert(data.message || 'Ein Fehler ist aufgetreten');
+                btn.disabled = false;
+            }
+        })
+        .catch(() => {
+            alert('Ein Fehler ist aufgetreten');
+            btn.disabled = false;
+        });
+    }
+
+    const becomeBtn = document.getElementById('becomeFeedbackContactBtn');
+    if (becomeBtn) {
+        becomeBtn.addEventListener('click', function () {
+            sendFeedbackContactAction('set', this);
+        });
+    }
+
+    const removeContactBtn = document.getElementById('removeFeedbackContactBtn');
+    if (removeContactBtn) {
+        removeContactBtn.addEventListener('click', function () {
+            if (confirm('Möchtest du dich als Feedback-Ansprechpartner zurückziehen?')) {
+                sendFeedbackContactAction('remove', this);
             }
         });
     }
