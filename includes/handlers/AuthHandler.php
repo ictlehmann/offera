@@ -693,12 +693,12 @@ class AuthHandler {
         }
         
         // Check if profile is complete and 2FA status
-        $stmt = $db->prepare("SELECT profile_complete, tfa_enabled, is_onboarded FROM users WHERE id = ?");
+        $stmt = $db->prepare("SELECT profile_complete, tfa_enabled, tfa_secret, is_onboarded FROM users WHERE id = ?");
         $stmt->execute([$userId]);
         $userCheck = $stmt->fetch();
 
-        // Check if 2FA is enabled - do this BEFORE setting authenticated session
-        if ($userCheck && intval($userCheck['tfa_enabled']) === 1) {
+        // Check if 2FA is enabled AND the user has actually configured a secret - do this BEFORE setting authenticated session
+        if ($userCheck && intval($userCheck['tfa_enabled']) === 1 && !empty($userCheck['tfa_secret'])) {
             // Store pending authentication state (without granting full access)
             $_SESSION['pending_2fa_user_id'] = $userId;
             $_SESSION['pending_2fa_email'] = $email;
