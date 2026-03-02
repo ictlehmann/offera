@@ -624,21 +624,21 @@ ob_start();
 <!-- ══════════════════════════════════════════════════════════════════════════════
      PRODUCT MODAL (create / edit)
 ══════════════════════════════════════════════════════════════════════════════ -->
-<div id="product-modal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[85vh] flex flex-col overflow-hidden border border-gray-100 dark:border-gray-700">
+<div id="product-modal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-3 sm:p-6">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-5xl max-h-[92vh] flex flex-col overflow-hidden border border-gray-100 dark:border-gray-700">
 
         <!-- Modal header -->
-        <div class="px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-700 rounded-t-2xl flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center shrink-0">
-                <i id="modal-header-icon" class="fas fa-plus text-white"></i>
+        <div class="px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-700 rounded-t-2xl flex items-center gap-3 shrink-0">
+            <div class="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+                <i id="modal-header-icon" class="fas fa-plus text-white text-sm"></i>
             </div>
-            <div class="flex-1">
-                <h2 id="modal-title" class="text-xl font-bold text-white leading-tight">Neues Produkt anlegen</h2>
+            <div class="flex-1 min-w-0">
+                <h2 id="modal-title" class="text-lg font-bold text-white leading-tight break-words">Neues Produkt anlegen</h2>
                 <p class="text-blue-100 text-xs mt-0.5">Pflichtfelder sind mit <span class="text-red-300 font-semibold">*</span> markiert</p>
             </div>
             <button type="button" onclick="closeProductModal()"
-                    class="text-white/70 hover:text-white transition-colors p-1 ml-2">
-                <i class="fas fa-times text-xl"></i>
+                    class="text-white/70 hover:text-white transition-colors p-1.5 shrink-0">
+                <i class="fas fa-times text-lg"></i>
             </button>
         </div>
 
@@ -647,151 +647,190 @@ ob_start();
             <input type="hidden" name="post_action" value="save_product">
             <input type="hidden" name="product_id" id="modal-product-id" value="">
 
-            <div class="p-6 overflow-y-auto flex-1">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+            <div class="overflow-y-auto flex-1">
 
-                <!-- ── Left column ── -->
-                <div class="space-y-5">
+                <!-- ══ ROW 1: Grunddaten (left) + Organisation/Preis (right) ══ -->
+                <div class="grid grid-cols-1 lg:grid-cols-5 gap-0 divide-y lg:divide-y-0 lg:divide-x divide-gray-200 dark:divide-gray-700">
 
-                    <!-- Section: Grunddaten -->
-                    <div>
-                        <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 flex items-center gap-2 mb-3">
-                            <i class="fas fa-info-circle text-blue-400"></i> Grunddaten
-                            <span class="flex-1 border-t border-gray-200 dark:border-gray-700"></span>
+                    <!-- Left: Grunddaten + Bilder (3/5) -->
+                    <div class="lg:col-span-3 p-5 space-y-5">
+
+                        <!-- Section header -->
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 flex items-center gap-2">
+                            <i class="fas fa-tag text-blue-400"></i> Grunddaten
+                            <span class="flex-1 border-t border-gray-200 dark:border-gray-700 ml-1"></span>
                         </h3>
-                        <div class="space-y-4">
+
+                        <!-- Name -->
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                                Produktname <span class="text-red-500">*</span>
+                            </label>
+                            <input type="text" name="name" id="modal-name" required
+                                   placeholder="z.B. IBC Hoodie, Kugelschreiber, ..."
+                                   class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition text-sm">
+                        </div>
+
+                        <!-- Description -->
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                                Beschreibung <span class="font-normal text-gray-400 dark:text-gray-500">(optional)</span>
+                            </label>
+                            <textarea name="description" id="modal-description" rows="3"
+                                      placeholder="Kurze Produktbeschreibung, z.B. Material, Verwendungszweck, ..."
+                                      class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition resize-none text-sm"></textarea>
+                        </div>
+
+                        <!-- Hints + Pickup location -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                                    Produktname <span class="text-red-500">*</span>
-                                </label>
-                                <input type="text" name="name" id="modal-name" required
-                                       placeholder="z.B. IBC Hoodie, Kugelschreiber, ..."
-                                       class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
-                            </div>
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                                    Beschreibung <span class="font-normal text-gray-400 dark:text-gray-500">(optional)</span>
-                                </label>
-                                <textarea name="description" id="modal-description" rows="4"
-                                          placeholder="Kurze Produktbeschreibung, z.B. Material, Verwendungszweck, ..."
-                                          class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition resize-none"></textarea>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                                    Kategorie
-                                </label>
-                                <select name="category" id="modal-category"
-                                        class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
-                                    <option value="">– bitte wählen –</option>
-                                    <option value="Kleidung">Kleidung</option>
-                                    <option value="Accessoires">Accessoires</option>
-                                    <option value="Bürobedarf">Bürobedarf</option>
-                                    <option value="Sonstiges">Sonstiges</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                                    Geschlecht
-                                </label>
-                                <select name="gender" id="modal-gender"
-                                        class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
-                                    <option value="Keine">Nicht zutreffend</option>
-                                    <option value="Herren">Herren</option>
-                                    <option value="Damen">Damen</option>
-                                    <option value="Unisex">Unisex</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
                                     Hinweise <span class="font-normal text-gray-400 dark:text-gray-500">(optional)</span>
                                 </label>
-                                <textarea name="hints" id="modal-hints" rows="3"
-                                          placeholder="z.B. Pflegehinweise, Besonderheiten, ..."
-                                          class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition resize-none"></textarea>
+                                <textarea name="hints" id="modal-hints" rows="2"
+                                          placeholder="z.B. Pflegehinweise, ..."
+                                          class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition resize-none text-sm"></textarea>
                             </div>
                             <div>
-                                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
+                                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
                                     Abholort &amp; Zeitpunkt <span class="font-normal text-gray-400 dark:text-gray-500">(optional)</span>
                                 </label>
                                 <input type="text" name="pickup_location" id="modal-pickup-location"
                                        placeholder="z.B. Nächstes Mittwochs-Meeting"
-                                       class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+                                       class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition text-sm">
                             </div>
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                                    Varianten <span class="font-normal text-gray-400 dark:text-gray-500">(optional, kommagetrennt)</span>
-                                </label>
-                                <input type="text" name="variants_text" id="modal-variants-text"
-                                       placeholder="z.B. S, M, L, XL, 2XL, 3XL"
-                                       class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
-                            </div>
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                                        Preis (€) <span class="text-red-500">*</span>
-                                    </label>
-                                    <div class="relative">
-                                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 dark:text-gray-500 font-medium pointer-events-none">€</span>
-                                        <input type="number" name="base_price" id="modal-base-price"
-                                               step="0.01" min="0" required value="0.00"
-                                               class="w-full pl-7 pr-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+                        </div>
+
+                        <!-- Produktbilder -->
+                        <div>
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 flex items-center gap-2 mb-3">
+                                <i class="fas fa-images text-blue-400"></i> Produktbilder
+                                <span class="flex-1 border-t border-gray-200 dark:border-gray-700 ml-1"></span>
+                            </h3>
+                            <p id="modal-no-images-hint" class="text-xs text-gray-400 dark:text-gray-500 mb-2 hidden">Noch keine Bilder vorhanden.</p>
+                            <div id="modal-images-grid" class="grid grid-cols-4 sm:grid-cols-6 gap-2 mb-3"></div>
+                            <label for="modal-product-images" id="image-drop-zone"
+                                   class="flex flex-col items-center justify-center w-full h-20 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl cursor-pointer bg-gray-50 dark:bg-gray-700/30 hover:bg-blue-50 dark:hover:bg-blue-900/10 hover:border-blue-400 dark:hover:border-blue-500 transition-colors group">
+                                <div class="flex items-center gap-2 py-2">
+                                    <i class="fas fa-cloud-upload-alt text-xl text-gray-400 group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors"></i>
+                                    <div>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors font-medium leading-tight">Bilder hierher ziehen oder auswählen</p>
+                                        <p class="text-xs text-gray-400 dark:text-gray-500 leading-tight">JPG, PNG oder WebP · max. 5 MB · Mehrfachauswahl</p>
                                     </div>
                                 </div>
-                                <div class="flex flex-col justify-end">
-                                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Status</label>
-                                    <label class="flex items-center gap-2.5 cursor-pointer h-[42px] px-3 rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/40 hover:bg-gray-100 dark:hover:bg-gray-700 transition">
-                                        <input type="checkbox" id="modal-active" name="active" value="1" checked
-                                               class="w-4 h-4 text-blue-600 rounded border-gray-300 dark:border-gray-600 focus:ring-blue-500">
-                                        <span class="text-sm text-gray-700 dark:text-gray-300">Produkt aktiv</span>
-                                    </label>
-                                </div>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                                    SKU <span class="font-normal text-gray-400 dark:text-gray-500">(optional)</span>
-                                </label>
-                                <input type="text" name="sku" id="modal-sku"
-                                       placeholder="z.B. MUG-2024-ALUMNI"
-                                       class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
-                            </div>
+                                <input id="modal-product-images" type="file" name="product_images[]"
+                                       accept="image/jpeg,image/png,image/webp" multiple class="hidden"
+                                       onchange="previewNewImages(event)">
+                            </label>
+                            <div id="new-images-preview" class="mt-2 grid grid-cols-4 sm:grid-cols-6 gap-2 hidden"></div>
                         </div>
                     </div>
 
-                    <!-- Section: Sammelbestellung -->
-                    <div>
-                        <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 flex items-center gap-2 mb-3">
-                            <i class="fas fa-users text-blue-400"></i> Sammelbestellung
-                            <span class="flex-1 border-t border-gray-200 dark:border-gray-700"></span>
-                        </h3>
-                        <div class="space-y-3">
-                            <label class="flex items-start gap-3 cursor-pointer p-3 rounded-lg bg-gray-50 dark:bg-gray-700/40 border border-gray-200 dark:border-gray-600">
+                    <!-- Right: Organisation + Preis (2/5) -->
+                    <div class="lg:col-span-2 p-5 space-y-5 bg-gray-50/60 dark:bg-gray-800/40">
+
+                        <!-- Status -->
+                        <div>
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 flex items-center gap-2 mb-3">
+                                <i class="fas fa-toggle-on text-blue-400"></i> Status &amp; Preis
+                                <span class="flex-1 border-t border-gray-200 dark:border-gray-700 ml-1"></span>
+                            </h3>
+                            <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition mb-4">
+                                <input type="checkbox" id="modal-active" name="active" value="1" checked
+                                       class="w-4 h-4 text-blue-600 rounded border-gray-300 dark:border-gray-600 focus:ring-blue-500">
+                                <div>
+                                    <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">Produkt aktiv</span>
+                                    <p class="text-xs text-gray-400 dark:text-gray-500">Im Shop sichtbar und bestellbar</p>
+                                </div>
+                            </label>
+                            <!-- Price -->
+                            <div class="mb-3">
+                                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                                    Preis <span class="text-red-500">*</span>
+                                </label>
+                                <div class="relative">
+                                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500 dark:text-gray-400 font-semibold pointer-events-none text-sm">€</span>
+                                    <input type="number" name="base_price" id="modal-base-price"
+                                           step="0.01" min="0" required value="0.00"
+                                           class="w-full pl-7 pr-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition text-sm">
+                                </div>
+                            </div>
+                            <!-- SKU -->
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                                    SKU <span class="font-normal text-gray-400 dark:text-gray-500">(optional)</span>
+                                </label>
+                                <input type="text" name="sku" id="modal-sku"
+                                       placeholder="z.B. IBC-HOODIE-2024"
+                                       class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition text-sm">
+                            </div>
+                        </div>
+
+                        <!-- Organisation -->
+                        <div>
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 flex items-center gap-2 mb-3">
+                                <i class="fas fa-folder text-blue-400"></i> Organisation
+                                <span class="flex-1 border-t border-gray-200 dark:border-gray-700 ml-1"></span>
+                            </h3>
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Kategorie</label>
+                                    <select name="category" id="modal-category"
+                                            class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition text-sm">
+                                        <option value="">– bitte wählen –</option>
+                                        <option value="Kleidung">Kleidung</option>
+                                        <option value="Accessoires">Accessoires</option>
+                                        <option value="Bürobedarf">Bürobedarf</option>
+                                        <option value="Sonstiges">Sonstiges</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Geschlecht</label>
+                                    <select name="gender" id="modal-gender"
+                                            class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition text-sm">
+                                        <option value="Keine">Nicht zutreffend</option>
+                                        <option value="Herren">Herren</option>
+                                        <option value="Damen">Damen</option>
+                                        <option value="Unisex">Unisex</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sammelbestellung -->
+                        <div>
+                            <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 flex items-center gap-2 mb-3">
+                                <i class="fas fa-users text-blue-400"></i> Sammelbestellung
+                                <span class="flex-1 border-t border-gray-200 dark:border-gray-700 ml-1"></span>
+                            </h3>
+                            <label class="flex items-start gap-3 cursor-pointer p-3 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition">
                                 <input type="checkbox" id="modal-is-bulk-order" name="is_bulk_order" value="1"
                                        onchange="toggleBulkOrderFields(this.checked)"
                                        class="w-4 h-4 mt-0.5 text-blue-600 rounded border-gray-300 dark:border-gray-600 focus:ring-blue-500">
                                 <div>
-                                    <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">Ist Sammelbestellung?</span>
+                                    <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">Sammelbestellung</span>
                                     <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
-                                        Aktivieren für Produkte, die erst bei Erreichen einer Mindestmenge produziert werden.
+                                        Erst bei Mindestmenge produziert
                                     </p>
                                 </div>
                             </label>
-                            <div id="modal-bulk-fields" class="hidden space-y-3">
+                            <div id="modal-bulk-fields" class="hidden mt-3 space-y-3 pl-1">
                                 <div>
-                                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                                        Deadline der Bestellung
+                                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                                        Bestelldeadline
                                     </label>
                                     <input type="date" name="bulk_end_date" id="modal-bulk-end-date"
-                                           class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
+                                           class="w-full px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition text-sm">
                                 </div>
                                 <div>
-                                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">
-                                        Ziel-Menge für Produktion
+                                    <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
+                                        Mindestmenge für Produktion
                                     </label>
                                     <div class="flex items-center gap-2">
                                         <input type="number" name="bulk_min_goal" id="modal-bulk-min-goal"
                                                value="" min="1"
-                                               class="w-32 px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 transition">
-                                        <span class="text-sm text-gray-500 dark:text-gray-400">Stück Minimum</span>
+                                               class="w-24 px-3 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 transition text-sm">
+                                        <span class="text-sm text-gray-500 dark:text-gray-400">Stück</span>
                                     </div>
                                 </div>
                             </div>
@@ -799,87 +838,51 @@ ob_start();
                     </div>
                 </div>
 
-                <!-- ── Right column ── -->
-                <div class="space-y-5">
-
-                    <!-- Section: Varianten -->
-                    <div>
-                        <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 flex items-center gap-2 mb-3">
-                            <i class="fas fa-warehouse text-blue-400"></i> Varianten
-                            <span class="flex-1 border-t border-gray-200 dark:border-gray-700"></span>
+                <!-- ══ ROW 2: Varianten (full-width) ══ -->
+                <div class="border-t border-gray-200 dark:border-gray-700 p-5">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 flex items-center gap-2">
+                            <i class="fas fa-layer-group text-purple-400"></i> Produktvarianten
+                            <span class="text-gray-300 dark:text-gray-600 font-normal normal-case tracking-normal ml-1">(Größe, Farbe, etc.)</span>
                         </h3>
-                        <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-700/40 border border-gray-200 dark:border-gray-600 mb-3">
-                            <label class="flex items-start gap-3 cursor-pointer">
-                                <input type="checkbox" id="modal-no-variants" name="no_variants" value="1"
-                                       onchange="toggleVariantMode(!this.checked)"
-                                       class="w-4 h-4 mt-0.5 text-purple-600 rounded border-gray-300 dark:border-gray-600 focus:ring-purple-500">
-                                <div>
-                                    <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">Keine Varianten</span>
-                                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
-                                        Aktivieren wenn der Artikel keine verschiedenen Ausführungen (z.B. Größe, Farbe) hat.
-                                    </p>
-                                </div>
-                            </label>
-                        </div>
-                        <div id="modal-section-variants" class="hidden">
-                            <div id="variants-container" class="space-y-3"></div>
-                            <button type="button" id="add-variant"
-                                    class="mt-3 w-full py-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl text-sm text-gray-500 dark:text-gray-400 hover:border-purple-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors flex items-center justify-center gap-2">
-                                <i class="fas fa-plus"></i> Neuen Varianten-Typ hinzufügen
-                            </button>
-                        </div>
+                        <!-- Toggle -->
+                        <label class="flex items-center gap-2 cursor-pointer select-none">
+                            <span class="text-sm text-gray-500 dark:text-gray-400">Hat Varianten</span>
+                            <input type="checkbox" id="modal-has-variants" name="has_variants" value="1"
+                                   onchange="toggleVariantMode(this.checked)"
+                                   class="w-4 h-4 text-purple-600 rounded border-gray-300 dark:border-gray-600 focus:ring-purple-500">
+                        </label>
                     </div>
 
-                    <!-- Tips box -->
-                    <div class="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-800">
-                        <p class="text-xs font-semibold text-blue-700 dark:text-blue-300 mb-2">
-                            <i class="fas fa-lightbulb mr-1"></i>Tipps
-                        </p>
-                        <ul class="text-xs text-blue-600 dark:text-blue-400 space-y-1 list-none m-0 p-0">
-                            <li><i class="fas fa-check-circle mr-1 text-blue-400"></i>Gib einen klaren, beschreibenden Produktnamen ein.</li>
-                            <li><i class="fas fa-check-circle mr-1 text-blue-400"></i>Verwende ein Produktbild für bessere Übersicht im Shop.</li>
-                            <li><i class="fas fa-check-circle mr-1 text-blue-400"></i>Setze „Produkt aktiv" nur, wenn es kaufbar sein soll.</li>
-                            <li><i class="fas fa-check-circle mr-1 text-blue-400"></i>Varianten brauchst du nur für Artikel mit Größen / Farben.</li>
-                        </ul>
+                    <!-- Variant builder panel -->
+                    <div id="modal-section-variants">
+                        <!-- Variant group cards -->
+                        <div id="variants-container" class="space-y-4"></div>
+
+                        <!-- Add variant type button -->
+                        <button type="button" id="add-variant"
+                                class="mt-4 w-full py-3 border-2 border-dashed border-purple-200 dark:border-purple-800 rounded-xl text-sm text-purple-500 dark:text-purple-400 hover:border-purple-400 dark:hover:border-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all flex items-center justify-center gap-2 font-medium">
+                            <i class="fas fa-plus-circle"></i> Neuen Varianten-Typ hinzufügen
+                            <span class="text-xs font-normal text-purple-400 dark:text-purple-500">(z.B. Größe, Farbe)</span>
+                        </button>
+                    </div>
+
+                    <!-- No-variants placeholder -->
+                    <div id="modal-no-variants-placeholder" class="hidden py-6 text-center">
+                        <div class="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-full text-sm text-gray-500 dark:text-gray-400">
+                            <i class="fas fa-cube"></i>
+                            Dieses Produkt hat keine Varianten – es wird als Einheitsgröße verkauft.
+                        </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- ── Full-width: Produktbilder ── -->
-            <div class="mt-6 pt-5 border-t border-gray-200 dark:border-gray-700">
-                <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 flex items-center gap-2 mb-3">
-                    <i class="fas fa-images text-blue-400"></i> Produktbilder
-                    <span class="flex-1 border-t border-gray-200 dark:border-gray-700"></span>
-                </h3>
-
-                <!-- Existing images grid (drag-and-drop sortable) -->
-                <p id="modal-no-images-hint" class="text-xs text-gray-400 dark:text-gray-500 mb-2 hidden">Noch keine Bilder vorhanden.</p>
-                <div id="modal-images-grid" class="grid grid-cols-4 sm:grid-cols-6 gap-2 mb-3"></div>
-
-                <!-- New images upload -->
-                <label for="modal-product-images" id="image-drop-zone"
-                       class="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl cursor-pointer bg-gray-50 dark:bg-gray-700/30 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:border-blue-400 dark:hover:border-blue-500 transition-colors group">
-                    <div class="flex flex-col items-center justify-center py-3">
-                        <i class="fas fa-cloud-upload-alt text-2xl text-gray-400 group-hover:text-blue-500 dark:group-hover:text-blue-400 mb-1 transition-colors"></i>
-                        <p class="text-sm text-gray-500 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors font-medium">Bilder hierher ziehen oder auswählen</p>
-                        <p class="text-xs text-gray-400 dark:text-gray-500">JPG, PNG oder WebP · max. 5 MB pro Bild · Mehrfachauswahl möglich</p>
-                    </div>
-                    <input id="modal-product-images" type="file" name="product_images[]"
-                           accept="image/jpeg,image/png,image/webp" multiple class="hidden"
-                           onchange="previewNewImages(event)">
-                </label>
-
-                <!-- Preview of newly selected (not yet uploaded) images -->
-                <div id="new-images-preview" class="mt-2 grid grid-cols-4 sm:grid-cols-6 gap-2 hidden"></div>
-            </div>
 
             </div><!-- end scrollable body -->
 
             <!-- Modal footer -->
-            <div class="flex items-center justify-between px-6 py-4 border-t border-gray-200 dark:border-gray-700 gap-3 flex-wrap">
+            <div class="flex items-center justify-between px-5 py-3.5 border-t border-gray-200 dark:border-gray-700 gap-3 flex-wrap shrink-0 bg-gray-50 dark:bg-gray-800/60">
                 <div id="modal-delete-area" class="hidden">
                     <button type="button" onclick="confirmDeleteProduct()"
-                            class="inline-flex items-center gap-2 px-4 py-2.5 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/40 font-medium text-sm transition-colors">
+                            class="inline-flex items-center gap-2 px-4 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/40 font-medium text-sm transition-colors">
                         <i class="fas fa-trash-alt"></i>Produkt löschen
                     </button>
                 </div>
@@ -893,11 +896,11 @@ ob_start();
                 </div>
                 <div class="flex gap-3 ml-auto">
                     <button type="button" onclick="closeProductModal()"
-                            class="px-5 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 font-medium transition-colors">
+                            class="px-5 py-2.5 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 font-medium transition-colors text-sm">
                         Abbrechen
                     </button>
                     <button type="submit"
-                            class="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 font-semibold transition-all shadow flex items-center gap-2">
+                            class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-all shadow text-sm flex items-center gap-2">
                         <i class="fas fa-save"></i>
                         <span id="modal-submit-label">Produkt erstellen</span>
                     </button>
@@ -978,7 +981,6 @@ function openProductModal(product) {
     document.getElementById('modal-gender').value          = isEdit ? (product.gender || 'Keine') : 'Keine';
     document.getElementById('modal-hints').value           = isEdit ? (product.hints || '') : '';
     document.getElementById('modal-pickup-location').value = isEdit ? (product.pickup_location || '') : '';
-    document.getElementById('modal-variants-text').value   = isEdit ? (product.variants_csv || '') : '';
     document.getElementById('modal-sku').value             = isEdit ? (product.sku || '') : '';
 
     // "Also create for other gender" checkbox – only relevant for new products
@@ -1225,53 +1227,58 @@ function buildVariantUI(variants) {
         Object.keys(groups).forEach(typeName => {
             container.appendChild(createVariantBlock(variantCount++, typeName, groups[typeName]));
         });
-        document.getElementById('modal-no-variants').checked = false;
+        document.getElementById('modal-has-variants').checked = true;
         document.getElementById('modal-section-variants').classList.remove('hidden');
+        document.getElementById('modal-no-variants-placeholder').classList.add('hidden');
     } else {
-        document.getElementById('modal-no-variants').checked = true;
+        document.getElementById('modal-has-variants').checked = false;
         document.getElementById('modal-section-variants').classList.add('hidden');
+        document.getElementById('modal-no-variants-placeholder').classList.remove('hidden');
     }
 }
 
 function createVariantBlock(idx, typeName, values) {
     const block = document.createElement('div');
-    block.className = 'variant-block border border-gray-200 dark:border-gray-600 rounded-xl p-3 bg-gray-50 dark:bg-gray-700/50';
+    block.className = 'variant-block border border-purple-100 dark:border-purple-800/50 rounded-xl bg-white dark:bg-gray-800 overflow-hidden shadow-sm';
     block.innerHTML = `
-        <div class="flex items-center gap-2 mb-3">
-            <span class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300 shrink-0">
-                <i class="fas fa-tag text-xs"></i>
-            </span>
+        <div class="flex items-center gap-2 px-4 py-3 bg-purple-50 dark:bg-purple-900/20 border-b border-purple-100 dark:border-purple-800/50">
+            <i class="fas fa-tag text-purple-400 text-xs"></i>
             <input type="text" name="variants[${idx}][name]"
                    value="${escapeHtml(typeName)}"
                    placeholder="Varianten-Typ (z.B. Größe, Farbe)"
-                   class="flex-1 px-3 py-1.5 border border-purple-200 dark:border-purple-700 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 text-sm font-medium focus:ring-2 focus:ring-purple-500 transition">
+                   class="flex-1 px-2 py-1 border-0 bg-transparent text-gray-800 dark:text-gray-100 text-sm font-semibold focus:ring-2 focus:ring-purple-500 rounded transition placeholder-gray-400 dark:placeholder-gray-500">
             <button type="button" onclick="this.closest('.variant-block').remove()"
-                    class="text-red-400 hover:text-red-600 p-1.5 ml-1 transition-colors rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20" title="Typ entfernen">
+                    class="text-red-400 hover:text-red-600 p-1 transition-colors rounded hover:bg-red-50 dark:hover:bg-red-900/20 shrink-0" title="Typ entfernen">
                 <i class="fas fa-trash-alt text-xs"></i>
             </button>
         </div>
-        <div class="value-rows space-y-2 ml-9">
-            ${(values || [{value:'',stock_quantity:0}]).map((v, vi) => valueRowHtml(idx, vi, v.value || '', v.stock_quantity || 0)).join('')}
-        </div>
-        <button type="button" onclick="addValueRow(this, ${idx})"
-                class="mt-2 ml-9 text-xs text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">
-            <i class="fas fa-plus"></i> Ausprägung hinzufügen
-        </button>`;
+        <div class="px-4 py-3">
+            <div class="grid grid-cols-[1fr_auto_auto] gap-x-3 gap-y-0 mb-1.5 px-1">
+                <span class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide">Ausprägung</span>
+                <span class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide text-right w-20">Bestand</span>
+                <span class="w-7"></span>
+            </div>
+            <div class="value-rows space-y-2">
+                ${(values || [{value:'',stock_quantity:0}]).map((v, vi) => valueRowHtml(idx, vi, v.value || '', v.stock_quantity || 0)).join('')}
+            </div>
+            <button type="button" onclick="addValueRow(this, ${idx})"
+                    class="mt-3 text-xs text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 flex items-center gap-1.5 font-medium transition-colors">
+                <i class="fas fa-plus-circle"></i> Ausprägung hinzufügen
+            </button>
+        </div>`;
     return block;
 }
 
 function valueRowHtml(vIdx, valIdx, value, stock) {
-    return `<div class="value-row flex gap-2 items-center">
-        <span class="text-xs text-gray-400 dark:text-gray-500 w-12 shrink-0 text-right">Wert</span>
+    return `<div class="value-row grid grid-cols-[1fr_auto_auto] gap-x-3 items-center">
         <input type="text" name="variants[${vIdx}][values][${valIdx}][value]"
                value="${escapeHtml(value)}" placeholder="z.B. Rot, XL ..."
-               class="flex-1 min-w-0 px-2 py-1.5 ${INPUT_CLASS} focus:ring-blue-500">
-        <span class="text-xs text-gray-400 dark:text-gray-500 shrink-0">Stk.</span>
+               class="px-2.5 py-1.5 border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700/50 text-gray-800 dark:text-gray-100 text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent transition">
         <input type="number" name="variants[${vIdx}][values][${valIdx}][stock]"
                value="${parseInt(stock) || 0}" min="0"
-               class="w-16 px-2 py-1.5 ${INPUT_CLASS} focus:ring-blue-500">
+               class="w-20 px-2.5 py-1.5 border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700/50 text-gray-800 dark:text-gray-100 text-sm text-right focus:ring-2 focus:ring-purple-500 focus:border-transparent transition">
         <button type="button" onclick="this.closest('.value-row').remove()"
-                class="text-red-400 hover:text-red-600 p-1 transition-colors rounded hover:bg-red-50 dark:hover:bg-red-900/20" title="Ausprägung entfernen">
+                class="w-7 h-7 flex items-center justify-center text-gray-300 hover:text-red-500 dark:text-gray-600 dark:hover:text-red-400 transition-colors rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20" title="Ausprägung entfernen">
             <i class="fas fa-times text-xs"></i>
         </button>
     </div>`;
@@ -1297,6 +1304,7 @@ function addValueRow(btn, vIdx) {
 
 function toggleVariantMode(hasVariants) {
     document.getElementById('modal-section-variants').classList.toggle('hidden', !hasVariants);
+    document.getElementById('modal-no-variants-placeholder').classList.toggle('hidden', hasVariants);
     if (hasVariants && document.getElementById('variants-container').children.length === 0) {
         document.getElementById('variants-container').appendChild(
             createVariantBlock(variantCount++, '', [{value:'',stock_quantity:0}])
