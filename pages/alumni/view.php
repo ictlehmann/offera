@@ -138,12 +138,12 @@ ob_start();
                     'vorstand_finanzen'   => 'bg-purple-100 text-purple-800 border-purple-300',
                     'vorstand_intern'     => 'bg-purple-100 text-purple-800 border-purple-300',
                     'vorstand_extern'     => 'bg-purple-100 text-purple-800 border-purple-300',
-                    'ressortleiter'        => 'bg-blue-100 text-blue-800 border-blue-300',
+                    'ressortleiter'       => 'bg-blue-100 text-blue-800 border-blue-300',
                     'mitglied'            => 'bg-green-100 text-green-800 border-green-300',
                     'anwaerter'           => 'bg-yellow-100 text-yellow-800 border-yellow-300',
                     'alumni'              => 'bg-purple-100 text-purple-800 border-purple-300',
                     'alumni_vorstand'     => 'bg-indigo-100 text-indigo-800 border-indigo-300',
-                    'alumni_finanz'=> 'bg-indigo-100 text-indigo-800 border-indigo-300',
+                    'alumni_finanz'       => 'bg-indigo-100 text-indigo-800 border-indigo-300',
                     'ehrenmitglied'       => 'bg-amber-100 text-amber-800 border-amber-300',
                 ];
                 $displayRole = getFormattedRoleName($profileUserRole);

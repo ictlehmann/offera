@@ -135,7 +135,7 @@ ob_start();
                 $roleBadgeColors = [
                     'alumni'              => 'bg-gray-100 text-gray-800 border-gray-300',
                     'alumni_vorstand'     => 'bg-indigo-100 text-indigo-800 border-indigo-300',
-                    'alumni_finanz'=> 'bg-indigo-100 text-indigo-800 border-indigo-300',
+                    'alumni_finanz'       => 'bg-indigo-100 text-indigo-800 border-indigo-300',
                     'ehrenmitglied'       => 'bg-amber-100 text-amber-800 border-amber-300',
                 ];
                 $displayRoleKey = Auth::getPrimaryEntraRoleKey($profile['entra_roles'] ?? null, $profile['role'] ?? '');
