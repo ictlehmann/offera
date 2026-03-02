@@ -10,6 +10,7 @@ require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../src/Auth.php';
 require_once __DIR__ . '/../../includes/handlers/AuthHandler.php';
 require_once __DIR__ . '/../../includes/handlers/GoogleAuthenticator.php';
+require_once __DIR__ . '/../../includes/handlers/CSRFHandler.php';
 require_once __DIR__ . '/../../includes/helpers.php';
 require_once __DIR__ . '/../../includes/models/User.php';
 
@@ -25,6 +26,8 @@ if (!isset($_SESSION['pending_2fa_user_id'])) {
 
 $error = '';
 $success = '';
+$csrfToken = CSRFHandler::getToken();
+$baseUrl = defined('BASE_URL') ? BASE_URL : '';
 
 // Handle 2FA verification
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['verify_2fa'])) {
@@ -259,6 +262,77 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['verify_2fa'])) {
         .help-text a:hover {
             text-decoration: underline;
         }
+
+        .support-section {
+            margin-top: 20px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .support-toggle {
+            display: block;
+            width: 100%;
+            padding: 14px 0;
+            background: none;
+            border: none;
+            text-align: center;
+            color: #667eea;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .support-toggle:hover { text-decoration: underline; }
+
+        .support-form-wrapper {
+            display: none;
+            padding: 16px 0 8px;
+        }
+
+        .support-form-wrapper.open { display: block; }
+
+        .support-form-wrapper label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #374151;
+            font-size: 14px;
+            text-align: left;
+        }
+
+        .support-form-wrapper input[type="text"],
+        .support-form-wrapper textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: border-color 0.25s;
+            font-family: inherit;
+            margin-bottom: 14px;
+        }
+
+        .support-form-wrapper input[type="text"]:focus,
+        .support-form-wrapper textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn-support {
+            width: 100%;
+            padding: 12px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-support:hover { background: #5a6fd6; }
+        .btn-support:disabled { opacity: 0.7; cursor: not-allowed; }
     </style>
 </head>
 <body>
@@ -304,8 +378,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['verify_2fa'])) {
             </form>
             
             <div class="help-text">
-                Probleme beim Einloggen?<br>
                 <a href="logout.php">Zurück zum Login</a>
+            </div>
+
+            <!-- Support Section -->
+            <div class="support-section">
+                <button type="button" class="support-toggle" onclick="toggleSupport()" aria-expanded="false" aria-controls="support-form-wrapper">
+                    🆘 Probleme? Support kontaktieren
+                </button>
+                <div class="support-form-wrapper" id="support-form-wrapper">
+                    <div id="support-feedback" class="alert" style="display:none;margin-bottom:12px;"></div>
+                    <form id="support-form">
+                        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
+                        <label for="support-name">Dein Name <span style="color:#ef4444;">*</span></label>
+                        <input type="text" id="support-name" name="name" placeholder="Vor- und Nachname" required aria-required="true" maxlength="200">
+                        <label for="support-description">Beschreibe dein Problem <span style="color:#ef4444;">*</span></label>
+                        <textarea id="support-description" name="description" rows="3" placeholder="Z. B. Ich habe mein Smartphone verloren und kann nicht mehr auf meine Authenticator-App zugreifen." required aria-required="true" style="resize:vertical;"></textarea>
+                        <button type="submit" class="btn-support" id="support-submit-btn">
+                            Anfrage senden
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
@@ -322,6 +415,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['verify_2fa'])) {
                 setTimeout(() => {
                     this.form.submit();
                 }, 300);
+            }
+        });
+
+        function toggleSupport() {
+            var wrapper = document.getElementById('support-form-wrapper');
+            var btn = document.querySelector('.support-toggle');
+            var isOpen = wrapper.classList.toggle('open');
+            btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        }
+
+        document.getElementById('support-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            var btn = document.getElementById('support-submit-btn');
+            var feedback = document.getElementById('support-feedback');
+
+            btn.disabled = true;
+            btn.textContent = 'Wird gesendet…';
+            feedback.style.display = 'none';
+
+            var formData = new FormData(this);
+
+            try {
+                var resp = await fetch('<?php echo $baseUrl; ?>/api/submit_2fa_support.php', {
+                    method: 'POST',
+                    body: formData
+                });
+                var json = await resp.json();
+
+                feedback.style.display = 'block';
+                if (json.success) {
+                    feedback.className = 'alert alert-success';
+                    feedback.textContent = json.message;
+                    document.getElementById('support-form').style.display = 'none';
+                } else {
+                    feedback.className = 'alert alert-error';
+                    feedback.textContent = json.message || 'Ein Fehler ist aufgetreten.';
+                    btn.disabled = false;
+                    btn.textContent = 'Anfrage senden';
+                }
+            } catch (err) {
+                feedback.style.display = 'block';
+                feedback.className = 'alert alert-error';
+                feedback.textContent = 'Netzwerkfehler. Bitte versuche es erneut.';
+                btn.disabled = false;
+                btn.textContent = 'Anfrage senden';
             }
         });
     </script>
