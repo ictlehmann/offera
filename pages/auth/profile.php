@@ -82,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'last_name' => trim($_POST['last_name'] ?? ''),
                 'email' => trim($_POST['profile_email'] ?? ''),
                 'secondary_email' => trim($_POST['secondary_email'] ?? ''),
-                'mobile_phone' => trim($_POST['mobile_phone'] ?? ''),
+                'mobile_phone' => trim($_POST['mobile_phone'] ?? '') ?: null,
                 'linkedin_url' => trim($_POST['linkedin_url'] ?? ''),
                 'xing_url' => trim($_POST['xing_url'] ?? ''),
                 'about_me' => mb_substr(trim($_POST['about_me'] ?? ''), 0, 400), // Limit to 400 chars
@@ -104,9 +104,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             if (!filter_var($profileData['email'], FILTER_VALIDATE_EMAIL)) {
                 throw new Exception('E-Mail-Adresse ist ungültig');
-            }
-            if (empty($profileData['mobile_phone'])) {
-                throw new Exception('Mobiltelefon ist erforderlich');
             }
             if (empty($profileData['birthday'])) {
                 throw new Exception('Das Geburtsdatum ist ein Pflichtfeld.');
@@ -252,11 +249,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $message = 'Profil erfolgreich aktualisiert';
                 
                 // Mark profile as complete if all required fields are provided:
-                // first_name, last_name, email, and mobile_phone
+                // first_name, last_name, and email
                 if (!empty($profileData['first_name']) && 
                     !empty($profileData['last_name']) && 
-                    !empty($profileData['email']) && 
-                    !empty($profileData['mobile_phone'])) {
+                    !empty($profileData['email'])) {
                     try {
                         $userDb = Database::getUserDB();
                         $stmt = $userDb->prepare("UPDATE users SET profile_complete = 1, is_onboarded = 1, has_seen_onboarding = 1 WHERE id = ?");
@@ -601,11 +597,10 @@ ob_start();
                     </div>
                     
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Telefon *</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Telefon</label>
                         <input 
                             type="tel" 
                             name="mobile_phone" 
-                            required
                             value="<?php echo htmlspecialchars($profile['mobile_phone'] ?? ''); ?>"
                             class="w-full px-4 py-2 bg-white border border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 rounded-lg"
                             placeholder="+49 123 456789"
