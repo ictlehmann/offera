@@ -92,13 +92,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Save variants and images if product was saved successfully
                 if ($ok && $pid) {
                     // Handle multiple image uploads
+                    $uploadErrors = [];
                     if (!empty($_FILES['product_images']['name'][0])) {
-                        $uploadDir     = __DIR__ . '/../../uploads/shop_products/';
+                        $uploadDir     = realpath(__DIR__ . '/../../uploads/shop_products');
+                        if ($uploadDir === false) {
+                            $uploadDir = __DIR__ . '/../../uploads/shop_products';
+                            if (!is_dir($uploadDir)) {
+                                mkdir($uploadDir, 0755, true);
+                            }
+                            $uploadDir = realpath($uploadDir) ?: $uploadDir;
+                        }
+                        $uploadDir .= DIRECTORY_SEPARATOR;
                         $files         = $_FILES['product_images'];
                         $existingImgs  = Shop::getProductImages($pid);
                         $nextSortOrder = count($existingImgs);
                         for ($i = 0; $i < count($files['name']); $i++) {
+                            if ($files['error'][$i] === UPLOAD_ERR_NO_FILE) {
+                                continue;
+                            }
                             if ($files['error'][$i] !== UPLOAD_ERR_OK) {
+                                $uploadErrors[] = 'Bild ' . htmlspecialchars(basename($files['name'][$i])) . ' konnte nicht hochgeladen werden (Fehler ' . $files['error'][$i] . ').';
                                 continue;
                             }
                             $singleFile = [
@@ -111,8 +124,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $uploadResult = SecureImageUpload::uploadImage($singleFile, $uploadDir, false);
                             if ($uploadResult['success']) {
                                 Shop::addProductImage($pid, $uploadResult['path'], $nextSortOrder++);
+                            } else {
+                                $uploadErrors[] = 'Bild ' . htmlspecialchars(basename($files['name'][$i])) . ': ' . ($uploadResult['error'] ?? 'Unbekannter Fehler');
                             }
                         }
+                    } elseif (
+                        isset($_SERVER['CONTENT_LENGTH']) &&
+                        (function_exists('ini_get') && (function ($val) {
+                            $val  = trim($val);
+                            $last = strtolower($val[strlen($val) - 1]);
+                            $num  = (int) $val;
+                            if ($last === 'g') { $num *= 1073741824; }
+                            elseif ($last === 'm') { $num *= 1048576; }
+                            elseif ($last === 'k') { $num *= 1024; }
+                            return $num;
+                        })(ini_get('post_max_size')) < (int) $_SERVER['CONTENT_LENGTH'])
+                    ) {
+                        $uploadErrors[] = 'Die hochgeladenen Bilder überschreiten die zulässige Gesamtgröße (post_max_size).';
                     }
 
                     $hasVariants = isset($_POST['has_variants']);
@@ -167,7 +195,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
 
                     // Redirect to avoid re-POST
-                    header('Location: ' . asset('pages/admin/shop_manage.php?section=products&saved=1'));
+                    if (!empty($uploadErrors)) {
+                        $query = 'saved=1&upload_errors=' . urlencode(implode('|', $uploadErrors));
+                    } else {
+                        $query = 'saved=1';
+                    }
+                    header('Location: ' . asset('pages/admin/shop_manage.php?section=products&' . $query));
                     exit;
                 }
             }
@@ -206,6 +239,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 if (isset($_GET['saved'])) {
     $successMessage = 'Änderungen erfolgreich gespeichert.';
+    if (!empty($_GET['upload_errors'])) {
+        $uploadErrList = explode('|', urldecode($_GET['upload_errors']));
+        $errorMessage = 'Produkt gespeichert, aber beim Bildupload gab es Fehler: ' . implode(' ', $uploadErrList);
+    }
 }
 if (isset($_GET['deleted'])) {
     $successMessage = 'Produkt erfolgreich gelöscht.';
@@ -344,7 +381,7 @@ ob_start();
                             <th class="pb-3 font-semibold hidden md:table-cell">Beschreibung</th>
                             <th class="pb-3 font-semibold text-right">Preis</th>
                             <th class="pb-3 font-semibold text-center hidden sm:table-cell">Status</th>
-                            <th class="pb-3 font-semibold text-center hidden sm:table-cell">Varianten</th>
+                            <th class="pb-3 font-semibold text-center hidden sm:table-cell">Lagerbestand</th>
                             <th class="pb-3"></th>
                         </tr>
                     </thead>
@@ -382,14 +419,34 @@ ob_start();
                                 <span class="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-full text-xs font-medium">Inaktiv</span>
                                 <?php endif; ?>
                             </td>
-                            <td class="py-3 text-center hidden sm:table-cell" data-label="Varianten">
+                            <td class="py-3 text-center hidden sm:table-cell" data-label="Lagerbestand">
                                 <?php
-                                $variantCount = count($product['variants']);
+                                $namedVariants = array_values(array_filter($product['variants'], fn($v) => $v['type'] !== '' || $v['value'] !== ''));
                                 $totalStock   = array_sum(array_column($product['variants'], 'stock_quantity'));
+                                $hasStock = $totalStock > 0;
+                                // Group by type (color) to build a readable summary
+                                $stockByColor = [];
+                                foreach ($namedVariants as $v) {
+                                    $color = $v['type'] ?: '–';
+                                    if (!isset($stockByColor[$color])) $stockByColor[$color] = 0;
+                                    $stockByColor[$color] += (int) $v['stock_quantity'];
+                                }
                                 ?>
-                                <div class="flex flex-col items-center">
-                                    <span class="font-medium text-gray-700 dark:text-gray-300"><?php echo $variantCount; ?></span>
-                                    <span class="text-xs text-gray-400 dark:text-gray-500"><?php echo $totalStock; ?> Stk.</span>
+                                <div class="flex flex-col items-center gap-0.5">
+                                    <?php if (!empty($namedVariants)): ?>
+                                    <span class="font-semibold text-sm <?php echo $hasStock ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400'; ?>">
+                                        <?php echo (int) $totalStock; ?> Stk.
+                                    </span>
+                                    <?php foreach ($stockByColor as $color => $colorStock): ?>
+                                    <span class="text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap">
+                                        <?php echo htmlspecialchars($color); ?>: <?php echo (int) $colorStock; ?>
+                                    </span>
+                                    <?php endforeach; ?>
+                                    <?php elseif ($product['is_bulk_order']): ?>
+                                    <span class="text-xs text-blue-500 dark:text-blue-400 font-medium">Sammelbestellung</span>
+                                    <?php else: ?>
+                                    <span class="text-xs text-gray-400 dark:text-gray-500">–</span>
+                                    <?php endif; ?>
                                 </div>
                             </td>
                             <td class="py-3 text-right" data-label="Aktionen">
@@ -843,7 +900,7 @@ ob_start();
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 flex items-center gap-2">
                             <i class="fas fa-layer-group text-purple-400"></i> Produktvarianten
-                            <span class="text-gray-300 dark:text-gray-600 font-normal normal-case tracking-normal ml-1">(Größe, Farbe, etc.)</span>
+                            <span class="text-gray-300 dark:text-gray-600 font-normal normal-case tracking-normal ml-1">(Farbe → Größen mit Lagerbestand)</span>
                         </h3>
                         <!-- Toggle -->
                         <label class="flex items-center gap-2 cursor-pointer select-none">
@@ -859,11 +916,11 @@ ob_start();
                         <!-- Variant group cards -->
                         <div id="variants-container" class="space-y-4"></div>
 
-                        <!-- Add variant type button -->
+                        <!-- Add color button -->
                         <button type="button" id="add-variant"
                                 class="mt-4 w-full py-3 border-2 border-dashed border-purple-200 dark:border-purple-800 rounded-xl text-sm text-purple-500 dark:text-purple-400 hover:border-purple-400 dark:hover:border-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all flex items-center justify-center gap-2 font-medium">
-                            <i class="fas fa-plus-circle"></i> Neuen Varianten-Typ hinzufügen
-                            <span class="text-xs font-normal text-purple-400 dark:text-purple-500">(z.B. Größe, Farbe)</span>
+                            <i class="fas fa-plus-circle"></i> Farbe hinzufügen
+                            <span class="text-xs font-normal text-purple-400 dark:text-purple-500">(z.B. Schwarz, Weiß)</span>
                         </button>
                     </div>
 
@@ -1242,20 +1299,21 @@ function createVariantBlock(idx, typeName, values) {
     block.className = 'variant-block border border-purple-100 dark:border-purple-800/50 rounded-xl bg-white dark:bg-gray-800 overflow-hidden shadow-sm';
     block.innerHTML = `
         <div class="flex items-center gap-2 px-4 py-3 bg-purple-50 dark:bg-purple-900/20 border-b border-purple-100 dark:border-purple-800/50">
-            <i class="fas fa-tag text-purple-400 text-xs"></i>
+            <i class="fas fa-palette text-purple-400 text-xs"></i>
+            <span class="text-xs font-semibold text-purple-500 dark:text-purple-400 uppercase tracking-wide shrink-0">Farbe:</span>
             <input type="text" name="variants[${idx}][name]"
                    value="${escapeHtml(typeName)}"
-                   placeholder="Varianten-Typ (z.B. Größe, Farbe)"
+                   placeholder="z.B. Schwarz, Weiß, Grau ..."
                    class="flex-1 px-2 py-1 border-0 bg-transparent text-gray-800 dark:text-gray-100 text-sm font-semibold focus:ring-2 focus:ring-purple-500 rounded transition placeholder-gray-400 dark:placeholder-gray-500">
             <button type="button" onclick="this.closest('.variant-block').remove()"
-                    class="text-red-400 hover:text-red-600 p-1 transition-colors rounded hover:bg-red-50 dark:hover:bg-red-900/20 shrink-0" title="Typ entfernen">
+                    class="text-red-400 hover:text-red-600 p-1 transition-colors rounded hover:bg-red-50 dark:hover:bg-red-900/20 shrink-0" title="Farbe entfernen">
                 <i class="fas fa-trash-alt text-xs"></i>
             </button>
         </div>
         <div class="px-4 py-3">
             <div class="grid grid-cols-[1fr_auto_auto] gap-x-3 gap-y-0 mb-1.5 px-1">
-                <span class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide">Ausprägung</span>
-                <span class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide text-right w-20">Bestand</span>
+                <span class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide">Größe</span>
+                <span class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide text-right w-24">Lagerbestand</span>
                 <span class="w-7"></span>
             </div>
             <div class="value-rows space-y-2">
@@ -1263,22 +1321,27 @@ function createVariantBlock(idx, typeName, values) {
             </div>
             <button type="button" onclick="addValueRow(this, ${idx})"
                     class="mt-3 text-xs text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 flex items-center gap-1.5 font-medium transition-colors">
-                <i class="fas fa-plus-circle"></i> Ausprägung hinzufügen
+                <i class="fas fa-plus-circle"></i> Größe hinzufügen
             </button>
         </div>`;
     return block;
 }
 
 function valueRowHtml(vIdx, valIdx, value, stock) {
+    const stockNum = parseInt(stock) || 0;
+    const stockClass = stockNum === 0
+        ? 'border-red-200 dark:border-red-700 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300'
+        : 'border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50 text-gray-800 dark:text-gray-100';
     return `<div class="value-row grid grid-cols-[1fr_auto_auto] gap-x-3 items-center">
         <input type="text" name="variants[${vIdx}][values][${valIdx}][value]"
-               value="${escapeHtml(value)}" placeholder="z.B. Rot, XL ..."
+               value="${escapeHtml(value)}" placeholder="Größe (z.B. S, M, L, XL)"
                class="px-2.5 py-1.5 border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700/50 text-gray-800 dark:text-gray-100 text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent transition">
         <input type="number" name="variants[${vIdx}][values][${valIdx}][stock]"
-               value="${parseInt(stock) || 0}" min="0"
-               class="w-20 px-2.5 py-1.5 border border-gray-200 dark:border-gray-600 rounded-lg bg-gray-50 dark:bg-gray-700/50 text-gray-800 dark:text-gray-100 text-sm text-right focus:ring-2 focus:ring-purple-500 focus:border-transparent transition">
+               value="${stockNum}" min="0"
+               class="w-24 px-2.5 py-1.5 border rounded-lg text-sm text-right focus:ring-2 focus:ring-purple-500 focus:border-transparent transition ${stockClass}"
+               oninput="updateStockColor(this)">
         <button type="button" onclick="this.closest('.value-row').remove()"
-                class="w-7 h-7 flex items-center justify-center text-gray-300 hover:text-red-500 dark:text-gray-600 dark:hover:text-red-400 transition-colors rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20" title="Ausprägung entfernen">
+                class="w-7 h-7 flex items-center justify-center text-gray-300 hover:text-red-500 dark:text-gray-600 dark:hover:text-red-400 transition-colors rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20" title="Größe entfernen">
             <i class="fas fa-times text-xs"></i>
         </button>
     </div>`;
@@ -1289,11 +1352,24 @@ function escapeHtml(str) {
     return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+function updateStockColor(input) {
+    const v = parseInt(input.value) || 0;
+    if (v === 0) {
+        input.classList.remove('border-gray-200', 'dark:border-gray-600', 'bg-gray-50', 'dark:bg-gray-700/50', 'text-gray-800', 'dark:text-gray-100');
+        input.classList.add('border-red-200', 'dark:border-red-700', 'bg-red-50', 'dark:bg-red-900/20', 'text-red-700', 'dark:text-red-300');
+    } else {
+        input.classList.remove('border-red-200', 'dark:border-red-700', 'bg-red-50', 'dark:bg-red-900/20', 'text-red-700', 'dark:text-red-300');
+        input.classList.add('border-gray-200', 'dark:border-gray-600', 'bg-gray-50', 'dark:bg-gray-700/50', 'text-gray-800', 'dark:text-gray-100');
+    }
+}
+
 document.getElementById('add-variant').addEventListener('click', function () {
     const idx   = variantCount++;
     const block = createVariantBlock(idx, '', [{value:'',stock_quantity:0}]);
     document.getElementById('variants-container').appendChild(block);
-    block.querySelector('input[type="text"]').focus();
+    // Focus the color name input (first text input in header)
+    const colorInput = block.querySelector('.variant-block input[type="text"]');
+    if (colorInput) colorInput.focus();
 });
 
 function addValueRow(btn, vIdx) {
