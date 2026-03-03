@@ -716,7 +716,7 @@ function dismissProfileReviewPrompt() {
                         <div class="h-3 rounded-full transition-all duration-500" style="width: <?php echo $profileCompletenessPercent; ?>%; background: linear-gradient(90deg, #a855f7, #ec4899)"></div>
                     </div>
                 </div>
-                <a href="../alumni/edit.php" class="inline-flex items-center px-4 py-2 text-white rounded-lg font-semibold text-sm transition-all duration-300 shadow-md hover:opacity-90" style="background: linear-gradient(90deg, #a855f7, #ec4899)">
+                <a href="../auth/profile.php" class="inline-flex items-center px-4 py-2 text-white rounded-lg font-semibold text-sm transition-all duration-300 shadow-md hover:opacity-90" style="background: linear-gradient(90deg, #a855f7, #ec4899)">
                     <i class="fas fa-user-edit mr-2"></i>Profil vervollständigen
                 </a>
             </div>

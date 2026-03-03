@@ -252,6 +252,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($updateSuccess) {
                 $message = 'Profil erfolgreich aktualisiert';
                 
+                // Reset the profile reminder cycle: record when the profile was last updated
+                // and clear the reminder-sent flag so the 1-year interval starts fresh.
+                try {
+                    $userDb = Database::getUserDB();
+                    $stmt = $userDb->prepare("UPDATE users SET last_profile_update = NOW(), profile_reminder_sent_at = NULL WHERE id = ?");
+                    $stmt->execute([$user['id']]);
+                } catch (Exception $e) {
+                    error_log("Failed to update profile reminder timestamps: " . $e->getMessage());
+                }
+                
                 // Mark profile as complete if all required fields are provided:
                 // first_name, last_name, and email
                 if (!empty($profileData['first_name']) && 

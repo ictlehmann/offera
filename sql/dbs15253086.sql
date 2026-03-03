@@ -16,6 +16,8 @@ SET time_zone = "+00:00";
 --   ALTER TABLE users ADD COLUMN entra_photo_path VARCHAR(500) DEFAULT NULL COMMENT 'Cached profile photo path fetched from Microsoft Entra ID';
 --   ALTER TABLE users ADD COLUMN is_onboarded BOOLEAN NOT NULL DEFAULT 0 COMMENT 'Whether user has completed the mandatory first-login onboarding workflow';
 --   ALTER TABLE users ADD COLUMN session_token VARCHAR(255) DEFAULT NULL COMMENT 'Random token for single-session enforcement; regenerated on every login';
+--   ALTER TABLE users ADD COLUMN last_profile_update DATETIME DEFAULT NULL COMMENT 'Timestamp when the user last saved their profile; used to trigger yearly reminder emails';
+--   ALTER TABLE users ADD COLUMN profile_reminder_sent_at DATETIME DEFAULT NULL COMMENT 'Timestamp when the yearly profile reminder email was sent; reset to NULL when user updates profile';
 -- ================================================
 CREATE TABLE IF NOT EXISTS `users` (
   `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -49,6 +51,8 @@ CREATE TABLE IF NOT EXISTS `users` (
   `current_session_id` VARCHAR(255) DEFAULT NULL COMMENT 'Active session ID for single-session enforcement; NULL if no active session',
   `session_token` VARCHAR(255) DEFAULT NULL COMMENT 'Random token for single-session enforcement; regenerated on every login',
   `deleted_at` DATETIME DEFAULT NULL COMMENT 'Timestamp when the user was soft deleted (NULL = active)',
+  `last_profile_update` DATETIME DEFAULT NULL COMMENT 'Timestamp when the user last saved their profile; used to trigger yearly reminder emails',
+  `profile_reminder_sent_at` DATETIME DEFAULT NULL COMMENT 'Timestamp when the yearly profile reminder email was sent; reset to NULL when user updates profile',
   `last_reminder_sent_at` DATETIME DEFAULT NULL COMMENT 'Timestamp when the last profile reminder email was sent to the user',
   `privacy_hide_email` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'Hide email from non-privileged users',
   `privacy_hide_phone` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'Hide phone from non-privileged users',
