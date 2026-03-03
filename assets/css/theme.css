@@ -4955,6 +4955,11 @@ body:not(.dark-mode) .card:hover {
 h1, h2, h3, h4, h5, h6 {
     font-feature-settings: "kern" 1, "liga" 1;
     -webkit-font-smoothing: antialiased;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    -webkit-hyphens: auto;
+    -ms-hyphens: auto;
+    hyphens: auto;
 }
 
 /* Better paragraph spacing */
@@ -4971,6 +4976,13 @@ p {
 /* Prevent long unbreakable strings (URLs, hashes) from overflowing any element */
 * {
     overflow-wrap: break-word;
+    min-width: 0;
+}
+
+/* Anchors and inline elements must also wrap */
+a, span, label, li {
+    overflow-wrap: break-word;
+    word-break: break-word;
 }
 
 /* Long-text content areas: event descriptions, blog posts, profile "About me" */
