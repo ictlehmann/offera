@@ -49,16 +49,18 @@ ob_start();
     <!-- Header -->
     <div class="mb-8">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-                <h1 class="text-4xl font-bold text-gray-800 dark:text-gray-100 mb-2">
-                    <i class="fas fa-chart-bar mr-3 text-blue-600 dark:text-blue-400"></i>
-                    Shop-Statistiken
-                </h1>
-                <p class="text-gray-600 dark:text-gray-300">Monatliche Verkaufszahlen und Umsatz der letzten 12 Monate</p>
+            <div class="flex items-center gap-4">
+                <div class="w-12 h-12 rounded-2xl bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center shadow-sm">
+                    <i class="fas fa-chart-bar text-blue-600 dark:text-blue-400 text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-50 tracking-tight">Shop-Statistiken</h1>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">Monatliche Verkaufszahlen und Umsatz der letzten 12 Monate</p>
+                </div>
             </div>
             <a href="<?php echo asset('pages/admin/shop_manage.php'); ?>"
-               class="inline-flex items-center px-5 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-all font-medium no-underline">
-                <i class="fas fa-arrow-left mr-2"></i>Shop-Verwaltung
+               class="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-600 transition-all font-medium text-sm no-underline">
+                <i class="fas fa-arrow-left"></i>Shop-Verwaltung
             </a>
         </div>
     </div>
@@ -66,45 +68,48 @@ ob_start();
     <!-- KPI Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
         <!-- Total orders -->
-        <div class="card p-6 rounded-xl shadow-lg border-l-4 border-blue-500 bg-gradient-to-br from-white to-blue-50 dark:from-gray-800 dark:to-blue-900/20">
-            <div class="flex items-center justify-between mb-3">
+        <div class="card rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+            <div class="px-6 pt-6 pb-2 flex items-start justify-between">
                 <div>
-                    <p class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Bestellungen</p>
-                    <p class="text-3xl font-bold text-blue-600 dark:text-blue-400"><?php echo number_format($totalOrders); ?></p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Letzte 12 Monate (bezahlt)</p>
+                    <p class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">Bestellungen</p>
+                    <p class="text-5xl font-extrabold text-gray-900 dark:text-gray-50 leading-none"><?php echo number_format($totalOrders); ?></p>
+                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-2">Letzte 12 Monate (bezahlt)</p>
                 </div>
-                <div class="w-14 h-14 bg-blue-100 dark:bg-blue-900/50 rounded-full flex items-center justify-center">
-                    <i class="fas fa-shopping-bag text-blue-600 dark:text-blue-400 text-2xl"></i>
+                <div class="w-12 h-12 bg-blue-50 dark:bg-blue-900/30 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-shopping-bag text-blue-500 dark:text-blue-400 text-lg"></i>
                 </div>
             </div>
+            <div class="h-1 bg-blue-500 mt-4"></div>
         </div>
 
         <!-- Total revenue -->
-        <div class="card p-6 rounded-xl shadow-lg border-l-4 border-green-500 bg-gradient-to-br from-white to-green-50 dark:from-gray-800 dark:to-green-900/20">
-            <div class="flex items-center justify-between mb-3">
+        <div class="card rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+            <div class="px-6 pt-6 pb-2 flex items-start justify-between">
                 <div>
-                    <p class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Gesamtumsatz</p>
-                    <p class="text-3xl font-bold text-green-600 dark:text-green-400"><?php echo number_format($totalRevenue, 2, ',', '.'); ?> €</p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Letzte 12 Monate</p>
+                    <p class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">Gesamtumsatz</p>
+                    <p class="text-4xl font-extrabold text-gray-900 dark:text-gray-50 leading-none"><?php echo number_format($totalRevenue, 2, ',', '.'); ?> <span class="text-2xl">€</span></p>
+                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-2">Letzte 12 Monate</p>
                 </div>
-                <div class="w-14 h-14 bg-green-100 dark:bg-green-900/50 rounded-full flex items-center justify-center">
-                    <i class="fas fa-euro-sign text-green-600 dark:text-green-400 text-2xl"></i>
+                <div class="w-12 h-12 bg-green-50 dark:bg-green-900/30 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-euro-sign text-green-500 dark:text-green-400 text-lg"></i>
                 </div>
             </div>
+            <div class="h-1 bg-green-500 mt-4"></div>
         </div>
 
         <!-- Average order value -->
-        <div class="card p-6 rounded-xl shadow-lg border-l-4 border-purple-500 bg-gradient-to-br from-white to-purple-50 dark:from-gray-800 dark:to-purple-900/20">
-            <div class="flex items-center justify-between mb-3">
+        <div class="card rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+            <div class="px-6 pt-6 pb-2 flex items-start justify-between">
                 <div>
-                    <p class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1">Ø Bestellwert</p>
-                    <p class="text-3xl font-bold text-purple-600 dark:text-purple-400"><?php echo number_format($avgRevenue, 2, ',', '.'); ?> €</p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Pro Bestellung</p>
+                    <p class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">Ø Bestellwert</p>
+                    <p class="text-4xl font-extrabold text-gray-900 dark:text-gray-50 leading-none"><?php echo number_format($avgRevenue, 2, ',', '.'); ?> <span class="text-2xl">€</span></p>
+                    <p class="text-xs text-gray-400 dark:text-gray-500 mt-2">Pro Bestellung</p>
                 </div>
-                <div class="w-14 h-14 bg-purple-100 dark:bg-purple-900/50 rounded-full flex items-center justify-center">
-                    <i class="fas fa-chart-line text-purple-600 dark:text-purple-400 text-2xl"></i>
+                <div class="w-12 h-12 bg-purple-50 dark:bg-purple-900/30 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-chart-line text-purple-500 dark:text-purple-400 text-lg"></i>
                 </div>
             </div>
+            <div class="h-1 bg-purple-500 mt-4"></div>
         </div>
     </div>
 
