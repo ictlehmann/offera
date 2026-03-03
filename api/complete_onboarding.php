@@ -120,6 +120,9 @@ try {
     $stmt = $db->prepare("UPDATE users SET birthday = ?, is_onboarded = 1, profile_complete = 1, has_seen_onboarding = 1 WHERE id = ?");
 
     if ($stmt->execute([$birthdayValue, $userId])) {
+        // Regenerate session ID on privilege elevation (onboarding completion)
+        session_regenerate_id(true);
+
         // Update session so the onboarding middleware no longer triggers
         $_SESSION['is_onboarded'] = true;
         $_SESSION['profile_incomplete'] = false;
