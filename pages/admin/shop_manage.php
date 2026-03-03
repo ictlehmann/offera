@@ -370,7 +370,7 @@ ob_start();
             <i class="fas fa-list mr-2 text-blue-500"></i>Alle Produkte
         </h2>
         <button type="button" onclick="openProductModal()"
-                class="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold text-base shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105">
+                class="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold text-base shadow-lg transition-colors duration-150">
             <i class="fas fa-plus"></i>Neues Produkt hinzufügen
         </button>
     </div>
@@ -684,7 +684,7 @@ ob_start();
             </div>
             <div class="flex gap-3 px-6 pb-6 pt-2">
                 <button type="submit" form="order-status-form"
-                        class="flex-1 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 font-semibold shadow transition-all">
+                        class="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold shadow transition-colors duration-150">
                     <i class="fas fa-save mr-2"></i>Speichern
                 </button>
                 <button type="button" onclick="closeOrderModal()"
