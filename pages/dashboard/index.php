@@ -64,15 +64,23 @@ if ($hour >= 5 && $hour < 12) {
     $greeting = 'Guten Abend';
 }
 
-// Get upcoming events from database
+// Get upcoming events from database that the current user has registered for
 $nextEvents = [];
 $events = [];
+$currentUserId = (int)Auth::getUserId();
 try {
     $contentDb = Database::getContentDB();
     $stmt = $contentDb->prepare(
-        "SELECT id, title, start_time, end_time, location, status, image_path, is_external FROM events WHERE status IN ('planned', 'open', 'closed') AND start_time >= NOW() ORDER BY start_time ASC LIMIT 5"
+        "SELECT DISTINCT e.id, e.title, e.start_time, e.end_time, e.location, e.status, e.image_path, e.is_external
+         FROM events e
+         WHERE e.status IN ('planned', 'open', 'closed') AND e.start_time >= NOW()
+           AND (
+               EXISTS (SELECT 1 FROM event_registrations er WHERE er.event_id = e.id AND er.user_id = ? AND er.status = 'confirmed')
+               OR EXISTS (SELECT 1 FROM event_signups es WHERE es.event_id = e.id AND es.user_id = ? AND es.status = 'confirmed')
+           )
+         ORDER BY e.start_time ASC LIMIT 5"
     );
-    $stmt->execute();
+    $stmt->execute([$currentUserId, $currentUserId]);
     $events = $stmt->fetchAll(PDO::FETCH_ASSOC);
     $nextEvents = array_slice($events, 0, 3);
 } catch (Exception $e) {

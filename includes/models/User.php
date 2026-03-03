@@ -158,14 +158,25 @@ class User {
                 $stmt = $db->query($sql);
             }
         } catch (PDOException $e) {
-            // SQLSTATE 42S22 = unknown column; fall back if entra_photo_path doesn't exist yet
-            if ($e->getCode() === '42S22' && strpos($e->getMessage(), 'entra_photo_path') !== false) {
-                $sql = str_replace('entra_photo_path', 'NULL AS entra_photo_path', $sql);
-                if ($role) {
-                    $stmt = $db->prepare($sql);
-                    $stmt->execute([$role]);
+            // SQLSTATE 42S22 = unknown column; fall back for columns that may not exist yet
+            if ($e->getCode() === '42S22') {
+                $msg = $e->getMessage();
+                $fixed = false;
+                foreach (['entra_photo_path', 'is_locked_permanently', 'locked_until'] as $col) {
+                    if (strpos($msg, $col) !== false) {
+                        $sql = preg_replace('/\b' . preg_quote($col, '/') . '\b/', 'NULL AS ' . $col, $sql);
+                        $fixed = true;
+                    }
+                }
+                if ($fixed) {
+                    if ($role) {
+                        $stmt = $db->prepare($sql);
+                        $stmt->execute([$role]);
+                    } else {
+                        $stmt = $db->query($sql);
+                    }
                 } else {
-                    $stmt = $db->query($sql);
+                    throw $e;
                 }
             } else {
                 throw $e;
