@@ -37,8 +37,9 @@ class Member {
         
         // Add search filter if provided
         if ($search !== null && $search !== '') {
-            $whereClauses[] = "(ap.first_name LIKE ? OR ap.last_name LIKE ? OR ap.company LIKE ? OR ap.industry LIKE ? OR ap.study_program LIKE ?)";
+            $whereClauses[] = "(ap.first_name LIKE ? OR ap.last_name LIKE ? OR ap.company LIKE ? OR ap.industry LIKE ? OR ap.study_program LIKE ? OR ap.skills LIKE ?)";
             $searchTerm = '%' . $search . '%';
+            $params[] = $searchTerm;
             $params[] = $searchTerm;
             $params[] = $searchTerm;
             $params[] = $searchTerm;
@@ -66,6 +67,7 @@ class Member {
                 ap.angestrebter_abschluss,
                 ap.degree,
                 ap.graduation_year,
+                ap.skills,
                 ap.image_path,
                 ap.created_at,
                 ap.updated_at
@@ -232,7 +234,7 @@ class Member {
             SELECT id, user_id, first_name, last_name, email, mobile_phone, 
                    linkedin_url, xing_url, industry, company, position, 
                    study_program, semester, angestrebter_abschluss, 
-                   degree, graduation_year,
+                   degree, graduation_year, skills,
                    image_path, last_verified_at, last_reminder_sent_at, created_at, updated_at
             FROM alumni_profiles 
             WHERE user_id = ?
@@ -286,7 +288,7 @@ class Member {
             'first_name', 'last_name', 'email', 'mobile_phone',
             'linkedin_url', 'xing_url', 'industry', 'company', 
             'position', 'image_path', 'study_program', 'semester', 
-            'angestrebter_abschluss', 'degree', 'graduation_year'
+            'angestrebter_abschluss', 'degree', 'graduation_year', 'skills'
         ];
         
         foreach ($allowedFields as $field) {

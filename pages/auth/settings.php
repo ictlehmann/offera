@@ -28,9 +28,20 @@ if (isset($_SESSION['error_message'])) {
     unset($_SESSION['error_message']);
 }
 
-// Handle form submissions
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['update_theme'])) {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (isset($_POST['update_privacy'])) {
+        $privacyData = [
+            'privacy_hide_email'  => isset($_POST['privacy_hide_email'])  ? 1 : 0,
+            'privacy_hide_phone'  => isset($_POST['privacy_hide_phone'])  ? 1 : 0,
+            'privacy_hide_career' => isset($_POST['privacy_hide_career']) ? 1 : 0,
+        ];
+        if (User::updateProfile($user['id'], $privacyData)) {
+            $message = 'Datenschutz-Einstellungen erfolgreich gespeichert';
+            $user = Auth::user();
+        } else {
+            $error = 'Fehler beim Speichern der Datenschutz-Einstellungen';
+        }
+    } elseif (isset($_POST['update_theme'])) {
         $theme = $_POST['theme'] ?? 'auto';
         
         // Validate theme value
@@ -301,6 +312,47 @@ ob_start();
                     </form>
                 </div>
                 <?php endif; ?>
+            </div>
+        </div>
+
+        <!-- Privacy Settings -->
+        <div class="lg:col-span-2">
+            <div class="card p-6">
+                <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
+                    <i class="fas fa-user-shield text-red-600 mr-2"></i>
+                    Privatsphäre-Einstellungen
+                </h2>
+                <p class="text-gray-600 dark:text-gray-300 mb-6">
+                    Lege fest, welche Informationen deines Profils für reguläre Mitglieder sichtbar sind.
+                    Verborgen gestellte Daten sind weiterhin für Vorstände und Alumni sichtbar.
+                </p>
+                <form method="POST" class="space-y-4">
+                    <?php
+                    $privacyItems = [
+                        ['key' => 'privacy_hide_email',  'label' => 'E-Mail verbergen',         'icon' => 'fa-envelope'],
+                        ['key' => 'privacy_hide_phone',  'label' => 'Telefonnummer verbergen',   'icon' => 'fa-phone'],
+                        ['key' => 'privacy_hide_career', 'label' => 'Karrieredaten verbergen',   'icon' => 'fa-briefcase'],
+                    ];
+                    foreach ($privacyItems as $item):
+                        $isHidden = !empty($user[$item['key']]);
+                    ?>
+                    <div class="flex items-center justify-between p-4 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-red-600 dark:text-red-400 flex-shrink-0">
+                                <i class="fas <?php echo $item['icon']; ?> text-sm"></i>
+                            </div>
+                            <span class="font-medium text-gray-800 dark:text-gray-200"><?php echo $item['label']; ?></span>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" name="<?php echo $item['key']; ?>" value="1" class="sr-only peer" <?php echo $isHidden ? 'checked' : ''; ?>>
+                            <div class="w-11 h-6 bg-gray-300 peer-focus:ring-2 peer-focus:ring-red-400 dark:bg-gray-600 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-500"></div>
+                        </label>
+                    </div>
+                    <?php endforeach; ?>
+                    <button type="submit" name="update_privacy" class="w-full btn-primary">
+                        <i class="fas fa-save mr-2"></i>Datenschutz-Einstellungen speichern
+                    </button>
+                </form>
             </div>
         </div>
 

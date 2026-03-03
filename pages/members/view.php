@@ -50,6 +50,11 @@ $profileUserEntraRoles = $profileUser['entra_roles'] ?? null;
 $displayRoleKey = Auth::getPrimaryEntraRoleKey($profileUserEntraRoles, $profileUserRole);
 $resolvedDisplayRole = resolveDisplayRole($profileUserRole, $profileUserEntraRoles);
 
+// Determine whether the current viewer can see private data
+// Privileged roles: alumni, vorstand_intern, vorstand_extern, vorstand_finanzen
+$viewerRole = $user['role'] ?? '';
+$canViewPrivate = in_array($viewerRole, ['alumni', 'vorstand_intern', 'vorstand_extern', 'vorstand_finanzen']);
+
 // Calculate profile completeness (only for alumni roles)
 $profileCompletenessPercent = 0;
 $isAlumniProfile = isAlumniRole($profileUserRole);
@@ -89,17 +94,18 @@ ob_start();
             <div class="flex justify-center md:justify-start flex-shrink-0">
                 <?php 
                 $initials = strtoupper(substr($profile['first_name'], 0, 1) . substr($profile['last_name'], 0, 1));
-                $imagePath = asset(getProfileImageUrl($profile['image_path'] ?? '', $profileUser['entra_photo_path'] ?? null));
+                $hasActualImage = !empty($profile['image_path']) || !empty($profileUser['entra_photo_path']);
+                $imagePath = $hasActualImage ? asset(getProfileImageUrl($profile['image_path'] ?? '', $profileUser['entra_photo_path'] ?? null)) : '';
                 ?>
                 <div class="w-32 h-32 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-4xl font-bold overflow-hidden shadow-lg">
-                    <?php if (!empty($imagePath)): ?>
+                    <?php if ($hasActualImage): ?>
                         <img 
                             src="<?php echo htmlspecialchars($imagePath); ?>" 
                             alt="<?php echo htmlspecialchars($profile['first_name'] . ' ' . $profile['last_name']); ?>"
                             class="w-full h-full object-cover"
                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
                         >
-                        <div style="display:none;" class="w-full h-full flex items-center justify-center text-4xl bg-gradient-to-br from-blue-400 to-blue-600">
+                        <div style="display:none;" class="w-full h-full flex items-center justify-center text-4xl">
                             <?php echo htmlspecialchars($initials); ?>
                         </div>
                     <?php else: ?>
@@ -204,9 +210,13 @@ ob_start();
                     </div>
                     <div class="min-w-0">
                         <p class="text-xs text-gray-400 font-medium">E-Mail</p>
+                        <?php if (!empty($profileUser['privacy_hide_email']) && !$canViewPrivate): ?>
+                        <p class="text-gray-400 italic text-sm">Privat</p>
+                        <?php else: ?>
                         <a href="mailto:<?php echo htmlspecialchars($profile['email']); ?>" class="text-blue-600 hover:text-blue-800 font-medium text-sm truncate block">
                             <?php echo htmlspecialchars($profile['email']); ?>
                         </a>
+                        <?php endif; ?>
                     </div>
                 </div>
                 <?php endif; ?>
@@ -219,9 +229,13 @@ ob_start();
                     </div>
                     <div class="min-w-0">
                         <p class="text-xs text-gray-400 font-medium">Zweite E-Mail</p>
+                        <?php if (!empty($profileUser['privacy_hide_email']) && !$canViewPrivate): ?>
+                        <p class="text-gray-400 italic text-sm">Privat</p>
+                        <?php else: ?>
                         <a href="mailto:<?php echo htmlspecialchars($profile['secondary_email']); ?>" class="text-blue-600 hover:text-blue-800 font-medium text-sm truncate block">
                             <?php echo htmlspecialchars($profile['secondary_email']); ?>
                         </a>
+                        <?php endif; ?>
                     </div>
                 </div>
                 <?php endif; ?>
@@ -234,9 +248,30 @@ ob_start();
                     </div>
                     <div class="min-w-0">
                         <p class="text-xs text-gray-400 font-medium">Telefon</p>
+                        <?php if (!empty($profileUser['privacy_hide_phone']) && !$canViewPrivate): ?>
+                        <p class="text-gray-400 italic text-sm">Privat</p>
+                        <?php else: ?>
                         <a href="tel:<?php echo htmlspecialchars($profile['mobile_phone']); ?>" class="text-blue-600 hover:text-blue-800 font-medium text-sm">
                             <?php echo htmlspecialchars($profile['mobile_phone']); ?>
                         </a>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                <?php endif; ?>
+
+                <!-- Geschlecht -->
+                <?php if (!empty($profileUser['gender'])): ?>
+                <?php
+                $genderLabels = ['m' => 'Männlich', 'f' => 'Weiblich', 'd' => 'Divers'];
+                $genderLabel = $genderLabels[$profileUser['gender']] ?? htmlspecialchars($profileUser['gender']);
+                ?>
+                <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50">
+                    <div class="w-9 h-9 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 flex-shrink-0">
+                        <i class="fas fa-venus-mars text-sm"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-gray-400 font-medium">Geschlecht</p>
+                        <p class="font-medium text-gray-800 dark:text-gray-200 text-sm"><?php echo $genderLabel; ?></p>
                     </div>
                 </div>
                 <?php endif; ?>
@@ -302,7 +337,7 @@ ob_start();
                     <?php endif; ?>
                 <?php endif; ?>
 
-                <?php if (empty($profile['email']) && empty($profile['mobile_phone']) && empty($profile['linkedin_url']) && empty($profile['secondary_email']) && empty($profile['xing_url']) && (empty($profileUser['birthday']) || empty($profileUser['show_birthday']))): ?>
+                <?php if (empty($profile['email']) && empty($profile['mobile_phone']) && empty($profile['linkedin_url']) && empty($profile['secondary_email']) && empty($profile['xing_url']) && (empty($profileUser['birthday']) || empty($profileUser['show_birthday'])) && empty($profileUser['gender'])): ?>
                 <p class="text-sm text-gray-400 italic">Keine Kontaktinformationen hinterlegt</p>
                 <?php endif; ?>
             </div>
@@ -366,6 +401,9 @@ ob_start();
             </span>
             Berufliches
         </h2>
+        <?php if (!empty($profileUser['privacy_hide_career']) && !$canViewPrivate): ?>
+        <p class="text-sm text-gray-400 italic">Karrieredaten sind privat.</p>
+        <?php else: ?>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <?php if (!empty($profile['company'])): ?>
             <div class="p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50">
@@ -387,6 +425,29 @@ ob_start();
                 <p class="font-semibold text-gray-800 dark:text-gray-200 text-sm"><?php echo htmlspecialchars($profile['industry']); ?></p>
             </div>
             <?php endif; ?>
+        </div>
+        <?php endif; ?>
+    </div>
+    <?php endif; ?>
+
+    <!-- Fähigkeiten / Skills -->
+    <?php if (!empty($profile['skills'])): ?>
+    <div class="card p-6 mb-6">
+        <h2 class="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
+            <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-teal-100 text-teal-600">
+                <i class="fas fa-tags text-sm"></i>
+            </span>
+            Fähigkeiten
+        </h2>
+        <div class="flex flex-wrap gap-2">
+            <?php
+            $skillsList = array_filter(array_map('trim', explode(',', $profile['skills'])));
+            foreach ($skillsList as $skill):
+            ?>
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-teal-100 text-teal-800 dark:bg-teal-900/40 dark:text-teal-300 border border-teal-200 dark:border-teal-700">
+                <?php echo htmlspecialchars($skill); ?>
+            </span>
+            <?php endforeach; ?>
         </div>
     </div>
     <?php endif; ?>
