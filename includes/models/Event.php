@@ -1106,17 +1106,17 @@ class Event {
         $placeholders = implode(',', array_fill(0, count($userIds), '?'));
         
         $stmt = $userDb->prepare("
-            SELECT u.id as user_id, u.email
+            SELECT u.id as user_id, u.email, u.privacy_hide_email
             FROM users u
             WHERE u.id IN ($placeholders)
         ");
         $stmt->execute($userIds);
         $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
-        // Create a map of user_id => email for quick lookup
+        // Create a map of user_id => user data for quick lookup
         $userMap = [];
         foreach ($users as $user) {
-            $userMap[$user['user_id']] = $user['email'];
+            $userMap[$user['user_id']] = $user;
         }
         
         // Get alumni profiles from content database
@@ -1142,29 +1142,32 @@ class Event {
                 continue;
             }
             
-            $email = $userMap[$userId];
+            $userData = $userMap[$userId];
+            $email = $userData['email'] ?? '';
+            $hideEmail = !empty($userData['privacy_hide_email'] ?? true);
             $attendee = [
                 'user_id' => $userId,
                 'email' => $email,
                 'first_name' => $profileMap[$userId]['first_name'] ?? '',
-                'last_name' => $profileMap[$userId]['last_name'] ?? ''
+                'last_name' => $profileMap[$userId]['last_name'] ?? '',
+                'privacy_hide_email' => $hideEmail,
             ];
             
             // For users without alumni profiles, use a fallback display name
             if (empty($attendee['first_name']) && empty($attendee['last_name'])) {
-                // Use email local part as first name for better display
-                if (!empty($email) && strpos($email, '@') !== false) {
+                // Only use email local part as display name if the user has not hidden their email
+                if (!$hideEmail && !empty($email) && strpos($email, '@') !== false) {
                     $emailParts = explode('@', $email);
                     $attendee['first_name'] = $emailParts[0];
                     $attendee['last_name'] = '';
                 } else {
-                    $attendee['first_name'] = 'User';
+                    $attendee['first_name'] = 'Benutzer';
                     $attendee['last_name'] = '';
                 }
             }
             
             // Store sort key for proper sorting (use email as fallback for last name)
-            $attendee['_sort_key'] = !empty($attendee['last_name']) ? $attendee['last_name'] : $email;
+            $attendee['_sort_key'] = !empty($attendee['last_name']) ? $attendee['last_name'] : (!$hideEmail ? $email : 'Benutzer');
             
             $attendees[] = $attendee;
         }
