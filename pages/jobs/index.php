@@ -54,8 +54,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
         // Delete PDF file if it exists
         if (!empty($listing['pdf_path'])) {
             $pdfFile = __DIR__ . '/../../' . $listing['pdf_path'];
-            if (file_exists($pdfFile)) {
-                unlink($pdfFile);
+            $allowedDir = realpath(__DIR__ . '/../../uploads/jobs');
+            $realFile = realpath($pdfFile);
+            if ($realFile !== false && $allowedDir !== false && strpos($realFile, $allowedDir . DIRECTORY_SEPARATOR) === 0) {
+                unlink($realFile);
             }
         }
         JobBoard::deleteByOwner($deleteId, $userId);

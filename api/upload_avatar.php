@@ -131,8 +131,12 @@ try {
 
     } catch (RuntimeException $e) {
         // Clean up the uploaded file if the DB update failed
-        if ($uploadPath !== null && file_exists($uploadPath)) {
-            @unlink($uploadPath);
+        if ($uploadPath !== null) {
+            $allowedDir = realpath(__DIR__ . '/../uploads/profile_photos');
+            $realUploadPath = realpath($uploadPath);
+            if ($realUploadPath !== false && $allowedDir !== false && strpos($realUploadPath, $allowedDir . DIRECTORY_SEPARATOR) === 0) {
+                @unlink($realUploadPath);
+            }
         }
         echo json_encode(['success' => false, 'message' => $e->getMessage()]);
     } finally {

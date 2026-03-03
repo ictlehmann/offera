@@ -128,8 +128,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Delete old PDF file if it was replaced or removed
             if ($updatePdf && !empty($listing['pdf_path'])) {
                 $oldFile = __DIR__ . '/../../' . $listing['pdf_path'];
-                if (file_exists($oldFile)) {
-                    unlink($oldFile);
+                $allowedDir = realpath(__DIR__ . '/../../uploads/jobs');
+                $realOldFile = realpath($oldFile);
+                if ($realOldFile !== false && $allowedDir !== false && strpos($realOldFile, $allowedDir . DIRECTORY_SEPARATOR) === 0) {
+                    unlink($realOldFile);
                 }
             }
 
@@ -140,8 +142,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // DB update failed – clean up the newly uploaded file to avoid orphaned files
             if ($newPdfPath !== null) {
                 $uploadedFile = __DIR__ . '/../../' . $newPdfPath;
-                if (file_exists($uploadedFile)) {
-                    unlink($uploadedFile);
+                $allowedDir = realpath(__DIR__ . '/../../uploads/jobs');
+                $realUploadedFile = realpath($uploadedFile);
+                if ($realUploadedFile !== false && $allowedDir !== false && strpos($realUploadedFile, $allowedDir . DIRECTORY_SEPARATOR) === 0) {
+                    unlink($realUploadedFile);
                 }
             }
             $errors[] = 'Das Gesuch konnte nicht aktualisiert werden. Bitte versuche es erneut.';
