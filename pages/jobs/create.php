@@ -56,14 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $errors[] = 'Die Datei überschreitet die maximale Größe von 5 MB.';
             }
 
-            // 2. Extension check – must be .pdf (case-insensitive)
-            $originalName = $file['name'];
-            $ext = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
-            if ($ext !== 'pdf') {
-                $errors[] = 'Nur PDF-Dateien sind erlaubt.';
-            }
-
-            // 3. MIME type check via finfo (not spoofable via $_FILES['type'])
+            // 2. MIME type check via finfo (not spoofable via $_FILES['type'])
             if (empty($errors)) {
                 $finfo = new finfo(FILEINFO_MIME_TYPE);
                 $mime  = $finfo->file($file['tmp_name']);
@@ -72,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
 
-            // 4. Magic-bytes check – PDF starts with "%PDF"
+            // 3. Magic-bytes check – PDF starts with "%PDF"
             if (empty($errors)) {
                 $handle = fopen($file['tmp_name'], 'rb');
                 $magic  = fread($handle, 4);
@@ -82,7 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
 
-            // 5. Move file if all checks passed
+            // 4. Move file if all checks passed
             if (empty($errors)) {
                 $uploadDir = __DIR__ . '/../../uploads/jobs/';
                 if (!is_dir($uploadDir)) {

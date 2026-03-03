@@ -66,12 +66,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $errors[] = 'Die Datei überschreitet die maximale Größe von 5 MB.';
             }
 
-            // Extension check – must be .pdf (case-insensitive)
-            $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-            if ($ext !== 'pdf') {
-                $errors[] = 'Nur PDF-Dateien sind erlaubt.';
-            }
-
             // MIME type check via finfo
             if (empty($errors)) {
                 $finfo = new finfo(FILEINFO_MIME_TYPE);
