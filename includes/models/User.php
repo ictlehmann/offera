@@ -16,15 +16,20 @@ class User {
      */
     public static function getById($id) {
         $db = Database::getUserDB();
-        $sql = "SELECT id, email, role, entra_roles, entra_photo_path, tfa_enabled, is_alumni_validated, last_login, created_at, about_me, gender, birthday, show_birthday, job_title FROM users WHERE id = ?";
+        $sql = "SELECT id, email, role, entra_roles, entra_photo_path, tfa_enabled, is_alumni_validated, last_login, created_at, about_me, gender, birthday, show_birthday, job_title, privacy_hide_email, privacy_hide_phone, privacy_hide_career FROM users WHERE id = ?";
         try {
             $stmt = $db->prepare($sql);
             $stmt->execute([$id]);
             return $stmt->fetch();
         } catch (PDOException $e) {
-            // SQLSTATE 42S22 = unknown column; fall back if entra_photo_path doesn't exist yet
-            if ($e->getCode() === '42S22' && strpos($e->getMessage(), 'entra_photo_path') !== false) {
-                $sql = str_replace('entra_photo_path,', 'NULL AS entra_photo_path,', $sql);
+            // SQLSTATE 42S22 = unknown column; fall back for columns that may not exist yet
+            if ($e->getCode() === '42S22') {
+                foreach (['entra_photo_path', 'privacy_hide_email', 'privacy_hide_phone', 'privacy_hide_career'] as $col) {
+                    if (strpos($e->getMessage(), $col) !== false) {
+                        $sql = str_replace($col . ',', 'NULL AS ' . $col . ',', $sql);
+                        $sql = str_replace(', ' . $col, ', NULL AS ' . $col, $sql);
+                    }
+                }
                 $stmt = $db->prepare($sql);
                 $stmt->execute([$id]);
                 return $stmt->fetch();
@@ -103,7 +108,7 @@ class User {
         $values = [];
         
         // Only allow specific profile fields to be updated
-        $allowedFields = ['about_me', 'gender', 'birthday', 'show_birthday'];
+        $allowedFields = ['about_me', 'gender', 'birthday', 'show_birthday', 'privacy_hide_email', 'privacy_hide_phone', 'privacy_hide_career'];
         
         foreach ($allowedFields as $field) {
             if (array_key_exists($field, $data)) {

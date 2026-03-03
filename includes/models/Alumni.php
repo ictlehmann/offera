@@ -22,7 +22,7 @@ class Alumni extends Database {
             SELECT id, user_id, first_name, last_name, email, secondary_email, mobile_phone, 
                    linkedin_url, xing_url, industry, company, position, 
                    study_program, semester, angestrebter_abschluss, 
-                   degree, graduation_year,
+                   degree, graduation_year, skills,
                    image_path, last_verified_at, last_reminder_sent_at, created_at, updated_at
             FROM alumni_profiles 
             WHERE id = ?
@@ -43,7 +43,7 @@ class Alumni extends Database {
             SELECT id, user_id, first_name, last_name, email, secondary_email, mobile_phone, 
                    linkedin_url, xing_url, industry, company, position, 
                    study_program, semester, angestrebter_abschluss, 
-                   degree, graduation_year,
+                   degree, graduation_year, skills,
                    image_path, last_verified_at, last_reminder_sent_at, created_at, updated_at
             FROM alumni_profiles 
             WHERE user_id = ?
@@ -80,8 +80,8 @@ class Alumni extends Database {
             (user_id, first_name, last_name, email, secondary_email, mobile_phone, 
              linkedin_url, xing_url, industry, company, position, image_path,
              study_program, semester, angestrebter_abschluss, 
-             degree, graduation_year)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+             degree, graduation_year, skills)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ");
         
         return $stmt->execute([
@@ -101,7 +101,8 @@ class Alumni extends Database {
             $data['semester'] ?? null,
             $data['angestrebter_abschluss'] ?? null,
             $data['degree'] ?? null,
-            $data['graduation_year'] ?? null
+            $data['graduation_year'] ?? null,
+            $data['skills'] ?? null
         ]);
     }
     
@@ -155,7 +156,7 @@ class Alumni extends Database {
             'linkedin_url', 'xing_url', 'industry', 'company', 
             'position', 'image_path', 'study_program', 
             'semester', 'angestrebter_abschluss', 'degree', 
-            'graduation_year'
+            'graduation_year', 'skills'
         ];
         
         foreach ($allowedFields as $field) {
@@ -242,10 +243,11 @@ class Alumni extends Database {
         $whereClauses = [];
         $params = [];
         
-        // Search term filters by: Name OR Position OR Company OR Industry
+        // Search term filters by: Name OR Position OR Company OR Industry OR Skills
         if (!empty($filters['search'])) {
-            $whereClauses[] = "(ap.first_name LIKE ? OR ap.last_name LIKE ? OR ap.position LIKE ? OR ap.company LIKE ? OR ap.industry LIKE ?)";
+            $whereClauses[] = "(ap.first_name LIKE ? OR ap.last_name LIKE ? OR ap.position LIKE ? OR ap.company LIKE ? OR ap.industry LIKE ? OR ap.skills LIKE ?)";
             $searchTerm = '%' . $filters['search'] . '%';
+            $params[] = $searchTerm;
             $params[] = $searchTerm;
             $params[] = $searchTerm;
             $params[] = $searchTerm;
@@ -272,7 +274,7 @@ class Alumni extends Database {
             SELECT ap.id, ap.user_id, ap.first_name, ap.last_name, ap.email, ap.mobile_phone, 
                    ap.linkedin_url, ap.xing_url, ap.industry, ap.company, ap.position, 
                    ap.study_program, ap.semester, ap.angestrebter_abschluss, 
-                   ap.degree, ap.graduation_year,
+                   ap.degree, ap.graduation_year, ap.skills,
                    ap.image_path, ap.last_verified_at, ap.last_reminder_sent_at, ap.created_at, ap.updated_at
             FROM alumni_profiles ap" . $whereSQL . "
             ORDER BY ap.last_name ASC, ap.first_name ASC
@@ -400,7 +402,7 @@ class Alumni extends Database {
             SELECT id, user_id, first_name, last_name, email, mobile_phone, 
                    linkedin_url, xing_url, industry, company, position, 
                    study_program, semester, angestrebter_abschluss, 
-                   degree, graduation_year,
+                   degree, graduation_year, skills,
                    image_path, last_verified_at, last_reminder_sent_at, created_at, updated_at
             FROM alumni_profiles 
             WHERE updated_at < DATE_SUB(NOW(), INTERVAL ? MONTH)

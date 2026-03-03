@@ -113,6 +113,7 @@ CREATE TABLE IF NOT EXISTS `alumni_profiles` (
   `last_verified_at` DATETIME DEFAULT NULL,
   `last_reminder_sent_at` DATETIME DEFAULT NULL,
   `bio` TEXT,
+  `skills` TEXT DEFAULT NULL COMMENT 'Comma-separated list of skills/competencies',
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   UNIQUE KEY `unique_user_id` (`user_id`),
