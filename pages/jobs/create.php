@@ -114,8 +114,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Clean up uploaded file to avoid orphaned files on disk
             if ($pdfPath !== null) {
                 $uploadedFile = __DIR__ . '/../../' . $pdfPath;
-                if (file_exists($uploadedFile)) {
-                    unlink($uploadedFile);
+                $allowedDir = realpath(__DIR__ . '/../../uploads/jobs');
+                $realUploadedFile = realpath($uploadedFile);
+                if ($realUploadedFile !== false && $allowedDir !== false && strpos($realUploadedFile, $allowedDir . DIRECTORY_SEPARATOR) === 0) {
+                    unlink($realUploadedFile);
                 }
             }
         }

@@ -83,8 +83,13 @@ class Invoice {
         } catch (Exception $e) {
             error_log("Error creating invoice: " . $e->getMessage());
             // Clean up uploaded file if database insertion failed
-            if (isset($uploadResult['path']) && file_exists(__DIR__ . '/../../' . $uploadResult['path'])) {
-                unlink(__DIR__ . '/../../' . $uploadResult['path']);
+            if (isset($uploadResult['path'])) {
+                $uploadedFile = __DIR__ . '/../../' . $uploadResult['path'];
+                $allowedDir = realpath(__DIR__ . '/../../' . self::UPLOAD_DIR);
+                $realUploadedFile = realpath($uploadedFile);
+                if ($realUploadedFile !== false && $allowedDir !== false && strpos($realUploadedFile, $allowedDir . DIRECTORY_SEPARATOR) === 0) {
+                    unlink($realUploadedFile);
+                }
             }
             return [
                 'success' => false,

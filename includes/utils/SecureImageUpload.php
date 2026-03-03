@@ -326,14 +326,38 @@ class SecureImageUpload {
         if (empty($relativePath)) {
             return false;
         }
-        
-        $fullPath = __DIR__ . '/../../' . $relativePath;
-        
-        if (file_exists($fullPath)) {
-            return unlink($fullPath);
+
+        $projectRoot = realpath(__DIR__ . '/../../');
+        if ($projectRoot === false) {
+            return false;
         }
-        
-        return false;
+
+        $fullPath = $projectRoot . DIRECTORY_SEPARATOR . ltrim(str_replace('/', DIRECTORY_SEPARATOR, $relativePath), DIRECTORY_SEPARATOR);
+        $realPath = realpath($fullPath);
+
+        if ($realPath === false) {
+            return false;
+        }
+
+        // Prevent path traversal: file must reside inside an allowed upload directory
+        $allowedDirs = [
+            $projectRoot . DIRECTORY_SEPARATOR . 'uploads',
+            $projectRoot . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'uploads',
+        ];
+
+        $allowed = false;
+        foreach ($allowedDirs as $dir) {
+            if (strpos($realPath, $dir . DIRECTORY_SEPARATOR) === 0) {
+                $allowed = true;
+                break;
+            }
+        }
+
+        if (!$allowed) {
+            return false;
+        }
+
+        return unlink($realPath);
     }
     
     /**
