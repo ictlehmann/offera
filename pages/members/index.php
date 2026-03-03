@@ -20,6 +20,10 @@ if (!$hasMembersAccess) {
     exit;
 }
 
+// Determine whether the current viewer may see hidden contact data
+$viewerRole = $user['role'] ?? '';
+$canViewPrivate = in_array($viewerRole, ['alumni', 'vorstand_intern', 'vorstand_extern', 'vorstand_finanzen']);
+
 // Get search filters
 $searchKeyword = $_GET['search'] ?? '';
 $roleFilter = $_GET['role'] ?? '';
@@ -234,7 +238,7 @@ ob_start();
                         <!-- Contact Icons: Round buttons for Mail, LinkedIn and Xing (if set) -->
                         <div class="d-flex justify-content-center gap-3 mb-3">
                             <!-- Mail Icon -->
-                            <?php if (!empty($member['email'])): ?>
+                            <?php if (!empty($member['email']) && ($canViewPrivate || empty($member['privacy_hide_email']))): ?>
                                 <a 
                                     href="mailto:<?php echo htmlspecialchars($member['email']); ?>" 
                                     class="directory-contact-icon"

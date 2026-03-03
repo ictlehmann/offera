@@ -296,7 +296,7 @@ class Alumni extends Database {
                 
                 // Fetch all user roles and entra_roles in a single query
                 $placeholders = implode(',', array_fill(0, count($userIds), '?'));
-                $userSql = "SELECT id, role, entra_roles, entra_photo_path FROM users WHERE id IN ($placeholders)";
+                $userSql = "SELECT id, role, entra_roles, entra_photo_path, privacy_hide_email FROM users WHERE id IN ($placeholders)";
                 try {
                     $userStmt = $userDb->prepare($userSql);
                     $userStmt->execute($userIds);
@@ -325,6 +325,7 @@ class Alumni extends Database {
                     if (in_array($userRole, ['alumni', 'alumni_vorstand', 'alumni_finanz', 'ehrenmitglied'])) {
                         $profile['role'] = $userRole;
                         $profile['entra_photo_path'] = $userData['entra_photo_path'] ?? null;
+                        $profile['privacy_hide_email'] = $userData['privacy_hide_email'] ?? 0;
                         
                         // Resolve display_role: prefer Entra display names, fall back to role label
                         $displayRole = null;
