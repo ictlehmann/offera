@@ -97,16 +97,14 @@ class Alumni extends Database {
             }
         }
         
-        $stmt = $db->prepare("
-            INSERT INTO alumni_profiles 
-            (user_id, first_name, last_name, email, secondary_email, mobile_phone, 
-             linkedin_url, xing_url, industry, company, position, image_path,
-             study_program, semester, angestrebter_abschluss, 
-             degree, graduation_year, skills)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ");
-        
-        return $stmt->execute([
+        // Build INSERT dynamically so the skills column can be dropped in the fallback
+        $insertColumns = [
+            'user_id', 'first_name', 'last_name', 'email', 'secondary_email', 'mobile_phone',
+            'linkedin_url', 'xing_url', 'industry', 'company', 'position', 'image_path',
+            'study_program', 'semester', 'angestrebter_abschluss',
+            'degree', 'graduation_year', 'skills'
+        ];
+        $insertParams = [
             $data['user_id'],
             $data['first_name'],
             $data['last_name'],
@@ -125,7 +123,29 @@ class Alumni extends Database {
             $data['degree'] ?? null,
             $data['graduation_year'] ?? null,
             $data['skills'] ?? null
-        ]);
+        ];
+
+        $buildInsertSql = static function (array $cols): string {
+            $placeholders = implode(', ', array_fill(0, count($cols), '?'));
+            return "INSERT INTO alumni_profiles (" . implode(', ', $cols) . ") VALUES ($placeholders)";
+        };
+
+        try {
+            $stmt = $db->prepare($buildInsertSql($insertColumns));
+            return $stmt->execute($insertParams);
+        } catch (PDOException $e) {
+            // SQLSTATE 42S22 = unknown column; fall back if skills column doesn't exist yet
+            if ($e->getCode() === '42S22' && strpos($e->getMessage(), 'skills') !== false) {
+                $idx = array_search('skills', $insertColumns);
+                if ($idx !== false) {
+                    array_splice($insertColumns, $idx, 1);
+                    array_splice($insertParams, $idx, 1);
+                }
+                $stmt = $db->prepare($buildInsertSql($insertColumns));
+                return $stmt->execute($insertParams);
+            }
+            throw $e;
+        }
     }
     
     /**
@@ -195,8 +215,26 @@ class Alumni extends Database {
         $values[] = $userId;
         $sql = "UPDATE alumni_profiles SET " . implode(', ', $fields) . " WHERE user_id = ?";
         
-        $stmt = $db->prepare($sql);
-        return $stmt->execute($values);
+        try {
+            $stmt = $db->prepare($sql);
+            return $stmt->execute($values);
+        } catch (PDOException $e) {
+            // SQLSTATE 42S22 = unknown column; fall back if skills column doesn't exist yet
+            if ($e->getCode() === '42S22' && strpos($e->getMessage(), 'skills') !== false) {
+                $skillsIdx = array_search('skills = ?', $fields);
+                if ($skillsIdx !== false) {
+                    array_splice($fields, $skillsIdx, 1);
+                    array_splice($values, $skillsIdx, 1);
+                }
+                if (empty($fields)) {
+                    return true;
+                }
+                $sql = "UPDATE alumni_profiles SET " . implode(', ', $fields) . " WHERE user_id = ?";
+                $stmt = $db->prepare($sql);
+                return $stmt->execute($values);
+            }
+            throw $e;
+        }
     }
     
     /**
