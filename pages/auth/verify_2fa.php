@@ -101,6 +101,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['verify_2fa'])) {
                             error_log('DB error resetting 2FA counters for user ' . $userId . ': ' . $e->getMessage());
                         }
 
+                        // Regenerate session ID to prevent session fixation attacks
+                        // Must be called before setting privileged session variables
+                        session_regenerate_id(true);
+
                         // Set session variables from pending data
                         $_SESSION['user_id'] = $_SESSION['pending_2fa_user_id'];
                         $_SESSION['user_email'] = $_SESSION['pending_2fa_email'];
@@ -123,9 +127,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['verify_2fa'])) {
                         // Update last login
                         $stmt = $db->prepare("UPDATE users SET last_login = NOW() WHERE id = ?");
                         $stmt->execute([$userId]);
-
-                        // Regenerate session ID to prevent session fixation attacks
-                        session_regenerate_id(true);
                         // Generate a cryptographically random session token for single-session enforcement
                         $sessionToken = bin2hex(random_bytes(32));
                         // Store session token in database (invalidates all other active sessions for this user)
