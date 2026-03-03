@@ -3,7 +3,7 @@
  * Profile Reminder Cron Script
  * 
  * Sends a single reminder email to users whose last_profile_update is older than
- * exactly 365 days and who have not yet received a reminder for the current cycle
+ * 1 year and who have not yet received a reminder for the current cycle
  * (profile_reminder_sent_at IS NULL).
  * After sending, sets profile_reminder_sent_at = NOW() to prevent duplicate emails.
  * When the user saves their profile, last_profile_update and profile_reminder_sent_at
@@ -26,11 +26,14 @@ try {
     $userDb = Database::getUserDB();
     $contentDb = Database::getContentDB();
     
-    // Query to find users whose profile has not been updated for at least 365 days
+    // Query to find users whose profile has not been updated for at least 1 year
     // and who have not yet received a reminder for the current cycle.
-    // - last_profile_update older than 365 days OR is NULL (never updated)
+    // - last_profile_update older than 1 year (must not be NULL;
+    //   users who never set last_profile_update are excluded intentionally —
+    //   they should update their profile first before the reminder cycle applies)
     // - profile_reminder_sent_at IS NULL (no reminder sent yet for this cycle)
     // - deleted_at IS NULL (exclude soft-deleted users)
+    // LIMIT 50 per run to prevent server timeout with large user bases
     $stmt = $userDb->prepare("
         SELECT 
             u.id,
@@ -40,10 +43,11 @@ try {
             ap.last_name
         FROM users u
         LEFT JOIN " . DB_CONTENT_NAME . ".alumni_profiles ap ON u.id = ap.user_id
-        WHERE (u.last_profile_update IS NULL OR u.last_profile_update < DATE_SUB(NOW(), INTERVAL 365 DAY))
+        WHERE u.last_profile_update < DATE_SUB(NOW(), INTERVAL 1 YEAR)
         AND u.profile_reminder_sent_at IS NULL
         AND u.deleted_at IS NULL
         ORDER BY u.last_profile_update ASC
+        LIMIT 50
     ");
     
     $stmt->execute();
