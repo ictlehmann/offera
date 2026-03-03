@@ -306,6 +306,14 @@ $_tailwindCssVersion = filemtime(__DIR__ . '/../../assets/css/tailwind.css');
                     <span>Blog</span>
                 </a>
 
+                <!-- Job- & Praktikumsbörse (All) -->
+                <a href="<?php echo asset('pages/jobs/index.php'); ?>"
+                   class="flex items-center justify-start px-4 py-2 text-white hover:bg-white/10 transition-colors duration-200 <?php echo isActivePath('/jobs/') ? 'bg-white/20 text-white border-l-4 border-ibc-green' : ''; ?>"
+                   <?php echo isActivePath('/jobs/') ? 'aria-current="page"' : ''; ?>>
+                    <i class="fas fa-briefcase w-5 mr-3" aria-hidden="true"></i>
+                    <span>Job- &amp; Praktikumsbörse</span>
+                </a>
+
                 <!-- Events (All) -->
                 <a href="<?php echo asset('pages/events/index.php'); ?>" 
                    class="flex items-center justify-start px-4 py-2 text-white hover:bg-white/10 transition-colors duration-200 <?php echo isActivePath('/events/') && !isActivePath('/events/helpers.php') ? 'bg-white/20 text-white border-l-4 border-ibc-green' : ''; ?>"
