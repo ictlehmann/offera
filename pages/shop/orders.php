@@ -166,7 +166,7 @@ ob_start();
     </div>
     <?php else: ?>
     <div class="overflow-x-auto">
-        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+        <table class="w-full card-table divide-y divide-gray-200 dark:divide-gray-700">
             <thead class="bg-gray-50 dark:bg-gray-900/50">
                 <tr>
                     <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Käufer</th>
@@ -219,30 +219,30 @@ ob_start();
                     }
                 ?>
                 <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                    <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100 whitespace-nowrap">
+                    <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100" data-label="Käufer">
                         <?php echo htmlspecialchars($buyerName); ?>
                     </td>
-                    <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
+                    <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100" data-label="Produkt">
                         <?php echo htmlspecialchars($row['product_name']); ?>
                     </td>
-                    <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
+                    <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400" data-label="Variante">
                         <?php echo $variantText !== '' ? $variantText : '–'; ?>
                     </td>
-                    <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                    <td class="px-4 py-3 text-sm text-gray-500 dark:text-gray-400" data-label="Abholort">
                         <?php echo !empty($row['pickup_location']) ? htmlspecialchars($row['pickup_location']) : '–'; ?>
                     </td>
-                    <td class="px-4 py-3 whitespace-nowrap">
+                    <td class="px-4 py-3" data-label="Zahlungsstatus">
                         <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold <?php echo $payBadgeClass; ?>">
                             <?php echo htmlspecialchars($payLabel); ?>
                         </span>
                     </td>
-                    <td class="px-4 py-3 whitespace-nowrap">
+                    <td class="px-4 py-3" data-label="Lieferstatus">
                         <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold <?php echo $delBadgeClass; ?>">
                             <?php echo htmlspecialchars($delLabel); ?>
                         </span>
                     </td>
                     <?php if ($canEdit): ?>
-                    <td class="px-4 py-3 whitespace-nowrap">
+                    <td class="px-4 py-3" data-label="Aktion">
                         <form method="POST" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>">
                             <?php echo CSRFHandler::getTokenField(); ?>
                             <input type="hidden" name="order_id" value="<?php echo (int) $row['order_id']; ?>">
