@@ -39,11 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Detect post_max_size / upload_max_filesize exceeded (PHP silently clears $_POST and $_FILES)
     if (empty($_POST) && empty($_FILES) && isset($_SERVER['CONTENT_LENGTH']) && (int)$_SERVER['CONTENT_LENGTH'] > 0) {
-        $maxSize = min(
-            (int) ini_get('post_max_size'),
-            (int) ini_get('upload_max_filesize')
-        ) . 'M';
-        $errorMessage = 'Die Formulardaten konnten nicht verarbeitet werden. Möglicherweise überschreiten die hochgeladenen Bilder die maximale Dateigröße (' . $maxSize . '). Bitte wähle kleinere Bilder aus.';
+        $errorMessage = 'Die Formulardaten konnten nicht verarbeitet werden. Möglicherweise überschreiten die hochgeladenen Bilder die maximale Dateigröße (max. ' . htmlspecialchars(ini_get('upload_max_filesize')) . ' pro Datei, ' . htmlspecialchars(ini_get('post_max_size')) . ' gesamt). Bitte wähle kleinere Bilder aus.';
     }
 
     // Save product (create or update)

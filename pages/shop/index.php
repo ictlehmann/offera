@@ -1278,18 +1278,6 @@ document.addEventListener('DOMContentLoaded', function() {
     var CAT_ALL_ACTIVE   = 'category-pill fpill fpill-all fpill-active';
     var CAT_ALL_INACTIVE = 'category-pill fpill fpill-all';
 
-    function pillClass(p, active, allActive, allInactive, normActive, normInactive, soldActive, soldInactive) {
-        if (p.dataset.filter !== undefined) {
-            if (p.dataset.filter === 'all')      return active ? allActive : allInactive;
-            if (p.dataset.filter === 'soldout')  return active ? (soldActive || normActive) : (soldInactive || normInactive);
-            return active ? normActive : normInactive;
-        }
-        if (p.dataset.gender !== undefined) {
-            return (p.dataset.gender === 'all') ? (active ? allActive : allInactive) : (active ? normActive : normInactive);
-        }
-        return (p.dataset.category === 'all') ? (active ? allActive : allInactive) : (active ? normActive : normInactive);
-    }
-
     document.querySelectorAll('.filter-pill').forEach(function(pill) {
         pill.addEventListener('click', function() {
             activeStock = this.dataset.filter;
