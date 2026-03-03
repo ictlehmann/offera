@@ -80,7 +80,12 @@ if ($routeAction === 'create') {
             exit;
         }
 
-        Shop::decrementStock($orderId);
+        $stockErrors = Shop::decrementStockAtomic($orderId);
+        if (!empty($stockErrors)) {
+            http_response_code(409);
+            echo json_encode(['success' => false, 'message' => implode(' ', $stockErrors)]);
+            exit;
+        }
 
         $total = $itemsTotal + $shippingCost;
 
@@ -254,8 +259,13 @@ try {
         exit;
     }
 
-    // 5a. Immediately decrement stock after order is created
-    Shop::decrementStock($orderId);
+    // 5a. Atomically check and decrement stock after order is created
+    $stockErrors = Shop::decrementStockAtomic($orderId);
+    if (!empty($stockErrors)) {
+        http_response_code(409);
+        echo json_encode(['success' => false, 'message' => implode(' ', $stockErrors)]);
+        exit;
+    }
 
     $total = $itemsTotal + $shippingCost;
 

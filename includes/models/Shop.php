@@ -651,6 +651,63 @@ class Shop {
     }
 
     /**
+     * Atomically check stock and decrement it within a single transaction.
+     * Uses SELECT … FOR UPDATE to lock variant rows so that concurrent
+     * checkouts cannot both pass the stock check and drive the quantity below zero.
+     *
+     * @param int $orderId  Already-created order whose items drive the check.
+     * @return array        Empty on success; error strings when stock is insufficient.
+     */
+    public static function decrementStockAtomic(int $orderId): array {
+        $errors = [];
+        $db = null;
+        try {
+            $db = Database::getShopDB();
+            $db->beginTransaction();
+
+            $stmt = $db->prepare("
+                SELECT oi.variant_id, oi.quantity,
+                       sv.stock_quantity, sv.type, sv.value, sp.name
+                FROM shop_order_items oi
+                JOIN shop_variants sv ON sv.id = oi.variant_id
+                JOIN shop_products sp ON sp.id = sv.product_id
+                WHERE oi.order_id = ? AND oi.variant_id IS NOT NULL
+                FOR UPDATE
+            ");
+            $stmt->execute([$orderId]);
+            $items = $stmt->fetchAll();
+
+            foreach ($items as $item) {
+                if ((int) $item['stock_quantity'] < (int) $item['quantity']) {
+                    $errors[] = 'Artikel ' . $item['name'] . ' ist leider nicht mehr verfügbar';
+                }
+            }
+
+            if (!empty($errors)) {
+                $db->rollBack();
+                return $errors;
+            }
+
+            $upd = $db->prepare("
+                UPDATE shop_variants
+                SET stock_quantity = GREATEST(0, stock_quantity - ?)
+                WHERE id = ?
+            ");
+            /* GREATEST(0, …) is a safety net: the check above already
+               guarantees stock_quantity >= quantity inside this lock,
+               but it mirrors the guard in decrementStock() for defence in depth. */
+            foreach ($items as $item) {
+                $upd->execute([(int) $item['quantity'], (int) $item['variant_id']]);
+            }
+
+            $db->commit();
+            return [];
+        } catch (Exception $e) {
+            return ['Lagerbestand konnte nicht verarbeitet werden.'];
+        }
+    }
+
+    /**
      * Create an order from the current session cart.
      *
      * @param int    $userId
