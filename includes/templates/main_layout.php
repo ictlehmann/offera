@@ -215,7 +215,7 @@ if (!isset($currentUser)) {
         }
 
         /* Ensure long text doesn't overflow */
-        .text-sm, .text-xs { overflow-wrap: break-word; word-break: break-word; }
+        .text-sm, .text-xs, .text-base, p, span, li { overflow-wrap: break-word; word-break: break-word; }
 
         /* Skip link accessibility */
         .skip-link {
