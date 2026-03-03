@@ -74,7 +74,7 @@ if ($isAlumniProfile) {
     $profileCompletenessPercent = (int)round(($filledCount / count($completenessFields)) * 100);
 }
 
-$title = htmlspecialchars($profile['first_name'] . ' ' . $profile['last_name']) . ' - IBC Intranet';
+$title = htmlspecialchars($profile['first_name'] . ' ' . $profile['last_name'], ENT_QUOTES, 'UTF-8') . ' - IBC Intranet';
 ob_start();
 ?>
 
@@ -100,16 +100,16 @@ ob_start();
                 <div class="w-32 h-32 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-4xl font-bold overflow-hidden shadow-lg">
                     <?php if ($hasActualImage): ?>
                         <img 
-                            src="<?php echo htmlspecialchars($imagePath); ?>" 
-                            alt="<?php echo htmlspecialchars($profile['first_name'] . ' ' . $profile['last_name']); ?>"
+                            src="<?php echo htmlspecialchars($imagePath, ENT_QUOTES, 'UTF-8'); ?>" 
+                            alt="<?php echo htmlspecialchars($profile['first_name'] . ' ' . $profile['last_name'], ENT_QUOTES, 'UTF-8'); ?>"
                             class="w-full h-full object-cover"
                             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
                         >
                         <div style="display:none;" class="w-full h-full flex items-center justify-center text-4xl">
-                            <?php echo htmlspecialchars($initials); ?>
+                            <?php echo htmlspecialchars($initials, ENT_QUOTES, 'UTF-8'); ?>
                         </div>
                     <?php else: ?>
-                        <?php echo htmlspecialchars($initials); ?>
+                        <?php echo htmlspecialchars($initials, ENT_QUOTES, 'UTF-8'); ?>
                     <?php endif; ?>
                 </div>
             </div>
@@ -117,7 +117,7 @@ ob_start();
             <!-- Profile Info -->
             <div class="flex-1 min-w-0">
                 <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-2">
-                    <?php echo htmlspecialchars($profile['first_name'] . ' ' . $profile['last_name']); ?>
+                    <?php echo htmlspecialchars($profile['first_name'] . ' ' . $profile['last_name'], ENT_QUOTES, 'UTF-8'); ?>
                 </h1>
 
                 <!-- Role Badge -->
@@ -138,7 +138,7 @@ ob_start();
                 ?>
                 <div class="mb-3">
                     <span class="inline-block px-4 py-1.5 text-sm font-semibold rounded-full border <?php echo $badgeClass; ?>">
-                        <?php echo htmlspecialchars($resolvedDisplayRole); ?>
+                        <?php echo htmlspecialchars($resolvedDisplayRole, ENT_QUOTES, 'UTF-8'); ?>
                     </span>
                 </div>
 
@@ -146,20 +146,20 @@ ob_start();
                 <?php if (!empty($profile['position']) || !empty($profileUser['job_title'])): ?>
                 <p class="text-base text-gray-700 dark:text-gray-300 mb-1 flex items-center gap-2">
                     <i class="fas fa-briefcase text-gray-400 w-4"></i>
-                    <span><?php echo htmlspecialchars($profile['position'] ?? $profileUser['job_title'] ?? ''); ?></span>
+                    <span><?php echo htmlspecialchars($profile['position'] ?? $profileUser['job_title'] ?? '', ENT_QUOTES, 'UTF-8'); ?></span>
                 </p>
                 <?php endif; ?>
                 <?php if (!empty($profile['company']) || !empty($profileUser['company'])): ?>
                 <p class="text-sm text-gray-500 mb-2 flex items-center gap-2">
                     <i class="fas fa-building text-gray-400 w-4"></i>
-                    <span><?php echo htmlspecialchars($profile['company'] ?? $profileUser['company'] ?? ''); ?></span>
+                    <span><?php echo htmlspecialchars($profile['company'] ?? $profileUser['company'] ?? '', ENT_QUOTES, 'UTF-8'); ?></span>
                 </p>
                 <?php endif; ?>
 
                 <?php if (!empty($profile['study_program'])): ?>
                 <p class="text-sm text-gray-500 flex items-center gap-2">
                     <i class="fas fa-graduation-cap text-gray-400 w-4"></i>
-                    <span><?php echo htmlspecialchars($profile['study_program']); ?><?php if (!empty($profile['semester'])): ?> &middot; <?php echo htmlspecialchars($profile['semester']); ?>. Semester<?php endif; ?></span>
+                    <span><?php echo htmlspecialchars($profile['study_program'], ENT_QUOTES, 'UTF-8'); ?><?php if (!empty($profile['semester'])): ?> &middot; <?php echo htmlspecialchars($profile['semester'], ENT_QUOTES, 'UTF-8'); ?>. Semester<?php endif; ?></span>
                 </p>
                 <?php endif; ?>
             </div>
@@ -188,7 +188,7 @@ ob_start();
             </span>
             Über mich
         </h2>
-        <p class="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line break-words profile-about"><?php echo htmlspecialchars($profileUser['about_me']); ?></p>
+        <p class="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line break-words profile-about"><?php echo htmlspecialchars($profileUser['about_me'], ENT_QUOTES, 'UTF-8'); ?></p>
     </div>
     <?php endif; ?>
 
@@ -213,8 +213,8 @@ ob_start();
                         <?php if (!empty($profileUser['privacy_hide_email']) && !$canViewPrivate): ?>
                         <p class="text-gray-400 italic text-sm">Privat</p>
                         <?php else: ?>
-                        <a href="mailto:<?php echo htmlspecialchars($profile['email']); ?>" class="text-blue-600 hover:text-blue-800 font-medium text-sm truncate block">
-                            <?php echo htmlspecialchars($profile['email']); ?>
+                        <a href="mailto:<?php echo htmlspecialchars($profile['email'], ENT_QUOTES, 'UTF-8'); ?>" class="text-blue-600 hover:text-blue-800 font-medium text-sm truncate block">
+                            <?php echo htmlspecialchars($profile['email'], ENT_QUOTES, 'UTF-8'); ?>
                         </a>
                         <?php endif; ?>
                     </div>
@@ -232,8 +232,8 @@ ob_start();
                         <?php if (!empty($profileUser['privacy_hide_email']) && !$canViewPrivate): ?>
                         <p class="text-gray-400 italic text-sm">Privat</p>
                         <?php else: ?>
-                        <a href="mailto:<?php echo htmlspecialchars($profile['secondary_email']); ?>" class="text-blue-600 hover:text-blue-800 font-medium text-sm truncate block">
-                            <?php echo htmlspecialchars($profile['secondary_email']); ?>
+                        <a href="mailto:<?php echo htmlspecialchars($profile['secondary_email'], ENT_QUOTES, 'UTF-8'); ?>" class="text-blue-600 hover:text-blue-800 font-medium text-sm truncate block">
+                            <?php echo htmlspecialchars($profile['secondary_email'], ENT_QUOTES, 'UTF-8'); ?>
                         </a>
                         <?php endif; ?>
                     </div>
@@ -251,8 +251,8 @@ ob_start();
                         <?php if (!empty($profileUser['privacy_hide_phone']) && !$canViewPrivate): ?>
                         <p class="text-gray-400 italic text-sm">Privat</p>
                         <?php else: ?>
-                        <a href="tel:<?php echo htmlspecialchars($profile['mobile_phone']); ?>" class="text-blue-600 hover:text-blue-800 font-medium text-sm">
-                            <?php echo htmlspecialchars($profile['mobile_phone']); ?>
+                        <a href="tel:<?php echo htmlspecialchars($profile['mobile_phone'], ENT_QUOTES, 'UTF-8'); ?>" class="text-blue-600 hover:text-blue-800 font-medium text-sm">
+                            <?php echo htmlspecialchars($profile['mobile_phone'], ENT_QUOTES, 'UTF-8'); ?>
                         </a>
                         <?php endif; ?>
                     </div>
@@ -263,7 +263,7 @@ ob_start();
                 <?php if (!empty($profileUser['gender'])): ?>
                 <?php
                 $genderLabels = ['m' => 'Männlich', 'f' => 'Weiblich', 'd' => 'Divers'];
-                $genderLabel = $genderLabels[$profileUser['gender']] ?? htmlspecialchars($profileUser['gender']);
+                $genderLabel = $genderLabels[$profileUser['gender']] ?? htmlspecialchars($profileUser['gender'], ENT_QUOTES, 'UTF-8');
                 ?>
                 <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50">
                     <div class="w-9 h-9 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 flex-shrink-0">
@@ -305,7 +305,7 @@ ob_start();
                     </div>
                     <div>
                         <p class="text-xs text-gray-400 font-medium">LinkedIn</p>
-                        <a href="<?php echo htmlspecialchars($linkedinUrl); ?>" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 font-medium text-sm">
+                        <a href="<?php echo htmlspecialchars($linkedinUrl, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 font-medium text-sm">
                             Profil ansehen <i class="fas fa-external-link-alt text-xs ml-1"></i>
                         </a>
                     </div>
@@ -329,7 +329,7 @@ ob_start();
                     </div>
                     <div>
                         <p class="text-xs text-gray-400 font-medium">Xing</p>
-                        <a href="<?php echo htmlspecialchars($xingUrl); ?>" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 font-medium text-sm">
+                        <a href="<?php echo htmlspecialchars($xingUrl, ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 font-medium text-sm">
                             Profil ansehen <i class="fas fa-external-link-alt text-xs ml-1"></i>
                         </a>
                     </div>
@@ -356,35 +356,35 @@ ob_start();
                 <?php if (!empty($profile['study_program'])): ?>
                 <div class="p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50">
                     <p class="text-xs text-gray-400 font-medium mb-0.5">Bachelor-Studiengang</p>
-                    <p class="font-semibold text-gray-800 dark:text-gray-200 text-sm"><?php echo htmlspecialchars($profile['study_program']); ?></p>
+                    <p class="font-semibold text-gray-800 dark:text-gray-200 text-sm"><?php echo htmlspecialchars($profile['study_program'], ENT_QUOTES, 'UTF-8'); ?></p>
                 </div>
                 <?php endif; ?>
 
                 <?php if (!empty($profile['semester'])): ?>
                 <div class="p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50">
                     <p class="text-xs text-gray-400 font-medium mb-0.5">Bachelor-Semester</p>
-                    <p class="font-semibold text-gray-800 dark:text-gray-200 text-sm"><?php echo htmlspecialchars($profile['semester']); ?></p>
+                    <p class="font-semibold text-gray-800 dark:text-gray-200 text-sm"><?php echo htmlspecialchars($profile['semester'], ENT_QUOTES, 'UTF-8'); ?></p>
                 </div>
                 <?php endif; ?>
 
                 <?php if (!empty($profile['degree'])): ?>
                 <div class="p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50">
                     <p class="text-xs text-gray-400 font-medium mb-0.5">Abschluss</p>
-                    <p class="font-semibold text-gray-800 dark:text-gray-200 text-sm"><?php echo htmlspecialchars($profile['degree']); ?></p>
+                    <p class="font-semibold text-gray-800 dark:text-gray-200 text-sm"><?php echo htmlspecialchars($profile['degree'], ENT_QUOTES, 'UTF-8'); ?></p>
                 </div>
                 <?php endif; ?>
 
                 <?php if (!empty($profile['angestrebter_abschluss'])): ?>
                 <div class="p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50">
                     <p class="text-xs text-gray-400 font-medium mb-0.5">Master-Studiengang</p>
-                    <p class="font-semibold text-gray-800 dark:text-gray-200 text-sm"><?php echo htmlspecialchars($profile['angestrebter_abschluss']); ?></p>
+                    <p class="font-semibold text-gray-800 dark:text-gray-200 text-sm"><?php echo htmlspecialchars($profile['angestrebter_abschluss'], ENT_QUOTES, 'UTF-8'); ?></p>
                 </div>
                 <?php endif; ?>
 
                 <?php if (!empty($profile['graduation_year'])): ?>
                 <div class="p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50">
                     <p class="text-xs text-gray-400 font-medium mb-0.5">Master-Semester</p>
-                    <p class="font-semibold text-gray-800 dark:text-gray-200 text-sm"><?php echo htmlspecialchars($profile['graduation_year']); ?></p>
+                    <p class="font-semibold text-gray-800 dark:text-gray-200 text-sm"><?php echo htmlspecialchars($profile['graduation_year'], ENT_QUOTES, 'UTF-8'); ?></p>
                 </div>
                 <?php endif; ?>
             </div>
@@ -408,21 +408,21 @@ ob_start();
             <?php if (!empty($profile['company']) || !empty($profileUser['company'])): ?>
             <div class="p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50">
                 <p class="text-xs text-gray-400 font-medium mb-0.5">Arbeitgeber</p>
-                <p class="font-semibold text-gray-800 dark:text-gray-200 text-sm"><?php echo htmlspecialchars($profile['company'] ?? $profileUser['company'] ?? ''); ?></p>
+                <p class="font-semibold text-gray-800 dark:text-gray-200 text-sm"><?php echo htmlspecialchars($profile['company'] ?? $profileUser['company'] ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
             </div>
             <?php endif; ?>
 
             <?php if (!empty($profile['position']) || !empty($profileUser['job_title'])): ?>
             <div class="p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50">
                 <p class="text-xs text-gray-400 font-medium mb-0.5">Position</p>
-                <p class="font-semibold text-gray-800 dark:text-gray-200 text-sm"><?php echo htmlspecialchars($profile['position'] ?? $profileUser['job_title'] ?? ''); ?></p>
+                <p class="font-semibold text-gray-800 dark:text-gray-200 text-sm"><?php echo htmlspecialchars($profile['position'] ?? $profileUser['job_title'] ?? '', ENT_QUOTES, 'UTF-8'); ?></p>
             </div>
             <?php endif; ?>
 
             <?php if (!empty($profile['industry'])): ?>
             <div class="p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50">
                 <p class="text-xs text-gray-400 font-medium mb-0.5">Branche</p>
-                <p class="font-semibold text-gray-800 dark:text-gray-200 text-sm"><?php echo htmlspecialchars($profile['industry']); ?></p>
+                <p class="font-semibold text-gray-800 dark:text-gray-200 text-sm"><?php echo htmlspecialchars($profile['industry'], ENT_QUOTES, 'UTF-8'); ?></p>
             </div>
             <?php endif; ?>
         </div>
@@ -445,7 +445,7 @@ ob_start();
             foreach ($skillsList as $skill):
             ?>
             <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-teal-100 text-teal-800 dark:bg-teal-900/40 dark:text-teal-300 border border-teal-200 dark:border-teal-700">
-                <?php echo htmlspecialchars($skill); ?>
+                <?php echo htmlspecialchars($skill, ENT_QUOTES, 'UTF-8'); ?>
             </span>
             <?php endforeach; ?>
         </div>

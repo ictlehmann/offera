@@ -99,14 +99,14 @@ ob_start();
     <?php if ($successMessage): ?>
     <div class="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg flex items-center gap-2">
         <i class="fas fa-check-circle"></i>
-        <?php echo htmlspecialchars($successMessage); ?>
+        <?php echo htmlspecialchars($successMessage, ENT_QUOTES, 'UTF-8'); ?>
     </div>
     <?php endif; ?>
 
     <?php if ($errorMessage): ?>
     <div class="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg flex items-center gap-2">
         <i class="fas fa-exclamation-circle"></i>
-        <?php echo htmlspecialchars($errorMessage); ?>
+        <?php echo htmlspecialchars($errorMessage, ENT_QUOTES, 'UTF-8'); ?>
     </div>
     <?php endif; ?>
 
@@ -124,7 +124,7 @@ ob_start();
             <?php foreach (JobBoard::SEARCH_TYPES as $type): ?>
             <a href="index.php?type=<?php echo urlencode($type); ?>"
                class="px-4 py-2 rounded-lg font-medium transition-all <?php echo $filterType === $type ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'; ?>">
-                <?php echo htmlspecialchars($type); ?>
+                <?php echo htmlspecialchars($type, ENT_QUOTES, 'UTF-8'); ?>
             </a>
             <?php endforeach; ?>
         </div>
@@ -158,18 +158,18 @@ ob_start();
                 <!-- Type Badge -->
                 <div class="mb-3">
                     <span class="px-3 py-1 text-xs font-semibold rounded-full <?php echo $typeColors[$listing['search_type']] ?? 'bg-gray-100 text-gray-800'; ?>">
-                        <?php echo htmlspecialchars($listing['search_type']); ?>
+                        <?php echo htmlspecialchars($listing['search_type'], ENT_QUOTES, 'UTF-8'); ?>
                     </span>
                 </div>
 
                 <!-- Title -->
                 <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2 break-words leading-snug">
-                    <?php echo htmlspecialchars($listing['title']); ?>
+                    <?php echo htmlspecialchars($listing['title'], ENT_QUOTES, 'UTF-8'); ?>
                 </h3>
 
                 <!-- Author & Date -->
                 <div class="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400 mb-3">
-                    <span><i class="fas fa-user-circle mr-1 text-blue-500"></i><?php echo htmlspecialchars($authorNames[$listing['user_id']] ?? 'Unbekannt'); ?></span>
+                    <span><i class="fas fa-user-circle mr-1 text-blue-500"></i><?php echo htmlspecialchars($authorNames[$listing['user_id']] ?? 'Unbekannt', ENT_QUOTES, 'UTF-8'); ?></span>
                     <span><i class="fas fa-calendar-alt mr-1"></i><?php echo (new DateTime($listing['created_at']))->format('d.m.Y'); ?></span>
                 </div>
 
@@ -177,14 +177,14 @@ ob_start();
                 <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-1 break-words">
                     <?php
                         $desc = $listing['description'];
-                        echo htmlspecialchars(mb_strlen($desc) > 200 ? mb_substr($desc, 0, 200) . '…' : $desc);
+                        echo htmlspecialchars(mb_strlen($desc) > 200 ? mb_substr($desc, 0, 200) . '…' : $desc, ENT_QUOTES, 'UTF-8');
                     ?>
                 </p>
 
                 <!-- Footer -->
                 <div class="pt-4 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between gap-2">
                     <?php if (!empty($listing['pdf_path'])): ?>
-                    <a href="<?php echo htmlspecialchars(asset($listing['pdf_path'])); ?>"
+                    <a href="<?php echo htmlspecialchars(asset($listing['pdf_path']), ENT_QUOTES, 'UTF-8'); ?>"
                        download
                        class="inline-flex items-center px-4 py-2 bg-red-50 hover:bg-red-100 text-red-700 dark:bg-red-900/30 dark:hover:bg-red-900/50 dark:text-red-300 rounded-lg text-sm font-medium transition-all">
                         <i class="fas fa-file-download mr-2"></i>Lebenslauf
