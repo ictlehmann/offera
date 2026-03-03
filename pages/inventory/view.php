@@ -503,7 +503,7 @@ if (!empty($logbookNote)):
     <p class="text-gray-500 dark:text-gray-400 text-center py-8">Keine Verlaufsdaten vorhanden</p>
     <?php else: ?>
     <div class="overflow-x-auto rounded-xl border border-gray-200 dark:border-slate-700">
-        <table class="w-full">
+        <table class="w-full card-table">
             <thead class="bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600">
                 <tr>
                     <th class="px-6 py-4 text-left text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Datum</th>
@@ -516,10 +516,10 @@ if (!empty($logbookNote)):
             <tbody class="divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-slate-800">
                 <?php foreach ($history as $entry): ?>
                 <tr class="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                    <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300 font-medium">
+                    <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300 font-medium" data-label="Datum">
                         <?php echo date('d.m.Y H:i', strtotime($entry['created_at'])); ?>
                     </td>
-                    <td class="px-6 py-4">
+                    <td class="px-6 py-4" data-label="Typ">
                         <?php
                         $typeClasses = [
                             'adjustment' => 'bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300',
@@ -546,7 +546,7 @@ if (!empty($logbookNote)):
                             <?php echo htmlspecialchars($label, ENT_QUOTES, 'UTF-8'); ?>
                         </span>
                     </td>
-                    <td class="px-6 py-4 text-sm">
+                    <td class="px-6 py-4 text-sm" data-label="Änderung">
                         <?php if ($entry['change_type'] === 'adjustment'): ?>
                         <span class="font-bold text-lg <?php echo $entry['change_amount'] >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'; ?>">
                             <?php echo ($entry['change_amount'] >= 0 ? '+' : '') . $entry['change_amount']; ?>
@@ -558,10 +558,10 @@ if (!empty($logbookNote)):
                         <span class="text-gray-500 dark:text-gray-400">-</span>
                         <?php endif; ?>
                     </td>
-                    <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300 font-medium">
+                    <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300 font-medium" data-label="Grund">
                         <?php echo htmlspecialchars($entry['reason'] ?? '-'); ?>
                     </td>
-                    <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
+                    <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300" data-label="Kommentar">
                         <?php 
                         // Use helper function to format history comment/details
                         $details = $entry['details'] ?? $entry['comment'] ?? '';
