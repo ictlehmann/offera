@@ -149,10 +149,10 @@ ob_start();
                     <span><?php echo htmlspecialchars($profile['position'] ?? $profileUser['job_title'] ?? ''); ?></span>
                 </p>
                 <?php endif; ?>
-                <?php if (!empty($profile['company'])): ?>
+                <?php if (!empty($profile['company']) || !empty($profileUser['company'])): ?>
                 <p class="text-sm text-gray-500 mb-2 flex items-center gap-2">
                     <i class="fas fa-building text-gray-400 w-4"></i>
-                    <span><?php echo htmlspecialchars($profile['company']); ?></span>
+                    <span><?php echo htmlspecialchars($profile['company'] ?? $profileUser['company'] ?? ''); ?></span>
                 </p>
                 <?php endif; ?>
 
@@ -393,7 +393,7 @@ ob_start();
     </div>
 
     <!-- Berufliches (shown if any professional info is set) -->
-    <?php if (!empty($profile['company']) || !empty($profile['position']) || !empty($profile['industry']) || !empty($profileUser['job_title'])): ?>
+    <?php if (!empty($profile['company']) || !empty($profileUser['company']) || !empty($profile['position']) || !empty($profile['industry']) || !empty($profileUser['job_title'])): ?>
     <div class="card p-6 mb-6">
         <h2 class="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
             <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-orange-100 text-orange-600">
@@ -405,10 +405,10 @@ ob_start();
         <p class="text-sm text-gray-400 italic">Karrieredaten sind privat.</p>
         <?php else: ?>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <?php if (!empty($profile['company'])): ?>
+            <?php if (!empty($profile['company']) || !empty($profileUser['company'])): ?>
             <div class="p-3 rounded-xl bg-gray-50 dark:bg-gray-700/50">
                 <p class="text-xs text-gray-400 font-medium mb-0.5">Arbeitgeber</p>
-                <p class="font-semibold text-gray-800 dark:text-gray-200 text-sm"><?php echo htmlspecialchars($profile['company']); ?></p>
+                <p class="font-semibold text-gray-800 dark:text-gray-200 text-sm"><?php echo htmlspecialchars($profile['company'] ?? $profileUser['company'] ?? ''); ?></p>
             </div>
             <?php endif; ?>
 
