@@ -8,6 +8,7 @@
 require_once __DIR__ . '/../../src/Auth.php';
 require_once __DIR__ . '/../../includes/helpers.php';
 require_once __DIR__ . '/../../includes/models/Shop.php';
+require_once __DIR__ . '/../../includes/handlers/CSRFHandler.php';
 
 header('Content-Type: application/json');
 
@@ -41,6 +42,9 @@ if (!is_array($input)) {
     echo json_encode(['success' => false, 'error' => 'Ungültiges JSON']);
     exit;
 }
+
+// CSRF protection
+CSRFHandler::verifyToken($input['csrf_token'] ?? '');
 
 $action = $input['action'] ?? '';
 
