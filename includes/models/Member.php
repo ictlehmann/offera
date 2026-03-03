@@ -76,9 +76,25 @@ class Member {
             ORDER BY ap.last_name ASC, ap.first_name ASC
         ";
         
-        $stmt = $contentDb->prepare($sql);
-        $stmt->execute($params);
-        $profiles = $stmt->fetchAll();
+        try {
+            $stmt = $contentDb->prepare($sql);
+            $stmt->execute($params);
+            $profiles = $stmt->fetchAll();
+        } catch (PDOException $e) {
+            // SQLSTATE 42S22 = unknown column; fall back if skills column doesn't exist yet
+            if ($e->getCode() === '42S22' && strpos($e->getMessage(), 'skills') !== false) {
+                $sql = str_replace('ap.skills,', 'NULL AS skills,', $sql);
+                if ($search !== null && $search !== '') {
+                    $sql = preg_replace('/\s*OR ap\.skills LIKE \?/', '', $sql);
+                    array_pop($params);
+                }
+                $stmt = $contentDb->prepare($sql);
+                $stmt->execute($params);
+                $profiles = $stmt->fetchAll();
+            } else {
+                throw $e;
+            }
+        }
         
         if (empty($profiles)) {
             return [];
@@ -232,7 +248,7 @@ class Member {
      */
     public static function getProfileByUserId(int $userId) {
         $db = Database::getContentDB();
-        $stmt = $db->prepare("
+        $sql = "
             SELECT id, user_id, first_name, last_name, email, mobile_phone, 
                    linkedin_url, xing_url, industry, company, position, 
                    study_program, semester, angestrebter_abschluss, 
@@ -240,7 +256,18 @@ class Member {
                    image_path, last_verified_at, last_reminder_sent_at, created_at, updated_at
             FROM alumni_profiles 
             WHERE user_id = ?
-        ");
+        ";
+        try {
+            $stmt = $db->prepare($sql);
+        } catch (PDOException $pdoEx) {
+            // SQLSTATE 42S22 = unknown column; fall back if skills column doesn't exist yet
+            if ($pdoEx->getCode() === '42S22' && strpos($pdoEx->getMessage(), 'skills') !== false) {
+                $sql = str_replace('skills,', 'NULL AS skills,', $sql);
+                $stmt = $db->prepare($sql);
+            } else {
+                throw $pdoEx;
+            }
+        }
         $stmt->execute([$userId]);
         return $stmt->fetch();
     }
@@ -308,8 +335,26 @@ class Member {
         // Uses alumni_profiles table as this is the central profile table for all users
         $sql = "UPDATE alumni_profiles SET " . implode(', ', $fields) . " WHERE user_id = ?";
         
-        $stmt = $db->prepare($sql);
-        return $stmt->execute($values);
+        try {
+            $stmt = $db->prepare($sql);
+            return $stmt->execute($values);
+        } catch (PDOException $e) {
+            // SQLSTATE 42S22 = unknown column; fall back if skills column doesn't exist yet
+            if ($e->getCode() === '42S22' && strpos($e->getMessage(), 'skills') !== false) {
+                $skillsIdx = array_search('skills = ?', $fields);
+                if ($skillsIdx !== false) {
+                    array_splice($fields, $skillsIdx, 1);
+                    array_splice($values, $skillsIdx, 1);
+                }
+                if (empty($fields)) {
+                    return true;
+                }
+                $sql = "UPDATE alumni_profiles SET " . implode(', ', $fields) . " WHERE user_id = ?";
+                $stmt = $db->prepare($sql);
+                return $stmt->execute($values);
+            }
+            throw $e;
+        }
     }
     
     /**
