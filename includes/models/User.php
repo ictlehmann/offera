@@ -163,25 +163,21 @@ class User {
                 $stmt = $db->query($sql);
             }
         } catch (PDOException $e) {
-            // SQLSTATE 42S22 = unknown column; fall back for columns that may not exist yet
-            if ($e->getCode() === '42S22') {
-                $msg = $e->getMessage();
-                $fixed = false;
-                foreach (['entra_photo_path', 'is_locked_permanently', 'locked_until'] as $col) {
-                    if (strpos($msg, $col) !== false) {
-                        $sql = preg_replace('/\b' . preg_quote($col, '/') . '\b/', 'NULL AS ' . $col, $sql);
-                        $fixed = true;
-                    }
+            // SQLSTATE 42S22 = unknown column; fall back for columns that may not exist yet.
+            // Replace ALL potentially-missing columns at once so a single retry suffices
+            // even when multiple new columns are absent (e.g. schema not yet migrated).
+            $fallbackCols = ['entra_photo_path', 'is_locked_permanently', 'locked_until'];
+            $msg = $e->getMessage();
+            $isKnownMissingCol = $e->getCode() === '42S22' && array_filter($fallbackCols, fn($c) => strpos($msg, $c) !== false);
+            if ($isKnownMissingCol) {
+                foreach ($fallbackCols as $col) {
+                    $sql = preg_replace('/\b' . preg_quote($col, '/') . '\b/', 'NULL AS ' . $col, $sql);
                 }
-                if ($fixed) {
-                    if ($role) {
-                        $stmt = $db->prepare($sql);
-                        $stmt->execute([$role]);
-                    } else {
-                        $stmt = $db->query($sql);
-                    }
+                if ($role) {
+                    $stmt = $db->prepare($sql);
+                    $stmt->execute([$role]);
                 } else {
-                    throw $e;
+                    $stmt = $db->query($sql);
                 }
             } else {
                 throw $e;
