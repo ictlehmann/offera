@@ -546,6 +546,25 @@ ob_start();
         border: 1.5px dashed var(--border-color);
         text-align: center;
     }
+
+    /* ── Hero Typography & Decorative ───────────────────── */
+    .hero-date-text {
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        opacity: 0.78;
+        margin-bottom: 0.5rem;
+    }
+    .hero-subtitle-text {
+        font-size: 1.0625rem;
+        opacity: 0.85;
+        margin-bottom: 1.25rem;
+    }
+    .hero-badge-icon {
+        font-size: 3rem;
+        opacity: 0.92;
+    }
 </style>
 
 <?php if (!empty($user['prompt_profile_review']) && $user['prompt_profile_review'] == 1): ?>
@@ -774,7 +793,7 @@ function dismissProfileReviewPrompt() {
         <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
             <div>
                 <!-- Date -->
-                <p class="text-sm font-semibold uppercase tracking-widest mb-2 hero-date" style="opacity: 0.78">
+                <p class="hero-date-text hero-date">
                     <i class="fas fa-calendar-day mr-2"></i><?php
                         $germanMonths = [1=>'Januar',2=>'Februar',3=>'März',4=>'April',5=>'Mai',6=>'Juni',7=>'Juli',8=>'August',9=>'September',10=>'Oktober',11=>'November',12=>'Dezember'];
                         $monthNum = (int)date('n');
@@ -785,7 +804,7 @@ function dismissProfileReviewPrompt() {
                 <h1 class="font-extrabold tracking-tight hero-title mb-2" style="font-size: clamp(1.75rem, 4vw, 2.75rem); line-height: 1.15">
                     <?php echo htmlspecialchars($greeting); ?>, <?php echo htmlspecialchars($displayName); ?>! 👋
                 </h1>
-                <p class="hero-subtitle mb-5" style="font-size: 1.0625rem; opacity: 0.85">
+                <p class="hero-subtitle hero-subtitle-text">
                     Willkommen zurück im IBC&nbsp;Intranet – hier ist deine Übersicht für heute.
                 </p>
                 <!-- Quick action pill buttons -->
@@ -809,7 +828,7 @@ function dismissProfileReviewPrompt() {
             <!-- Decorative icon badge (desktop only) -->
             <div class="hidden lg:flex items-center justify-center flex-shrink-0"
                  style="width: 7rem; height: 7rem; background: rgba(255,255,255,0.13); border-radius: 1.5rem; border: 1px solid rgba(255,255,255,0.22); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);">
-                <i class="fas fa-th-large" style="font-size: 3rem; opacity: 0.92;"></i>
+                <i class="fas fa-th-large hero-badge-icon"></i>
             </div>
         </div>
     </div>
