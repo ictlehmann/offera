@@ -330,7 +330,7 @@ ob_start();
                 <?php else: ?>
                 <div class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl mb-5 w-fit">
                     <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 flex-shrink-0"></span>
-                    <span class="text-sm font-semibold text-emerald-700 dark:text-emerald-300">Auf Lager</span>
+                    <span class="text-sm font-semibold text-emerald-700 dark:text-emerald-300"><?php echo $totalStock; ?> Stück auf Lager</span>
                 </div>
                 <?php endif; ?>
                 <?php endif; ?>

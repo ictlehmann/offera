@@ -37,6 +37,11 @@ if ($editProductId) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $postAction = $_POST['post_action'] ?? '';
 
+    // Detect post_max_size / upload_max_filesize exceeded (PHP silently clears $_POST and $_FILES)
+    if (empty($_POST) && empty($_FILES) && isset($_SERVER['CONTENT_LENGTH']) && (int)$_SERVER['CONTENT_LENGTH'] > 0) {
+        $errorMessage = 'Die Formulardaten konnten nicht verarbeitet werden. Möglicherweise überschreiten die hochgeladenen Bilder die maximale Dateigröße (max. ' . htmlspecialchars(ini_get('upload_max_filesize')) . ' pro Datei, ' . htmlspecialchars(ini_get('post_max_size')) . ' gesamt). Bitte wähle kleinere Bilder aus.';
+    }
+
     // Save product (create or update)
     if ($postAction === 'save_product') {
         $pid  = isset($_POST['product_id']) ? (int) $_POST['product_id'] : 0;
@@ -1304,6 +1309,7 @@ function createVariantBlock(idx, typeName, values) {
             <input type="text" name="variants[${idx}][name]"
                    value="${escapeHtml(typeName)}"
                    placeholder="z.B. Schwarz, Weiß, Grau ..."
+                   required
                    class="flex-1 px-2 py-1 border-0 bg-transparent text-gray-800 dark:text-gray-100 text-sm font-semibold focus:ring-2 focus:ring-purple-500 rounded transition placeholder-gray-400 dark:placeholder-gray-500">
             <button type="button" onclick="this.closest('.variant-block').remove()"
                     class="text-red-400 hover:text-red-600 p-1 transition-colors rounded hover:bg-red-50 dark:hover:bg-red-900/20 shrink-0" title="Farbe entfernen">
@@ -1374,7 +1380,13 @@ document.getElementById('add-variant').addEventListener('click', function () {
 
 function addValueRow(btn, vIdx) {
     const valueContainer = btn.previousElementSibling;
-    const nextIdx        = valueContainer.querySelectorAll('.value-row').length;
+    // Use max existing index + 1 to avoid conflicts after deletions
+    let maxIdx = -1;
+    valueContainer.querySelectorAll('.value-row input[name]').forEach(inp => {
+        const m = inp.name.match(/\[values\]\[(\d+)\]/);
+        if (m) { const n = parseInt(m[1]); if (n > maxIdx) maxIdx = n; }
+    });
+    const nextIdx = maxIdx + 1;
     valueContainer.insertAdjacentHTML('beforeend', valueRowHtml(vIdx, nextIdx, '', 0));
 }
 
@@ -1455,6 +1467,7 @@ openProductModal(<?php
         'bulk_min_goal' => $editProduct['bulk_min_goal'],
         'category'      => $editProduct['category'],
         'pickup_location' => $editProduct['pickup_location'],
+        'gender'        => $editProduct['gender'],
         'sku'           => $editProduct['sku'],
         'image_path'    => !empty($editProduct['image_path']) ? asset($editProduct['image_path']) : '',
         'images'        => $imagesForJs,
