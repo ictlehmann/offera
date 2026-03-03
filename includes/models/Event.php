@@ -533,6 +533,12 @@ class Event {
      */
     public static function delete($id, $userId) {
         $db = Database::getContentDB();
+
+        // Fetch the event's image path before deletion so we can clean up the file
+        $stmt = $db->prepare("SELECT image_path FROM events WHERE id = ?");
+        $stmt->execute([$id]);
+        $row = $stmt->fetch();
+        $imagePath = ($row !== false) ? ($row['image_path'] ?? null) : null;
         
         // Log deletion before deleting
         self::logHistory($id, $userId, 'delete', [
@@ -540,7 +546,14 @@ class Event {
         ]);
         
         $stmt = $db->prepare("DELETE FROM events WHERE id = ?");
-        return $stmt->execute([$id]);
+        $result = $stmt->execute([$id]);
+
+        // Delete the cover image file after successful DB deletion
+        if ($result && !empty($imagePath)) {
+            SecureImageUpload::deleteImage($imagePath);
+        }
+
+        return $result;
     }
     
     /**
