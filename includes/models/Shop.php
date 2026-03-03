@@ -248,9 +248,24 @@ class Shop {
     public static function deleteProductImage(int $imageId): bool {
         try {
             $db   = Database::getShopDB();
+
+            // Fetch the image path before deleting so we can remove the file
+            $stmt = $db->prepare("SELECT image_path FROM shop_product_images WHERE id = ?");
+            $stmt->execute([$imageId]);
+            $row = $stmt->fetch();
+            $imagePath = ($row !== false) ? ($row['image_path'] ?? null) : null;
+
             $stmt = $db->prepare("DELETE FROM shop_product_images WHERE id = ?");
             $stmt->execute([$imageId]);
-            return $stmt->rowCount() > 0;
+            $deleted = $stmt->rowCount() > 0;
+
+            // Remove the physical file after successful DB deletion
+            if ($deleted && !empty($imagePath)) {
+                require_once __DIR__ . '/../utils/SecureImageUpload.php';
+                SecureImageUpload::deleteImage($imagePath);
+            }
+
+            return $deleted;
         } catch (Exception $e) {
             error_log('Shop::deleteProductImage – ' . $e->getMessage());
             return false;
@@ -316,9 +331,36 @@ class Shop {
     public static function deleteProduct(int $id): bool {
         try {
             $db   = Database::getShopDB();
+
+            // Collect all image paths before deletion so we can remove the files
+            $stmtProduct = $db->prepare("SELECT image_path FROM shop_products WHERE id = ?");
+            $stmtProduct->execute([$id]);
+            $product = $stmtProduct->fetch();
+            $productImagePath = ($product !== false) ? ($product['image_path'] ?? null) : null;
+
+            $stmtImages = $db->prepare("SELECT image_path FROM shop_product_images WHERE product_id = ?");
+            $stmtImages->execute([$id]);
+            $productImages = $stmtImages->fetchAll();
+
             $stmt = $db->prepare("DELETE FROM shop_products WHERE id = ?");
             $stmt->execute([$id]);
-            return $stmt->rowCount() > 0;
+            $deleted = $stmt->rowCount() > 0;
+
+            if ($deleted) {
+                require_once __DIR__ . '/../utils/SecureImageUpload.php';
+                // Delete main product image
+                if (!empty($productImagePath)) {
+                    SecureImageUpload::deleteImage($productImagePath);
+                }
+                // Delete all gallery images
+                foreach ($productImages as $img) {
+                    if (!empty($img['image_path'])) {
+                        SecureImageUpload::deleteImage($img['image_path']);
+                    }
+                }
+            }
+
+            return $deleted;
         } catch (Exception $e) {
             error_log('Shop::deleteProduct – ' . $e->getMessage());
             return false;
