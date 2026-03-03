@@ -5850,3 +5850,599 @@ body.dark-mode .inventory-item-card:hover {
         transition: transform 0.28s cubic-bezier(0.0, 0.0, 0.2, 1) !important;
     }
 }
+
+/* ============================================================
+   VISUAL ENHANCEMENT LAYER – Prettier design polish
+   Applied at the end to ensure higher cascade priority
+   ============================================================ */
+
+/* ── Sidebar: Beautiful gradient background ─────────────── */
+.sidebar {
+    background: linear-gradient(
+        180deg,
+        #003d6b 0%,
+        #00457d 40%,
+        #004d8a 100%
+    ) !important;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.18) !important;
+}
+
+body.dark-mode .sidebar {
+    background: linear-gradient(
+        180deg,
+        #0a0f1e 0%,
+        #121212 60%,
+        #0d1117 100%
+    ) !important;
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.45) !important;
+}
+
+/* ── Sidebar: Pill-style active nav items ───────────────── */
+.sidebar a[class*="bg-white/20"],
+.sidebar a.active {
+    background: rgba(255, 255, 255, 0.18) !important;
+    border-left: 3px solid #6cb73e !important;
+    border-radius: 10px !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 2px 8px rgba(0,0,0,0.15) !important;
+    font-weight: 600 !important;
+}
+
+/* ── Sidebar: Refined nav item hover ───────────────────── */
+.sidebar nav a:hover {
+    background: rgba(255, 255, 255, 0.12) !important;
+    border-radius: 10px !important;
+    transform: translateX(2px);
+    transition: all 0.2s ease !important;
+}
+
+/* ── Sidebar: Section label polish ─────────────────────── */
+.sidebar nav .border-t {
+    border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* ── Light Mode: Elevated main content background ──────── */
+body:not(.dark-mode) {
+    background: linear-gradient(135deg, #f0f4f8 0%, #e8edf4 100%) !important;
+}
+
+body:not(.dark-mode) main {
+    background: transparent !important;
+}
+
+/* ── Card: Richer shadows and micro-interactions ────────── */
+body:not(.dark-mode) .card {
+    background: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.06) !important;
+    box-shadow:
+        0 1px 2px rgba(0, 0, 0, 0.04),
+        0 4px 16px rgba(0, 0, 0, 0.06),
+        0 0 0 1px rgba(0, 0, 0, 0.02) !important;
+    border-radius: 14px !important;
+    transition: box-shadow 0.25s ease, transform 0.25s ease !important;
+}
+
+body:not(.dark-mode) .card:hover {
+    box-shadow:
+        0 4px 8px rgba(0, 0, 0, 0.06),
+        0 12px 40px rgba(0, 0, 0, 0.10),
+        0 0 0 1px rgba(0, 102, 179, 0.05) !important;
+    transform: translateY(-3px) !important;
+}
+
+body.dark-mode .card {
+    border-radius: 14px !important;
+}
+
+/* ── Bootstrap Button Overrides – IBC Design System ────── */
+.btn {
+    font-weight: 600 !important;
+    letter-spacing: 0.01em !important;
+    border-radius: 10px !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    padding: 0.55rem 1.25rem !important;
+}
+
+.btn:hover {
+    transform: translateY(-1px) !important;
+}
+
+.btn:active {
+    transform: translateY(0) scale(0.98) !important;
+}
+
+/* Override Bootstrap btn-primary to use IBC blue gradient */
+.btn.btn-primary {
+    background: linear-gradient(135deg, #0077cc 0%, #0066b3 60%, #004f8c 100%) !important;
+    border: none !important;
+    color: #fff !important;
+    box-shadow: 0 2px 8px rgba(0, 102, 179, 0.30) !important;
+}
+
+.btn.btn-primary:hover {
+    background: linear-gradient(135deg, #0088dd 0%, #0077cc 60%, #005a9e 100%) !important;
+    box-shadow: 0 4px 16px rgba(0, 102, 179, 0.40) !important;
+    color: #fff !important;
+}
+
+.btn.btn-primary:focus {
+    box-shadow: 0 0 0 3px rgba(0, 102, 179, 0.35) !important;
+    color: #fff !important;
+}
+
+/* Override Bootstrap btn-success to use IBC green */
+.btn.btn-success {
+    background: linear-gradient(135deg, #00c060 0%, #00a651 60%, #008741 100%) !important;
+    border: none !important;
+    color: #fff !important;
+    box-shadow: 0 2px 8px rgba(0, 166, 81, 0.30) !important;
+}
+
+.btn.btn-success:hover {
+    background: linear-gradient(135deg, #00d06a 0%, #00b55a 60%, #009848 100%) !important;
+    box-shadow: 0 4px 16px rgba(0, 166, 81, 0.40) !important;
+    color: #fff !important;
+}
+
+/* Override Bootstrap btn-danger */
+.btn.btn-danger {
+    background: linear-gradient(135deg, #f87171 0%, #ef4444 60%, #dc2626 100%) !important;
+    border: none !important;
+    color: #fff !important;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.30) !important;
+}
+
+.btn.btn-danger:hover {
+    background: linear-gradient(135deg, #fb8080 0%, #f25656 60%, #e52d2d 100%) !important;
+    box-shadow: 0 4px 16px rgba(239, 68, 68, 0.40) !important;
+    color: #fff !important;
+}
+
+/* Override Bootstrap btn-warning */
+.btn.btn-warning {
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 60%, #d97706 100%) !important;
+    border: none !important;
+    color: #1a1a1a !important;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.30) !important;
+}
+
+.btn.btn-warning:hover {
+    background: linear-gradient(135deg, #fcd34d 0%, #fbbf24 60%, #e6a805 100%) !important;
+    box-shadow: 0 4px 16px rgba(245, 158, 11, 0.40) !important;
+}
+
+/* Override Bootstrap btn-secondary */
+.btn.btn-secondary {
+    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%) !important;
+    border: none !important;
+    color: #fff !important;
+    box-shadow: 0 2px 6px rgba(75, 85, 99, 0.25) !important;
+}
+
+.btn.btn-secondary:hover {
+    background: linear-gradient(135deg, #7c8694 0%, #5a6472 100%) !important;
+    box-shadow: 0 4px 12px rgba(75, 85, 99, 0.35) !important;
+    color: #fff !important;
+}
+
+/* Override Bootstrap btn-outline-primary */
+.btn.btn-outline-primary {
+    border: 2px solid var(--ibc-blue) !important;
+    color: var(--ibc-blue) !important;
+    background: transparent !important;
+}
+
+.btn.btn-outline-primary:hover {
+    background: var(--ibc-blue) !important;
+    color: #fff !important;
+    box-shadow: 0 4px 12px rgba(0, 102, 179, 0.30) !important;
+}
+
+/* Override Bootstrap btn-outline-secondary */
+.btn.btn-outline-secondary {
+    border: 2px solid #6b7280 !important;
+    color: #4b5563 !important;
+    background: transparent !important;
+}
+
+body.dark-mode .btn.btn-outline-secondary {
+    border-color: #94a3b8 !important;
+    color: #cbd5e1 !important;
+}
+
+.btn.btn-outline-secondary:hover {
+    background: #4b5563 !important;
+    color: #fff !important;
+}
+
+/* Override Bootstrap btn-outline-danger */
+.btn.btn-outline-danger {
+    border: 2px solid #ef4444 !important;
+    color: #ef4444 !important;
+    background: transparent !important;
+}
+
+.btn.btn-outline-danger:hover {
+    background: #ef4444 !important;
+    color: #fff !important;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.30) !important;
+}
+
+/* ── Badge polish ───────────────────────────────────────── */
+.badge {
+    font-weight: 600 !important;
+    letter-spacing: 0.03em !important;
+    border-radius: 6px !important;
+    padding: 0.35em 0.75em !important;
+}
+
+/* ── Table: Better header and alternating rows ──────────── */
+body:not(.dark-mode) .table > thead > tr > th {
+    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%) !important;
+    font-weight: 700 !important;
+    font-size: 0.75rem !important;
+    letter-spacing: 0.06em !important;
+    text-transform: uppercase !important;
+    color: #374151 !important;
+    border-bottom: 2px solid #cbd5e1 !important;
+}
+
+body.dark-mode .table > thead > tr > th {
+    background: linear-gradient(135deg, #1e293b 0%, #1a2535 100%) !important;
+    font-weight: 700 !important;
+    font-size: 0.75rem !important;
+    letter-spacing: 0.06em !important;
+    text-transform: uppercase !important;
+    color: #94a3b8 !important;
+    border-bottom: 2px solid #334155 !important;
+}
+
+body:not(.dark-mode) .table-hover > tbody > tr:hover > td {
+    background-color: rgba(0, 102, 179, 0.04) !important;
+}
+
+body.dark-mode .table-hover > tbody > tr:hover > td {
+    background-color: rgba(255, 255, 255, 0.04) !important;
+}
+
+/* ── Form inputs: More polished focus ring ──────────────── */
+body:not(.dark-mode) input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+body:not(.dark-mode) textarea,
+body:not(.dark-mode) select {
+    border: 1.5px solid #d1d5db !important;
+    border-radius: 10px !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+body:not(.dark-mode) input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):focus,
+body:not(.dark-mode) textarea:focus,
+body:not(.dark-mode) select:focus {
+    border-color: var(--ibc-blue) !important;
+    box-shadow: 0 0 0 3px rgba(0, 102, 179, 0.15) !important;
+    outline: none !important;
+}
+
+body.dark-mode input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):focus,
+body.dark-mode textarea:focus,
+body.dark-mode select:focus {
+    border-color: var(--ibc-blue-light) !important;
+    box-shadow: 0 0 0 3px rgba(51, 133, 196, 0.2) !important;
+    outline: none !important;
+}
+
+/* ── Bootstrap form-control overrides ───────────────────── */
+body:not(.dark-mode) .form-control,
+body:not(.dark-mode) .form-select {
+    border: 1.5px solid #d1d5db !important;
+    border-radius: 10px !important;
+    background-color: #fff !important;
+    color: #111827 !important;
+}
+
+body:not(.dark-mode) .form-control:focus,
+body:not(.dark-mode) .form-select:focus {
+    border-color: var(--ibc-blue) !important;
+    box-shadow: 0 0 0 3px rgba(0, 102, 179, 0.15) !important;
+}
+
+body.dark-mode .form-control,
+body.dark-mode .form-select {
+    background-color: #0c1222 !important;
+    border-color: #334155 !important;
+    color: #f1f5f9 !important;
+}
+
+body.dark-mode .form-control:focus,
+body.dark-mode .form-select:focus {
+    border-color: var(--ibc-blue-light) !important;
+    box-shadow: 0 0 0 3px rgba(51, 133, 196, 0.2) !important;
+}
+
+/* ── Page section heading style ────────────────────────── */
+.page-section-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--text-main);
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.page-section-title::after {
+    content: '';
+    flex: 1;
+    height: 2px;
+    background: linear-gradient(90deg, var(--ibc-blue) 0%, transparent 100%);
+    border-radius: 99px;
+    opacity: 0.25;
+}
+
+/* ── Hero gradient text ─────────────────────────────────── */
+.gradient-text {
+    background: linear-gradient(135deg, var(--ibc-blue) 0%, var(--ibc-green) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ── Bootstrap alert overrides ─────────────────────────── */
+.alert {
+    border-radius: 12px !important;
+    border: none !important;
+    font-weight: 500 !important;
+}
+
+.alert-success {
+    background: linear-gradient(135deg, rgba(0, 166, 81, 0.10) 0%, rgba(0, 166, 81, 0.06) 100%) !important;
+    color: #065f46 !important;
+    border-left: 4px solid #00a651 !important;
+}
+
+body.dark-mode .alert-success {
+    background: rgba(0, 166, 81, 0.15) !important;
+    color: #6ee7b7 !important;
+    border-left-color: #00a651 !important;
+}
+
+.alert-danger, .alert-error {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.10) 0%, rgba(239, 68, 68, 0.06) 100%) !important;
+    color: #7f1d1d !important;
+    border-left: 4px solid #ef4444 !important;
+}
+
+body.dark-mode .alert-danger {
+    background: rgba(239, 68, 68, 0.15) !important;
+    color: #fca5a5 !important;
+    border-left-color: #ef4444 !important;
+}
+
+.alert-warning {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.10) 0%, rgba(245, 158, 11, 0.06) 100%) !important;
+    color: #7c2d12 !important;
+    border-left: 4px solid #f59e0b !important;
+}
+
+body.dark-mode .alert-warning {
+    background: rgba(245, 158, 11, 0.15) !important;
+    color: #fde68a !important;
+    border-left-color: #f59e0b !important;
+}
+
+.alert-info {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.10) 0%, rgba(59, 130, 246, 0.06) 100%) !important;
+    color: #1e3a8a !important;
+    border-left: 4px solid #3b82f6 !important;
+}
+
+body.dark-mode .alert-info {
+    background: rgba(59, 130, 246, 0.15) !important;
+    color: #93c5fd !important;
+    border-left-color: #3b82f6 !important;
+}
+
+/* ── Scrollbar: global polish ───────────────────────────── */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 99px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.18);
+    border-radius: 99px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.30);
+    background-clip: padding-box;
+}
+
+body.dark-mode ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.18);
+    background-clip: padding-box;
+}
+
+body.dark-mode ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.30);
+    background-clip: padding-box;
+}
+
+/* ── Bootstrap pagination polish ───────────────────────── */
+.pagination .page-link {
+    border-radius: 8px !important;
+    margin: 0 2px !important;
+    font-weight: 600 !important;
+    border: 1.5px solid var(--border-color) !important;
+    color: var(--ibc-blue) !important;
+    background: var(--bg-card) !important;
+    transition: all 0.2s ease !important;
+}
+
+.pagination .page-item.active .page-link {
+    background: linear-gradient(135deg, #0077cc 0%, #0066b3 100%) !important;
+    border-color: transparent !important;
+    color: #fff !important;
+    box-shadow: 0 2px 8px rgba(0, 102, 179, 0.35) !important;
+}
+
+.pagination .page-link:hover {
+    background: rgba(0, 102, 179, 0.08) !important;
+    border-color: var(--ibc-blue) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* ── Modal dialog polish ────────────────────────────────── */
+.modal-content {
+    border-radius: 18px !important;
+    border: none !important;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.20), 0 0 0 1px rgba(0, 0, 0, 0.05) !important;
+    overflow: hidden !important;
+}
+
+body.dark-mode .modal-content {
+    background: var(--bg-card) !important;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.60), 0 0 0 1px rgba(255,255,255,0.06) !important;
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--border-color) !important;
+    padding: 1.25rem 1.5rem !important;
+}
+
+.modal-footer {
+    border-top: 1px solid var(--border-color) !important;
+    padding: 1rem 1.5rem !important;
+}
+
+/* ── Dropdown menu polish ───────────────────────────────── */
+.dropdown-menu {
+    border-radius: 14px !important;
+    border: 1px solid var(--border-color) !important;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+    padding: 0.5rem !important;
+    overflow: hidden !important;
+    background: var(--bg-card) !important;
+}
+
+body.dark-mode .dropdown-menu {
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.40), 0 2px 8px rgba(0, 0, 0, 0.30) !important;
+}
+
+.dropdown-item {
+    border-radius: 8px !important;
+    padding: 0.55rem 0.875rem !important;
+    font-weight: 500 !important;
+    transition: all 0.15s ease !important;
+    color: var(--text-main) !important;
+}
+
+.dropdown-item:hover {
+    background: rgba(0, 102, 179, 0.08) !important;
+    color: var(--ibc-blue) !important;
+}
+
+body.dark-mode .dropdown-item:hover {
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: #fff !important;
+}
+
+/* ── Tooltip polish ─────────────────────────────────────── */
+.tooltip .tooltip-inner {
+    background: #1e293b !important;
+    border-radius: 8px !important;
+    font-size: 0.8125rem !important;
+    font-weight: 500 !important;
+    padding: 0.35rem 0.75rem !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
+}
+
+/* ── Progress bar polish ────────────────────────────────── */
+.progress {
+    border-radius: 99px !important;
+    background: rgba(0, 0, 0, 0.08) !important;
+    overflow: hidden !important;
+}
+
+body.dark-mode .progress {
+    background: rgba(255, 255, 255, 0.08) !important;
+}
+
+.progress-bar {
+    border-radius: 99px !important;
+    background: linear-gradient(90deg, var(--ibc-blue) 0%, var(--ibc-green) 100%) !important;
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* ── Sidebar footer logo area ───────────────────────────── */
+.sidebar .p-5 > .mb-6 {
+    padding: 0.75rem 0.5rem 0.75rem;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    margin-bottom: 1.25rem !important;
+}
+
+/* ── Better sidebar nav icon alignment ─────────────────── */
+.sidebar nav a i.fas,
+.sidebar nav a i.far,
+.sidebar nav a i.fab {
+    width: 1.5rem !important;
+    text-align: center !important;
+    font-size: 0.95rem !important;
+    flex-shrink: 0 !important;
+}
+
+/* ── Smooth page transitions ────────────────────────────── */
+main {
+    animation: pageIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes pageIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ── Rounded image thumbnails ───────────────────────────── */
+.rounded-img {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+/* ── Link button improvements in tables ────────────────── */
+.btn.btn-sm {
+    padding: 0.35rem 0.75rem !important;
+    font-size: 0.8125rem !important;
+    border-radius: 8px !important;
+}
+
+/* ── Focus-visible for accessibility ────────────────────── */
+:focus-visible {
+    outline: 2px solid var(--ibc-blue) !important;
+    outline-offset: 2px !important;
+}
+
+button:focus-visible,
+a:focus-visible {
+    outline: 2px solid var(--ibc-blue) !important;
+    outline-offset: 2px !important;
+    border-radius: 4px !important;
+}
+
+/* ── Sidebar nav items: Universal rounded pill style ────── */
+.sidebar nav a {
+    border-radius: 10px !important;
+    margin: 2px 6px !important;
+    padding: 0.55rem 0.875rem !important;
+}
