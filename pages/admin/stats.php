@@ -649,7 +649,7 @@ ob_start();
                 </div>
             <?php else: ?>
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <table class="w-full card-table divide-y divide-gray-200 dark:divide-gray-700">
                         <thead class="bg-gray-50 dark:bg-gray-800">
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
@@ -672,10 +672,10 @@ ob_start();
                         <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
                             <?php foreach ($activeCheckouts as $checkout): ?>
                             <tr class="hover:bg-gray-50 dark:hover:bg-gray-800">
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-gray-100" data-label="Artikel">
                                     <?php echo htmlspecialchars($checkout['item_name']); ?>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td class="px-6 py-4 whitespace-nowrap" data-label="Benutzer">
                                     <div class="text-sm text-gray-900 dark:text-gray-100 font-medium">
                                         <?php echo htmlspecialchars($checkout['user_name']); ?>
                                     </div>
@@ -683,10 +683,10 @@ ob_start();
                                         <?php echo htmlspecialchars($checkout['user_email']); ?>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300" data-label="Ausgeliehen am">
                                     <?php echo date('d.m.Y H:i', strtotime($checkout['checked_out_at'])); ?>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300" data-label="Fällig am">
                                     <?php 
                                     if (!empty($checkout['due_date'])) {
                                         echo date('d.m.Y', strtotime($checkout['due_date']));
@@ -695,7 +695,7 @@ ob_start();
                                     }
                                     ?>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td class="px-6 py-4 whitespace-nowrap" data-label="Status">
                                     <?php if ($checkout['is_overdue']): ?>
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/50 text-red-800 dark:text-red-300">
                                             <i class="fas fa-exclamation-triangle mr-1"></i>
@@ -737,7 +737,7 @@ ob_start();
                 </div>
             <?php else: ?>
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <table class="w-full card-table divide-y divide-gray-200 dark:divide-gray-700">
                         <thead class="bg-gray-50 dark:bg-gray-800">
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
@@ -757,13 +757,13 @@ ob_start();
                         <tbody class="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
                             <?php foreach ($projectApplications as $project): ?>
                             <tr class="hover:bg-gray-50 dark:hover:bg-gray-800">
-                                <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-100">
+                                <td class="px-6 py-4 text-sm font-medium text-gray-900 dark:text-gray-100" data-label="Projekttitel">
                                     <a href="../projects/view.php?id=<?php echo $project['id']; ?>" 
                                        class="text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 hover:underline">
                                         <?php echo htmlspecialchars($project['title']); ?>
                                     </a>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300" data-label="Typ">
                                     <?php 
                                     $typeLabels = [
                                         'internal' => 'Intern',
@@ -780,7 +780,7 @@ ob_start();
                                         <?php echo htmlspecialchars($typeLabel); ?>
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-300" data-label="Status">
                                     <?php 
                                     $statusLabels = [
                                         'open' => 'Offen',
@@ -803,7 +803,7 @@ ob_start();
                                         <?php echo htmlspecialchars($statusLabel); ?>
                                     </span>
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
+                                <td class="px-6 py-4 whitespace-nowrap" data-label="Bewerbungen">
                                     <div class="flex items-center">
                                         <span class="text-lg font-bold text-purple-600 dark:text-purple-400 mr-2">
                                             <?php echo $project['application_count']; ?>
