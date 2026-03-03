@@ -589,7 +589,7 @@ ob_start();
                     </div>
                 </div>
             </div>
-            <div class="max-h-64 overflow-y-auto">
+            <div class="max-h-64 overflow-auto">
                 <table class="w-full text-sm">
                     <thead class="bg-gray-50 dark:bg-gray-700 sticky top-0">
                         <tr>
