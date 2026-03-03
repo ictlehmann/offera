@@ -93,6 +93,9 @@ COMMENT='Financial statistics for events - tracks sales and calculations with ye
 -- NOTE: For existing databases, run:
 --   ALTER TABLE alumni_profiles ADD COLUMN bio TEXT DEFAULT NULL AFTER last_reminder_sent_at;
 --   ALTER TABLE alumni_profiles ADD COLUMN skills TEXT DEFAULT NULL COMMENT 'Comma-separated list of skills/competencies' AFTER bio;
+-- Migration: add bio and skills columns if not already present
+ALTER TABLE `alumni_profiles` ADD COLUMN IF NOT EXISTS `bio` TEXT DEFAULT NULL AFTER `last_reminder_sent_at`;
+ALTER TABLE `alumni_profiles` ADD COLUMN IF NOT EXISTS `skills` TEXT DEFAULT NULL COMMENT 'Comma-separated list of skills/competencies' AFTER `bio`;
 -- ================================================
 CREATE TABLE IF NOT EXISTS `alumni_profiles` (
   `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,

@@ -18,7 +18,7 @@ class Alumni extends Database {
      */
     public static function getProfileById($id) {
         $db = Database::getContentDB();
-        $stmt = $db->prepare("
+        $sql = "
             SELECT id, user_id, first_name, last_name, email, secondary_email, mobile_phone, 
                    linkedin_url, xing_url, industry, company, position, 
                    study_program, semester, angestrebter_abschluss, 
@@ -26,7 +26,18 @@ class Alumni extends Database {
                    image_path, last_verified_at, last_reminder_sent_at, created_at, updated_at
             FROM alumni_profiles 
             WHERE id = ?
-        ");
+        ";
+        try {
+            $stmt = $db->prepare($sql);
+        } catch (PDOException $pdoEx) {
+            // SQLSTATE 42S22 = unknown column; fall back if skills column doesn't exist yet
+            if ($pdoEx->getCode() === '42S22' && strpos($pdoEx->getMessage(), 'skills') !== false) {
+                $sql = str_replace('skills,', 'NULL AS skills,', $sql);
+                $stmt = $db->prepare($sql);
+            } else {
+                throw $pdoEx;
+            }
+        }
         $stmt->execute([$id]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
@@ -39,7 +50,7 @@ class Alumni extends Database {
      */
     public static function getProfileByUserId(int $userId) {
         $db = Database::getContentDB();
-        $stmt = $db->prepare("
+        $sql = "
             SELECT id, user_id, first_name, last_name, email, secondary_email, mobile_phone, 
                    linkedin_url, xing_url, industry, company, position, 
                    study_program, semester, angestrebter_abschluss, 
@@ -47,7 +58,18 @@ class Alumni extends Database {
                    image_path, last_verified_at, last_reminder_sent_at, created_at, updated_at
             FROM alumni_profiles 
             WHERE user_id = ?
-        ");
+        ";
+        try {
+            $stmt = $db->prepare($sql);
+        } catch (PDOException $pdoEx) {
+            // SQLSTATE 42S22 = unknown column; fall back if skills column doesn't exist yet
+            if ($pdoEx->getCode() === '42S22' && strpos($pdoEx->getMessage(), 'skills') !== false) {
+                $sql = str_replace('skills,', 'NULL AS skills,', $sql);
+                $stmt = $db->prepare($sql);
+            } else {
+                throw $pdoEx;
+            }
+        }
         $stmt->execute([$userId]);
         return $stmt->fetch();
     }
@@ -280,7 +302,18 @@ class Alumni extends Database {
             ORDER BY ap.last_name ASC, ap.first_name ASC
         ";
         
-        $stmt = $contentDb->prepare($sql);
+        try {
+            $stmt = $contentDb->prepare($sql);
+        } catch (PDOException $pdoEx) {
+            // SQLSTATE 42S22 = unknown column; fall back if skills column doesn't exist yet
+            if ($pdoEx->getCode() === '42S22' && strpos($pdoEx->getMessage(), 'skills') !== false) {
+                $sql = str_replace('ap.skills,', 'NULL AS skills,', $sql);
+                $sql = str_replace('OR ap.skills LIKE ?', 'OR NULL LIKE ?', $sql);
+                $stmt = $contentDb->prepare($sql);
+            } else {
+                throw $pdoEx;
+            }
+        }
         $stmt->execute($params);
         $profiles = $stmt->fetchAll();
         
@@ -399,7 +432,7 @@ class Alumni extends Database {
         
         // Fetch profiles where updated_at is older than specified months
         // AND last reminder was either never sent OR sent more than 12 months ago (spam protection)
-        $stmt = $contentDb->prepare("
+        $sql = "
             SELECT id, user_id, first_name, last_name, email, mobile_phone, 
                    linkedin_url, xing_url, industry, company, position, 
                    study_program, semester, angestrebter_abschluss, 
@@ -409,7 +442,18 @@ class Alumni extends Database {
             WHERE updated_at < DATE_SUB(NOW(), INTERVAL ? MONTH)
               AND (last_reminder_sent_at IS NULL OR last_reminder_sent_at < DATE_SUB(NOW(), INTERVAL 12 MONTH))
             ORDER BY updated_at ASC
-        ");
+        ";
+        try {
+            $stmt = $contentDb->prepare($sql);
+        } catch (PDOException $pdoEx) {
+            // SQLSTATE 42S22 = unknown column; fall back if skills column doesn't exist yet
+            if ($pdoEx->getCode() === '42S22' && strpos($pdoEx->getMessage(), 'skills') !== false) {
+                $sql = str_replace('skills,', 'NULL AS skills,', $sql);
+                $stmt = $contentDb->prepare($sql);
+            } else {
+                throw $pdoEx;
+            }
+        }
         $stmt->execute([$months]);
         $profiles = $stmt->fetchAll();
         
