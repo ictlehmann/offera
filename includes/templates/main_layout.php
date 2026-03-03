@@ -30,6 +30,12 @@ if (Auth::check() && isset($_SESSION['profile_incomplete']) && $_SESSION['profil
 
 $_themeCssVersion = filemtime(__DIR__ . '/../../assets/css/theme.css');
 $_tailwindCssVersion = filemtime(__DIR__ . '/../../assets/css/tailwind.css');
+
+// Ensure $currentUser is defined for the body data-user-theme attribute,
+// even on pages that don't set it before including this layout.
+if (!isset($currentUser)) {
+    $currentUser = Auth::user();
+}
 ?>
 <!DOCTYPE html>
 <html lang="de">

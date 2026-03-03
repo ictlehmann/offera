@@ -66,9 +66,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     
     // Validate category is one of the allowed values
-    $allowedCategories = ['Allgemein', 'IT', 'Marketing', 'Human Resources', 'Qualitätsmanagement', 'Akquise'];
+    $allowedCategories = ['Allgemein', 'IT', 'Marketing', 'Human Resources', 'Qualitätsmanagement', 'Akquise', 'Vorstand'];
     if (!empty($category) && !in_array($category, $allowedCategories)) {
         $errors[] = 'Ungültige Kategorie ausgewählt.';
+    }
+
+    // Only board roles may use the Vorstand category
+    if ($category === 'Vorstand' && !in_array($userRole, Auth::BOARD_ROLES)) {
+        $errors[] = 'Die Kategorie "Vorstand" darf nur von Vorstandsmitgliedern verwendet werden.';
     }
     
     // Validate external link if provided
@@ -249,6 +254,9 @@ ob_start();
                     <option value="Human Resources" <?php echo $category === 'Human Resources' ? 'selected' : ''; ?>>Human Resources</option>
                     <option value="Qualitätsmanagement" <?php echo $category === 'Qualitätsmanagement' ? 'selected' : ''; ?>>Qualitätsmanagement</option>
                     <option value="Akquise" <?php echo $category === 'Akquise' ? 'selected' : ''; ?>>Akquise</option>
+                    <?php if (in_array($userRole, Auth::BOARD_ROLES)): ?>
+                    <option value="Vorstand" <?php echo $category === 'Vorstand' ? 'selected' : ''; ?>>Vorstand</option>
+                    <?php endif; ?>
                 </select>
             </div>
 
