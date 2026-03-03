@@ -111,6 +111,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             exit;
         } else {
             $errors[] = 'Das Gesuch konnte nicht gespeichert werden. Bitte versuche es erneut.';
+            // Clean up uploaded file to avoid orphaned files on disk
+            if ($pdfPath !== null) {
+                $uploadedFile = __DIR__ . '/../../' . $pdfPath;
+                if (file_exists($uploadedFile)) {
+                    unlink($uploadedFile);
+                }
+            }
         }
     }
 }

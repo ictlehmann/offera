@@ -122,19 +122,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $clearPdf = $updatePdf && $newPdfPath === null;
 
-        JobBoard::updateByOwner($listingId, $userId, $data, $clearPdf);
+        $updated = JobBoard::updateByOwner($listingId, $userId, $data, $clearPdf);
 
-        // Delete old PDF file if it was replaced or removed
-        if ($updatePdf && !empty($listing['pdf_path'])) {
-            $oldFile = __DIR__ . '/../../' . $listing['pdf_path'];
-            if (file_exists($oldFile)) {
-                unlink($oldFile);
+        if ($updated) {
+            // Delete old PDF file if it was replaced or removed
+            if ($updatePdf && !empty($listing['pdf_path'])) {
+                $oldFile = __DIR__ . '/../../' . $listing['pdf_path'];
+                if (file_exists($oldFile)) {
+                    unlink($oldFile);
+                }
             }
-        }
 
-        $_SESSION['success_message'] = 'Dein Gesuch wurde erfolgreich aktualisiert!';
-        header('Location: index.php');
-        exit;
+            $_SESSION['success_message'] = 'Dein Gesuch wurde erfolgreich aktualisiert!';
+            header('Location: index.php');
+            exit;
+        } else {
+            // DB update failed – clean up the newly uploaded file to avoid orphaned files
+            if ($newPdfPath !== null) {
+                $uploadedFile = __DIR__ . '/../../' . $newPdfPath;
+                if (file_exists($uploadedFile)) {
+                    unlink($uploadedFile);
+                }
+            }
+            $errors[] = 'Das Gesuch konnte nicht aktualisiert werden. Bitte versuche es erneut.';
+        }
     }
 }
 
