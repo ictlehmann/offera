@@ -82,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $imagePath = $item['image_path'];
             
             // Handle image upload using secure upload utility
-            if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+            if (isset($_FILES['image']) && $_FILES['image']['error'] !== UPLOAD_ERR_NO_FILE) {
                 $uploadResult = SecureImageUpload::uploadImage($_FILES['image']);
                 
                 if ($uploadResult['success']) {
