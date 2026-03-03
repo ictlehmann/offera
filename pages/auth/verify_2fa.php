@@ -29,6 +29,33 @@ $success = '';
 $csrfToken = CSRFHandler::getToken();
 $baseUrl = defined('BASE_URL') ? BASE_URL : '';
 
+// Check if 2FA is temporarily locked due to too many failed attempts (on page load)
+try {
+    $db = Database::getUserDB();
+    $stmt = $db->prepare("SELECT tfa_locked_until FROM users WHERE id = ?");
+    $stmt->execute([$_SESSION['pending_2fa_user_id']]);
+    $lockRow = $stmt->fetch();
+    if ($lockRow && !empty($lockRow['tfa_locked_until']) && strtotime($lockRow['tfa_locked_until']) > time()) {
+        $remainingMinutes = ceil((strtotime($lockRow['tfa_locked_until']) - time()) / 60);
+        unset($_SESSION['pending_2fa_user_id'], $_SESSION['pending_2fa_email'], $_SESSION['pending_2fa_role'],
+              $_SESSION['pending_2fa_profile_complete'], $_SESSION['pending_2fa_is_onboarded']);
+        $loginUrl = (defined('BASE_URL') && BASE_URL)
+            ? BASE_URL . '/pages/auth/login.php?error=' . urlencode("Konto gesperrt. Zu viele fehlgeschlagene 2FA-Versuche. Bitte warten Sie noch {$remainingMinutes} Minute(n).")
+            : '/pages/auth/login.php';
+        header('Location: ' . $loginUrl);
+        exit;
+    }
+} catch (PDOException $e) {
+    // Column not yet added; fall back to session-based tracking
+    if (($_SESSION['2fa_attempts'] ?? 0) >= 5) {
+        unset($_SESSION['pending_2fa_user_id'], $_SESSION['pending_2fa_email'], $_SESSION['pending_2fa_role'],
+              $_SESSION['pending_2fa_profile_complete'], $_SESSION['pending_2fa_is_onboarded'], $_SESSION['2fa_attempts']);
+        $loginUrl = (defined('BASE_URL') && BASE_URL) ? BASE_URL . '/pages/auth/login.php' : '/pages/auth/login.php';
+        header('Location: ' . $loginUrl);
+        exit;
+    }
+}
+
 // Handle 2FA verification
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['verify_2fa'])) {
     $code = $_POST['code'] ?? '';
@@ -53,57 +80,130 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['verify_2fa'])) {
             if (empty($tfaSecret)) {
                 $error = '2FA ist nicht korrekt konfiguriert. Bitte kontaktieren Sie den Administrator.';
             } else {
-                // Verify 2FA code
-                $ga = new PHPGangsta_GoogleAuthenticator();
-                
-                if ($ga->verifyCode($tfaSecret, $code, 2)) {
-                    // 2FA verified successfully
-                    // Set session variables from pending data
-                    $_SESSION['user_id'] = $_SESSION['pending_2fa_user_id'];
-                    $_SESSION['user_email'] = $_SESSION['pending_2fa_email'];
-                    $_SESSION['user_role'] = $_SESSION['pending_2fa_role'];
-                    $_SESSION['authenticated'] = true;
-                    $_SESSION['last_activity'] = time();
-                    
-                    // Set profile_incomplete flag from pending session data
-                    $_SESSION['profile_incomplete'] = (intval($_SESSION['pending_2fa_profile_complete'] ?? 1) === 0);
-                    // Set is_onboarded flag from pending session data
-                    $_SESSION['is_onboarded'] = (bool)($_SESSION['pending_2fa_is_onboarded'] ?? false);
-
-                    // Clear pending 2FA data
-                    unset($_SESSION['pending_2fa_user_id']);
-                    unset($_SESSION['pending_2fa_email']);
-                    unset($_SESSION['pending_2fa_role']);
-                    unset($_SESSION['pending_2fa_profile_complete']);
-                    unset($_SESSION['pending_2fa_is_onboarded']);
-
-                    // Update last login
-                    $stmt = $db->prepare("UPDATE users SET last_login = NOW() WHERE id = ?");
+                // Re-check brute-force lockout before verifying code
+                $tfaLocked = false;
+                try {
+                    $stmt = $db->prepare("SELECT tfa_failed_attempts, tfa_locked_until FROM users WHERE id = ?");
                     $stmt->execute([$userId]);
+                    $lockStatus = $stmt->fetch();
+                    if ($lockStatus && !empty($lockStatus['tfa_locked_until']) && strtotime($lockStatus['tfa_locked_until']) > time()) {
+                        $remainingMinutes = ceil((strtotime($lockStatus['tfa_locked_until']) - time()) / 60);
+                        $error = "Zu viele fehlgeschlagene Versuche. Bitte warten Sie noch {$remainingMinutes} Minute(n).";
+                        $tfaLocked = true;
+                    }
+                } catch (PDOException $e) {
+                    // Column not yet added; use session fallback
+                    if (($_SESSION['2fa_attempts'] ?? 0) >= 5) {
+                        $tfaLocked = true;
+                        unset($_SESSION['pending_2fa_user_id'], $_SESSION['pending_2fa_email'], $_SESSION['pending_2fa_role'],
+                              $_SESSION['pending_2fa_profile_complete'], $_SESSION['pending_2fa_is_onboarded'], $_SESSION['2fa_attempts']);
+                        $loginUrl = (defined('BASE_URL') && BASE_URL) ? BASE_URL . '/pages/auth/login.php' : '/pages/auth/login.php';
+                        header('Location: ' . $loginUrl);
+                        exit;
+                    }
+                }
 
-                    // Regenerate session ID to prevent session fixation attacks
-                    session_regenerate_id(true);
-                    // Generate a cryptographically random session token for single-session enforcement
-                    $sessionToken = bin2hex(random_bytes(32));
-                    // Store session token in database (invalidates all other active sessions for this user)
-                    $stmt = $db->prepare("UPDATE users SET current_session_id = ?, session_token = ? WHERE id = ?");
-                    $stmt->execute([session_id(), $sessionToken, $userId]);
-                    // Store session token in session for subsequent verification
-                    $_SESSION['session_token'] = $sessionToken;
+                if (!$tfaLocked) {
+                    // Verify 2FA code
+                    $ga = new PHPGangsta_GoogleAuthenticator();
                     
-                    // Log successful 2FA verification
-                    AuthHandler::logSystemAction($userId, 'login_2fa_success', 'user', $userId, '2FA verification successful');
-                    
-                    // Redirect to dashboard
-                    $dashboardUrl = (defined('BASE_URL') && BASE_URL) ? BASE_URL . '/pages/dashboard/index.php' : '/pages/dashboard/index.php';
-                    header('Location: ' . $dashboardUrl);
-                    exit;
-                } else {
-                    // Invalid 2FA code
-                    $error = 'Ungültiger 2FA-Code. Bitte versuchen Sie es erneut.';
-                    
-                    // Log failed 2FA attempt
-                    AuthHandler::logSystemAction($userId, 'login_2fa_failed', 'user', $userId, 'Invalid 2FA code entered');
+                    if ($ga->verifyCode($tfaSecret, $code, 2)) {
+                        // 2FA verified successfully - reset brute-force counters
+                        try {
+                            $stmt = $db->prepare("UPDATE users SET tfa_failed_attempts = 0, tfa_locked_until = NULL WHERE id = ?");
+                            $stmt->execute([$userId]);
+                        } catch (PDOException $e) {
+                            // Column not yet added; ignore
+                        }
+                        unset($_SESSION['2fa_attempts']);
+
+                        // Set session variables from pending data
+                        $_SESSION['user_id'] = $_SESSION['pending_2fa_user_id'];
+                        $_SESSION['user_email'] = $_SESSION['pending_2fa_email'];
+                        $_SESSION['user_role'] = $_SESSION['pending_2fa_role'];
+                        $_SESSION['authenticated'] = true;
+                        $_SESSION['last_activity'] = time();
+                        
+                        // Set profile_incomplete flag from pending session data
+                        $_SESSION['profile_incomplete'] = (intval($_SESSION['pending_2fa_profile_complete'] ?? 1) === 0);
+                        // Set is_onboarded flag from pending session data
+                        $_SESSION['is_onboarded'] = (bool)($_SESSION['pending_2fa_is_onboarded'] ?? false);
+
+                        // Clear pending 2FA data
+                        unset($_SESSION['pending_2fa_user_id']);
+                        unset($_SESSION['pending_2fa_email']);
+                        unset($_SESSION['pending_2fa_role']);
+                        unset($_SESSION['pending_2fa_profile_complete']);
+                        unset($_SESSION['pending_2fa_is_onboarded']);
+
+                        // Update last login
+                        $stmt = $db->prepare("UPDATE users SET last_login = NOW() WHERE id = ?");
+                        $stmt->execute([$userId]);
+
+                        // Regenerate session ID to prevent session fixation attacks
+                        session_regenerate_id(true);
+                        // Generate a cryptographically random session token for single-session enforcement
+                        $sessionToken = bin2hex(random_bytes(32));
+                        // Store session token in database (invalidates all other active sessions for this user)
+                        $stmt = $db->prepare("UPDATE users SET current_session_id = ?, session_token = ? WHERE id = ?");
+                        $stmt->execute([session_id(), $sessionToken, $userId]);
+                        // Store session token in session for subsequent verification
+                        $_SESSION['session_token'] = $sessionToken;
+                        
+                        // Log successful 2FA verification
+                        AuthHandler::logSystemAction($userId, 'login_2fa_success', 'user', $userId, '2FA verification successful');
+                        
+                        // Redirect to dashboard
+                        $dashboardUrl = (defined('BASE_URL') && BASE_URL) ? BASE_URL . '/pages/dashboard/index.php' : '/pages/dashboard/index.php';
+                        header('Location: ' . $dashboardUrl);
+                        exit;
+                    } else {
+                        // Failed 2FA attempt - track for brute-force protection
+                        $_SESSION['2fa_attempts'] = ($_SESSION['2fa_attempts'] ?? 0) + 1;
+                        $newAttempts = $_SESSION['2fa_attempts'];
+
+                        try {
+                            $stmt = $db->prepare("SELECT tfa_failed_attempts FROM users WHERE id = ?");
+                            $stmt->execute([$userId]);
+                            $r = $stmt->fetch();
+                            $newAttempts = ($r['tfa_failed_attempts'] ?? 0) + 1;
+
+                            if ($newAttempts >= 5) {
+                                $lockedUntil = date('Y-m-d H:i:s', time() + 900);
+                                $stmt = $db->prepare("UPDATE users SET tfa_failed_attempts = ?, tfa_locked_until = ? WHERE id = ?");
+                                $stmt->execute([$newAttempts, $lockedUntil, $userId]);
+                                AuthHandler::logSystemAction($userId, 'login_2fa_locked', 'user', $userId, '2FA account locked after ' . $newAttempts . ' failed attempts');
+                                // Clear pending session and force re-login
+                                unset($_SESSION['pending_2fa_user_id'], $_SESSION['pending_2fa_email'], $_SESSION['pending_2fa_role'],
+                                      $_SESSION['pending_2fa_profile_complete'], $_SESSION['pending_2fa_is_onboarded'], $_SESSION['2fa_attempts']);
+                                $loginUrl = (defined('BASE_URL') && BASE_URL)
+                                    ? BASE_URL . '/pages/auth/login.php?error=' . urlencode('Konto gesperrt. Zu viele fehlgeschlagene 2FA-Versuche. Bitte warten Sie 15 Minuten.')
+                                    : '/pages/auth/login.php';
+                                header('Location: ' . $loginUrl);
+                                exit;
+                            } else {
+                                $stmt = $db->prepare("UPDATE users SET tfa_failed_attempts = ? WHERE id = ?");
+                                $stmt->execute([$newAttempts, $userId]);
+                            }
+                        } catch (PDOException $e) {
+                            // Column not yet added; session counter used as fallback
+                            if ($_SESSION['2fa_attempts'] >= 5) {
+                                unset($_SESSION['pending_2fa_user_id'], $_SESSION['pending_2fa_email'], $_SESSION['pending_2fa_role'],
+                                      $_SESSION['pending_2fa_profile_complete'], $_SESSION['pending_2fa_is_onboarded'], $_SESSION['2fa_attempts']);
+                                $loginUrl = (defined('BASE_URL') && BASE_URL) ? BASE_URL . '/pages/auth/login.php' : '/pages/auth/login.php';
+                                header('Location: ' . $loginUrl);
+                                exit;
+                            }
+                        }
+
+                        $remainingAttempts = max(0, 5 - $newAttempts);
+                        $error = $remainingAttempts > 0
+                            ? "Ungültiger 2FA-Code. Noch {$remainingAttempts} Versuch(e) verbleibend."
+                            : 'Ungültiger 2FA-Code. Bitte versuchen Sie es erneut.';
+                        
+                        // Log failed 2FA attempt
+                        AuthHandler::logSystemAction($userId, 'login_2fa_failed', 'user', $userId, 'Invalid 2FA code entered');
+                    }
                 }
             }
         }

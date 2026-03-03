@@ -125,7 +125,7 @@ class Auth {
                 $stmt->execute([$_SESSION['user_id']]);
                 $row = $stmt->fetch();
                 
-                if ($row && $row['session_token'] !== null && (!isset($_SESSION['session_token']) || $_SESSION['session_token'] !== $row['session_token'])) {
+                if ($row && $row['session_token'] !== null && (!isset($_SESSION['session_token']) || !hash_equals((string)$row['session_token'], (string)$_SESSION['session_token']))) {
                     // Token mismatch – user logged in from another device
                     session_unset();
                     session_destroy();

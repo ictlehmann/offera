@@ -134,15 +134,48 @@ class AuthHandler {
                 return ['success' => false, 'require_2fa' => true, 'user_id' => $user['id']];
             }
             
+            // Check if 2FA is temporarily locked due to too many failed attempts
+            try {
+                if (!empty($user['tfa_locked_until']) && strtotime($user['tfa_locked_until']) > time()) {
+                    $remainingMinutes = ceil((strtotime($user['tfa_locked_until']) - time()) / 60);
+                    return ['success' => false, 'message' => "Konto gesperrt. Zu viele fehlgeschlagene 2FA-Versuche. Bitte versuchen Sie es in {$remainingMinutes} Minute(n) erneut."];
+                }
+            } catch (Exception $e) {
+                // Column may not exist yet; proceed without lockout check
+            }
+            
             require_once __DIR__ . '/GoogleAuthenticator.php';
             $ga = new PHPGangsta_GoogleAuthenticator();
             
             if (!$ga->verifyCode($user['tfa_secret'], $tfaCode, 2)) {
-                // Log failed 2FA attempt with IP address and User Agent
+                // Track failed 2FA attempt with brute-force protection
                 $ipAddress = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
                 $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? 'unknown';
+                try {
+                    $newAttempts = ($user['tfa_failed_attempts'] ?? 0) + 1;
+                    if ($newAttempts >= 5) {
+                        $lockedUntil = date('Y-m-d H:i:s', time() + 900);
+                        $stmt = $db->prepare("UPDATE users SET tfa_failed_attempts = ?, tfa_locked_until = ? WHERE id = ?");
+                        $stmt->execute([$newAttempts, $lockedUntil, $user['id']]);
+                        self::logSystemAction($user['id'], 'login_2fa_locked', 'user', $user['id'], "2FA locked after {$newAttempts} failed attempts - IP: {$ipAddress}");
+                        return ['success' => false, 'message' => 'Konto gesperrt. Zu viele fehlgeschlagene 2FA-Versuche. Bitte versuchen Sie es in 15 Minuten erneut.'];
+                    } else {
+                        $stmt = $db->prepare("UPDATE users SET tfa_failed_attempts = ? WHERE id = ?");
+                        $stmt->execute([$newAttempts, $user['id']]);
+                    }
+                } catch (Exception $e) {
+                    // Column may not exist yet; proceed without DB tracking
+                }
                 self::logSystemAction($user['id'], 'login_2fa_failed', 'user', $user['id'], "Invalid 2FA code - IP: {$ipAddress} - User Agent: {$userAgent}");
                 return ['success' => false, 'message' => 'Ungültiger 2FA-Code'];
+            }
+            
+            // 2FA successful - reset failed attempts counter
+            try {
+                $stmt = $db->prepare("UPDATE users SET tfa_failed_attempts = 0, tfa_locked_until = NULL WHERE id = ?");
+                $stmt->execute([$user['id']]);
+            } catch (Exception $e) {
+                // Column may not exist yet; ignore
             }
         }
         
@@ -440,7 +473,7 @@ class AuthHandler {
         self::startSession();
         
         // Validate state for CSRF protection
-        if (!isset($_GET['state']) || !isset($_SESSION['oauth2state']) || $_GET['state'] !== $_SESSION['oauth2state']) {
+        if (!isset($_GET['state']) || !isset($_SESSION['oauth2state']) || !hash_equals((string)$_SESSION['oauth2state'], (string)$_GET['state'])) {
             // Log detailed error information for debugging (without exposing actual values)
             error_log("[OAuth] State validation failed:");
             error_log("[OAuth]   - GET state present: " . (isset($_GET['state']) ? 'YES' : 'NO'));

@@ -18,6 +18,11 @@ SET time_zone = "+00:00";
 --   ALTER TABLE users ADD COLUMN session_token VARCHAR(255) DEFAULT NULL COMMENT 'Random token for single-session enforcement; regenerated on every login';
 --   ALTER TABLE users ADD COLUMN last_profile_update DATETIME DEFAULT NULL COMMENT 'Timestamp when the user last saved their profile; used to trigger yearly reminder emails';
 --   ALTER TABLE users ADD COLUMN profile_reminder_sent_at DATETIME DEFAULT NULL COMMENT 'Timestamp when the yearly profile reminder email was sent; reset to NULL when user updates profile';
+--   ALTER TABLE users ADD COLUMN failed_login_attempts INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Number of consecutive failed password login attempts';
+--   ALTER TABLE users ADD COLUMN locked_until DATETIME DEFAULT NULL COMMENT 'Timestamp until which password login is locked after too many failed attempts';
+--   ALTER TABLE users ADD COLUMN is_locked_permanently BOOLEAN NOT NULL DEFAULT 0 COMMENT 'Whether the account is permanently locked (requires admin unlock)';
+--   ALTER TABLE users ADD COLUMN tfa_failed_attempts INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Number of consecutive failed 2FA verification attempts';
+--   ALTER TABLE users ADD COLUMN tfa_locked_until DATETIME DEFAULT NULL COMMENT 'Timestamp until which 2FA verification is locked after too many failed attempts';
 -- ================================================
 CREATE TABLE IF NOT EXISTS `users` (
   `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -43,6 +48,11 @@ CREATE TABLE IF NOT EXISTS `users` (
   `is_onboarded` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'Whether user has completed the mandatory first-login onboarding workflow',
   `tfa_secret` VARCHAR(255) DEFAULT NULL COMMENT 'Two-factor authentication secret key',
   `tfa_enabled` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'Whether two-factor authentication is enabled',
+  `tfa_failed_attempts` INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Number of consecutive failed 2FA verification attempts',
+  `tfa_locked_until` DATETIME DEFAULT NULL COMMENT 'Timestamp until which 2FA verification is locked after too many failed attempts',
+  `failed_login_attempts` INT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Number of consecutive failed password login attempts',
+  `locked_until` DATETIME DEFAULT NULL COMMENT 'Timestamp until which password login is locked after too many failed attempts',
+  `is_locked_permanently` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'Whether the account is permanently locked (requires admin unlock)',
   `is_alumni_validated` BOOLEAN NOT NULL DEFAULT 1 COMMENT 'Whether alumni user is validated by board (0=needs approval, 1=approved)',
   `notify_new_projects` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'Receive email notifications for new projects',
   `notify_new_events` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'Receive email notifications for new events',
