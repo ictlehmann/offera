@@ -87,6 +87,48 @@ class JobBoard {
     }
 
     /**
+     * Update a listing by ID (only by owner)
+     *
+     * @param int $id
+     * @param int $userId
+     * @param array $data Keys: title, search_type, description, pdf_path (optional, null to keep existing)
+     * @param bool $clearPdf Set to true to explicitly set pdf_path to NULL
+     * @return bool
+     */
+    public static function updateByOwner(int $id, int $userId, array $data, bool $clearPdf = false): bool {
+        $db = Database::getContentDB();
+
+        if ($clearPdf || array_key_exists('pdf_path', $data)) {
+            $stmt = $db->prepare(
+                "UPDATE job_board SET title = ?, search_type = ?, description = ?, pdf_path = ?
+                 WHERE id = ? AND user_id = ?"
+            );
+            $stmt->execute([
+                $data['title'],
+                $data['search_type'],
+                $data['description'],
+                $clearPdf ? null : ($data['pdf_path'] ?? null),
+                $id,
+                $userId,
+            ]);
+        } else {
+            $stmt = $db->prepare(
+                "UPDATE job_board SET title = ?, search_type = ?, description = ?
+                 WHERE id = ? AND user_id = ?"
+            );
+            $stmt->execute([
+                $data['title'],
+                $data['search_type'],
+                $data['description'],
+                $id,
+                $userId,
+            ]);
+        }
+
+        return $stmt->rowCount() > 0;
+    }
+
+    /**
      * Delete a listing by ID (only by owner)
      *
      * @param int $id
