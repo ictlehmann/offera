@@ -46,14 +46,7 @@ try {
         exit;
     }
 } catch (PDOException $e) {
-    // Column not yet added; fall back to session-based tracking
-    if (($_SESSION['2fa_attempts'] ?? 0) >= 5) {
-        unset($_SESSION['pending_2fa_user_id'], $_SESSION['pending_2fa_email'], $_SESSION['pending_2fa_role'],
-              $_SESSION['pending_2fa_profile_complete'], $_SESSION['pending_2fa_is_onboarded'], $_SESSION['2fa_attempts']);
-        $loginUrl = (defined('BASE_URL') && BASE_URL) ? BASE_URL . '/pages/auth/login.php' : '/pages/auth/login.php';
-        header('Location: ' . $loginUrl);
-        exit;
-    }
+    error_log('DB error checking 2FA lockout for user ' . $_SESSION['pending_2fa_user_id'] . ': ' . $e->getMessage());
 }
 
 // Handle 2FA verification
@@ -92,15 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['verify_2fa'])) {
                         $tfaLocked = true;
                     }
                 } catch (PDOException $e) {
-                    // Column not yet added; use session fallback
-                    if (($_SESSION['2fa_attempts'] ?? 0) >= 5) {
-                        $tfaLocked = true;
-                        unset($_SESSION['pending_2fa_user_id'], $_SESSION['pending_2fa_email'], $_SESSION['pending_2fa_role'],
-                              $_SESSION['pending_2fa_profile_complete'], $_SESSION['pending_2fa_is_onboarded'], $_SESSION['2fa_attempts']);
-                        $loginUrl = (defined('BASE_URL') && BASE_URL) ? BASE_URL . '/pages/auth/login.php' : '/pages/auth/login.php';
-                        header('Location: ' . $loginUrl);
-                        exit;
-                    }
+                    error_log('DB error checking 2FA lockout for user ' . $userId . ': ' . $e->getMessage());
                 }
 
                 if (!$tfaLocked) {
@@ -113,9 +98,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['verify_2fa'])) {
                             $stmt = $db->prepare("UPDATE users SET tfa_failed_attempts = 0, tfa_locked_until = NULL WHERE id = ?");
                             $stmt->execute([$userId]);
                         } catch (PDOException $e) {
-                            // Column not yet added; ignore
+                            error_log('DB error resetting 2FA counters for user ' . $userId . ': ' . $e->getMessage());
                         }
-                        unset($_SESSION['2fa_attempts']);
 
                         // Set session variables from pending data
                         $_SESSION['user_id'] = $_SESSION['pending_2fa_user_id'];
@@ -158,10 +142,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['verify_2fa'])) {
                         header('Location: ' . $dashboardUrl);
                         exit;
                     } else {
-                        // Failed 2FA attempt - track for brute-force protection
-                        $_SESSION['2fa_attempts'] = ($_SESSION['2fa_attempts'] ?? 0) + 1;
-                        $newAttempts = $_SESSION['2fa_attempts'];
-
+                        // Failed 2FA attempt - track for brute-force protection (DB only)
                         try {
                             $stmt = $db->prepare("SELECT tfa_failed_attempts FROM users WHERE id = ?");
                             $stmt->execute([$userId]);
@@ -175,7 +156,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['verify_2fa'])) {
                                 AuthHandler::logSystemAction($userId, 'login_2fa_locked', 'user', $userId, '2FA account locked after ' . $newAttempts . ' failed attempts');
                                 // Clear pending session and force re-login
                                 unset($_SESSION['pending_2fa_user_id'], $_SESSION['pending_2fa_email'], $_SESSION['pending_2fa_role'],
-                                      $_SESSION['pending_2fa_profile_complete'], $_SESSION['pending_2fa_is_onboarded'], $_SESSION['2fa_attempts']);
+                                      $_SESSION['pending_2fa_profile_complete'], $_SESSION['pending_2fa_is_onboarded']);
                                 $loginUrl = (defined('BASE_URL') && BASE_URL)
                                     ? BASE_URL . '/pages/auth/login.php?error=' . urlencode('Konto gesperrt. Zu viele fehlgeschlagene 2FA-Versuche. Bitte warten Sie 15 Minuten.')
                                     : '/pages/auth/login.php';
@@ -186,14 +167,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['verify_2fa'])) {
                                 $stmt->execute([$newAttempts, $userId]);
                             }
                         } catch (PDOException $e) {
-                            // Column not yet added; session counter used as fallback
-                            if ($_SESSION['2fa_attempts'] >= 5) {
-                                unset($_SESSION['pending_2fa_user_id'], $_SESSION['pending_2fa_email'], $_SESSION['pending_2fa_role'],
-                                      $_SESSION['pending_2fa_profile_complete'], $_SESSION['pending_2fa_is_onboarded'], $_SESSION['2fa_attempts']);
-                                $loginUrl = (defined('BASE_URL') && BASE_URL) ? BASE_URL . '/pages/auth/login.php' : '/pages/auth/login.php';
-                                header('Location: ' . $loginUrl);
-                                exit;
-                            }
+                            error_log('DB error tracking 2FA failed attempt for user ' . $userId . ': ' . $e->getMessage());
+                            $newAttempts = 1; // cannot determine exact count; show generic message
                         }
 
                         $remainingAttempts = max(0, 5 - $newAttempts);
