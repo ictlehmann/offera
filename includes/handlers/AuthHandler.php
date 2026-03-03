@@ -101,20 +101,9 @@ class AuthHandler {
             $failedAttempts = $user['failed_login_attempts'] + 1;
             $lockedUntil = null;
             
-            // Implement exponential backoff rate limiting using shared configuration
-            // Lockout durations defined in config.php: RATE_LIMIT_BACKOFF
-            if ($failedAttempts >= 3) {
-                if (!defined('RATE_LIMIT_BACKOFF') || !defined('RATE_LIMIT_MAX_BACKOFF')) {
-                    error_log('CRITICAL: Rate limiting constants not defined in config.php');
-                    // Use secure fallback values
-                    $lockoutTimes = [3 => 60, 4 => 120, 5 => 300, 6 => 900, 7 => 1800];
-                    $maxBackoff = 3600;
-                } else {
-                    $lockoutTimes = RATE_LIMIT_BACKOFF;
-                    $maxBackoff = RATE_LIMIT_MAX_BACKOFF;
-                }
-                $lockoutDuration = $lockoutTimes[$failedAttempts] ?? $maxBackoff;
-                $lockedUntil = date('Y-m-d H:i:s', time() + $lockoutDuration);
+            // Lock account for 15 minutes after 5 consecutive failed attempts
+            if ($failedAttempts >= 5) {
+                $lockedUntil = date('Y-m-d H:i:s', time() + 900);
             }
             
             $stmt = $db->prepare("UPDATE users SET failed_login_attempts = ?, locked_until = ? WHERE id = ?");
