@@ -116,7 +116,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 continue;
                             }
                             if ($files['error'][$i] !== UPLOAD_ERR_OK) {
-                                $uploadErrors[] = 'Bild ' . htmlspecialchars(basename($files['name'][$i])) . ' konnte nicht hochgeladen werden (Fehler ' . $files['error'][$i] . ').';
+                                $phpUploadErrors = [
+                                    UPLOAD_ERR_INI_SIZE   => 'Datei überschreitet das PHP-Upload-Limit (upload_max_filesize).',
+                                    UPLOAD_ERR_FORM_SIZE  => 'Datei überschreitet das im Formular angegebene Limit.',
+                                    UPLOAD_ERR_PARTIAL    => 'Datei wurde nur teilweise hochgeladen.',
+                                    UPLOAD_ERR_NO_TMP_DIR => 'Kein temporäres Verzeichnis verfügbar.',
+                                    UPLOAD_ERR_CANT_WRITE => 'Datei konnte nicht auf dem Server gespeichert werden.',
+                                    UPLOAD_ERR_EXTENSION  => 'Upload durch PHP-Erweiterung abgebrochen.',
+                                ];
+                                $errMsg = $phpUploadErrors[$files['error'][$i]] ?? 'Upload-Fehler (Code ' . $files['error'][$i] . ').';
+                                $uploadErrors[] = 'Bild ' . htmlspecialchars(basename($files['name'][$i])) . ': ' . $errMsg;
                                 continue;
                             }
                             $singleFile = [
@@ -126,7 +135,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 'error'    => $files['error'][$i],
                                 'size'     => $files['size'][$i],
                             ];
-                            $uploadResult = SecureImageUpload::uploadImage($singleFile, $uploadDir, false);
+                            $uploadResult = SecureImageUpload::uploadImage($singleFile, $uploadDir, true);
                             if ($uploadResult['success']) {
                                 Shop::addProductImage($pid, $uploadResult['path'], $nextSortOrder++);
                             } else {

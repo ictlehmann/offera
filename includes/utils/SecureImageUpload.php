@@ -68,12 +68,13 @@ class SecureImageUpload {
             ];
         }
         
-        // Validate file size
-        if ($file['size'] > self::MAX_FILE_SIZE) {
+        // Validate file size (allow larger source files when converting to WebP, since compression reduces size significantly)
+        $effectiveMaxSize = $convertToWebP ? (self::MAX_FILE_SIZE * 4) : self::MAX_FILE_SIZE;
+        if ($file['size'] > $effectiveMaxSize) {
             return [
                 'success' => false,
                 'path' => null,
-                'error' => 'Datei ist zu groß. Maximum: 5MB'
+                'error' => 'Datei ist zu groß. Maximum: ' . ($convertToWebP ? '20MB' : '5MB')
             ];
         }
         
