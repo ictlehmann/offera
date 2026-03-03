@@ -216,6 +216,152 @@ ob_start();
 ?>
 
 <style>
+    /* ── Dashboard Wrapper ──────────────────────────────── */
+    .dash-wrap {
+        max-width: 80rem;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    /* ── Section Headers ────────────────────────────────── */
+    .dash-section-hdr {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+    .dash-section-hdr-left {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    .dash-section-icon {
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 0.75rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 0.9rem;
+        box-shadow: var(--shadow-soft);
+    }
+    .dash-section-title {
+        font-size: 1.375rem;
+        font-weight: 800;
+        color: var(--text-main);
+        letter-spacing: -0.01em;
+    }
+    .dash-section-link {
+        font-size: 0.875rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.375rem;
+        transition: gap 0.2s ease, opacity 0.2s ease;
+        text-decoration: none !important;
+    }
+    .dash-section-link:hover {
+        gap: 0.625rem;
+        opacity: 0.85;
+        text-decoration: none !important;
+    }
+
+    /* ── Hero Quick Actions ─────────────────────────────── */
+    .hero-quick-action {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.4rem 0.9rem;
+        border-radius: 9999px;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        background: rgba(255, 255, 255, 0.18);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.28);
+        color: #fff !important;
+        text-decoration: none !important;
+        transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .hero-quick-action:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        text-decoration: none !important;
+        color: #fff !important;
+    }
+
+    /* ── Stat Cards ─────────────────────────────────────── */
+    .dash-stat-card {
+        border-radius: 1rem;
+        padding: 1.5rem;
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow-card);
+        transition: all 0.25s ease;
+        position: relative;
+        overflow: hidden;
+        text-decoration: none !important;
+        display: block;
+        color: inherit;
+    }
+    .dash-stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 3px;
+        border-radius: 1rem 1rem 0 0;
+        background: var(--dash-stat-color, var(--ibc-blue));
+        opacity: 0.8;
+    }
+    .dash-stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-card-hover);
+        text-decoration: none !important;
+        color: inherit;
+    }
+    .dash-stat-icon {
+        width: 3rem;
+        height: 3rem;
+        border-radius: 0.75rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--dash-stat-bg, rgba(0,102,179,0.08));
+        color: var(--dash-stat-color, var(--ibc-blue));
+        font-size: 1.1rem;
+        flex-shrink: 0;
+    }
+
+    /* ── Profile Completeness Ring ──────────────────────── */
+    .profile-ring {
+        position: relative;
+        width: 5rem;
+        height: 5rem;
+        flex-shrink: 0;
+    }
+    .profile-ring svg {
+        transform: rotate(-90deg);
+        width: 100%;
+        height: 100%;
+    }
+    .profile-ring-pct {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #a855f7, #ec4899);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
     /* ── Dashboard Event Cards ──────────────────────────── */
     .dash-event-card {
         display: flex;
@@ -224,6 +370,7 @@ ob_start();
         border-radius: 1rem;
         border: 1.5px solid var(--border-color);
         background-color: var(--bg-card);
+        box-shadow: var(--shadow-card);
         transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
         text-decoration: none !important;
         color: inherit;
@@ -248,11 +395,11 @@ ob_start();
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        background: var(--bg-card);
-        border: 1.5px solid var(--border-color);
+        background: rgba(0, 102, 179, 0.06);
+        border: 1.5px solid rgba(0, 102, 179, 0.15);
         border-radius: 0.75rem;
         padding: 0.4rem 0.7rem;
-        min-width: 48px;
+        min-width: 52px;
         text-align: center;
         line-height: 1;
         flex-shrink: 0;
@@ -313,6 +460,7 @@ ob_start();
         border-radius: 1rem;
         border: 1.5px solid var(--border-color);
         background-color: var(--bg-card);
+        box-shadow: var(--shadow-card);
         transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
         text-decoration: none !important;
         color: inherit;
@@ -339,6 +487,44 @@ ob_start();
     .dash-blog-card:hover .dash-blog-img img {
         transform: scale(1.05);
     }
+
+    /* ── Helper Event Cards ─────────────────────────────── */
+    .dash-helper-card {
+        border-radius: 1rem;
+        padding: 1.25rem 1.5rem;
+        background: var(--bg-card);
+        border: 1.5px solid var(--border-color);
+        border-top: 4px solid var(--ibc-green);
+        box-shadow: var(--shadow-card);
+        transition: all 0.25s ease;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    .dash-helper-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-card-hover);
+    }
+
+    /* ── Poll Cards ─────────────────────────────────────── */
+    .dash-poll-card {
+        border-radius: 1rem;
+        background: var(--bg-card);
+        border: 1.5px solid var(--border-color);
+        box-shadow: var(--shadow-card);
+        overflow: hidden;
+        transition: all 0.25s ease;
+    }
+    .dash-poll-card:hover {
+        box-shadow: var(--shadow-card-hover);
+        transform: translateY(-2px);
+    }
+    .dash-poll-accent {
+        height: 3px;
+        background: linear-gradient(90deg, #f97316, #ef4444);
+    }
+
+    /* ── Line Clamp ─────────────────────────────────────── */
     .line-clamp-2 {
         display: -webkit-box;
         -webkit-line-clamp: 2;
@@ -350,6 +536,34 @@ ob_start();
         -webkit-line-clamp: 3;
         -webkit-box-orient: vertical;
         overflow: hidden;
+    }
+
+    /* ── Empty State ────────────────────────────────────── */
+    .dash-empty {
+        border-radius: 1rem;
+        padding: 2.5rem;
+        background: var(--bg-card);
+        border: 1.5px dashed var(--border-color);
+        text-align: center;
+    }
+
+    /* ── Hero Typography & Decorative ───────────────────── */
+    .hero-date-text {
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        opacity: 0.78;
+        margin-bottom: 0.5rem;
+    }
+    .hero-subtitle-text {
+        font-size: 1.0625rem;
+        opacity: 0.85;
+        margin-bottom: 1.25rem;
+    }
+    .hero-badge-icon {
+        font-size: 3rem;
+        opacity: 0.92;
     }
 </style>
 
@@ -557,78 +771,110 @@ function dismissProfileReviewPrompt() {
 <?php endif; ?>
 
 <!-- Hero Section with Personalized Greeting -->
-<div class="mb-10">
-    <div class="max-w-4xl mx-auto">
-        <div class="hero-gradient relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 via-blue-700 to-emerald-600 p-8 md:p-12 text-white shadow-xl">
-            <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmZmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PHBhdGggZD0iTTM2IDM0djZoNnYtNmgtNnptMCAwdi02aC02djZoNnoiLz48L2c+PC9nPjwvc3ZnPg==')] opacity-50"></div>
-            <div class="relative z-10">
-                <p class="text-blue-100 text-sm font-medium uppercase tracking-wider mb-2 hero-date">
-                    <i class="fas fa-sun mr-1"></i> <?php
+<div class="dash-wrap mb-10">
+    <div class="hero-gradient relative overflow-hidden rounded-2xl text-white shadow-xl"
+         style="background: linear-gradient(135deg, #004f8c 0%, #0066b3 35%, #007a5c 70%, #00a651 100%); padding: 2.5rem 2rem 2rem;">
+        <!-- Decorative grid pattern -->
+        <svg class="absolute inset-0 w-full h-full pointer-events-none" xmlns="http://www.w3.org/2000/svg" style="opacity:0.06">
+            <defs>
+                <pattern id="dash-hero-grid" width="36" height="36" patternUnits="userSpaceOnUse">
+                    <path d="M 36 0 L 0 0 0 36" fill="none" stroke="white" stroke-width="1"/>
+                </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#dash-hero-grid)"/>
+        </svg>
+        <!-- Glowing orbs -->
+        <div class="absolute -top-10 -right-10 w-64 h-64 rounded-full pointer-events-none"
+             style="background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)"></div>
+        <div class="absolute -bottom-10 -left-10 w-56 h-56 rounded-full pointer-events-none"
+             style="background: radial-gradient(circle, rgba(0,200,120,0.18) 0%, transparent 70%)"></div>
+
+        <!-- Content -->
+        <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <div>
+                <!-- Date -->
+                <p class="hero-date-text hero-date">
+                    <i class="fas fa-calendar-day mr-2"></i><?php
                         $germanMonths = [1=>'Januar',2=>'Februar',3=>'März',4=>'April',5=>'Mai',6=>'Juni',7=>'Juli',8=>'August',9=>'September',10=>'Oktober',11=>'November',12=>'Dezember'];
                         $monthNum = (int)date('n');
                         echo date('d') . '. ' . ($germanMonths[$monthNum] ?? '') . ' ' . date('Y');
                     ?>
                 </p>
-                <h1 class="text-3xl md:text-5xl font-extrabold mb-3 tracking-tight hero-title">
+                <!-- Greeting -->
+                <h1 class="font-extrabold tracking-tight hero-title mb-2" style="font-size: clamp(1.75rem, 4vw, 2.75rem); line-height: 1.15">
                     <?php echo htmlspecialchars($greeting); ?>, <?php echo htmlspecialchars($displayName); ?>! 👋
                 </h1>
-                <p class="text-lg text-blue-100 font-medium hero-subtitle">
-                    Willkommen zurück im IBC Intranet
+                <p class="hero-subtitle hero-subtitle-text">
+                    Willkommen zurück im IBC&nbsp;Intranet – hier ist deine Übersicht für heute.
                 </p>
+                <!-- Quick action pill buttons -->
+                <div class="flex flex-wrap gap-2">
+                    <a href="../events/index.php" class="hero-quick-action">
+                        <i class="fas fa-calendar-alt"></i> Events
+                    </a>
+                    <a href="../inventory/index.php" class="hero-quick-action">
+                        <i class="fas fa-box-open"></i> Inventar
+                    </a>
+                    <?php if ($canAccessInvoices): ?>
+                    <a href="/pages/invoices/index.php" class="hero-quick-action">
+                        <i class="fas fa-file-invoice-dollar"></i> Rechnungen
+                    </a>
+                    <?php endif; ?>
+                    <a href="../auth/profile.php" class="hero-quick-action">
+                        <i class="fas fa-user-circle"></i> Profil
+                    </a>
+                </div>
             </div>
-            <div class="absolute -bottom-6 -right-6 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
-            <div class="absolute -top-6 -left-6 w-24 h-24 bg-emerald-400/20 rounded-full blur-xl"></div>
+            <!-- Decorative icon badge (desktop only) -->
+            <div class="hidden lg:flex items-center justify-center flex-shrink-0"
+                 style="width: 7rem; height: 7rem; background: rgba(255,255,255,0.13); border-radius: 1.5rem; border: 1px solid rgba(255,255,255,0.22); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);">
+                <i class="fas fa-th-large hero-badge-icon"></i>
+            </div>
         </div>
     </div>
 </div>
 
 <!-- Quick Stats Widgets -->
-<div class="max-w-6xl mx-auto mb-10">
-    <div class="flex items-center mb-6">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center mr-3 shadow-md">
-            <i class="fas fa-tachometer-alt text-white text-sm"></i>
-        </div>
-        <h2 class="text-2xl font-bold" style="color: var(--text-main)">Schnellübersicht</h2>
-    </div>
-    <div class="grid grid-cols-1 <?php echo $canAccessInvoices ? 'md:grid-cols-3' : 'md:grid-cols-2'; ?> gap-6">
-        <!-- My Open Rentals Widget -->
-        <a href="/pages/inventory/my_rentals.php" class="block group">
-            <div class="card p-6 rounded-2xl hover:shadow-2xl transition-all duration-300 cursor-pointer border-t-4 border-orange-400" style="background-color: var(--bg-card)">
-                <div class="flex items-start justify-between mb-4">
-                    <div>
-                        <p class="text-xs font-semibold uppercase tracking-wider text-orange-500 mb-1">Ausleihen</p>
-                        <h3 class="text-lg font-bold" style="color: var(--text-main)">Meine Ausleihen</h3>
-                    </div>
-                    <div class="w-12 h-12 bg-gradient-to-br from-orange-400 to-orange-500 rounded-xl flex items-center justify-center shadow-md flex-shrink-0">
-                        <i class="fas fa-box-open text-white"></i>
-                    </div>
-                </div>
-                <div class="flex items-end justify-between">
-                    <span class="text-4xl font-extrabold text-orange-500"><?php echo $openTasksCount; ?></span>
-                    <span class="inline-flex items-center text-orange-500 font-semibold text-sm group-hover:translate-x-1 transition-transform">
-                        <?php echo $openTasksCount > 0 ? 'Verwalten' : 'Zur Ausleihe'; ?> <i class="fas fa-arrow-right ml-1.5"></i>
-                    </span>
-                </div>
-                <p class="text-xs mt-2" style="color: var(--text-muted)">
-                    <?php if ($openTasksCount > 0): ?>
-                        <i class="fas fa-exclamation-circle text-orange-400 mr-1"></i><?php echo $openTasksCount; ?> offene <?php echo $openTasksCount == 1 ? 'Ausleihe' : 'Ausleihen'; ?>
-                    <?php else: ?>
-                        <i class="fas fa-check-circle text-green-500 mr-1"></i>Keine offenen Ausleihen
-                    <?php endif; ?>
-                </p>
+<div class="dash-wrap mb-10">
+    <div class="dash-section-hdr">
+        <div class="dash-section-hdr-left">
+            <div class="dash-section-icon" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: #fff">
+                <i class="fas fa-tachometer-alt"></i>
             </div>
+            <h2 class="dash-section-title">Schnellübersicht</h2>
+        </div>
+    </div>
+    <div class="grid grid-cols-1 <?php echo $canAccessInvoices ? 'sm:grid-cols-3' : 'sm:grid-cols-2'; ?> gap-5">
+
+        <!-- Rentals Stat Card -->
+        <a href="/pages/inventory/my_rentals.php"
+           class="dash-stat-card"
+           style="--dash-stat-color: #f97316; --dash-stat-bg: rgba(249,115,22,0.09);">
+            <div class="flex items-center justify-between mb-4">
+                <div class="dash-stat-icon">
+                    <i class="fas fa-box-open"></i>
+                </div>
+                <span class="text-xs font-bold uppercase tracking-wider" style="color: #f97316">Ausleihen</span>
+            </div>
+            <div class="text-4xl font-extrabold mb-1" style="color: var(--text-main)"><?php echo $openTasksCount; ?></div>
+            <div class="text-sm font-semibold mb-2" style="color: var(--text-main)">Meine Ausleihen</div>
+            <p class="text-xs" style="color: var(--text-muted)">
+                <?php if ($openTasksCount > 0): ?>
+                    <i class="fas fa-exclamation-circle mr-1" style="color: #f97316"></i><?php echo $openTasksCount; ?> offene <?php echo $openTasksCount == 1 ? 'Ausleihe' : 'Ausleihen'; ?>
+                <?php else: ?>
+                    <i class="fas fa-check-circle mr-1" style="color: var(--ibc-green)"></i>Keine offenen Ausleihen
+                <?php endif; ?>
+            </p>
         </a>
 
-        <!-- Next Event Widget -->
-        <div class="card p-6 rounded-2xl hover:shadow-2xl transition-all duration-300 border-t-4 border-blue-500" style="background-color: var(--bg-card)">
-            <div class="flex items-start justify-between mb-4">
-                <div>
-                    <p class="text-xs font-semibold uppercase tracking-wider text-blue-500 mb-1">Events</p>
-                    <h3 class="text-lg font-bold" style="color: var(--text-main)">Neuestes Event</h3>
+        <!-- Next Event Stat Card -->
+        <div class="dash-stat-card"
+             style="--dash-stat-color: var(--ibc-blue); --dash-stat-bg: rgba(0,102,179,0.08);">
+            <div class="flex items-center justify-between mb-4">
+                <div class="dash-stat-icon">
+                    <i class="fas fa-calendar-alt"></i>
                 </div>
-                <div class="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-md flex-shrink-0">
-                    <i class="fas fa-calendar-alt text-white"></i>
-                </div>
+                <span class="text-xs font-bold uppercase tracking-wider" style="color: var(--ibc-blue)">Events</span>
             </div>
             <?php if (!empty($nextEvents)):
                 $nextEvent = $nextEvents[0];
@@ -636,89 +882,96 @@ function dismissProfileReviewPrompt() {
                 $monthAbbrs = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
                 $monthAbbr = $monthAbbrs[(int)date('n', $ts) - 1];
             ?>
-            <div class="flex items-center gap-3 mb-3">
-                <div class="flex-shrink-0 w-12 rounded-lg overflow-hidden shadow text-center select-none">
-                    <div class="bg-blue-600 text-white text-xs font-bold uppercase tracking-wider py-0.5"><?php echo $monthAbbr; ?></div>
-                    <div class="text-blue-600 text-xl font-extrabold leading-tight py-0.5" style="background-color: var(--bg-card)"><?php echo date('d', $ts); ?></div>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <p class="font-semibold truncate text-sm" style="color: var(--text-main)"><?php echo htmlspecialchars($nextEvent['title']); ?></p>
-                    <p class="text-xs mt-0.5" style="color: var(--text-muted)"><i class="fas fa-clock mr-1 text-blue-400"></i><?php echo date('H:i', $ts); ?> Uhr</p>
-                </div>
-            </div>
-            <div class="flex items-center justify-between">
-                <span class="text-xs" style="color: var(--text-muted)">+<?php echo count($nextEvents) - 1; ?> weitere Events</span>
-                <a href="../events/view.php?id=<?php echo $nextEvent['id']; ?>" class="inline-flex items-center text-blue-500 font-semibold text-sm hover:translate-x-1 transition-transform">
-                    Details <i class="fas fa-arrow-right ml-1.5"></i>
-                </a>
-            </div>
+            <div class="text-4xl font-extrabold mb-1" style="color: var(--text-main)"><?php echo count($nextEvents); ?></div>
+            <div class="text-sm font-semibold mb-2 truncate" style="color: var(--text-main)">Nächstes: <?php echo htmlspecialchars($nextEvent['title']); ?></div>
+            <p class="text-xs" style="color: var(--text-muted)">
+                <i class="fas fa-clock mr-1" style="color: var(--ibc-blue)"></i><?php echo date('d.m.Y', $ts); ?> &middot; <?php echo date('H:i', $ts); ?> Uhr
+            </p>
             <?php else: ?>
-            <p class="text-sm mb-3" style="color: var(--text-muted)">Keine anstehenden Events</p>
-            <a href="../events/index.php" class="inline-flex items-center text-blue-500 font-semibold text-sm hover:translate-x-1 transition-transform">
-                Events durchsuchen <i class="fas fa-arrow-right ml-1.5"></i>
-            </a>
+            <div class="text-4xl font-extrabold mb-1" style="color: var(--text-main)">0</div>
+            <div class="text-sm font-semibold mb-2" style="color: var(--text-main)">Nächstes Event</div>
+            <p class="text-xs" style="color: var(--text-muted)">
+                <i class="fas fa-info-circle mr-1"></i>Keine anstehenden Events
+            </p>
             <?php endif; ?>
         </div>
 
         <?php if ($canAccessInvoices): ?>
-        <!-- Open Invoices Widget -->
-        <a href="/pages/invoices/index.php" class="block group">
-            <div class="card p-6 rounded-2xl hover:shadow-2xl transition-all duration-300 cursor-pointer border-t-4 border-emerald-500" style="background-color: var(--bg-card)">
-                <div class="flex items-start justify-between mb-4">
-                    <div>
-                        <p class="text-xs font-semibold uppercase tracking-wider text-emerald-600 mb-1">Rechnungen</p>
-                        <h3 class="text-lg font-bold" style="color: var(--text-main)">Offene Rechnungen</h3>
-                    </div>
-                    <div class="w-12 h-12 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl flex items-center justify-center shadow-md flex-shrink-0">
-                        <i class="fas fa-file-invoice-dollar text-white"></i>
-                    </div>
+        <!-- Invoices Stat Card -->
+        <a href="/pages/invoices/index.php"
+           class="dash-stat-card"
+           style="--dash-stat-color: var(--ibc-green); --dash-stat-bg: rgba(0,166,81,0.09);">
+            <div class="flex items-center justify-between mb-4">
+                <div class="dash-stat-icon">
+                    <i class="fas fa-file-invoice-dollar"></i>
                 </div>
-                <div class="flex items-end justify-between">
-                    <span class="text-4xl font-extrabold text-emerald-600"><?php echo $openInvoicesCount; ?></span>
-                    <span class="inline-flex items-center text-emerald-600 font-semibold text-sm group-hover:translate-x-1 transition-transform">
-                        <?php echo $openInvoicesCount > 0 ? 'Anzeigen' : 'Zur Übersicht'; ?> <i class="fas fa-arrow-right ml-1.5"></i>
-                    </span>
-                </div>
-                <p class="text-xs mt-2" style="color: var(--text-muted)">
-                    <?php if ($openInvoicesCount > 0): ?>
-                        <i class="fas fa-hourglass-half text-amber-500 mr-1"></i><?php echo $openInvoicesCount; ?> <?php echo $openInvoicesCount == 1 ? 'Rechnung ausstehend' : 'Rechnungen ausstehend'; ?>
-                    <?php else: ?>
-                        <i class="fas fa-check-circle text-green-500 mr-1"></i>Alle Rechnungen bearbeitet
-                    <?php endif; ?>
-                </p>
+                <span class="text-xs font-bold uppercase tracking-wider" style="color: var(--ibc-green)">Rechnungen</span>
             </div>
+            <div class="text-4xl font-extrabold mb-1" style="color: var(--text-main)"><?php echo $openInvoicesCount; ?></div>
+            <div class="text-sm font-semibold mb-2" style="color: var(--text-main)">Offene Rechnungen</div>
+            <p class="text-xs" style="color: var(--text-muted)">
+                <?php if ($openInvoicesCount > 0): ?>
+                    <i class="fas fa-hourglass-half mr-1" style="color: #f59e0b"></i><?php echo $openInvoicesCount; ?> <?php echo $openInvoicesCount == 1 ? 'Rechnung ausstehend' : 'Rechnungen ausstehend'; ?>
+                <?php else: ?>
+                    <i class="fas fa-check-circle mr-1" style="color: var(--ibc-green)"></i>Alle Rechnungen bearbeitet
+                <?php endif; ?>
+            </p>
         </a>
         <?php endif; ?>
+
     </div>
 </div>
 
 <?php if (in_array($userRole, $rolesRequiringProfile) && $profileCompletenessPercent < 100): ?>
 <!-- Profile Completeness Widget -->
-<div class="max-w-6xl mx-auto mb-10">
-    <div class="card p-6 rounded-2xl shadow-lg" style="background-color: var(--bg-card); border-left: 4px solid #a855f7">
-        <div class="flex flex-col sm:flex-row items-start gap-4">
-            <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md">
-                <i class="fas fa-user-circle text-white text-xl"></i>
-            </div>
-            <div class="flex-1 min-w-0">
-                <h3 class="text-lg font-bold mb-1" style="color: var(--text-main)">
-                    🎯 Vervollständige dein Profil!
-                </h3>
-                <p class="text-sm mb-4" style="color: var(--text-muted)">
-                    Ein vollständiges Profil hilft deinen Kolleginnen und Kollegen, dich besser kennenzulernen. Du bist schon zu <strong><?php echo $profileCompletenessPercent; ?>%</strong> fertig – fast geschafft!
-                </p>
-                <div class="mb-4">
-                    <div class="flex items-center justify-between mb-1.5">
-                        <span class="text-xs font-semibold" style="color: var(--text-muted)">Profil-Fortschritt</span>
-                        <span class="text-xs font-bold" style="color: #a855f7"><?php echo $profileCompletenessPercent; ?>%</span>
-                    </div>
-                    <div class="w-full rounded-full h-3 overflow-hidden" style="background-color: var(--border-color)">
-                        <div class="h-3 rounded-full transition-all duration-500" style="width: <?php echo $profileCompletenessPercent; ?>%; background: linear-gradient(90deg, #a855f7, #ec4899)"></div>
-                    </div>
+<div class="dash-wrap mb-10">
+    <?php
+        // SVG ring values: r=34 → circumference ≈ 213.6
+        $circumference = 213.628;
+        $dashOffset = $circumference * (1 - $profileCompletenessPercent / 100);
+    ?>
+    <div class="card rounded-2xl overflow-hidden" style="background-color: var(--bg-card); border: 1.5px solid var(--border-color); box-shadow: var(--shadow-card);">
+        <!-- Accent top strip -->
+        <div style="height: 3px; background: linear-gradient(90deg, #a855f7, #ec4899);"></div>
+        <div class="p-6">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-5">
+                <!-- Circular progress ring -->
+                <div class="profile-ring">
+                    <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Track -->
+                        <circle cx="40" cy="40" r="34" fill="none" stroke="var(--border-color)" stroke-width="6"/>
+                        <!-- Progress -->
+                        <circle cx="40" cy="40" r="34" fill="none"
+                                stroke="url(#profileGrad)"
+                                stroke-width="6"
+                                stroke-linecap="round"
+                                stroke-dasharray="<?php echo $circumference; ?>"
+                                stroke-dashoffset="<?php echo $dashOffset; ?>"
+                                style="transition: stroke-dashoffset 0.6s ease"/>
+                        <defs>
+                            <linearGradient id="profileGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" stop-color="#a855f7"/>
+                                <stop offset="100%" stop-color="#ec4899"/>
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                    <div class="profile-ring-pct"><?php echo $profileCompletenessPercent; ?>%</div>
                 </div>
-                <a href="../auth/profile.php" class="inline-flex items-center px-4 py-2 text-white rounded-lg font-semibold text-sm transition-all duration-300 shadow-md hover:opacity-90" style="background: linear-gradient(90deg, #a855f7, #ec4899)">
-                    <i class="fas fa-user-edit mr-2"></i>Profil vervollständigen
-                </a>
+                <!-- Text content -->
+                <div class="flex-1 min-w-0">
+                    <h3 class="text-lg font-bold mb-1" style="color: var(--text-main)">
+                        🎯 Vervollständige dein Profil!
+                    </h3>
+                    <p class="text-sm mb-4" style="color: var(--text-muted)">
+                        Ein vollständiges Profil hilft deinen Kolleginnen und Kollegen, dich besser kennenzulernen.
+                        Du bist schon zu&nbsp;<strong style="color: #a855f7"><?php echo $profileCompletenessPercent; ?>%</strong>&nbsp;fertig&nbsp;– fast geschafft!
+                    </p>
+                    <a href="../auth/profile.php"
+                       class="inline-flex items-center px-4 py-2.5 text-white rounded-xl font-semibold text-sm transition-all duration-300 shadow-md hover:opacity-90 hover:-translate-y-0.5"
+                       style="background: linear-gradient(135deg, #a855f7, #ec4899)">
+                        <i class="fas fa-user-edit mr-2"></i>Profil vervollständigen
+                    </a>
+                </div>
             </div>
         </div>
     </div>
@@ -727,16 +980,16 @@ function dismissProfileReviewPrompt() {
 
 <!-- Meine nächsten Events Section -->
 <?php if (!empty($events)): ?>
-<div class="max-w-6xl mx-auto mb-10">
-    <div class="flex flex-wrap items-center justify-between gap-2 mb-6">
-        <div class="flex items-center">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center mr-3 shadow-md shrink-0">
-                <i class="fas fa-calendar-alt text-white text-sm"></i>
+<div class="dash-wrap mb-10">
+    <div class="dash-section-hdr">
+        <div class="dash-section-hdr-left">
+            <div class="dash-section-icon" style="background: linear-gradient(135deg, #3b82f6, #4f46e5); color: #fff">
+                <i class="fas fa-calendar-alt"></i>
             </div>
-            <h2 class="text-2xl font-bold" style="color: var(--text-main)">Meine nächsten Events</h2>
+            <h2 class="dash-section-title">Meine nächsten Events</h2>
         </div>
-        <a href="../events/index.php" class="text-blue-600 hover:text-blue-700 font-semibold text-sm shrink-0">
-            Alle Events <i class="fas fa-arrow-right ml-1"></i>
+        <a href="../events/index.php" class="dash-section-link" style="color: var(--ibc-blue)">
+            Alle Events <i class="fas fa-arrow-right"></i>
         </a>
     </div>
     <?php
@@ -815,16 +1068,16 @@ function dismissProfileReviewPrompt() {
 
 <!-- Offene Rechnungen Section -->
 <?php if ($canAccessInvoices && !empty($recentOpenInvoices)): ?>
-<div class="max-w-6xl mx-auto mb-10">
-    <div class="flex flex-wrap items-center justify-between gap-2 mb-6">
-        <div class="flex items-center">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center mr-3 shadow-md shrink-0">
-                <i class="fas fa-file-invoice-dollar text-white text-sm"></i>
+<div class="dash-wrap mb-10">
+    <div class="dash-section-hdr">
+        <div class="dash-section-hdr-left">
+            <div class="dash-section-icon" style="background: linear-gradient(135deg, #10b981, #059669); color: #fff">
+                <i class="fas fa-file-invoice-dollar"></i>
             </div>
-            <h2 class="text-2xl font-bold" style="color: var(--text-main)">Offene Rechnungen</h2>
+            <h2 class="dash-section-title">Offene Rechnungen</h2>
         </div>
-        <a href="/pages/invoices/index.php" class="text-emerald-600 hover:text-emerald-700 font-semibold text-sm shrink-0">
-            Alle Rechnungen <i class="fas fa-arrow-right ml-1"></i>
+        <a href="/pages/invoices/index.php" class="dash-section-link" style="color: var(--ibc-green)">
+            Alle Rechnungen <i class="fas fa-arrow-right"></i>
         </a>
     </div>
     <?php
@@ -833,7 +1086,7 @@ function dismissProfileReviewPrompt() {
             'approved' => 'Offen',
         ];
     ?>
-    <div class="card rounded-2xl shadow-lg overflow-hidden" style="background-color: var(--bg-card)">
+    <div class="card rounded-2xl overflow-hidden" style="background-color: var(--bg-card); border: 1.5px solid var(--border-color); box-shadow: var(--shadow-card);">
         <div class="divide-y" style="border-color: var(--border-color)">
             <?php foreach ($recentOpenInvoices as $inv): ?>
             <?php
@@ -854,7 +1107,7 @@ function dismissProfileReviewPrompt() {
                     </p>
                 </div>
                 <div class="flex items-center gap-3 flex-shrink-0">
-                    <span class="font-bold text-sm text-emerald-700 dark:text-emerald-400">
+                    <span class="font-bold text-sm" style="color: var(--ibc-green)">
                         <?php echo number_format((float)$inv['amount'], 2, ',', '.'); ?>&nbsp;€
                     </span>
                     <span class="invoice-badge invoice-badge--<?php echo $invStatus; ?>">
@@ -869,55 +1122,60 @@ function dismissProfileReviewPrompt() {
 </div>
 <?php endif; ?>
 
-<!-- Dashboard Section - Wir suchen Helfer -->
-<div class="max-w-6xl mx-auto mb-12">
-    <div class="flex items-center mb-6">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center mr-3 shadow-md">
-            <i class="fas fa-hands-helping text-white text-sm"></i>
-        </div>
-        <h2 class="text-2xl font-bold" style="color: var(--text-main)">Wir suchen Helfer</h2>
-    </div>
-    
-    <?php if (!empty($helperEvents)): ?>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <?php foreach ($helperEvents as $event): ?>
-        <div class="card p-6 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border-l-4 border-green-500" style="background-color: var(--bg-card)">
-            <div class="mb-4">
-                <h3 class="text-lg font-bold mb-2" style="color: var(--text-main)">
-                    <i class="fas fa-calendar-alt text-green-600 mr-2"></i>
-                    <?php echo htmlspecialchars($event['title']); ?>
-                </h3>
-                <?php if (!empty($event['description'])): ?>
-                <p class="text-sm mb-2" style="color: var(--text-muted)">
-                    <?php echo htmlspecialchars(substr($event['description'], 0, 100)) . (strlen($event['description']) > 100 ? '...' : ''); ?>
-                </p>
-                <?php endif; ?>
+<!-- Wir suchen Helfer Section -->
+<div class="dash-wrap mb-10">
+    <div class="dash-section-hdr">
+        <div class="dash-section-hdr-left">
+            <div class="dash-section-icon" style="background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff">
+                <i class="fas fa-hands-helping"></i>
             </div>
-            <div class="text-sm mb-3" style="color: var(--text-muted)">
-                <div class="flex items-center mb-1">
-                    <i class="fas fa-clock mr-2 text-green-600"></i>
-                    <?php echo date('d.m.Y H:i', strtotime($event['start_time'])); ?> Uhr
+            <h2 class="dash-section-title">Wir suchen Helfer</h2>
+        </div>
+        <a href="../events/index.php" class="dash-section-link" style="color: var(--ibc-green)">
+            Alle Events <i class="fas fa-arrow-right"></i>
+        </a>
+    </div>
+
+    <?php if (!empty($helperEvents)): ?>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <?php foreach ($helperEvents as $event): ?>
+        <div class="dash-helper-card">
+            <h3 class="text-base font-bold leading-snug" style="color: var(--text-main)">
+                <?php echo htmlspecialchars($event['title']); ?>
+            </h3>
+            <?php if (!empty($event['description'])): ?>
+            <p class="text-sm line-clamp-2" style="color: var(--text-muted)">
+                <?php echo htmlspecialchars(substr($event['description'], 0, 100)) . (strlen($event['description']) > 100 ? '…' : ''); ?>
+            </p>
+            <?php endif; ?>
+            <div class="text-xs space-y-1" style="color: var(--text-muted)">
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-clock w-3 text-center" style="color: var(--ibc-green)"></i>
+                    <span><?php echo date('d.m.Y H:i', strtotime($event['start_time'])); ?> Uhr</span>
                 </div>
                 <?php if (!empty($event['location'])): ?>
-                <div class="flex items-center">
-                    <i class="fas fa-map-marker-alt mr-2 text-green-600"></i>
-                    <?php echo htmlspecialchars($event['location']); ?>
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-map-marker-alt w-3 text-center" style="color: var(--ibc-green)"></i>
+                    <span class="truncate"><?php echo htmlspecialchars($event['location']); ?></span>
                 </div>
                 <?php endif; ?>
             </div>
-            <a href="../events/view.php?id=<?php echo $event['id']; ?>" 
-               class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition-all font-semibold">
-                Mehr erfahren <i class="fas fa-arrow-right ml-2"></i>
+            <a href="../events/view.php?id=<?php echo $event['id']; ?>"
+               class="inline-flex items-center gap-2 px-4 py-2 text-white rounded-xl font-semibold text-sm transition-all hover:opacity-90 hover:-translate-y-0.5 shadow-md"
+               style="background: linear-gradient(135deg, var(--ibc-green), var(--ibc-green-dark))">
+                Mehr erfahren <i class="fas fa-arrow-right"></i>
             </a>
         </div>
         <?php endforeach; ?>
     </div>
     <?php else: ?>
-    <div class="card p-8 rounded-xl shadow-lg text-center" style="background-color: var(--bg-card)">
-        <i class="fas fa-hands-helping text-4xl mb-3 text-gray-400"></i>
-        <p class="text-lg" style="color: var(--text-muted)">Aktuell werden keine Helfer gesucht</p>
-        <a href="../events/index.php" class="inline-flex items-center mt-4 text-green-600 hover:text-green-700 font-semibold">
-            Alle Events ansehen <i class="fas fa-arrow-right ml-2"></i>
+    <div class="dash-empty">
+        <div class="w-14 h-14 rounded-2xl mx-auto mb-4 flex items-center justify-center" style="background: rgba(0,166,81,0.1)">
+            <i class="fas fa-hands-helping text-2xl" style="color: var(--ibc-green)"></i>
+        </div>
+        <p class="font-semibold mb-1" style="color: var(--text-main)">Aktuell werden keine Helfer gesucht</p>
+        <a href="../events/index.php" class="inline-flex items-center gap-1 text-sm font-semibold mt-2" style="color: var(--ibc-green); text-decoration: none">
+            Alle Events ansehen <i class="fas fa-arrow-right"></i>
         </a>
     </div>
     <?php endif; ?>
@@ -925,16 +1183,16 @@ function dismissProfileReviewPrompt() {
 
 <!-- Neuigkeiten aus dem Blog Section -->
 <?php if (!empty($recentBlogPosts)): ?>
-<div class="max-w-6xl mx-auto mb-10">
-    <div class="flex flex-wrap items-center justify-between gap-2 mb-6">
-        <div class="flex items-center">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center mr-3 shadow-md shrink-0">
-                <i class="fas fa-newspaper text-white text-sm"></i>
+<div class="dash-wrap mb-10">
+    <div class="dash-section-hdr">
+        <div class="dash-section-hdr-left">
+            <div class="dash-section-icon" style="background: linear-gradient(135deg, #6366f1, #7c3aed); color: #fff">
+                <i class="fas fa-newspaper"></i>
             </div>
-            <h2 class="text-2xl font-bold" style="color: var(--text-main)">Neuigkeiten aus dem Blog</h2>
+            <h2 class="dash-section-title">Neuigkeiten aus dem Blog</h2>
         </div>
-        <a href="../blog/index.php" class="text-indigo-600 hover:text-indigo-700 font-semibold text-sm shrink-0">
-            Alle Artikel <i class="fas fa-arrow-right ml-1"></i>
+        <a href="../blog/index.php" class="dash-section-link" style="color: #6366f1">
+            Alle Artikel <i class="fas fa-arrow-right"></i>
         </a>
     </div>
     <?php
@@ -987,7 +1245,7 @@ function dismissProfileReviewPrompt() {
                 </p>
                 <div class="mt-3 pt-3 flex items-center justify-between text-xs" style="border-top: 1px solid var(--border-color); color: var(--text-muted)">
                     <span class="truncate"><i class="fas fa-user-circle mr-1 text-indigo-400"></i><?php echo htmlspecialchars(explode('@', $post['author_email'])[0]); ?></span>
-                    <span class="inline-flex items-center gap-1 text-indigo-600 font-semibold flex-shrink-0">
+                    <span class="inline-flex items-center gap-1 font-semibold flex-shrink-0" style="color: #6366f1">
                         Lesen <i class="fas fa-arrow-right"></i>
                     </span>
                 </div>
@@ -999,19 +1257,19 @@ function dismissProfileReviewPrompt() {
 <?php endif; ?>
 
 <!-- Polls Widget Section -->
-<div class="max-w-6xl mx-auto mb-12">
-    <div class="flex flex-wrap items-center justify-between gap-2 mb-6">
-        <div class="flex items-center">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center mr-3 shadow-md shrink-0">
-                <i class="fas fa-poll text-white text-sm"></i>
+<div class="dash-wrap mb-12">
+    <div class="dash-section-hdr">
+        <div class="dash-section-hdr-left">
+            <div class="dash-section-icon" style="background: linear-gradient(135deg, #f97316, #dc2626); color: #fff">
+                <i class="fas fa-poll"></i>
             </div>
-            <h2 class="text-2xl font-bold" style="color: var(--text-main)">Aktuelle Umfragen</h2>
+            <h2 class="dash-section-title">Aktuelle Umfragen</h2>
         </div>
-        <a href="../polls/index.php" class="text-orange-600 hover:text-orange-700 font-semibold text-sm shrink-0">
-            Alle Umfragen <i class="fas fa-arrow-right ml-1"></i>
+        <a href="../polls/index.php" class="dash-section-link" style="color: #f97316">
+            Alle Umfragen <i class="fas fa-arrow-right"></i>
         </a>
     </div>
-    
+
     <?php
     // Fetch active polls for the user
     $userAzureRoles = isset($user['azure_roles']) ? json_decode($user['azure_roles'], true) : [];
@@ -1035,50 +1293,47 @@ function dismissProfileReviewPrompt() {
     ?>
     <div class="grid grid-cols-1 gap-4">
         <?php foreach ($visiblePolls as $poll): ?>
-        <div class="card p-5 rounded-xl shadow-md hover:shadow-lg transition-all" style="background-color: var(--bg-card)">
-            <div class="flex flex-col sm:flex-row items-start gap-3">
+        <div class="dash-poll-card">
+            <div class="dash-poll-accent"></div>
+            <div class="p-5 flex flex-col sm:flex-row items-start gap-4">
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm"
+                     style="background: rgba(249,115,22,0.12); color: #f97316; font-size: 1.1rem">
+                    <i class="fas fa-poll-h"></i>
+                </div>
                 <div class="flex-1 min-w-0">
-                    <h3 class="font-bold text-lg mb-2" style="color: var(--text-main)">
-                        <i class="fas fa-poll-h text-orange-500 mr-2"></i>
+                    <h3 class="font-bold text-base mb-1.5 leading-snug" style="color: var(--text-main)">
                         <?php echo htmlspecialchars($poll['title']); ?>
                     </h3>
                     <?php if (!empty($poll['description'])): ?>
-                    <p class="text-sm mb-3" style="color: var(--text-muted)">
-                        <?php echo htmlspecialchars(substr($poll['description'], 0, 150)) . (strlen($poll['description']) > 150 ? '...' : ''); ?>
+                    <p class="text-sm mb-2 line-clamp-2" style="color: var(--text-muted)">
+                        <?php echo htmlspecialchars(substr($poll['description'], 0, 150)) . (strlen($poll['description']) > 150 ? '…' : ''); ?>
                     </p>
                     <?php endif; ?>
                     <p class="text-xs" style="color: var(--text-muted)">
-                        <i class="fas fa-clock mr-1"></i>
-                        Endet am <?php echo date('d.m.Y', strtotime($poll['end_date'])); ?>
+                        <i class="fas fa-clock mr-1"></i>Endet am <?php echo date('d.m.Y', strtotime($poll['end_date'])); ?>
                     </p>
                 </div>
-                <div class="flex sm:flex-col gap-2 shrink-0">
+                <div class="flex sm:flex-col gap-2 flex-shrink-0">
                     <?php if (!empty($poll['microsoft_forms_url'])): ?>
-                    <!-- Microsoft Forms Link -->
-                    <a 
-                        href="<?php echo htmlspecialchars($poll['microsoft_forms_url']); ?>"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="inline-flex items-center px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-all text-sm font-semibold"
-                    >
-                        <i class="fas fa-external-link-alt mr-1"></i>Zur Umfrage
+                    <a href="<?php echo htmlspecialchars($poll['microsoft_forms_url']); ?>"
+                       target="_blank" rel="noopener noreferrer"
+                       class="inline-flex items-center gap-1.5 px-4 py-2 text-white rounded-xl font-semibold text-sm transition-all hover:opacity-90"
+                       style="background: linear-gradient(135deg, #f97316, #ea580c)">
+                        <i class="fas fa-external-link-alt"></i>Zur Umfrage
                     </a>
-                    <button 
-                        onclick="hidePollFromDashboard(<?php echo $poll['id']; ?>)"
-                        class="inline-flex items-center px-4 py-2 bg-gray-400 text-white rounded-lg hover:bg-gray-500 transition-all text-xs font-semibold"
-                    >
-                        <i class="fas fa-eye-slash mr-1"></i>Ausblenden
+                    <button onclick="hidePollFromDashboard(<?php echo $poll['id']; ?>)"
+                            class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl font-semibold text-xs transition-all"
+                            style="background: var(--ibc-gray-200); color: var(--text-muted)">
+                        <i class="fas fa-eye-slash"></i>Ausblenden
                     </button>
                     <?php else: ?>
-                    <!-- Internal Poll -->
-                    <a 
-                        href="../polls/view.php?id=<?php echo $poll['id']; ?>"
-                        class="inline-flex items-center px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-all text-sm font-semibold"
-                    >
+                    <a href="../polls/view.php?id=<?php echo $poll['id']; ?>"
+                       class="inline-flex items-center gap-1.5 px-4 py-2 text-white rounded-xl font-semibold text-sm transition-all hover:opacity-90"
+                       style="background: linear-gradient(135deg, #f97316, #ea580c)">
                         <?php if ($poll['user_has_voted'] > 0): ?>
-                            <i class="fas fa-chart-bar mr-1"></i>Ergebnisse
+                            <i class="fas fa-chart-bar"></i>Ergebnisse
                         <?php else: ?>
-                            <i class="fas fa-vote-yea mr-1"></i>Abstimmen
+                            <i class="fas fa-vote-yea"></i>Abstimmen
                         <?php endif; ?>
                     </a>
                     <?php endif; ?>
@@ -1088,9 +1343,14 @@ function dismissProfileReviewPrompt() {
         <?php endforeach; ?>
     </div>
     <?php else: ?>
-    <div class="card p-6 rounded-xl shadow-md text-center" style="background-color: var(--bg-card)">
-        <i class="fas fa-poll text-3xl mb-2 text-gray-400"></i>
-        <p style="color: var(--text-muted)">Keine aktiven Umfragen für Sie verfügbar</p>
+    <div class="dash-empty">
+        <div class="w-14 h-14 rounded-2xl mx-auto mb-4 flex items-center justify-center" style="background: rgba(249,115,22,0.1)">
+            <i class="fas fa-poll text-2xl" style="color: #f97316"></i>
+        </div>
+        <p class="font-semibold mb-1" style="color: var(--text-main)">Keine aktiven Umfragen verfügbar</p>
+        <a href="../polls/index.php" class="inline-flex items-center gap-1 text-sm font-semibold mt-2" style="color: #f97316; text-decoration: none">
+            Alle Umfragen ansehen <i class="fas fa-arrow-right"></i>
+        </a>
     </div>
     <?php endif; ?>
 </div>
