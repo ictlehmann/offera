@@ -151,12 +151,15 @@ ob_start();
 ?>
 
 <div class="max-w-6xl mx-auto">
-    <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-800 mb-2">
-            <i class="fas fa-cog text-purple-600 mr-3"></i>
-            Einstellungen
-        </h1>
-        <p class="text-gray-600">Verwalte deine persönlichen Einstellungen</p>
+    <!-- Page Header -->
+    <div class="mb-8 flex items-center gap-4">
+        <div class="w-12 h-12 rounded-2xl bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center shadow-sm">
+            <i class="fas fa-cog text-purple-600 dark:text-purple-400 text-xl"></i>
+        </div>
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-50 tracking-tight">Einstellungen</h1>
+            <p class="text-gray-500 dark:text-gray-400 text-sm">Verwalte deine persönlichen Einstellungen</p>
+        </div>
     </div>
 
     <!-- Success/Error Messages -->
@@ -224,11 +227,18 @@ ob_start();
 
         <!-- 2FA Settings -->
         <div class="lg:col-span-2">
-            <div class="card p-6">
-                <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
-                    <i class="fas fa-shield-alt text-green-600 mr-2"></i>
-                    Zwei-Faktor-Authentifizierung (2FA)
-                </h2>
+            <div class="card rounded-xl shadow-sm overflow-hidden">
+                <!-- Section header -->
+                <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center gap-3 bg-green-50 dark:bg-green-900/10">
+                    <div class="w-9 h-9 rounded-xl bg-green-100 dark:bg-green-900/40 flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-shield-alt text-green-600 dark:text-green-400"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-base font-bold text-gray-900 dark:text-gray-100">Sicherheit</h2>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Zwei-Faktor-Authentifizierung (2FA)</p>
+                    </div>
+                </div>
+                <div class="p-6">
 
                 <?php if (!$showQRCode): ?>
                 <div class="flex items-center justify-between mb-6">
@@ -312,17 +322,25 @@ ob_start();
                     </form>
                 </div>
                 <?php endif; ?>
+                </div><!-- /p-6 -->
             </div>
         </div>
 
         <!-- Privacy Settings -->
         <div class="lg:col-span-2">
-            <div class="card p-6">
-                <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
-                    <i class="fas fa-user-shield text-red-600 mr-2"></i>
-                    Privatsphäre-Einstellungen
-                </h2>
-                <p class="text-gray-600 dark:text-gray-300 mb-6">
+            <div class="card rounded-xl shadow-sm overflow-hidden">
+                <!-- Section header -->
+                <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center gap-3 bg-red-50 dark:bg-red-900/10">
+                    <div class="w-9 h-9 rounded-xl bg-red-100 dark:bg-red-900/40 flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-user-shield text-red-600 dark:text-red-400"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-base font-bold text-gray-900 dark:text-gray-100">Datenschutz</h2>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Sichtbarkeit deiner Profildaten für andere Mitglieder</p>
+                    </div>
+                </div>
+                <div class="p-6">
+                <p class="text-gray-600 dark:text-gray-300 mb-5 text-sm">
                     Lege fest, welche Informationen deines Profils für reguläre Mitglieder sichtbar sind.
                     Verborgen gestellte Daten sind weiterhin für Vorstände und Alumni sichtbar.
                 </p>
@@ -353,44 +371,48 @@ ob_start();
                         <i class="fas fa-save mr-2"></i>Datenschutz-Einstellungen speichern
                     </button>
                 </form>
+                </div><!-- /p-6 -->
             </div>
         </div>
 
         <!-- Theme Settings -->
         <div class="lg:col-span-2">
-            <div class="card p-6">
-                <h2 class="text-xl font-bold text-gray-800 mb-4">
-                    <i class="fas fa-palette text-purple-600 mr-2"></i>
-                    Design-Einstellungen
-                </h2>
-                <p class="text-gray-600 mb-6">
-                    Wähle dein bevorzugtes Design-Theme
-                </p>
-                
+            <div class="card rounded-xl shadow-sm overflow-hidden">
+                <!-- Section header -->
+                <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center gap-3 bg-purple-50 dark:bg-purple-900/10">
+                    <div class="w-9 h-9 rounded-xl bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-palette text-purple-600 dark:text-purple-400"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-base font-bold text-gray-900 dark:text-gray-100">Erscheinungsbild</h2>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">Design-Theme auswählen</p>
+                    </div>
+                </div>
+                <div class="p-6">
                 <form method="POST" class="space-y-4">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <!-- Light Theme -->
-                        <label class="flex flex-col items-center p-4 border-2 rounded-lg cursor-pointer transition-all hover:border-purple-500 <?php echo ($user['theme_preference'] ?? 'auto') === 'light' ? 'border-purple-500 bg-purple-50' : 'border-gray-200'; ?>">
+                        <label class="flex flex-col items-center p-4 border-2 rounded-xl cursor-pointer transition-all hover:border-purple-500 <?php echo ($user['theme_preference'] ?? 'auto') === 'light' ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20' : 'border-gray-200 dark:border-gray-700'; ?>">
                             <input type="radio" name="theme" value="light" <?php echo ($user['theme_preference'] ?? 'auto') === 'light' ? 'checked' : ''; ?> class="sr-only">
                             <i class="fas fa-sun text-4xl text-yellow-500 mb-2"></i>
-                            <span class="font-medium text-gray-800">Hellmodus</span>
-                            <span class="text-sm text-gray-600 text-center mt-1">Immer helles Design</span>
+                            <span class="font-semibold text-gray-800 dark:text-gray-100">Hellmodus</span>
+                            <span class="text-sm text-gray-500 dark:text-gray-400 text-center mt-1">Immer helles Design</span>
                         </label>
 
                         <!-- Dark Theme -->
-                        <label class="flex flex-col items-center p-4 border-2 rounded-lg cursor-pointer transition-all hover:border-purple-500 <?php echo ($user['theme_preference'] ?? 'auto') === 'dark' ? 'border-purple-500 bg-purple-50' : 'border-gray-200'; ?>">
+                        <label class="flex flex-col items-center p-4 border-2 rounded-xl cursor-pointer transition-all hover:border-purple-500 <?php echo ($user['theme_preference'] ?? 'auto') === 'dark' ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20' : 'border-gray-200 dark:border-gray-700'; ?>">
                             <input type="radio" name="theme" value="dark" <?php echo ($user['theme_preference'] ?? 'auto') === 'dark' ? 'checked' : ''; ?> class="sr-only">
-                            <i class="fas fa-moon text-4xl text-indigo-600 mb-2"></i>
-                            <span class="font-medium text-gray-800">Dunkelmodus</span>
-                            <span class="text-sm text-gray-600 text-center mt-1">Immer dunkles Design</span>
+                            <i class="fas fa-moon text-4xl text-indigo-500 mb-2"></i>
+                            <span class="font-semibold text-gray-800 dark:text-gray-100">Dunkelmodus</span>
+                            <span class="text-sm text-gray-500 dark:text-gray-400 text-center mt-1">Immer dunkles Design</span>
                         </label>
 
                         <!-- Auto Theme -->
-                        <label class="flex flex-col items-center p-4 border-2 rounded-lg cursor-pointer transition-all hover:border-purple-500 <?php echo ($user['theme_preference'] ?? 'auto') === 'auto' ? 'border-purple-500 bg-purple-50' : 'border-gray-200'; ?>">
+                        <label class="flex flex-col items-center p-4 border-2 rounded-xl cursor-pointer transition-all hover:border-purple-500 <?php echo ($user['theme_preference'] ?? 'auto') === 'auto' ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20' : 'border-gray-200 dark:border-gray-700'; ?>">
                             <input type="radio" name="theme" value="auto" <?php echo ($user['theme_preference'] ?? 'auto') === 'auto' ? 'checked' : ''; ?> class="sr-only">
-                            <i class="fas fa-adjust text-4xl text-gray-600 mb-2"></i>
-                            <span class="font-medium text-gray-800">Automatisch</span>
-                            <span class="text-sm text-gray-600 text-center mt-1">Folgt Systemeinstellung</span>
+                            <i class="fas fa-adjust text-4xl text-gray-500 dark:text-gray-400 mb-2"></i>
+                            <span class="font-semibold text-gray-800 dark:text-gray-100">Automatisch</span>
+                            <span class="text-sm text-gray-500 dark:text-gray-400 text-center mt-1">Folgt Systemeinstellung</span>
                         </label>
                     </div>
 
@@ -398,6 +420,7 @@ ob_start();
                         <i class="fas fa-save mr-2"></i>Design-Einstellungen speichern
                     </button>
                 </form>
+                </div><!-- /p-6 -->
             </div>
         </div>
 
@@ -405,51 +428,64 @@ ob_start();
 
     <!-- GDPR Data Export -->
     <div class="mt-6">
-        <div class="card p-6">
-            <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
-                <i class="fas fa-file-export text-green-600 mr-2"></i>
-                Datenschutz / DSGVO
-            </h2>
-            <p class="text-gray-600 dark:text-gray-300 mb-6">
+        <div class="card rounded-xl shadow-sm overflow-hidden">
+            <!-- Section header -->
+            <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center gap-3 bg-teal-50 dark:bg-teal-900/10">
+                <div class="w-9 h-9 rounded-xl bg-teal-100 dark:bg-teal-900/40 flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-file-export text-teal-600 dark:text-teal-400"></i>
+                </div>
+                <div>
+                    <h2 class="text-base font-bold text-gray-900 dark:text-gray-100">DSGVO / Datenschutz</h2>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Datenschutz-Grundverordnung – Deine Rechte</p>
+                </div>
+            </div>
+            <div class="p-6">
+            <p class="text-gray-600 dark:text-gray-300 mb-5 text-sm">
                 Gemäß DSGVO Art. 20 kannst du alle zu deiner Person gespeicherten Daten als JSON-Datei herunterladen (Profil, Ausleihen, Shop-Bestellungen, Event-Teilnahmen).
             </p>
             <form method="POST" action="<?php echo asset('api/export_user_data.php'); ?>">
                 <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(CSRFHandler::getToken(), ENT_QUOTES, 'UTF-8'); ?>">
-                <button type="submit" class="flex items-center px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-semibold">
+                <button type="submit" class="inline-flex items-center px-5 py-2.5 bg-teal-600 text-white rounded-xl hover:bg-teal-700 transition font-semibold text-sm">
                     <i class="fas fa-download mr-2"></i>Meine Daten anfordern / exportieren
                 </button>
             </form>
+            </div><!-- /p-6 -->
         </div>
     </div>
 
     <!-- Support Section -->
     <div class="mt-6">
-        <div class="card p-6">
-            <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
-                <i class="fas fa-life-ring text-blue-600 mr-2"></i>
-                Hilfe
-            </h2>
-            <p class="text-gray-600 dark:text-gray-300 mb-6">
-                Wende dich bei Fragen oder Problemen direkt an die IT-Ressortleitung
-            </p>
+        <div class="card rounded-xl shadow-sm overflow-hidden">
+            <!-- Section header -->
+            <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center gap-3 bg-blue-50 dark:bg-blue-900/10">
+                <div class="w-9 h-9 rounded-xl bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-life-ring text-blue-600 dark:text-blue-400"></i>
+                </div>
+                <div>
+                    <h2 class="text-base font-bold text-gray-900 dark:text-gray-100">Hilfe &amp; Support</h2>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Wende dich bei Fragen direkt an die IT-Ressortleitung</p>
+                </div>
+            </div>
+            <div class="p-6">
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <button type="button" onclick="showSupportModal('2fa_reset')"
-                   class="flex items-center p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg hover:bg-yellow-100 dark:hover:bg-yellow-900/40 transition text-left w-full">
+                   class="flex items-center p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-xl hover:bg-yellow-100 dark:hover:bg-yellow-900/40 transition text-left w-full">
                     <i class="fas fa-shield-alt text-yellow-600 dark:text-yellow-400 text-2xl mr-4 shrink-0"></i>
                     <div>
                         <span class="block font-semibold text-gray-800 dark:text-gray-100">2FA zurücksetzen</span>
-                        <span class="block text-sm text-gray-600 dark:text-gray-400">Anfrage per E-Mail senden</span>
+                        <span class="block text-sm text-gray-500 dark:text-gray-400">Anfrage per E-Mail senden</span>
                     </div>
                 </button>
                 <button type="button" onclick="showSupportModal('bug')"
-                   class="flex items-center p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/40 transition text-left w-full">
+                   class="flex items-center p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-xl hover:bg-red-100 dark:hover:bg-red-900/40 transition text-left w-full">
                     <i class="fas fa-bug text-red-600 dark:text-red-400 text-2xl mr-4 shrink-0"></i>
                     <div>
                         <span class="block font-semibold text-gray-800 dark:text-gray-100">Bug melden</span>
-                        <span class="block text-sm text-gray-600 dark:text-gray-400">Fehler per E-Mail melden</span>
+                        <span class="block text-sm text-gray-500 dark:text-gray-400">Fehler per E-Mail melden</span>
                     </div>
                 </button>
             </div>
+            </div><!-- /p-6 -->
         </div>
     </div>
 

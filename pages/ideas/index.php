@@ -86,7 +86,7 @@ ob_start();
         </button>
     </div>
     <?php else: ?>
-    <div class="grid grid-cols-1 gap-4" id="ideas-list">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="ideas-list">
         <?php foreach ($ideas as $idea):
             $submitterEmail = $userInfoMap[$idea['user_id']] ?? 'unknown@example.com';
             $submitterName  = formatEntraName(explode('@', $submitterEmail)[0]);
@@ -96,12 +96,13 @@ ob_start();
             $userVote       = $idea['user_vote'] ?? null;
             $upvotes        = (int) ($idea['upvotes'] ?? 0);
             $downvotes      = (int) ($idea['downvotes'] ?? 0);
+            $score          = $upvotes - $downvotes;
         ?>
         <div class="group bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md hover:border-yellow-300 dark:hover:border-yellow-700/50 transition-all duration-200 flex gap-0 overflow-hidden"
              data-idea-id="<?php echo $idea['id']; ?>">
 
             <!-- Vote Column -->
-            <div class="flex flex-col items-center justify-center gap-1 px-4 py-5 bg-gray-50 dark:bg-gray-800/60 border-r border-gray-100 dark:border-gray-800 min-w-[64px]">
+            <div class="flex flex-col items-center justify-center gap-1.5 px-4 py-5 bg-gray-50 dark:bg-gray-800/60 border-r border-gray-100 dark:border-gray-800 min-w-[72px]">
                 <button
                     onclick="castVote(<?php echo $idea['id']; ?>, 'up')"
                     title="Upvote"
@@ -109,8 +110,8 @@ ob_start();
                 >
                     <i class="fas fa-chevron-up text-sm"></i>
                 </button>
-                <span class="vote-score text-sm font-bold <?php echo ($upvotes - $downvotes) > 0 ? 'text-green-600 dark:text-green-400' : (($upvotes - $downvotes) < 0 ? 'text-red-500 dark:text-red-400' : 'text-gray-500 dark:text-gray-400'); ?>">
-                    <?php echo $upvotes - $downvotes; ?>
+                <span class="vote-score text-xl font-extrabold leading-none <?php echo $score > 0 ? 'text-green-600 dark:text-green-400' : ($score < 0 ? 'text-red-500 dark:text-red-400' : 'text-gray-400 dark:text-gray-500'); ?>">
+                    <?php echo $score; ?>
                 </span>
                 <button
                     onclick="castVote(<?php echo $idea['id']; ?>, 'down')"
@@ -356,7 +357,7 @@ async function castVote(ideaId, direction) {
         downBtn.className = data.user_vote === 'down' ? activeDown : inactiveDown;
 
         scoreEl.textContent = score;
-        scoreEl.className   = 'vote-score text-sm font-bold ' + (score > 0 ? 'text-green-600 dark:text-green-400' : score < 0 ? 'text-red-500 dark:text-red-400' : 'text-gray-500 dark:text-gray-400');
+        scoreEl.className   = 'vote-score text-xl font-extrabold leading-none ' + (score > 0 ? 'text-green-600 dark:text-green-400' : score < 0 ? 'text-red-500 dark:text-red-400' : 'text-gray-400 dark:text-gray-500');
     } catch (err) {
         console.error('Vote error:', err);
     }
