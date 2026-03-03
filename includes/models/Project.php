@@ -51,7 +51,25 @@ class Project {
      */
     public static function handleDocumentationUpload($file) {
         // Check if file was uploaded
-        if (!isset($file) || $file['error'] !== UPLOAD_ERR_OK) {
+        if (!isset($file)) {
+            return [
+                'success' => false,
+                'path' => null,
+                'error' => 'Keine Datei hochgeladen oder Upload-Fehler'
+            ];
+        }
+
+        // Check for PHP upload_max_filesize / form size limit exceeded BEFORE checking $file['size'],
+        // because when PHP rejects the upload these error codes are set and $file['size'] is 0.
+        if ($file['error'] === UPLOAD_ERR_INI_SIZE || $file['error'] === UPLOAD_ERR_FORM_SIZE) {
+            return [
+                'success' => false,
+                'path' => null,
+                'error' => 'Datei ist zu groß. Maximum: 10MB'
+            ];
+        }
+
+        if ($file['error'] !== UPLOAD_ERR_OK) {
             return [
                 'success' => false,
                 'path' => null,
