@@ -97,7 +97,7 @@ ob_start();
             $upvotes        = (int) ($idea['upvotes'] ?? 0);
             $downvotes      = (int) ($idea['downvotes'] ?? 0);
         ?>
-        <div class="group bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md transition-all duration-200 flex gap-0 overflow-hidden"
+        <div class="group bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md hover:border-yellow-300 dark:hover:border-yellow-700/50 transition-all duration-200 flex gap-0 overflow-hidden"
              data-idea-id="<?php echo $idea['id']; ?>">
 
             <!-- Vote Column -->
@@ -124,10 +124,10 @@ ob_start();
             <!-- Content -->
             <div class="flex-1 p-5 min-w-0">
                 <div class="flex items-start justify-between gap-3 mb-2">
-                    <h3 class="font-semibold text-gray-900 dark:text-gray-50 text-base leading-snug"><?php echo htmlspecialchars($idea['title']); ?></h3>
+                    <h3 class="font-semibold text-gray-900 dark:text-gray-50 text-base leading-snug break-words"><?php echo htmlspecialchars($idea['title']); ?></h3>
                     <div class="flex items-center gap-2 flex-shrink-0">
                         <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium <?php echo $sc['badge']; ?>">
-                            <span class="w-1.5 h-1.5 rounded-full <?php echo $sc['dot']; ?>"></span>
+                            <span class="w-1.5 h-1.5 rounded-full flex-shrink-0 <?php echo $sc['dot']; ?>"></span>
                             <?php echo $sc['label']; ?>
                         </span>
                         <?php if (Auth::isBoard()): ?>
@@ -145,7 +145,7 @@ ob_start();
                                     onclick="changeIdeaStatus(<?php echo $idea['id']; ?>, '<?php echo $sKey; ?>')"
                                     class="w-full text-left px-3 py-2 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2 transition-colors"
                                 >
-                                    <span class="w-2 h-2 rounded-full <?php echo $sCfg['dot']; ?>"></span>
+                                    <span class="w-2 h-2 rounded-full flex-shrink-0 <?php echo $sCfg['dot']; ?>"></span>
                                     <?php echo $sCfg['label']; ?>
                                 </button>
                                 <?php endforeach; ?>
@@ -155,22 +155,22 @@ ob_start();
                     </div>
                 </div>
 
-                <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-3 line-clamp-3"><?php echo nl2br(htmlspecialchars($idea['description'])); ?></p>
+                <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-3 line-clamp-3 break-words"><?php echo nl2br(htmlspecialchars($idea['description'])); ?></p>
 
                 <!-- Meta -->
-                <div class="flex items-center gap-3 text-xs text-gray-400 dark:text-gray-500">
+                <div class="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-gray-400 dark:text-gray-500">
                     <div class="flex items-center gap-1.5">
                         <span class="w-5 h-5 rounded-full flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0"
                               style="background-color: <?php echo htmlspecialchars($avatarColor); ?>">
                             <?php echo htmlspecialchars($initials); ?>
                         </span>
-                        <span><?php echo htmlspecialchars($submitterName); ?></span>
+                        <span class="truncate max-w-[100px] sm:max-w-[160px]"><?php echo htmlspecialchars($submitterName); ?></span>
                     </div>
-                    <span>·</span>
+                    <span class="hidden sm:inline">·</span>
                     <span><?php echo date('d.m.Y', strtotime($idea['created_at'])); ?></span>
-                    <span>·</span>
-                    <span><i class="fas fa-arrow-up mr-0.5 text-green-500"></i><?php echo $upvotes; ?></span>
-                    <span><i class="fas fa-arrow-down mr-0.5 text-red-400"></i><?php echo $downvotes; ?></span>
+                    <span class="hidden sm:inline">·</span>
+                    <span class="inline-flex items-center gap-1"><i class="fas fa-arrow-up text-green-500"></i><?php echo $upvotes; ?></span>
+                    <span class="inline-flex items-center gap-1"><i class="fas fa-arrow-down text-red-400"></i><?php echo $downvotes; ?></span>
                 </div>
             </div>
         </div>

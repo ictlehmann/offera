@@ -189,7 +189,7 @@ ob_start();
                         </div>
                         
                         <!-- Title -->
-                        <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">
+                        <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2 break-words leading-snug">
                             <?php echo htmlspecialchars($post['title']); ?>
                         </h3>
                         
@@ -203,15 +203,15 @@ ob_start();
                         </div>
                         
                         <!-- Excerpt -->
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-1">
+                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-1 break-words">
                             <?php echo htmlspecialchars(truncateText($post['content'])); ?>
                         </p>
                         
                         <!-- Footer -->
-                        <div class="pt-4 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between text-sm text-gray-600 dark:text-gray-300">
-                            <div class="flex items-center">
-                                <i class="fas fa-user-circle mr-2 text-blue-600"></i>
-                                <span><?php echo htmlspecialchars($post['author_email']); ?></span>
+                        <div class="pt-4 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between text-sm text-gray-600 dark:text-gray-300 gap-2">
+                            <div class="flex items-center min-w-0">
+                                <i class="fas fa-user-circle mr-2 text-blue-600 flex-shrink-0"></i>
+                                <span class="truncate"><?php echo htmlspecialchars($post['author_email']); ?></span>
                             </div>
                             <div class="flex items-center gap-4">
                                 <span class="flex items-center">

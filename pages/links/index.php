@@ -53,24 +53,26 @@ ob_start();
 
 <div class="mb-8 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
     <div>
-        <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-2">
-            <i class="fas fa-link text-ibc-green mr-2"></i>
-            Nützliche Links
-        </h1>
-        <p class="text-gray-600 dark:text-gray-300">Schnellzugriff auf häufig genutzte Tools und Ressourcen</p>
+        <div class="flex items-center gap-3 mb-2">
+            <div class="w-11 h-11 rounded-2xl bg-green-100 dark:bg-green-900/40 flex items-center justify-center shadow-sm">
+                <i class="fas fa-link text-ibc-green text-xl"></i>
+            </div>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-50 tracking-tight">Nützliche Links</h1>
+        </div>
+        <p class="text-gray-500 dark:text-gray-400 text-sm">Schnellzugriff auf häufig genutzte Tools und Ressourcen</p>
     </div>
 
     <?php if ($canManage): ?>
     <div class="flex items-center gap-3">
         <button id="toggle-edit-mode"
-                class="inline-flex items-center px-4 py-3 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-lg font-semibold hover:bg-gray-200 dark:hover:bg-gray-600 transition-all">
-            <i class="fas fa-pencil-alt mr-2"></i>
+                class="inline-flex items-center gap-2 px-4 py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-xl font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 transition-all text-sm">
+            <i class="fas fa-pencil-alt"></i>
             Bearbeiten
         </button>
         <a href="edit.php"
-           class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-ibc-green to-ibc-green-dark text-white rounded-lg font-semibold hover:opacity-90 transition-all shadow-lg">
-            <i class="fas fa-plus mr-2"></i>
-            Neuen Link erstellen
+           class="inline-flex items-center gap-2 px-5 py-2.5 bg-ibc-green hover:bg-ibc-green-dark text-white rounded-xl font-semibold transition-all shadow-sm hover:shadow-md text-sm">
+            <i class="fas fa-plus"></i>
+            Neuer Link
         </a>
     </div>
     <?php endif; ?>
@@ -80,45 +82,49 @@ ob_start();
     <input type="text" name="q"
            value="<?php echo htmlspecialchars($searchQuery, ENT_QUOTES, 'UTF-8'); ?>"
            placeholder="Links durchsuchen..."
-           class="flex-1 rounded-xl border-gray-300 shadow-sm focus:ring-ibc-green focus:border-ibc-green py-2 px-4">
+           class="flex-1 rounded-xl border-gray-300 dark:border-gray-700 shadow-sm focus:ring-ibc-green focus:border-ibc-green py-2.5 px-4 text-sm">
     <button type="submit"
-            class="inline-flex items-center justify-center px-6 rounded-xl bg-ibc-green text-white font-medium hover:bg-green-600 transition-colors shadow-sm">
-        <i class="fas fa-search mr-2"></i>Suchen
+            class="inline-flex items-center justify-center gap-2 px-5 rounded-xl bg-ibc-green text-white font-semibold hover:bg-ibc-green-dark transition-colors shadow-sm text-sm">
+        <i class="fas fa-search"></i>Suchen
     </button>
     <?php if ($searchQuery !== ''): ?>
     <a href="index.php"
-       class="px-5 py-2 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-xl font-semibold hover:bg-gray-200 dark:hover:bg-gray-600 transition">
-        <i class="fas fa-times mr-1"></i>Zurücksetzen
+       class="inline-flex items-center gap-1.5 px-4 py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-xl font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 transition text-sm">
+        <i class="fas fa-times"></i>Zurücksetzen
     </a>
     <?php endif; ?>
 </form>
 
 <?php if (isset($_SESSION['success_message'])): ?>
-<div class="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
-    <i class="fas fa-check-circle mr-2"></i><?php echo htmlspecialchars($_SESSION['success_message']); ?>
+<div class="mb-6 flex items-center gap-3 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-700 dark:text-green-300 rounded-xl text-sm">
+    <i class="fas fa-check-circle flex-shrink-0"></i>
+    <span><?php echo htmlspecialchars($_SESSION['success_message']); ?></span>
 </div>
 <?php unset($_SESSION['success_message']); endif; ?>
 
 <?php if (isset($_SESSION['error_message'])): ?>
-<div class="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-    <i class="fas fa-exclamation-circle mr-2"></i><?php echo htmlspecialchars($_SESSION['error_message']); ?>
+<div class="mb-6 flex items-center gap-3 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 rounded-xl text-sm">
+    <i class="fas fa-exclamation-circle flex-shrink-0"></i>
+    <span><?php echo htmlspecialchars($_SESSION['error_message']); ?></span>
 </div>
 <?php unset($_SESSION['error_message']); endif; ?>
 
 <?php if (empty($links)): ?>
-<div class="card p-12 text-center">
-    <i class="fas fa-link text-gray-300 dark:text-gray-600 text-5xl mb-4" aria-hidden="true"></i>
+<div class="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm p-12 text-center">
+    <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+        <i class="fas fa-link text-gray-400 dark:text-gray-600 text-2xl" aria-hidden="true"></i>
+    </div>
     <?php if ($searchQuery !== ''): ?>
-    <p class="text-gray-500 dark:text-gray-400 text-lg">Keine Links für „<?php echo htmlspecialchars($searchQuery, ENT_QUOTES, 'UTF-8'); ?>" gefunden.</p>
+    <p class="text-gray-600 dark:text-gray-400 font-medium">Keine Links für „<?php echo htmlspecialchars($searchQuery, ENT_QUOTES, 'UTF-8'); ?>" gefunden.</p>
     <?php else: ?>
-    <p class="text-gray-500 dark:text-gray-400 text-lg">Noch keine Links vorhanden.</p>
+    <p class="text-gray-600 dark:text-gray-400 font-medium">Noch keine Links vorhanden.</p>
     <?php if ($canManage): ?>
-    <p class="text-gray-400 dark:text-gray-500 text-sm mt-2">Klicken Sie auf „Neuen Link erstellen", um den ersten Link hinzuzufügen.</p>
+    <p class="text-gray-400 dark:text-gray-500 text-sm mt-2">Klicken Sie auf „Neuer Link", um den ersten Link hinzuzufügen.</p>
     <?php endif; ?>
     <?php endif; ?>
 </div>
 <?php else: ?>
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
     <?php foreach ($links as $link):
         $rawUrl  = $link['url'] ?? '';
         $parsed  = parse_url($rawUrl);
@@ -127,40 +133,40 @@ ob_start();
         $icon = htmlspecialchars($link['icon'] ?? 'fas fa-external-link-alt', ENT_QUOTES, 'UTF-8');
         $linkDbId = $link['id'] ?? null;
     ?>
-    <div class="card p-6 flex flex-col group hover:shadow-lg transition-shadow duration-200">
+    <div class="group bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md hover:border-ibc-green/30 dark:hover:border-ibc-green/30 transition-all duration-200 flex flex-col overflow-hidden">
         <a href="<?php echo htmlspecialchars($url, ENT_QUOTES, 'UTF-8'); ?>"
            target="_blank"
            rel="noopener noreferrer"
-           class="flex items-start space-x-4 flex-1">
-            <div class="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-ibc-green/20 to-emerald-100 dark:from-ibc-green/30 dark:to-emerald-900/30 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform duration-200">
-                <i class="<?php echo $icon; ?> text-ibc-green text-xl"></i>
+           class="flex items-start gap-4 p-5 flex-1">
+            <div class="flex-shrink-0 w-11 h-11 bg-green-50 dark:bg-green-900/30 rounded-xl flex items-center justify-center group-hover:scale-110 group-hover:bg-ibc-green group-hover:text-white transition-all duration-200">
+                <i class="<?php echo $icon; ?> text-ibc-green group-hover:text-white text-lg transition-colors duration-200"></i>
             </div>
             <div class="min-w-0 flex-1">
-                <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 group-hover:text-ibc-green transition-colors duration-200">
+                <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 group-hover:text-ibc-green dark:group-hover:text-ibc-green-light transition-colors duration-200 leading-snug">
                     <?php echo htmlspecialchars($link['title'] ?? '', ENT_QUOTES, 'UTF-8'); ?>
                 </h3>
                 <?php if (!empty($link['description'])): ?>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
                     <?php echo htmlspecialchars($link['description'], ENT_QUOTES, 'UTF-8'); ?>
                 </p>
                 <?php endif; ?>
             </div>
-            <i class="fas fa-external-link-alt text-gray-300 dark:text-gray-600 text-xs ml-auto flex-shrink-0 mt-1 group-hover:text-ibc-green transition-colors duration-200"></i>
+            <i class="fas fa-external-link-alt text-gray-300 dark:text-gray-600 text-xs flex-shrink-0 mt-1 group-hover:text-ibc-green transition-colors duration-200"></i>
         </a>
 
         <?php if ($canManage && $linkDbId !== null): ?>
-        <div class="link-actions hidden mt-4 pt-3 border-t border-gray-100 dark:border-gray-700 flex justify-end gap-2">
+        <div class="link-actions hidden px-5 pb-4 pt-0 flex justify-end gap-2">
             <a href="edit.php?id=<?php echo (int)$linkDbId; ?>"
-               class="px-3 py-1 text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition">
-                <i class="fas fa-edit mr-1"></i>Bearbeiten
+               class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition font-medium">
+                <i class="fas fa-edit"></i>Bearbeiten
             </a>
             <form method="POST" action="index.php" data-confirm="Link wirklich löschen?" class="inline delete-form">
                 <input type="hidden" name="csrf_token" value="<?php echo CSRFHandler::getToken(); ?>">
                 <input type="hidden" name="action" value="delete">
                 <input type="hidden" name="link_id" value="<?php echo (int)$linkDbId; ?>">
                 <button type="submit"
-                        class="px-3 py-1 text-xs bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded hover:bg-red-100 dark:hover:bg-red-900/50 transition">
-                    <i class="fas fa-trash mr-1"></i>Löschen
+                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/50 transition font-medium">
+                    <i class="fas fa-trash"></i>Löschen
                 </button>
             </form>
         </div>
