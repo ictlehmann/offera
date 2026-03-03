@@ -337,60 +337,87 @@ ob_start();
     $availableCategories = array_unique(array_filter(array_column($products, 'category')));
     sort($availableCategories);
     ?>
-    <div class="mb-8 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+    <div class="mb-8 rounded-2xl overflow-hidden shadow-md border border-blue-100 dark:border-gray-700" style="background: linear-gradient(135deg,#f0f7ff 0%,#fff 60%) ;">
+        <style>
+        .dark .shop-filter-wrap { background: linear-gradient(135deg,#1e293b 0%,#1f2937 60%) !important; }
+        .filter-section-card { background: rgba(255,255,255,0.7); border: 1px solid rgba(99,102,241,0.08); }
+        .dark .filter-section-card { background: rgba(31,41,55,0.8); border: 1px solid rgba(99,102,241,0.15); }
+        .fpill { display: inline-flex; align-items: center; gap: 5px; padding: 6px 14px; border-radius: 9999px; font-size: 0.8125rem; font-weight: 600; border: 2px solid transparent; cursor: pointer; transition: all .18s ease; }
+        .fpill:not(.fpill-active) { background: #f3f4f6; color: #4b5563; border-color: #e5e7eb; }
+        .dark .fpill:not(.fpill-active) { background: #374151; color: #d1d5db; border-color: #4b5563; }
+        .fpill:not(.fpill-active):hover { border-color: currentColor; }
+        .fpill.fpill-active { color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,.15); }
+        .fpill-avail.fpill-active  { background: linear-gradient(135deg,#059669,#10b981); border-color: #059669; }
+        .fpill-avail:not(.fpill-active):hover { color: #059669; border-color: #059669; background: #ecfdf5; }
+        .dark .fpill-avail:not(.fpill-active):hover { background: rgba(16,185,129,.1); }
+        .fpill-sold.fpill-active   { background: linear-gradient(135deg,#6b7280,#9ca3af); border-color: #6b7280; }
+        .fpill-sold:not(.fpill-active):hover  { color: #6b7280; border-color: #9ca3af; }
+        .fpill-gender.fpill-active { background: linear-gradient(135deg,#2563eb,#6366f1); border-color: #2563eb; }
+        .fpill-gender:not(.fpill-active):hover { color: #2563eb; border-color: #6366f1; background: #eff6ff; }
+        .dark .fpill-gender:not(.fpill-active):hover { background: rgba(99,102,241,.1); }
+        .fpill-cat.fpill-active    { background: linear-gradient(135deg,#7c3aed,#a855f7); border-color: #7c3aed; }
+        .fpill-cat:not(.fpill-active):hover   { color: #7c3aed; border-color: #a855f7; background: #faf5ff; }
+        .dark .fpill-cat:not(.fpill-active):hover { background: rgba(168,85,247,.1); }
+        .fpill-all.fpill-active    { background: linear-gradient(135deg,#2563eb,#4f46e5); border-color: #2563eb; }
+        .fpill-all:not(.fpill-active):hover { color: #4f46e5; border-color: #4f46e5; background: #eff6ff; }
+        .dark .fpill-all:not(.fpill-active):hover { background: rgba(79,70,229,.1); }
+        </style>
+
         <!-- Filter header -->
-        <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
-            <div class="flex items-center gap-2.5">
-                <div class="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center">
-                    <i class="fas fa-sliders text-blue-600 dark:text-blue-400 text-sm"></i>
+        <div class="shop-filter-wrap px-5 py-3.5 flex items-center justify-between border-b border-blue-100 dark:border-gray-700">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-sm">
+                    <i class="fas fa-sliders-h text-white text-sm"></i>
                 </div>
-                <span class="font-semibold text-gray-800 dark:text-gray-100">Filter &amp; Suche</span>
-                <span id="filter-active-count" class="hidden ml-1 px-2 py-0.5 bg-blue-600 text-white text-xs font-bold rounded-full"></span>
+                <div>
+                    <span class="font-bold text-gray-800 dark:text-gray-100 text-base leading-tight">Filter &amp; Suche</span>
+                    <span id="filter-active-count" class="hidden ml-2 px-2 py-0.5 bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-xs font-bold rounded-full shadow-sm"></span>
+                </div>
             </div>
             <button id="filter-toggle" type="button"
-                    class="text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
+                    class="w-8 h-8 rounded-xl bg-white/60 dark:bg-gray-700/60 hover:bg-white dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600 flex items-center justify-center text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-all shadow-sm"
                     aria-label="Filter ein-/ausklappen">
-                <i class="fas fa-chevron-up text-sm" id="filter-toggle-icon"></i>
+                <i class="fas fa-chevron-up text-xs" id="filter-toggle-icon"></i>
             </button>
         </div>
 
         <!-- Filter body -->
-        <div id="filter-body" class="p-5">
-            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
+        <div id="filter-body" class="shop-filter-wrap p-5">
+            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
 
                 <!-- Search -->
                 <div class="sm:col-span-2 xl:col-span-1">
-                    <p class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
+                    <p class="text-xs font-bold text-blue-600 dark:text-blue-400 uppercase tracking-widest mb-2.5 flex items-center gap-1.5">
                         <i class="fas fa-magnifying-glass"></i> Suche
                     </p>
-                    <div class="relative">
-                        <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm pointer-events-none"></i>
+                    <div class="relative filter-section-card rounded-xl overflow-hidden">
+                        <i class="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-blue-400 dark:text-blue-500 text-sm pointer-events-none"></i>
                         <input type="text" id="search-input" placeholder="Produkte suchen…"
-                               class="w-full pl-9 pr-9 py-2.5 rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 text-gray-800 dark:text-gray-100 text-sm placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all">
+                               class="w-full pl-10 pr-9 py-2.5 bg-transparent text-gray-800 dark:text-gray-100 text-sm placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:ring-inset outline-none transition-all">
                         <button type="button" id="search-clear"
-                                class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors">
-                            <i class="fas fa-times text-sm"></i>
+                                class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 transition-colors">
+                            <i class="fas fa-times-circle text-sm"></i>
                         </button>
                     </div>
                 </div>
 
                 <!-- Availability -->
                 <div>
-                    <p class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
-                        <i class="fas fa-circle-check text-emerald-500"></i> Verfügbarkeit
+                    <p class="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-2.5 flex items-center gap-1.5">
+                        <i class="fas fa-circle-dot"></i> Verfügbarkeit
                     </p>
                     <div class="flex flex-wrap gap-1.5" id="filter-bar">
                         <button type="button" data-filter="all"
-                                class="filter-pill px-3.5 py-1.5 rounded-xl text-sm font-medium transition-all bg-blue-600 text-white shadow-sm">
-                            Alle
+                                class="filter-pill fpill fpill-all fpill-active">
+                            <i class="fas fa-border-all text-xs"></i>Alle
                         </button>
                         <button type="button" data-filter="available"
-                                class="filter-pill px-3.5 py-1.5 rounded-xl text-sm font-medium transition-all bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-emerald-500 hover:text-white">
-                            <i class="fas fa-circle-check mr-1 text-xs"></i>Verfügbar
+                                class="filter-pill fpill fpill-avail">
+                            <i class="fas fa-circle-check text-xs"></i>Verfügbar
                         </button>
                         <button type="button" data-filter="soldout"
-                                class="filter-pill px-3.5 py-1.5 rounded-xl text-sm font-medium transition-all bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-500 hover:text-white">
-                            <i class="fas fa-ban mr-1 text-xs"></i>Ausverkauft
+                                class="filter-pill fpill fpill-sold">
+                            <i class="fas fa-ban text-xs"></i>Ausverkauft
                         </button>
                     </div>
                 </div>
@@ -398,19 +425,22 @@ ob_start();
                 <!-- Gender -->
                 <?php if (!empty($availableGenders)): ?>
                 <div id="gender-filter-wrap">
-                    <p class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
-                        <i class="fas fa-person text-blue-400"></i> Zielgruppe
+                    <p class="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-2.5 flex items-center gap-1.5">
+                        <i class="fas fa-person"></i> Zielgruppe
                     </p>
                     <div class="flex flex-wrap gap-1.5" id="gender-filter-bar">
                         <button type="button" data-gender="all"
-                                class="gender-pill px-3.5 py-1.5 rounded-xl text-sm font-medium transition-all bg-blue-600 text-white shadow-sm">
-                            Alle
+                                class="gender-pill fpill fpill-all fpill-active">
+                            <i class="fas fa-border-all text-xs"></i>Alle
                         </button>
                         <?php foreach (['Herren', 'Damen', 'Unisex'] as $g): ?>
                         <?php if (in_array($g, $availableGenders, true)): ?>
+                        <?php
+                        $gIcon = $g === 'Herren' ? 'fa-mars' : ($g === 'Damen' ? 'fa-venus' : 'fa-venus-mars');
+                        ?>
                         <button type="button" data-gender="<?php echo htmlspecialchars($g); ?>"
-                                class="gender-pill px-3.5 py-1.5 rounded-xl text-sm font-medium transition-all bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-blue-500 hover:text-white">
-                            <?php echo htmlspecialchars($g); ?>
+                                class="gender-pill fpill fpill-gender">
+                            <i class="fas <?php echo $gIcon; ?> text-xs"></i><?php echo htmlspecialchars($g); ?>
                         </button>
                         <?php endif; ?>
                         <?php endforeach; ?>
@@ -421,17 +451,17 @@ ob_start();
                 <!-- Category -->
                 <?php if (!empty($availableCategories)): ?>
                 <div id="category-filter-wrap">
-                    <p class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
-                        <i class="fas fa-shapes text-purple-400"></i> Kategorie
+                    <p class="text-xs font-bold text-purple-600 dark:text-purple-400 uppercase tracking-widest mb-2.5 flex items-center gap-1.5">
+                        <i class="fas fa-shapes"></i> Kategorie
                     </p>
                     <div class="flex flex-wrap gap-1.5" id="category-filter-bar">
                         <button type="button" data-category="all"
-                                class="category-pill px-3.5 py-1.5 rounded-xl text-sm font-medium transition-all bg-blue-600 text-white shadow-sm">
-                            Alle
+                                class="category-pill fpill fpill-all fpill-active">
+                            <i class="fas fa-border-all text-xs"></i>Alle
                         </button>
                         <?php foreach ($availableCategories as $cat): ?>
                         <button type="button" data-category="<?php echo htmlspecialchars($cat); ?>"
-                                class="category-pill px-3.5 py-1.5 rounded-xl text-sm font-medium transition-all bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-purple-500 hover:text-white">
+                                class="category-pill fpill fpill-cat">
                             <?php echo htmlspecialchars($cat); ?>
                         </button>
                         <?php endforeach; ?>
@@ -442,13 +472,13 @@ ob_start();
             </div>
 
             <!-- Results count -->
-            <div class="mt-4 pt-4 border-t border-gray-100 dark:border-gray-700 flex items-center justify-between">
-                <p class="text-sm text-gray-500 dark:text-gray-400">
-                    <span id="results-count" class="font-semibold text-gray-700 dark:text-gray-200"><?php echo count($products); ?></span>
+            <div class="mt-4 pt-4 border-t border-blue-100 dark:border-gray-700 flex items-center justify-between">
+                <p class="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-2">
+                    <span class="inline-flex items-center justify-center w-7 h-7 bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 rounded-lg font-bold text-xs" id="results-count"><?php echo count($products); ?></span>
                     von <?php echo count($products); ?> Produkten
                 </p>
                 <button type="button" id="reset-filters"
-                        class="hidden text-sm text-blue-600 dark:text-blue-400 hover:underline font-medium flex items-center gap-1.5 transition-colors">
+                        class="hidden text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 font-semibold flex items-center gap-1.5 transition-colors px-3 py-1.5 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20">
                     <i class="fas fa-rotate-left text-xs"></i> Filter zurücksetzen
                 </button>
             </div>
@@ -526,9 +556,24 @@ ob_start();
                         <?php echo htmlspecialchars($product['name']); ?>
                     </a>
                 </h3>
-                <p class="text-blue-600 dark:text-blue-400 font-bold text-base mb-3 flex-1">
+                <p class="text-blue-600 dark:text-blue-400 font-bold text-base mb-2 flex-1">
                     <?php echo number_format((float) $product['base_price'], 2, ',', '.'); ?> €
                 </p>
+
+                <?php
+                $namedVariants = array_values(array_filter($product['variants'] ?? [], fn($v) => $v['type'] !== '' || $v['value'] !== ''));
+                $gridTotalStock = count($namedVariants) > 0 ? array_sum(array_column($namedVariants, 'stock_quantity')) : null;
+                if (!$productOutOfStock && $gridTotalStock !== null && $gridTotalStock <= 5 && $gridTotalStock > 0): ?>
+                <p class="text-xs font-semibold text-amber-600 dark:text-amber-400 mb-2 flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse flex-shrink-0"></span>
+                    Nur noch <?php echo $gridTotalStock; ?> Stück verfügbar
+                </p>
+                <?php elseif (!$productOutOfStock && $gridTotalStock !== null && $gridTotalStock > 5): ?>
+                <p class="text-xs text-emerald-600 dark:text-emerald-400 mb-2 flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0"></span>
+                    <?php echo $gridTotalStock; ?> Stück auf Lager
+                </p>
+                <?php endif; ?>
 
                 <?php if ($isBulk && $bulkGoal > 0): ?>
                 <!-- Bulk order progress bar -->
@@ -1218,18 +1263,41 @@ document.addEventListener('DOMContentLoaded', function() {
         updateUI(visible);
     }
 
-    var PILL_ACTIVE   = 'filter-pill px-3.5 py-1.5 rounded-xl text-sm font-medium transition-all bg-blue-600 text-white shadow-sm';
-    var PILL_INACTIVE = 'filter-pill px-3.5 py-1.5 rounded-xl text-sm font-medium transition-all bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-emerald-500 hover:text-white';
-    var GENDER_ACTIVE   = 'gender-pill px-3.5 py-1.5 rounded-xl text-sm font-medium transition-all bg-blue-600 text-white shadow-sm';
-    var GENDER_INACTIVE = 'gender-pill px-3.5 py-1.5 rounded-xl text-sm font-medium transition-all bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-blue-500 hover:text-white';
-    var CAT_ACTIVE   = 'category-pill px-3.5 py-1.5 rounded-xl text-sm font-medium transition-all bg-blue-600 text-white shadow-sm';
-    var CAT_INACTIVE = 'category-pill px-3.5 py-1.5 rounded-xl text-sm font-medium transition-all bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-purple-500 hover:text-white';
+    var PILL_ACTIVE   = 'filter-pill fpill fpill-avail fpill-active';
+    var PILL_INACTIVE = 'filter-pill fpill fpill-avail';
+    var PILL_ALL_ACTIVE   = 'filter-pill fpill fpill-all fpill-active';
+    var PILL_ALL_INACTIVE = 'filter-pill fpill fpill-all';
+    var PILL_SOLD_ACTIVE   = 'filter-pill fpill fpill-sold fpill-active';
+    var PILL_SOLD_INACTIVE = 'filter-pill fpill fpill-sold';
+    var GENDER_ACTIVE   = 'gender-pill fpill fpill-gender fpill-active';
+    var GENDER_INACTIVE = 'gender-pill fpill fpill-gender';
+    var GENDER_ALL_ACTIVE   = 'gender-pill fpill fpill-all fpill-active';
+    var GENDER_ALL_INACTIVE = 'gender-pill fpill fpill-all';
+    var CAT_ACTIVE   = 'category-pill fpill fpill-cat fpill-active';
+    var CAT_INACTIVE = 'category-pill fpill fpill-cat';
+    var CAT_ALL_ACTIVE   = 'category-pill fpill fpill-all fpill-active';
+    var CAT_ALL_INACTIVE = 'category-pill fpill fpill-all';
+
+    function pillClass(p, active, allActive, allInactive, normActive, normInactive, soldActive, soldInactive) {
+        if (p.dataset.filter !== undefined) {
+            if (p.dataset.filter === 'all')      return active ? allActive : allInactive;
+            if (p.dataset.filter === 'soldout')  return active ? (soldActive || normActive) : (soldInactive || normInactive);
+            return active ? normActive : normInactive;
+        }
+        if (p.dataset.gender !== undefined) {
+            return (p.dataset.gender === 'all') ? (active ? allActive : allInactive) : (active ? normActive : normInactive);
+        }
+        return (p.dataset.category === 'all') ? (active ? allActive : allInactive) : (active ? normActive : normInactive);
+    }
 
     document.querySelectorAll('.filter-pill').forEach(function(pill) {
         pill.addEventListener('click', function() {
             activeStock = this.dataset.filter;
             document.querySelectorAll('.filter-pill').forEach(function(p) {
-                p.className = (p.dataset.filter === activeStock) ? PILL_ACTIVE : PILL_INACTIVE;
+                var isActive = p.dataset.filter === activeStock;
+                if (p.dataset.filter === 'all')     p.className = isActive ? PILL_ALL_ACTIVE  : PILL_ALL_INACTIVE;
+                else if (p.dataset.filter === 'soldout') p.className = isActive ? PILL_SOLD_ACTIVE : PILL_SOLD_INACTIVE;
+                else                                p.className = isActive ? PILL_ACTIVE     : PILL_INACTIVE;
             });
             applyFilters();
         });
@@ -1239,7 +1307,8 @@ document.addEventListener('DOMContentLoaded', function() {
         pill.addEventListener('click', function() {
             activeGender = this.dataset.gender;
             document.querySelectorAll('.gender-pill').forEach(function(p) {
-                p.className = (p.dataset.gender === activeGender) ? GENDER_ACTIVE : GENDER_INACTIVE;
+                var isActive = p.dataset.gender === activeGender;
+                p.className = (p.dataset.gender === 'all') ? (isActive ? GENDER_ALL_ACTIVE : GENDER_ALL_INACTIVE) : (isActive ? GENDER_ACTIVE : GENDER_INACTIVE);
             });
             applyFilters();
         });
@@ -1249,7 +1318,8 @@ document.addEventListener('DOMContentLoaded', function() {
         pill.addEventListener('click', function() {
             activeCategory = this.dataset.category;
             document.querySelectorAll('.category-pill').forEach(function(p) {
-                p.className = (p.dataset.category === activeCategory) ? CAT_ACTIVE : CAT_INACTIVE;
+                var isActive = p.dataset.category === activeCategory;
+                p.className = (p.dataset.category === 'all') ? (isActive ? CAT_ALL_ACTIVE : CAT_ALL_INACTIVE) : (isActive ? CAT_ACTIVE : CAT_INACTIVE);
             });
             applyFilters();
         });
@@ -1284,13 +1354,15 @@ document.addEventListener('DOMContentLoaded', function() {
             if (searchInput) searchInput.value = '';
             if (searchClear) searchClear.classList.add('hidden');
             document.querySelectorAll('.filter-pill').forEach(function(p) {
-                p.className = (p.dataset.filter === 'all') ? PILL_ACTIVE : PILL_INACTIVE;
+                var isAll = p.dataset.filter === 'all';
+                var isSold = p.dataset.filter === 'soldout';
+                p.className = isAll ? PILL_ALL_ACTIVE : (isSold ? PILL_SOLD_INACTIVE : PILL_INACTIVE);
             });
             document.querySelectorAll('.gender-pill').forEach(function(p) {
-                p.className = (p.dataset.gender === 'all') ? GENDER_ACTIVE : GENDER_INACTIVE;
+                p.className = (p.dataset.gender === 'all') ? GENDER_ALL_ACTIVE : GENDER_INACTIVE;
             });
             document.querySelectorAll('.category-pill').forEach(function(p) {
-                p.className = (p.dataset.category === 'all') ? CAT_ACTIVE : CAT_INACTIVE;
+                p.className = (p.dataset.category === 'all') ? CAT_ALL_ACTIVE : CAT_INACTIVE;
             });
             applyFilters();
         });
@@ -1305,8 +1377,8 @@ document.addEventListener('DOMContentLoaded', function() {
             var collapsed = filterBody.classList.toggle('hidden');
             if (filterIcon) {
                 filterIcon.className = collapsed
-                    ? 'fas fa-chevron-down text-sm'
-                    : 'fas fa-chevron-up text-sm';
+                    ? 'fas fa-chevron-down text-xs'
+                    : 'fas fa-chevron-up text-xs';
             }
         });
     }
