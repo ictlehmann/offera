@@ -142,7 +142,7 @@ ob_start();
     <?php else: ?>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <?php foreach ($listings as $listing): ?>
-        <div class="card dark:bg-gray-800 overflow-hidden flex flex-col hover:shadow-xl transition-shadow">
+        <div class="card dark:bg-gray-800 overflow-hidden flex flex-col hover:shadow-xl transition-shadow min-w-0">
             <!-- Top accent bar based on type -->
             <div class="h-1.5 w-full <?php
                 $accent = [

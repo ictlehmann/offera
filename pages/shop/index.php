@@ -539,7 +539,7 @@ ob_start();
             $sliderId = 'slider-grid-' . $product['id'];
             $productUrl = asset('pages/shop/view.php?id=' . $product['id']);
         ?>
-        <div class="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden flex flex-col group hover:shadow-2xl transition-all duration-300 border border-gray-100 dark:border-gray-700 hover:border-blue-200 dark:hover:border-blue-700 <?php echo $productOutOfStock ? 'opacity-70' : ''; ?>"
+        <div class="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden flex flex-col group hover:shadow-2xl transition-all duration-300 border border-gray-100 dark:border-gray-700 hover:border-blue-200 dark:hover:border-blue-700 min-w-0 <?php echo $productOutOfStock ? 'opacity-70' : ''; ?>"
              data-instock="<?php echo $productOutOfStock ? '0' : '1'; ?>"
              data-gender="<?php echo htmlspecialchars($product['gender'] ?? ''); ?>"
              data-category="<?php echo htmlspecialchars($product['category'] ?? ''); ?>"
@@ -591,8 +591,8 @@ ob_start();
             </a>
 
             <!-- Product info -->
-            <div class="p-4 flex flex-col flex-1">
-                <h3 class="font-semibold text-gray-900 dark:text-gray-100 text-sm mb-2 line-clamp-2 leading-snug">
+            <div class="p-4 flex flex-col flex-1 min-w-0">
+                <h3 class="font-semibold text-gray-900 dark:text-gray-100 text-sm mb-2 line-clamp-2 leading-snug break-words">
                     <a href="<?php echo $productUrl; ?>" class="no-underline text-inherit hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                         <?php echo htmlspecialchars($product['name']); ?>
                     </a>
@@ -731,7 +731,7 @@ ob_start();
                     <?php echo number_format((float) $currentProduct['base_price'], 2, ',', '.'); ?> €
                 </p>
                 <?php if (!empty($currentProduct['description'])): ?>
-                <p class="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
+                <p class="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed break-words">
                     <?php echo nl2br(htmlspecialchars($currentProduct['description'])); ?>
                 </p>
                 <?php endif; ?>

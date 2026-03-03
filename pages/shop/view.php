@@ -337,7 +337,7 @@ ob_start();
 
                 <!-- Description -->
                 <?php if (!empty($product['description'])): ?>
-                <p class="text-gray-600 dark:text-gray-300 mb-5 leading-relaxed text-[0.95rem]">
+                <p class="text-gray-600 dark:text-gray-300 mb-5 leading-relaxed text-[0.95rem] break-words">
                     <?php echo nl2br(htmlspecialchars($product['description'])); ?>
                 </p>
                 <?php endif; ?>
