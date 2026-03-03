@@ -73,14 +73,12 @@ try {
     $stmt = $contentDb->prepare(
         "SELECT DISTINCT e.id, e.title, e.start_time, e.end_time, e.location, e.status, e.image_path, e.is_external
          FROM events e
+         INNER JOIN event_signups es ON es.event_id = e.id
          WHERE e.status IN ('planned', 'open', 'closed') AND DATE(e.start_time) >= CURDATE()
-           AND (
-               EXISTS (SELECT 1 FROM event_registrations er WHERE er.event_id = e.id AND er.user_id = ? AND er.status = 'confirmed')
-               OR EXISTS (SELECT 1 FROM event_signups es WHERE es.event_id = e.id AND es.user_id = ? AND es.status = 'confirmed')
-           )
+           AND es.user_id = ? AND es.status = 'confirmed'
          ORDER BY e.start_time ASC LIMIT 5"
     );
-    $stmt->execute([$currentUserId, $currentUserId]);
+    $stmt->execute([$currentUserId]);
     $events = $stmt->fetchAll(PDO::FETCH_ASSOC);
     $nextEvents = array_slice($events, 0, 3);
 } catch (Exception $e) {
