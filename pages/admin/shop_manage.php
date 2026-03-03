@@ -1347,13 +1347,15 @@ function createVariantBlock(idx, typeName, values) {
             </button>
         </div>
         <div class="px-4 py-3">
-            <div class="grid grid-cols-[1fr_auto_auto] gap-x-3 gap-y-0 mb-1.5 px-1">
-                <span class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide">Größe</span>
-                <span class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide text-right w-24">Lagerbestand</span>
-                <span class="w-7"></span>
-            </div>
-            <div class="value-rows space-y-2">
-                ${(values || [{value:'',stock_quantity:0}]).map((v, vi) => valueRowHtml(idx, vi, v.value || '', v.stock_quantity || 0)).join('')}
+            <div class="overflow-x-auto">
+                <div class="grid grid-cols-[1fr_auto_auto] gap-x-3 gap-y-0 mb-1.5 px-1 min-w-[280px]">
+                    <span class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide">Größe</span>
+                    <span class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide text-right w-24">Lagerbestand</span>
+                    <span class="w-7"></span>
+                </div>
+                <div class="value-rows space-y-2 min-w-[280px]">
+                    ${(values || [{value:'',stock_quantity:0}]).map((v, vi) => valueRowHtml(idx, vi, v.value || '', v.stock_quantity || 0)).join('')}
+                </div>
             </div>
             <button type="button" onclick="addValueRow(this, ${idx})"
                     class="mt-3 text-xs text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 flex items-center gap-1.5 font-medium transition-colors">
