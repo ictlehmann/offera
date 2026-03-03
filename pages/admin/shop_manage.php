@@ -724,13 +724,15 @@ ob_start();
                 <div class="grid grid-cols-1 lg:grid-cols-5 gap-0 divide-y lg:divide-y-0 lg:divide-x divide-gray-200 dark:divide-gray-700">
 
                     <!-- Left: Grunddaten + Bilder (3/5) -->
-                    <div class="lg:col-span-3 p-5 space-y-5">
+                    <div class="lg:col-span-3 p-6 space-y-5">
 
                         <!-- Section header -->
-                        <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 flex items-center gap-2">
-                            <i class="fas fa-tag text-blue-400"></i> Grunddaten
-                            <span class="flex-1 border-t border-gray-200 dark:border-gray-700 ml-1"></span>
-                        </h3>
+                        <div class="flex items-center gap-2.5 pb-3 border-b border-gray-100 dark:border-gray-700">
+                            <div class="w-7 h-7 rounded-lg bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center">
+                                <i class="fas fa-tag text-blue-600 dark:text-blue-400 text-xs"></i>
+                            </div>
+                            <h3 class="text-sm font-bold text-gray-700 dark:text-gray-200">Grundinformationen</h3>
+                        </div>
 
                         <!-- Name -->
                         <div>
@@ -774,10 +776,12 @@ ob_start();
 
                         <!-- Produktbilder -->
                         <div>
-                            <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 flex items-center gap-2 mb-3">
-                                <i class="fas fa-images text-blue-400"></i> Produktbilder
-                                <span class="flex-1 border-t border-gray-200 dark:border-gray-700 ml-1"></span>
-                            </h3>
+                            <div class="flex items-center gap-2.5 pb-3 border-b border-gray-100 dark:border-gray-700 mb-3">
+                                <div class="w-7 h-7 rounded-lg bg-sky-100 dark:bg-sky-900/40 flex items-center justify-center">
+                                    <i class="fas fa-images text-sky-600 dark:text-sky-400 text-xs"></i>
+                                </div>
+                                <h3 class="text-sm font-bold text-gray-700 dark:text-gray-200">Produktbilder</h3>
+                            </div>
                             <p id="modal-no-images-hint" class="text-xs text-gray-400 dark:text-gray-500 mb-2 hidden">Noch keine Bilder vorhanden.</p>
                             <div id="modal-images-grid" class="grid grid-cols-4 sm:grid-cols-6 gap-2 mb-3"></div>
                             <label for="modal-product-images" id="image-drop-zone"
@@ -798,14 +802,16 @@ ob_start();
                     </div>
 
                     <!-- Right: Organisation + Preis (2/5) -->
-                    <div class="lg:col-span-2 p-5 space-y-5 bg-gray-50/60 dark:bg-gray-800/40">
+                    <div class="lg:col-span-2 p-6 space-y-5 bg-gray-50/60 dark:bg-gray-800/40">
 
                         <!-- Status -->
                         <div>
-                            <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 flex items-center gap-2 mb-3">
-                                <i class="fas fa-toggle-on text-blue-400"></i> Status &amp; Preis
-                                <span class="flex-1 border-t border-gray-200 dark:border-gray-700 ml-1"></span>
-                            </h3>
+                            <div class="flex items-center gap-2.5 pb-3 border-b border-gray-100 dark:border-gray-700 mb-4">
+                                <div class="w-7 h-7 rounded-lg bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center">
+                                    <i class="fas fa-toggle-on text-emerald-600 dark:text-emerald-400 text-xs"></i>
+                                </div>
+                                <h3 class="text-sm font-bold text-gray-700 dark:text-gray-200">Status &amp; Preis</h3>
+                            </div>
                             <label class="flex items-center gap-3 p-3 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition mb-4">
                                 <input type="checkbox" id="modal-active" name="active" value="1" checked
                                        class="w-4 h-4 text-blue-600 rounded border-gray-300 dark:border-gray-600 focus:ring-blue-500">
@@ -839,10 +845,12 @@ ob_start();
 
                         <!-- Organisation -->
                         <div>
-                            <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 flex items-center gap-2 mb-3">
-                                <i class="fas fa-folder text-blue-400"></i> Organisation
-                                <span class="flex-1 border-t border-gray-200 dark:border-gray-700 ml-1"></span>
-                            </h3>
+                            <div class="flex items-center gap-2.5 pb-3 border-b border-gray-100 dark:border-gray-700 mb-3">
+                                <div class="w-7 h-7 rounded-lg bg-violet-100 dark:bg-violet-900/40 flex items-center justify-center">
+                                    <i class="fas fa-folder text-violet-600 dark:text-violet-400 text-xs"></i>
+                                </div>
+                                <h3 class="text-sm font-bold text-gray-700 dark:text-gray-200">Organisation</h3>
+                            </div>
                             <div class="space-y-3">
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Kategorie</label>
@@ -870,10 +878,12 @@ ob_start();
 
                         <!-- Sammelbestellung -->
                         <div>
-                            <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 flex items-center gap-2 mb-3">
-                                <i class="fas fa-users text-blue-400"></i> Sammelbestellung
-                                <span class="flex-1 border-t border-gray-200 dark:border-gray-700 ml-1"></span>
-                            </h3>
+                            <div class="flex items-center gap-2.5 pb-3 border-b border-gray-100 dark:border-gray-700 mb-3">
+                                <div class="w-7 h-7 rounded-lg bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center">
+                                    <i class="fas fa-users text-blue-600 dark:text-blue-400 text-xs"></i>
+                                </div>
+                                <h3 class="text-sm font-bold text-gray-700 dark:text-gray-200">Sammelbestellung</h3>
+                            </div>
                             <label class="flex items-start gap-3 cursor-pointer p-3 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 transition">
                                 <input type="checkbox" id="modal-is-bulk-order" name="is_bulk_order" value="1"
                                        onchange="toggleBulkOrderFields(this.checked)"
@@ -910,20 +920,26 @@ ob_start();
                 </div>
 
                 <!-- ══ ROW 2: Varianten (full-width) ══ -->
-                <div class="border-t border-gray-200 dark:border-gray-700 p-5">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 flex items-center gap-2">
-                            <i class="fas fa-layer-group text-purple-400"></i> Produktvarianten
-                            <span class="text-gray-300 dark:text-gray-600 font-normal normal-case tracking-normal ml-1">(Farbe → Größen mit Lagerbestand)</span>
-                        </h3>
+                <div class="border-t-4 border-purple-500 dark:border-purple-600 bg-purple-50/40 dark:bg-purple-900/10">
+                    <div class="px-6 py-4 flex items-center justify-between border-b border-purple-100 dark:border-purple-800/40">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-xl bg-purple-600 flex items-center justify-center shadow-sm">
+                                <i class="fas fa-layer-group text-white text-sm"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-bold text-gray-800 dark:text-gray-100">Produktvarianten</h3>
+                                <p class="text-xs text-purple-600 dark:text-purple-400 mt-0.5">Farben &amp; Größen mit Lagerbestand</p>
+                            </div>
+                        </div>
                         <!-- Toggle -->
-                        <label class="flex items-center gap-2 cursor-pointer select-none">
-                            <span class="text-sm text-gray-500 dark:text-gray-400">Hat Varianten</span>
+                        <label class="flex items-center gap-2 cursor-pointer select-none bg-white dark:bg-gray-800 px-3 py-1.5 rounded-lg border border-purple-200 dark:border-purple-700 hover:border-purple-400 transition-colors">
+                            <span class="text-sm font-medium text-gray-600 dark:text-gray-300">Varianten aktivieren</span>
                             <input type="checkbox" id="modal-has-variants" name="has_variants" value="1"
                                    onchange="toggleVariantMode(this.checked)"
                                    class="w-4 h-4 text-purple-600 rounded border-gray-300 dark:border-gray-600 focus:ring-purple-500">
                         </label>
                     </div>
+                    <div class="p-6">
 
                     <!-- Variant builder panel -->
                     <div id="modal-section-variants">
@@ -932,19 +948,24 @@ ob_start();
 
                         <!-- Add color button -->
                         <button type="button" id="add-variant"
-                                class="mt-4 w-full py-3 border-2 border-dashed border-purple-200 dark:border-purple-800 rounded-xl text-sm text-purple-500 dark:text-purple-400 hover:border-purple-400 dark:hover:border-purple-600 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-all flex items-center justify-center gap-2 font-medium">
-                            <i class="fas fa-plus-circle"></i> Farbe hinzufügen
+                                class="mt-4 w-full py-3 border-2 border-dashed border-purple-300 dark:border-purple-700 rounded-xl text-sm text-purple-600 dark:text-purple-400 hover:border-purple-500 dark:hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/30 transition-all flex items-center justify-center gap-2 font-semibold">
+                            <i class="fas fa-plus-circle"></i> Farbe / Variante hinzufügen
                             <span class="text-xs font-normal text-purple-400 dark:text-purple-500">(z.B. Schwarz, Weiß)</span>
                         </button>
                     </div>
 
                     <!-- No-variants placeholder -->
-                    <div id="modal-no-variants-placeholder" class="hidden py-6 text-center">
-                        <div class="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 rounded-full text-sm text-gray-500 dark:text-gray-400">
-                            <i class="fas fa-cube"></i>
-                            Dieses Produkt hat keine Varianten – es wird als Einheitsgröße verkauft.
+                    <div id="modal-no-variants-placeholder" class="hidden py-8 text-center">
+                        <div class="inline-flex flex-col items-center gap-2">
+                            <div class="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                                <i class="fas fa-cube text-gray-400 dark:text-gray-500 text-xl"></i>
+                            </div>
+                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Dieses Produkt hat keine Varianten</p>
+                            <p class="text-xs text-gray-400 dark:text-gray-500">Es wird als Einheitsgröße ohne Lagerbestandsverwaltung verkauft.</p>
                         </div>
                     </div>
+
+                    </div><!-- end p-6 -->
                 </div>
 
             </div><!-- end scrollable body -->
