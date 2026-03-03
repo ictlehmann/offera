@@ -253,11 +253,13 @@ ob_start();
 <!-- ─── Floating Cart Button ─── -->
 <button id="cartFloatingBtn"
         onclick="openCartPanel()"
-        style="display:none"
-        class="fixed bottom-6 right-6 z-40 w-16 h-16 bg-gradient-to-br from-purple-600 to-blue-600 text-white rounded-full shadow-2xl hover:shadow-purple-500/30 flex items-center justify-center transition-all hover:scale-110 focus:outline-none focus:ring-4 focus:ring-purple-300"
+        class="fixed left-4 bottom-4 md:left-auto md:right-8 md:bottom-auto md:top-24 z-40 w-16 h-16 bg-gradient-to-br from-purple-600 to-blue-600 text-white rounded-full shadow-2xl hover:shadow-purple-500/30 flex items-center justify-center transition-all hover:scale-110 focus:outline-none focus:ring-4 focus:ring-purple-300"
         aria-label="Warenkorb öffnen">
-    <i class="fas fa-shopping-cart text-xl"></i>
+    <span class="text-2xl leading-none">🛒</span>
     <span id="cartBadge"
+          style="display:none"
+          aria-live="polite"
+          aria-atomic="true"
           class="absolute -top-2 -right-2 min-w-[1.4rem] h-[1.4rem] bg-red-500 text-white text-xs font-extrabold rounded-full flex items-center justify-center px-1 shadow-lg ring-2 ring-white">
         0
     </span>
@@ -474,13 +476,12 @@ ob_start();
     function updateCartUI() {
         var count      = cart.length;
         var badge      = document.getElementById('cartBadge');
-        var floatBtn   = document.getElementById('cartFloatingBtn');
         var panelCount = document.getElementById('cartPanelCount');
         var submitLbl  = document.getElementById('cartSubmitLabel');
         var submitBtn  = document.getElementById('cartSubmitBtn');
 
         badge.textContent         = count;
-        floatBtn.style.display    = count > 0 ? 'flex' : 'none';
+        badge.style.display       = count > 0 ? 'flex' : 'none';
         if (panelCount) panelCount.textContent = count + ' Artikel';
         if (submitLbl)  submitLbl.textContent  = count > 1 ? count + ' Anfragen senden' : 'Anfrage senden';
         if (submitBtn)  submitBtn.disabled     = count === 0;
