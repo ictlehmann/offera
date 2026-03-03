@@ -12,6 +12,10 @@ if (!Auth::check()) {
 
 $user = Auth::user();
 
+// Determine whether the current viewer may see hidden contact data
+$viewerRole = $user['role'] ?? '';
+$canViewPrivate = in_array($viewerRole, ['alumni', 'vorstand_intern', 'vorstand_extern', 'vorstand_finanzen']);
+
 // Get search filters
 $searchKeyword = $_GET['search'] ?? '';
 $industryFilter = $_GET['industry'] ?? '';
@@ -227,6 +231,7 @@ ob_start();
                         </div>
                         
                         <!-- Contact Button -->
+                        <?php if (!empty($profile['email']) && ($canViewPrivate || empty($profile['privacy_hide_email']))): ?>
                         <a 
                             href="mailto:<?php echo htmlspecialchars($profile['email']); ?>"
                             class="btn w-100 fw-semibold shadow-sm text-white"
@@ -235,6 +240,7 @@ ob_start();
                             <i class="fas fa-envelope me-2"></i>
                             Kontakt
                         </a>
+                        <?php endif; ?>
                     </div>
                 </div>
                 </div>

@@ -113,7 +113,8 @@ class Member {
                 u.entra_roles,
                 u.entra_photo_path,
                 u.job_title,
-                u.created_at
+                u.created_at,
+                u.privacy_hide_email
             FROM users u
             WHERE " . $userWhereSQL . "
         ";
@@ -156,6 +157,7 @@ class Member {
                 $profile['entra_photo_path'] = $user['entra_photo_path'] ?? null;
                 $profile['job_title'] = $user['job_title'] ?? null;
                 $profile['user_created_at'] = $user['created_at'];
+                $profile['privacy_hide_email'] = $user['privacy_hide_email'] ?? 0;
                 
                 // Resolve display_role: prefer Entra display names, fall back to internal role label
                 $displayRole = null;
