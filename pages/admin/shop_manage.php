@@ -45,6 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Save product (create or update)
     if ($postAction === 'save_product') {
+        CSRFHandler::verifyToken($_POST['csrf_token'] ?? '');
         $pid  = isset($_POST['product_id']) ? (int) $_POST['product_id'] : 0;
         $data = [
             'name'          => trim($_POST['name'] ?? ''),
@@ -239,6 +240,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Update order status
     if ($postAction === 'update_order') {
+        CSRFHandler::verifyToken($_POST['csrf_token'] ?? '');
         $orderId        = (int) ($_POST['order_id'] ?? 0);
         $paymentStatus  = $_POST['payment_status']  ?? null;
         $shippingStatus = $_POST['shipping_status'] ?? null;
@@ -652,6 +654,7 @@ ob_start();
                 </div>
                 <form method="POST" id="order-status-form" class="space-y-4">
                     <input type="hidden" name="post_action" value="update_order">
+                    <input type="hidden" name="csrf_token" value="<?php echo CSRFHandler::getToken(); ?>">
                     <input type="hidden" name="order_id" id="modal-order-id">
 
                     <div>
@@ -718,6 +721,7 @@ ob_start();
         <!-- Modal body -->
         <form method="POST" enctype="multipart/form-data" id="product-form" class="flex flex-col flex-1 min-h-0">
             <input type="hidden" name="post_action" value="save_product">
+            <input type="hidden" name="csrf_token" value="<?php echo CSRFHandler::getToken(); ?>">
             <input type="hidden" name="product_id" id="modal-product-id" value="">
 
             <div class="overflow-y-auto flex-1">

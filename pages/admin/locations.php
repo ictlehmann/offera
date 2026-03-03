@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../../src/Auth.php';
 require_once __DIR__ . '/../../includes/models/Inventory.php';
+require_once __DIR__ . '/../../includes/handlers/CSRFHandler.php';
 
 if (!Auth::check() || !Auth::hasPermission('manager')) {
     header('Location: ../dashboard/index.php');
@@ -12,6 +13,7 @@ $error = '';
 
 // Handle location creation
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_location'])) {
+    CSRFHandler::verifyToken($_POST['csrf_token'] ?? '');
     $name = trim($_POST['name'] ?? '');
     $description = trim($_POST['description'] ?? '');
     $address = trim($_POST['address'] ?? '');
@@ -74,6 +76,7 @@ ob_start();
             </h2>
             <form method="POST" class="space-y-4">
                 <input type="hidden" name="create_location" value="1">
+                <input type="hidden" name="csrf_token" value="<?php echo CSRFHandler::getToken(); ?>">
                 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
