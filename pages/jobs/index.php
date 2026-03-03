@@ -185,28 +185,33 @@ ob_start();
                 <div class="pt-4 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between gap-2">
                     <?php if (!empty($listing['pdf_path'])): ?>
                     <a href="<?php echo htmlspecialchars(asset($listing['pdf_path'])); ?>"
-                       target="_blank"
-                       rel="noopener noreferrer"
+                       download
                        class="inline-flex items-center px-4 py-2 bg-red-50 hover:bg-red-100 text-red-700 dark:bg-red-900/30 dark:hover:bg-red-900/50 dark:text-red-300 rounded-lg text-sm font-medium transition-all">
-                        <i class="fas fa-file-pdf mr-2"></i>Lebenslauf
+                        <i class="fas fa-file-download mr-2"></i>Lebenslauf
                     </a>
                     <?php else: ?>
                     <span class="text-xs text-gray-400 dark:text-gray-500 italic">Kein Lebenslauf</span>
                     <?php endif; ?>
 
                     <?php if ((int)$listing['user_id'] === $userId): ?>
-                    <form method="POST" action="index.php<?php echo $filterType ? '?type=' . urlencode($filterType) : ''; ?>"
-                          onsubmit="return confirm('Gesuch wirklich löschen?');">
-                        <input type="hidden" name="csrf_token" value="<?php
-                            require_once __DIR__ . '/../../includes/handlers/CSRFHandler.php';
-                            echo CSRFHandler::getToken();
-                        ?>">
-                        <input type="hidden" name="delete_id" value="<?php echo (int)$listing['id']; ?>">
-                        <button type="submit"
-                                class="inline-flex items-center px-3 py-2 bg-gray-100 hover:bg-red-100 text-gray-500 hover:text-red-600 dark:bg-gray-700 dark:hover:bg-red-900/40 dark:text-gray-400 dark:hover:text-red-400 rounded-lg text-sm transition-all">
-                            <i class="fas fa-trash-alt mr-1"></i>Löschen
-                        </button>
-                    </form>
+                    <div class="flex items-center gap-2">
+                        <a href="edit.php?id=<?php echo (int)$listing['id']; ?>"
+                           class="inline-flex items-center px-3 py-2 bg-gray-100 hover:bg-blue-100 text-gray-500 hover:text-blue-600 dark:bg-gray-700 dark:hover:bg-blue-900/40 dark:text-gray-400 dark:hover:text-blue-400 rounded-lg text-sm transition-all">
+                            <i class="fas fa-edit mr-1"></i>Bearbeiten
+                        </a>
+                        <form method="POST" action="index.php<?php echo $filterType ? '?type=' . urlencode($filterType) : ''; ?>"
+                              onsubmit="return confirm('Gesuch wirklich löschen?');">
+                            <input type="hidden" name="csrf_token" value="<?php
+                                require_once __DIR__ . '/../../includes/handlers/CSRFHandler.php';
+                                echo CSRFHandler::getToken();
+                            ?>">
+                            <input type="hidden" name="delete_id" value="<?php echo (int)$listing['id']; ?>">
+                            <button type="submit"
+                                    class="inline-flex items-center px-3 py-2 bg-gray-100 hover:bg-red-100 text-gray-500 hover:text-red-600 dark:bg-gray-700 dark:hover:bg-red-900/40 dark:text-gray-400 dark:hover:text-red-400 rounded-lg text-sm transition-all">
+                                <i class="fas fa-trash-alt mr-1"></i>Löschen
+                            </button>
+                        </form>
+                    </div>
                     <?php endif; ?>
                 </div>
             </div>
