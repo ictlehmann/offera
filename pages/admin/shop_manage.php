@@ -9,6 +9,7 @@ require_once __DIR__ . '/../../src/Auth.php';
 require_once __DIR__ . '/../../includes/helpers.php';
 require_once __DIR__ . '/../../includes/models/Shop.php';
 require_once __DIR__ . '/../../includes/utils/SecureImageUpload.php';
+require_once __DIR__ . '/../../includes/handlers/CSRFHandler.php';
 
 if (!Auth::check()) {
     header('Location: ../auth/login.php');
@@ -223,6 +224,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Delete product
     if ($postAction === 'delete_product') {
+        CSRFHandler::verifyToken($_POST['csrf_token'] ?? '');
         $pid = (int) ($_POST['product_id'] ?? 0);
         if ($pid) {
             $ok = Shop::deleteProduct($pid);
@@ -1022,6 +1024,7 @@ ob_start();
         <form method="POST" id="delete-product-form" class="px-6 pb-6">
             <input type="hidden" name="post_action" value="delete_product">
             <input type="hidden" name="product_id" id="delete-product-id">
+            <input type="hidden" name="csrf_token" value="<?php echo CSRFHandler::getToken(); ?>">
             <div class="flex gap-3">
                 <button type="button" onclick="closeDeleteConfirm()"
                         class="flex-1 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 font-medium transition-colors">
@@ -1042,6 +1045,7 @@ ob_start();
 
 const INPUT_CLASS       = 'border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 text-sm focus:ring-2';
 const IMAGE_ORDER_URL   = '<?php echo asset('api/shop/update_image_order.php'); ?>';
+const CSRF_TOKEN        = <?php echo json_encode(CSRFHandler::getToken()); ?>;
 
 let variantCount       = 0;
 let currentProductId   = null;
@@ -1202,7 +1206,7 @@ function saveImageOrder() {
     fetch(IMAGE_ORDER_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'reorder', orders }),
+        body: JSON.stringify({ action: 'reorder', orders, csrf_token: CSRF_TOKEN }),
     })
     .then(r => r.json())
     .catch(err => console.error('Reihenfolge konnte nicht gespeichert werden:', err));
@@ -1213,7 +1217,7 @@ function deleteProductImage(imageId, element) {
     fetch(IMAGE_ORDER_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'delete', id: imageId }),
+        body: JSON.stringify({ action: 'delete', id: imageId, csrf_token: CSRF_TOKEN }),
     })
     .then(r => r.json())
     .then(data => {
