@@ -102,14 +102,32 @@ class Invoice {
      */
     private static function handleFileUpload($file) {
         // Check if file was uploaded
-        if (!isset($file) || $file['error'] !== UPLOAD_ERR_OK) {
+        if (!isset($file) || !isset($file['error'])) {
             return [
                 'success' => false,
                 'path' => null,
-                'error' => 'Keine Datei hochgeladen oder Upload-Fehler'
+                'error' => 'Keine Datei hochgeladen'
             ];
         }
-        
+
+        // UPLOAD_ERR_INI_SIZE / UPLOAD_ERR_FORM_SIZE must be caught before inspecting
+        // $file['size'], because PHP reports size as 0 when the limit is exceeded.
+        if ($file['error'] === UPLOAD_ERR_INI_SIZE || $file['error'] === UPLOAD_ERR_FORM_SIZE) {
+            return [
+                'success' => false,
+                'path' => null,
+                'error' => 'Datei ist zu groß. Maximum: 10MB'
+            ];
+        }
+
+        if ($file['error'] !== UPLOAD_ERR_OK) {
+            return [
+                'success' => false,
+                'path' => null,
+                'error' => 'Upload-Fehler (Code: ' . (int)$file['error'] . ')'
+            ];
+        }
+
         // Validate file size (10MB)
         if ($file['size'] > self::MAX_FILE_SIZE) {
             return [

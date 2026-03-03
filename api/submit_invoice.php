@@ -65,8 +65,20 @@ if (!is_numeric($amount) || $amount <= 0) {
 }
 
 // Validate file upload
-if (!isset($_FILES['file']) || $_FILES['file']['error'] !== UPLOAD_ERR_OK) {
+if (!isset($_FILES['file'])) {
     $_SESSION['error_message'] = 'Datei-Upload fehlgeschlagen';
+    header('Location: ' . asset('pages/invoices/index.php'));
+    exit;
+}
+
+if ($_FILES['file']['error'] === UPLOAD_ERR_INI_SIZE || $_FILES['file']['error'] === UPLOAD_ERR_FORM_SIZE) {
+    $_SESSION['error_message'] = 'Datei ist zu groß. Maximum: 10MB';
+    header('Location: ' . asset('pages/invoices/index.php'));
+    exit;
+}
+
+if ($_FILES['file']['error'] !== UPLOAD_ERR_OK) {
+    $_SESSION['error_message'] = 'Datei-Upload fehlgeschlagen (Code: ' . (int)$_FILES['file']['error'] . ')';
     header('Location: ' . asset('pages/invoices/index.php'));
     exit;
 }
