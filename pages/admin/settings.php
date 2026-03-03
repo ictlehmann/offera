@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../../src/Auth.php';
 require_once __DIR__ . '/../../src/Database.php';
+require_once __DIR__ . '/../../includes/handlers/CSRFHandler.php';
 
 if (!Auth::canAccessSystemSettings()) {
     header('Location: /index.php');
@@ -15,6 +16,7 @@ $db = Database::getContentDB();
 
 // Handle form submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    CSRFHandler::verifyToken($_POST['csrf_token'] ?? '');
     try {
         // Ensure system_settings table exists (one-time check)
         try {
@@ -121,6 +123,7 @@ ob_start();
     </h2>
     
     <form method="POST" class="space-y-4">
+        <input type="hidden" name="csrf_token" value="<?php echo CSRFHandler::getToken(); ?>">
         <div>
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Website-Name

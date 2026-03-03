@@ -36,15 +36,15 @@ if (!$hasInvoiceSubmitAccess) {
 
 $userRole = $user['role'] ?? '';
 
-// CSRF protection
-CSRFHandler::verifyToken($_POST['csrf_token'] ?? '');
-
 // Validate POST request
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     $_SESSION['error_message'] = 'Methode nicht erlaubt';
     header('Location: ' . asset('pages/invoices/index.php'));
     exit;
 }
+
+// CSRF protection
+CSRFHandler::verifyToken($_POST['csrf_token'] ?? '');
 
 // Validate required fields
 $amount = $_POST['amount'] ?? null;
