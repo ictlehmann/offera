@@ -989,9 +989,9 @@ ob_start();
                             </div>
                             <div class="flex-1">
                                 <p class="font-semibold text-gray-800 dark:text-gray-100">Postversand</p>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">zzgl. 7,99 €</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">zzgl. <span id="mail-shipping-cost-hint"><?php echo number_format(Shop::calculateShippingCost('DE', $cartTotalAmt), 2, ',', '.'); ?> €</span></p>
                             </div>
-                            <span class="text-blue-600 dark:text-blue-400 font-bold text-sm">7,99 €</span>
+                            <span id="mail-shipping-cost-badge" class="text-blue-600 dark:text-blue-400 font-bold text-sm"><?php echo number_format(Shop::calculateShippingCost('DE', $cartTotalAmt), 2, ',', '.'); ?> €</span>
                         </label>
                     </div>
 
@@ -1405,7 +1405,8 @@ document.addEventListener('DOMContentLoaded', function () {
 // ── Checkout: shipping method toggle + live total ────────────────────────────
 document.addEventListener('DOMContentLoaded', function() {
     var CART_TOTAL = <?php echo json_encode((float) $cartTotalAmt); ?>;
-    var GET_SHIPPING_COST_URL = <?php echo json_encode(asset('api/shop/get_shipping_cost.php')); ?>;
+    var GET_SHIPPING_COST_URL   = <?php echo json_encode(asset('api/shop/get_shipping_cost.php')); ?>;
+    var ADDRESS_SUGGEST_URL     = <?php echo json_encode(asset('api/shop/address_suggest.php')); ?>;
 
     var shippingRadios      = document.querySelectorAll('input[name="shipping_method"]');
     var countrySelect       = document.getElementById('shipping-country-select');
@@ -1415,6 +1416,8 @@ document.addEventListener('DOMContentLoaded', function() {
     var summaryTotal        = document.getElementById('summary-total');
     var checkoutDisplay     = document.getElementById('checkout-total-display');
     var deliveryMethodField = document.getElementById('selected-delivery-method');
+    var mailCostHint        = document.getElementById('mail-shipping-cost-hint');
+    var mailCostBadge       = document.getElementById('mail-shipping-cost-badge');
 
     // ── Address autocomplete (Nominatim / OpenStreetMap) ─────────────────────
     var searchInput    = document.getElementById('shipping-address-search');
@@ -1505,18 +1508,22 @@ document.addEventListener('DOMContentLoaded', function() {
     function searchNominatim(query) {
         if (!query || query.trim().length < 3) { closeSuggestions(); return; }
         if (spinner) spinner.classList.remove('hidden');
-        var url = 'https://nominatim.openstreetmap.org/search'
-            + '?format=json&addressdetails=1&limit=5'
-            + '&q=' + encodeURIComponent(query.trim());
-        fetch(url, {
-            headers: {
-                'Accept-Language': 'de',
-                'User-Agent': 'offera-intranet-shop/1.0'
-            }
-        })
+        var trimmedQuery = query.trim();
+        var url = ADDRESS_SUGGEST_URL + '?q=' + encodeURIComponent(trimmedQuery);
+        fetch(url)
             .then(function(res) { return res.json(); })
             .then(function(data) {
-                renderSuggestions(data);
+                if (data.success) {
+                    renderSuggestions(data.results);
+                } else {
+                    closeSuggestions();
+                    if (suggestionList) {
+                        suggestionList.innerHTML = '<li class="px-4 py-2 text-gray-500 dark:text-gray-400 text-xs italic">'
+                            + '<i class="fas fa-exclamation-circle mr-1"></i>Adressvorschläge momentan nicht verfügbar.</li>';
+                        suggestionList.classList.remove('hidden');
+                        if (searchInput) searchInput.setAttribute('aria-expanded', 'true');
+                    }
+                }
             })
             .catch(function() {
                 closeSuggestions();
@@ -1592,6 +1599,9 @@ document.addEventListener('DOMContentLoaded', function() {
         if (summaryShipping) summaryShipping.textContent = formatMoney(shippingCost) + ' €';
         if (summaryTotal)    summaryTotal.textContent    = formatMoney(grandTotal);
         if (checkoutDisplay) checkoutDisplay.textContent = formatMoney(grandTotal);
+        var formatted = formatMoney(shippingCost) + ' €';
+        if (mailCostHint)  mailCostHint.textContent  = formatted;
+        if (mailCostBadge) mailCostBadge.textContent = formatted;
     }
 
     function fetchShippingCost() {
