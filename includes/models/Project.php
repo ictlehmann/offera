@@ -723,12 +723,12 @@ class Project {
         $userIds = array_column($assignments, 'user_id');
         $placeholders = implode(',', array_fill(0, count($userIds), '?'));
 
-        // Get emails from user database
-        $stmt = $userDb->prepare("SELECT id AS user_id, email FROM users WHERE id IN ($placeholders)");
+        // Get emails and privacy settings from user database
+        $stmt = $userDb->prepare("SELECT id AS user_id, email, privacy_hide_email FROM users WHERE id IN ($placeholders)");
         $stmt->execute($userIds);
         $userMap = [];
         foreach ($stmt->fetchAll() as $u) {
-            $userMap[$u['user_id']] = $u['email'];
+            $userMap[$u['user_id']] = $u;
         }
 
         // Get profile names from content database
@@ -742,20 +742,28 @@ class Project {
         $participants = [];
         foreach ($assignments as $assignment) {
             $uid = $assignment['user_id'];
-            $email = $userMap[$uid] ?? '';
+            $userData = $userMap[$uid] ?? [];
+            $email = $userData['email'] ?? '';
+            $hideEmail = !empty($userData['privacy_hide_email']);
             $firstName = $profileMap[$uid]['first_name'] ?? '';
             $lastName = $profileMap[$uid]['last_name'] ?? '';
 
-            if (empty($firstName) && empty($lastName) && !empty($email) && strpos($email, '@') !== false) {
-                $firstName = explode('@', $email)[0];
+            if (empty($firstName) && empty($lastName)) {
+                // Only use email local part as display name if the user has not hidden their email
+                if (!$hideEmail && !empty($email) && strpos($email, '@') !== false) {
+                    $firstName = explode('@', $email)[0];
+                } else {
+                    $firstName = 'Benutzer';
+                }
             }
 
             $participants[] = [
-                'user_id'    => $uid,
-                'role'       => $assignment['role'],
-                'created_at' => $assignment['created_at'],
-                'first_name' => $firstName,
-                'last_name'  => $lastName,
+                'user_id'           => $uid,
+                'role'              => $assignment['role'],
+                'created_at'        => $assignment['created_at'],
+                'first_name'        => $firstName,
+                'last_name'         => $lastName,
+                'privacy_hide_email' => $hideEmail,
             ];
         }
 
