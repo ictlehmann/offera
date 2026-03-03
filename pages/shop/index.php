@@ -336,7 +336,51 @@ ob_start();
     sort($availableGenders);
     $availableCategories = array_unique(array_filter(array_column($products, 'category')));
     sort($availableCategories);
+    $catIconMap = [
+        'Kleidung'    => ['icon' => 'fa-shirt',     'from' => '#6366f1', 'to' => '#8b5cf6'],
+        'Accessoires' => ['icon' => 'fa-glasses',   'from' => '#ec4899', 'to' => '#f43f5e'],
+        'Bürobedarf'  => ['icon' => 'fa-pen-ruler',  'from' => '#f59e0b', 'to' => '#f97316'],
+        'Sonstiges'   => ['icon' => 'fa-tag',        'from' => '#14b8a6', 'to' => '#10b981'],
+    ];
     ?>
+
+    <!-- ── Visual Category Tab Strip ─────────────────────────────────────────── -->
+    <?php if (!empty($availableCategories)): ?>
+    <style>
+    .cat-tab { display:inline-flex; align-items:center; gap:8px; padding:10px 18px; border-radius:14px; font-size:.875rem; font-weight:700; cursor:pointer; transition:all .2s ease; white-space:nowrap; border:2px solid transparent; }
+    .cat-tab-all { background:#111827; color:#fff; box-shadow:0 2px 12px rgba(0,0,0,.18); }
+    .cat-tab-all.cat-tab-inactive { background:#f3f4f6; color:#374151; border-color:#e5e7eb; box-shadow:none; }
+    .dark .cat-tab-all.cat-tab-inactive { background:#374151; color:#d1d5db; border-color:#4b5563; }
+    .dark .cat-tab-all { background:#f9fafb; color:#111827; }
+    .cat-tab-item { background:#fff; color:#4b5563; border-color:#e5e7eb; box-shadow:0 1px 3px rgba(0,0,0,.06); }
+    .dark .cat-tab-item { background:#1f2937; color:#d1d5db; border-color:#374151; }
+    .cat-tab-item:hover { box-shadow:0 3px 10px rgba(0,0,0,.12); transform:translateY(-1px); }
+    .cat-tab-item.cat-tab-active { color:#fff; border-color:transparent; box-shadow:0 4px 14px rgba(0,0,0,.2); transform:translateY(-1px); }
+    .cat-count-badge { font-size:.7rem; font-weight:700; padding:2px 7px; border-radius:999px; background:rgba(0,0,0,.12); }
+    .cat-tab-item.cat-tab-active .cat-count-badge { background:rgba(255,255,255,.25); }
+    </style>
+    <div class="mb-5 flex items-center gap-2 overflow-x-auto pb-1" id="shop-cat-tabs" aria-label="Kategorien">
+        <button type="button" data-tab-cat="all"
+                class="cat-tab cat-tab-all flex-shrink-0">
+            <i class="fas fa-border-all text-sm"></i>
+            <span>Alle</span>
+            <span class="cat-count-badge"><?php echo count($products); ?></span>
+        </button>
+        <?php foreach ($availableCategories as $cat):
+            $catCfg = $catIconMap[$cat] ?? ['icon' => 'fa-tag', 'from' => '#6b7280', 'to' => '#9ca3af'];
+            $count = count(array_filter($products, fn($p) => ($p['category'] ?? '') === $cat));
+        ?>
+        <button type="button" data-tab-cat="<?php echo htmlspecialchars($cat); ?>"
+                class="cat-tab cat-tab-item flex-shrink-0"
+                style="--cat-from:<?php echo $catCfg['from']; ?>;--cat-to:<?php echo $catCfg['to']; ?>">
+            <i class="fas <?php echo $catCfg['icon']; ?> text-sm" style="color:<?php echo $catCfg['from']; ?>"></i>
+            <span><?php echo htmlspecialchars($cat); ?></span>
+            <span class="cat-count-badge"><?php echo $count; ?></span>
+        </button>
+        <?php endforeach; ?>
+    </div>
+    <?php endif; ?>
+
     <div class="mb-8 rounded-2xl overflow-hidden shadow-md border border-blue-100 dark:border-gray-700" style="background: linear-gradient(135deg,#f0f7ff 0%,#fff 60%) ;">
         <style>
         .dark .shop-filter-wrap { background: linear-gradient(135deg,#1e293b 0%,#1f2937 60%) !important; }
@@ -383,7 +427,7 @@ ob_start();
 
         <!-- Filter body -->
         <div id="filter-body" class="shop-filter-wrap p-5">
-            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
 
                 <!-- Search -->
                 <div class="sm:col-span-2 xl:col-span-1">
@@ -448,12 +492,9 @@ ob_start();
                 </div>
                 <?php endif; ?>
 
-                <!-- Category -->
+                <!-- Category (hidden – managed by the tab strip above) -->
                 <?php if (!empty($availableCategories)): ?>
-                <div id="category-filter-wrap">
-                    <p class="text-xs font-bold text-purple-600 dark:text-purple-400 uppercase tracking-widest mb-2.5 flex items-center gap-1.5">
-                        <i class="fas fa-shapes"></i> Kategorie
-                    </p>
+                <div id="category-filter-wrap" class="hidden" aria-hidden="true">
                     <div class="flex flex-wrap gap-1.5" id="category-filter-bar">
                         <button type="button" data-category="all"
                                 class="category-pill fpill fpill-all fpill-active">
@@ -498,13 +539,13 @@ ob_start();
             $sliderId = 'slider-grid-' . $product['id'];
             $productUrl = asset('pages/shop/view.php?id=' . $product['id']);
         ?>
-        <div class="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden flex flex-col group hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-700 hover:border-blue-200 dark:hover:border-blue-800 <?php echo $productOutOfStock ? 'opacity-70' : ''; ?>"
+        <div class="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden flex flex-col group hover:shadow-2xl transition-all duration-300 border border-gray-100 dark:border-gray-700 hover:border-blue-200 dark:hover:border-blue-700 <?php echo $productOutOfStock ? 'opacity-70' : ''; ?>"
              data-instock="<?php echo $productOutOfStock ? '0' : '1'; ?>"
              data-gender="<?php echo htmlspecialchars($product['gender'] ?? ''); ?>"
              data-category="<?php echo htmlspecialchars($product['category'] ?? ''); ?>"
              data-name="<?php echo htmlspecialchars(mb_strtolower($product['name'])); ?>">
-            <!-- Product image (square) -->
-            <a href="<?php echo $productUrl; ?>" class="block relative aspect-square overflow-hidden bg-gray-50 dark:bg-gray-900" id="<?php echo $sliderId; ?>">
+            <!-- Product image -->
+            <a href="<?php echo $productUrl; ?>" class="block relative aspect-[4/5] overflow-hidden bg-gray-50 dark:bg-gray-900" id="<?php echo $sliderId; ?>">
                 <?php if (!empty($allImages)): ?>
                     <?php foreach ($allImages as $idx => $img): ?>
                     <img src="<?php echo asset($img['image_path']); ?>"
@@ -541,23 +582,23 @@ ob_start();
                     </span>
                     <?php endif; ?>
                 </div>
-                <!-- Quick view hint on hover -->
-                <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 dark:group-hover:bg-black/20 transition-all duration-300 flex items-end justify-center pb-4 opacity-0 group-hover:opacity-100">
-                    <span class="px-3 py-1.5 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm text-gray-800 dark:text-gray-100 text-xs font-semibold rounded-full shadow">
-                        <i class="fas fa-eye mr-1.5 text-blue-600"></i>Details ansehen
+                <!-- Hover overlay with gradient -->
+                <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-black/0 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-end p-3">
+                    <span class="w-full py-2 bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 text-xs font-bold rounded-xl flex items-center justify-center gap-1.5 shadow-lg transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                        <i class="fas fa-eye text-blue-600 dark:text-blue-400"></i>Details ansehen
                     </span>
                 </div>
             </a>
 
             <!-- Product info -->
             <div class="p-4 flex flex-col flex-1">
-                <h3 class="font-bold text-gray-900 dark:text-gray-100 text-sm mb-1 line-clamp-2 leading-snug">
+                <h3 class="font-semibold text-gray-900 dark:text-gray-100 text-sm mb-2 line-clamp-2 leading-snug">
                     <a href="<?php echo $productUrl; ?>" class="no-underline text-inherit hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                         <?php echo htmlspecialchars($product['name']); ?>
                     </a>
                 </h3>
-                <p class="text-blue-600 dark:text-blue-400 font-bold text-base mb-2 flex-1">
-                    <?php echo number_format((float) $product['base_price'], 2, ',', '.'); ?> €
+                <p class="text-gray-900 dark:text-gray-100 font-bold text-lg mb-2 flex-1 flex items-center gap-1">
+                    <span><?php echo number_format((float) $product['base_price'], 2, ',', '.'); ?> €</span>
                 </p>
 
                 <?php
@@ -1309,7 +1350,52 @@ document.addEventListener('DOMContentLoaded', function() {
                 var isActive = p.dataset.category === activeCategory;
                 p.className = (p.dataset.category === 'all') ? (isActive ? CAT_ALL_ACTIVE : CAT_ALL_INACTIVE) : (isActive ? CAT_ACTIVE : CAT_INACTIVE);
             });
+            syncCatTabs(activeCategory);
             applyFilters();
+        });
+    });
+
+    // Category tab strip
+    var catTabs = document.querySelectorAll('.cat-tab');
+    function syncCatTabs(activeCat) {
+        catTabs.forEach(function(t) {
+            var isAll    = t.dataset.tabCat === 'all';
+            var isActive = t.dataset.tabCat === activeCat;
+            t.classList.toggle('cat-tab-active', isActive && !isAll);
+            t.classList.toggle('cat-tab-inactive', !isActive && isAll);
+            if (!isAll) {
+                var icon = t.querySelector('i');
+                if (isActive) {
+                    var from = t.style.getPropertyValue('--cat-from').trim() || '#6366f1';
+                    var to   = t.style.getPropertyValue('--cat-to').trim()   || '#8b5cf6';
+                    t.style.background  = 'linear-gradient(135deg,' + from + ',' + to + ')';
+                    t.style.color       = '#fff';
+                    t.style.borderColor = 'transparent';
+                    if (icon) icon.style.color = 'rgba(255,255,255,0.9)';
+                } else {
+                    t.style.background  = '';
+                    t.style.color       = '';
+                    t.style.borderColor = '';
+                    if (icon) icon.style.color = '';
+                }
+            } else {
+                // "Alle" tab - always keeps cat-tab-all class, just toggle inactive
+                t.classList.toggle('cat-tab-inactive', !isActive);
+            }
+        });
+    }
+    catTabs.forEach(function(tab) {
+        tab.addEventListener('click', function() {
+            var cat = this.dataset.tabCat;
+            // Trigger the hidden category pill to run existing filter logic
+            var targetPill = document.querySelector('.category-pill[data-category="' + cat + '"]');
+            if (targetPill) {
+                targetPill.click();
+            } else {
+                activeCategory = cat;
+                applyFilters();
+            }
+            syncCatTabs(cat);
         });
     });
 
@@ -1352,6 +1438,7 @@ document.addEventListener('DOMContentLoaded', function() {
             document.querySelectorAll('.category-pill').forEach(function(p) {
                 p.className = (p.dataset.category === 'all') ? CAT_ALL_ACTIVE : CAT_INACTIVE;
             });
+            syncCatTabs('all');
             applyFilters();
         });
     }
