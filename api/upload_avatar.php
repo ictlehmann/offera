@@ -93,11 +93,12 @@ try {
         $extMap = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp', 'image/gif' => 'gif'];
         $ext = $extMap[$actualMime] ?? 'jpg';
 
-        // Load current user to generate deterministic filename tied to email + username
+        // Load current user
         $user = Auth::user();
         $userId = $user['id'];
         $userRole = $user['role'] ?? '';
-        $filename = hash('sha256', ($user['email'] ?? '') . ($user['username'] ?? '')) . '.' . $ext;
+        // Generate a cryptographically secure random filename to prevent collisions and filename guessing
+        $filename = bin2hex(random_bytes(16)) . '.' . $ext;
         $uploadPath = $uploadDir . $filename;
 
         if (!copy($tmpFile, $uploadPath)) {
