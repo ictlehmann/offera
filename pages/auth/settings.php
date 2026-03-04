@@ -459,6 +459,51 @@ ob_start();
         </div>
     </div>
 
+    <!-- Änderungsantrag Section -->
+    <div class="mt-6" id="aenderungsantrag">
+        <div class="card rounded-xl shadow-sm overflow-hidden">
+            <!-- Section header -->
+            <div class="px-6 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center gap-3 bg-orange-50 dark:bg-orange-900/10">
+                <div class="w-9 h-9 rounded-xl bg-orange-100 dark:bg-orange-900/40 flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-file-alt text-orange-600 dark:text-orange-400"></i>
+                </div>
+                <div>
+                    <h2 class="text-base font-bold text-gray-900 dark:text-gray-100">Änderungsantrag</h2>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Rollenänderung oder E-Mail-Adressenänderung beantragen</p>
+                </div>
+            </div>
+            <div class="p-6">
+            <p class="text-gray-600 dark:text-gray-300 mb-5 text-sm">
+                Wenn deine Rolle nicht korrekt ist oder du eine andere E-Mail-Adresse hinterlegen möchtest, kannst du hier einen Änderungsantrag stellen. Der Antrag wird per E-Mail an den Vorstand weitergeleitet.
+            </p>
+            <form method="POST" class="space-y-4">
+                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(CSRFHandler::getToken(), ENT_QUOTES, 'UTF-8'); ?>">
+                <div>
+                    <label for="change-request-type" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Art der Änderung</label>
+                    <select id="change-request-type" name="request_type" required
+                            class="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-lg focus:ring-orange-500 focus:border-orange-500">
+                        <option value="">Bitte auswählen...</option>
+                        <option value="Rollenänderung">Rollenänderung</option>
+                        <option value="E-Mail-Adressenänderung">E-Mail-Adressenänderung</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="change-request-reason" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Begründung / Neuer Wert</label>
+                    <textarea id="change-request-reason" name="request_reason" rows="4" required
+                              minlength="10" maxlength="1000"
+                              placeholder="Beschreibe dein Anliegen ausführlich (z. B. welche Rolle du haben solltest und warum)..."
+                              class="w-full px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white rounded-lg focus:ring-orange-500 focus:border-orange-500 resize-none"></textarea>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Mindestens 10 Zeichen, maximal 1000 Zeichen.</p>
+                </div>
+                <button type="submit" name="submit_change_request"
+                        class="w-full inline-flex items-center justify-center px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-xl transition font-semibold text-sm">
+                    <i class="fas fa-paper-plane mr-2"></i>Änderungsantrag senden
+                </button>
+            </form>
+            </div><!-- /p-6 -->
+        </div>
+    </div>
+
     <!-- Support Section -->
     <div class="mt-6">
         <div class="card rounded-xl shadow-sm overflow-hidden">

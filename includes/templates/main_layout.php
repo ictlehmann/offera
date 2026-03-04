@@ -763,7 +763,6 @@ if (!isset($currentUser)) {
     <!-- Main Content -->
     <main id="main-content" role="main" class="md:ml-64 lg:ml-72 min-h-screen p-4 pt-16 md:p-6 lg:p-10" style="padding-bottom: max(1rem, env(safe-area-inset-bottom, 0))">
         <?php if (isset($_SESSION['show_2fa_nudge']) && $_SESSION['show_2fa_nudge']): ?>
-        <!-- 2FA Nudge Modal -->
         <div id="tfa-nudge-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[1070] p-4" role="dialog" aria-modal="true" aria-labelledby="tfa-nudge-title">
             <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-lg max-h-[85vh] flex flex-col overflow-hidden transform transition-all">
                 <!-- Modal Header -->
@@ -817,6 +816,62 @@ if (!isset($currentUser)) {
         <?php 
             unset($_SESSION['show_2fa_nudge']);
         endif; 
+        ?>
+
+        <?php if (isset($_SESSION['show_role_notice']) && $_SESSION['show_role_notice']): ?>
+        <!-- Role Notice Modal -->
+        <div id="role-notice-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[1060] p-4" role="dialog" aria-modal="true" aria-labelledby="role-notice-title" aria-describedby="role-notice-description">
+            <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full max-w-lg max-h-[85vh] flex flex-col overflow-hidden transform transition-all">
+                <!-- Modal Header -->
+                <div class="bg-gradient-to-r from-orange-500 to-yellow-500 px-6 py-4">
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-4">
+                            <i class="fas fa-user-tag text-white text-2xl" aria-hidden="true"></i>
+                        </div>
+                        <h3 id="role-notice-title" class="text-xl font-bold text-white">Rollenhinweis</h3>
+                    </div>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="px-6 py-6 overflow-y-auto flex-1">
+                    <p class="text-slate-800 dark:text-slate-200 text-lg mb-2 font-semibold">
+                        Stimmt deine Rolle?
+                    </p>
+                    <p id="role-notice-description" class="text-slate-800 dark:text-slate-200 mb-6">
+                        Dir wurde automatisch die Rolle <strong>Mitglied</strong> zugewiesen, da in Microsoft keine Rolle hinterlegt ist. Falls deine Rolle nicht korrekt ist, kannst du einen Änderungsantrag stellen.
+                    </p>
+
+                    <div class="bg-orange-50 dark:bg-orange-900/30 border border-orange-200 dark:border-orange-700 rounded-lg p-4">
+                        <div class="flex items-start">
+                            <i class="fas fa-info-circle text-orange-600 dark:text-orange-400 mt-1 mr-3" aria-hidden="true"></i>
+                            <p class="text-sm text-slate-800 dark:text-slate-200">
+                                Bitte wende dich an den Vorstand oder stelle einen Änderungsantrag, wenn deine Rolle angepasst werden muss.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal Footer -->
+                <div class="px-6 py-4 bg-gray-50 dark:bg-slate-700 flex flex-col sm:flex-row gap-3">
+                    <a href="<?php echo asset('pages/auth/settings.php'); ?>#aenderungsantrag" class="flex-1 inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-orange-500 to-yellow-500 text-white rounded-lg font-semibold hover:from-orange-600 hover:to-yellow-600 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                        <i class="fas fa-file-alt mr-2" aria-hidden="true"></i>
+                        Zum Änderungsantrag
+                    </a>
+                    <button onclick="dismissRoleNotice()" class="flex-1 px-6 py-3 bg-gray-300 dark:bg-slate-600 text-slate-800 dark:text-slate-200 rounded-lg font-semibold hover:bg-gray-400 dark:hover:bg-slate-500 transition-all duration-300">
+                        Später
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+        function dismissRoleNotice() {
+            document.getElementById('role-notice-modal').style.display = 'none';
+        }
+        </script>
+        <?php
+            unset($_SESSION['show_role_notice']);
+        endif;
         ?>
         
         <?php echo $content ?? ''; ?>
