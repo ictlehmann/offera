@@ -589,10 +589,10 @@ class ShopPaymentService {
      *          Verification via PayPal's verify-webhook-signature API.
      *          Requires PAYPAL_WEBHOOK_ID in .env. Returns 403 on invalid signature.
      *
+     * @param string $rawBody  Raw request body (must be read from php://input by the caller).
      * @return void  Sends HTTP 200 / 400 / 403 and exits.
      */
-    public static function handleWebhook(): void {
-        $rawBody = (string) file_get_contents('php://input');
+    public static function handleWebhook(string $rawBody): void {
         $headers = function_exists('getallheaders') ? (array) getallheaders() : [];
 
         // Normalise header names to lowercase for reliable lookup

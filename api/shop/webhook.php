@@ -22,4 +22,10 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-ShopPaymentService::handleWebhook();
+// Read the raw request body here so it is available before PHP can parse/consume it.
+// Signature verification (e.g. PayPal) requires the unmodified raw body – $_POST must
+// never be used for this purpose because PHP only populates $_POST for form-encoded
+// payloads, not for JSON bodies, and the body stream is exhausted after the first read.
+$payload = (string) file_get_contents('php://input');
+
+ShopPaymentService::handleWebhook($payload);
