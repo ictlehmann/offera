@@ -52,11 +52,11 @@ ob_start();
     <!-- Header -->
     <div class="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-            <h1 class="text-4xl font-bold text-gray-800 mb-2">
-                <i class="fas fa-users mr-3 text-blue-600"></i>
+            <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 dark:text-gray-100 mb-2">
+                <i class="fas fa-users mr-3 text-blue-600 dark:text-blue-400"></i>
                 Mitgliederverzeichnis
             </h1>
-            <p class="text-gray-600">Entdecken und vernetzen Sie sich mit unseren aktiven Mitgliedern</p>
+            <p class="text-gray-600 dark:text-gray-300">Entdecken und vernetzen Sie sich mit unseren aktiven Mitgliedern</p>
         </div>
         
         <!-- Edit My Profile Button - Only for Vorstand (all types), Resortleiter, Mitglied, Anwärter -->
@@ -111,7 +111,7 @@ ob_start();
 
     <!-- Results Count -->
     <div class="mb-6">
-        <p class="text-gray-600">
+        <p class="text-gray-600 dark:text-gray-300">
             <strong><?php echo count($members); ?></strong> 
             <?php echo count($members) === 1 ? 'Mitglied' : 'Mitglieder'; ?> gefunden
         </p>
@@ -137,21 +137,21 @@ ob_start();
                 <?php
                 // Determine role badge color
                 $roleBadgeColors = [
-                    'vorstand_finanzen'   => 'bg-purple-100 text-purple-800 border-purple-300',
-                    'vorstand_intern'     => 'bg-purple-100 text-purple-800 border-purple-300',
-                    'vorstand_extern'     => 'bg-purple-100 text-purple-800 border-purple-300',
-                    'ressortleiter'       => 'bg-blue-100 text-blue-800 border-blue-300',
-                    'mitglied'            => 'bg-green-100 text-green-800 border-green-300',
-                    'anwaerter'           => 'bg-yellow-100 text-yellow-800 border-yellow-300',
-                    'alumni'              => 'bg-gray-100 text-gray-800 border-gray-300',
-                    'alumni_vorstand'     => 'bg-indigo-100 text-indigo-800 border-indigo-300',
-                    'alumni_finanz'       => 'bg-indigo-100 text-indigo-800 border-indigo-300',
-                    'ehrenmitglied'       => 'bg-amber-100 text-amber-800 border-amber-300',
+                    'vorstand_finanzen'   => 'bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-900 dark:text-purple-200 dark:border-purple-700',
+                    'vorstand_intern'     => 'bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-900 dark:text-purple-200 dark:border-purple-700',
+                    'vorstand_extern'     => 'bg-purple-100 text-purple-800 border-purple-300 dark:bg-purple-900 dark:text-purple-200 dark:border-purple-700',
+                    'ressortleiter'       => 'bg-blue-100 text-blue-800 border-blue-300 dark:bg-blue-900 dark:text-blue-200 dark:border-blue-700',
+                    'mitglied'            => 'bg-green-100 text-green-800 border-green-300 dark:bg-green-900 dark:text-green-200 dark:border-green-700',
+                    'anwaerter'           => 'bg-yellow-100 text-yellow-800 border-yellow-300 dark:bg-yellow-900 dark:text-yellow-200 dark:border-yellow-700',
+                    'alumni'              => 'bg-gray-100 text-gray-800 border-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600',
+                    'alumni_vorstand'     => 'bg-indigo-100 text-indigo-800 border-indigo-300 dark:bg-indigo-900 dark:text-indigo-200 dark:border-indigo-700',
+                    'alumni_finanz'       => 'bg-indigo-100 text-indigo-800 border-indigo-300 dark:bg-indigo-900 dark:text-indigo-200 dark:border-indigo-700',
+                    'ehrenmitglied'       => 'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-900 dark:text-amber-200 dark:border-amber-700',
                 ];
                 
                 // Display role: prefer Entra-derived display_role, fall back to local role label
                 $displayRoleKey = Auth::getPrimaryEntraRoleKey($member['entra_roles'] ?? null, $member['role']);
-                $badgeClass = $roleBadgeColors[$displayRoleKey] ?? 'bg-gray-100 text-gray-800 border-gray-300';
+                $badgeClass = $roleBadgeColors[$displayRoleKey] ?? 'bg-gray-100 text-gray-800 border-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600';
                 $displayRole = htmlspecialchars($member['display_role'] ?? Auth::getRoleLabel($member['role']));
                 
                 // Generate initials for fallback
@@ -219,7 +219,7 @@ ob_start();
                     <!-- Card Body -->
                     <div class="directory-card-body">
                         <!-- Name (Bold) -->
-                        <h3 class="fs-6 directory-card-name text-gray-800 text-center mb-2">
+                        <h3 class="fs-6 directory-card-name text-gray-800 dark:text-gray-100 text-center mb-2">
                             <?php echo htmlspecialchars($member['first_name'] . ' ' . $member['last_name']); ?>
                         </h3>
                         

@@ -205,7 +205,7 @@ ob_start();
         <div class="mb-8 rounded-xl overflow-hidden shadow-2xl relative group">
             <img src="/<?php echo htmlspecialchars($project['image_path']); ?>" 
                  alt="<?php echo htmlspecialchars($project['title']); ?>"
-                 class="w-full h-96 object-cover transform group-hover:scale-105 transition-transform duration-700">
+                 class="w-full h-48 sm:h-64 md:h-96 object-cover transform group-hover:scale-105 transition-transform duration-700">
             <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
         </div>
         <?php endif; ?>

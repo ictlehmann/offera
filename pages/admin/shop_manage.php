@@ -331,7 +331,7 @@ ob_start();
     <!-- Header -->
     <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-            <h1 class="text-4xl font-bold text-gray-800 dark:text-gray-100 mb-2">
+            <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 dark:text-gray-100 mb-2">
                 <i class="fas fa-store mr-3 text-blue-600 dark:text-blue-400"></i>
                 Shop-Verwaltung
             </h1>

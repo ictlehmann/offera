@@ -53,11 +53,11 @@ ob_start();
     <!-- Header with Edit Button -->
     <div class="mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-            <h1 class="text-4xl font-bold text-gray-800 mb-2">
-                <i class="fas fa-user-graduate mr-3 text-purple-600"></i>
+            <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 dark:text-gray-100 mb-2">
+                <i class="fas fa-user-graduate mr-3 text-purple-600 dark:text-purple-400"></i>
                 Alumni-Verzeichnis
             </h1>
-            <p class="text-gray-600">Entdecke und vernetze dich mit unserem Alumni-Netzwerk</p>
+            <p class="text-gray-600 dark:text-gray-300">Entdecke und vernetze dich mit unserem Alumni-Netzwerk</p>
         </div>
         
         <!-- Edit My Profile Button - Only for Alumni, Alumni-Vorstand, Alumni-Finanzprüfer, and Ehrenmitglied -->
@@ -111,7 +111,7 @@ ob_start();
 
     <!-- Results Count -->
     <div class="mb-6">
-        <p class="text-gray-600">
+        <p class="text-gray-600 dark:text-gray-300">
             <strong><?php echo count($profiles); ?></strong> 
             <?php echo count($profiles) === 1 ? 'Profil' : 'Profile'; ?> gefunden
         </p>
@@ -137,13 +137,13 @@ ob_start();
                 <?php
                 // Determine role badge color
                 $roleBadgeColors = [
-                    'alumni'              => 'bg-gray-100 text-gray-800 border-gray-300',
-                    'alumni_vorstand'     => 'bg-indigo-100 text-indigo-800 border-indigo-300',
-                    'alumni_finanz'       => 'bg-indigo-100 text-indigo-800 border-indigo-300',
-                    'ehrenmitglied'       => 'bg-amber-100 text-amber-800 border-amber-300',
+                    'alumni'              => 'bg-gray-100 text-gray-800 border-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600',
+                    'alumni_vorstand'     => 'bg-indigo-100 text-indigo-800 border-indigo-300 dark:bg-indigo-900 dark:text-indigo-200 dark:border-indigo-700',
+                    'alumni_finanz'       => 'bg-indigo-100 text-indigo-800 border-indigo-300 dark:bg-indigo-900 dark:text-indigo-200 dark:border-indigo-700',
+                    'ehrenmitglied'       => 'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-900 dark:text-amber-200 dark:border-amber-700',
                 ];
                 $displayRoleKey = Auth::getPrimaryEntraRoleKey($profile['entra_roles'] ?? null, $profile['role'] ?? '');
-                $badgeClass = $roleBadgeColors[$displayRoleKey] ?? 'bg-gray-100 text-gray-800 border-gray-300';
+                $badgeClass = $roleBadgeColors[$displayRoleKey] ?? 'bg-gray-100 text-gray-800 border-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600';
                 $displayRole = htmlspecialchars($profile['display_role'] ?? Auth::getRoleLabel($profile['role'] ?? ''));
                 ?>
                 <div class="col">
@@ -183,7 +183,7 @@ ob_start();
                     <!-- Card Body -->
                     <div class="directory-card-body">
                         <!-- Name -->
-                        <h3 class="fs-6 directory-card-name text-gray-800 text-center mb-2">
+                        <h3 class="fs-6 directory-card-name text-gray-800 dark:text-gray-100 text-center mb-2">
                             <?php echo htmlspecialchars($profile['first_name'] . ' ' . $profile['last_name']); ?>
                         </h3>
                         

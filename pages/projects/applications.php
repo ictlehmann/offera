@@ -309,18 +309,18 @@ ob_start();
         <?php endif; ?>
         
         <div>
-            <span class="text-sm font-medium text-gray-600">Status</span>
-            <p class="text-gray-800 mt-1">
+            <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Status</span>
+            <p class="text-gray-800 dark:text-gray-200 mt-1">
                 <span class="px-3 py-1 text-sm font-semibold rounded-full
                     <?php 
                     switch($project['status']) {
-                        case 'draft': echo 'bg-gray-100 text-gray-800'; break;
-                        case 'open': echo 'bg-blue-100 text-blue-800'; break;
-                        case 'applying': echo 'bg-yellow-100 text-yellow-800'; break;
-                        case 'assigned': echo 'bg-green-100 text-green-800'; break;
-                        case 'running': echo 'bg-purple-100 text-purple-800'; break;
-                        case 'completed': echo 'bg-teal-100 text-teal-800'; break;
-                        case 'archived': echo 'bg-red-100 text-red-800'; break;
+                        case 'draft': echo 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'; break;
+                        case 'open': echo 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'; break;
+                        case 'applying': echo 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'; break;
+                        case 'assigned': echo 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'; break;
+                        case 'running': echo 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200'; break;
+                        case 'completed': echo 'bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-200'; break;
+                        case 'archived': echo 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'; break;
                     }
                     ?>">
                     <?php 
@@ -339,14 +339,14 @@ ob_start();
         </div>
         
         <div>
-            <span class="text-sm font-medium text-gray-600">Priorität</span>
-            <p class="text-gray-800 mt-1">
+            <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Priorität</span>
+            <p class="text-gray-800 dark:text-gray-200 mt-1">
                 <span class="px-3 py-1 text-sm font-semibold rounded-full
                     <?php 
                     switch($project['priority']) {
-                        case 'low': echo 'bg-blue-100 text-blue-800'; break;
-                        case 'medium': echo 'bg-yellow-100 text-yellow-800'; break;
-                        case 'high': echo 'bg-red-100 text-red-800'; break;
+                        case 'low': echo 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'; break;
+                        case 'medium': echo 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'; break;
+                        case 'high': echo 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'; break;
                     }
                     ?>">
                     <?php 

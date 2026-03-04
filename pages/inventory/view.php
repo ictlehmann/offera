@@ -203,7 +203,7 @@ ob_start();
         <div class="card p-8 shadow-xl border border-gray-200 dark:border-slate-700">
             <div class="flex items-start justify-between mb-6">
                 <div>
-                    <h1 class="text-4xl font-extrabold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-3"><?php echo htmlspecialchars($item['name']); ?></h1>
+                    <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-3"><?php echo htmlspecialchars($item['name']); ?></h1>
                     <div class="flex flex-wrap gap-2">
                         <?php if ($item['category_name']): ?>
                         <span class="px-4 py-2 text-sm font-semibold rounded-full inline-color-badge shadow-md" style="background-color: <?php echo htmlspecialchars($item['category_color']); ?>20; color: <?php echo htmlspecialchars($item['category_color']); ?>">

@@ -104,8 +104,8 @@ ob_start();
     <!-- Header -->
     <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-            <h1 class="text-4xl font-bold text-gray-800 mb-2">
-                <i class="fas fa-briefcase mr-3 text-purple-600"></i>
+            <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 dark:text-gray-100 mb-2">
+                <i class="fas fa-briefcase mr-3 text-purple-600 dark:text-purple-400"></i>
                 Projekte
             </h1>
             <p class="text-gray-600 dark:text-gray-300">Entdecke aktuelle Projekte und bewirb Dich</p>
