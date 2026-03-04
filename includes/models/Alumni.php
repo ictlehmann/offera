@@ -9,7 +9,16 @@ declare(strict_types=1);
 require_once __DIR__ . '/../database.php';
 
 class Alumni extends Database {
-    
+
+    /**
+     * Alumni roles (excludes active member roles)
+     * Includes: 'alumni', 'alumni_vorstand', 'alumni_finanz', and honorary members
+     *
+     * IMPORTANT: These values are trusted, internal constants and are interpolated
+     * directly into SQL strings. They MUST NOT be derived from or contain user input.
+     */
+    const ALUMNI_ROLES = ['alumni', 'alumni_vorstand', 'alumni_finanz', 'ehrenmitglied'];
+
     /**
      * Get profile by primary key ID
      * 
@@ -376,7 +385,9 @@ class Alumni extends Database {
                 
                 // Fetch all user roles and entra_roles in a single query
                 $placeholders = implode(',', array_fill(0, count($userIds), '?'));
-                $userSql = "SELECT id, role, entra_roles, entra_photo_path, privacy_hide_email FROM users WHERE id IN ($placeholders)";
+                // Role values are trusted internal constants – hardcoded directly in SQL
+                $alumniRoleList = "'" . implode("', '", self::ALUMNI_ROLES) . "'";
+                $userSql = "SELECT id, role, entra_roles, entra_photo_path, privacy_hide_email FROM users WHERE id IN ($placeholders) AND role IN ($alumniRoleList)";
                 try {
                     $userStmt = $userDb->prepare($userSql);
                     $userStmt->execute($userIds);
@@ -511,18 +522,16 @@ class Alumni extends Database {
             $userIds = array_column($profiles, 'user_id');
             
             try {
-                // Fetch all user roles in a single query
+                // Fetch user roles for the given IDs – role values are trusted internal constants,
+                // hardcoded directly in SQL; no parameter binding needed for the role list
                 $placeholders = implode(',', array_fill(0, count($userIds), '?'));
-                $userStmt = $userDb->prepare("SELECT id, role FROM users WHERE id IN ($placeholders)");
+                $userStmt = $userDb->prepare("SELECT id, role FROM users WHERE id IN ($placeholders) AND role IN ('alumni', 'alumni_vorstand')");
                 $userStmt->execute($userIds);
                 $userRoles = $userStmt->fetchAll(PDO::FETCH_KEY_PAIR); // id => role mapping
                 
-                // Filter profiles by role - only include 'alumni' or 'alumni_vorstand'
+                // Only include profiles whose linked user has a matching alumni role
                 foreach ($profiles as $profile) {
-                    $userId = $profile['user_id'];
-                    $userRole = $userRoles[$userId] ?? null;
-                    
-                    if (in_array($userRole, ['alumni', 'alumni_vorstand'])) {
+                    if (isset($userRoles[$profile['user_id']])) {
                         $result[] = $profile;
                     }
                 }
