@@ -394,19 +394,19 @@ ob_start();
                 <table class="w-full text-sm card-table">
                     <thead>
                         <tr class="border-b border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 text-left">
-                            <th class="pb-3 font-semibold">Bild</th>
-                            <th class="pb-3 font-semibold">Name</th>
-                            <th class="pb-3 font-semibold hidden md:table-cell">Beschreibung</th>
-                            <th class="pb-3 font-semibold text-right">Preis</th>
-                            <th class="pb-3 font-semibold text-center hidden sm:table-cell">Status</th>
-                            <th class="pb-3 font-semibold text-center hidden sm:table-cell">Lagerbestand</th>
-                            <th class="pb-3"></th>
+                            <th class="p-4 font-semibold whitespace-nowrap">Bild</th>
+                            <th class="p-4 font-semibold whitespace-nowrap">Name</th>
+                            <th class="p-4 font-semibold whitespace-nowrap hidden md:table-cell">Beschreibung</th>
+                            <th class="p-4 font-semibold text-right whitespace-nowrap">Preis</th>
+                            <th class="p-4 font-semibold text-center whitespace-nowrap hidden sm:table-cell">Status</th>
+                            <th class="p-4 font-semibold text-center whitespace-nowrap hidden sm:table-cell">Lagerbestand</th>
+                            <th class="p-4 whitespace-nowrap"></th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                         <?php foreach ($products as $product): ?>
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors">
-                            <td class="py-3 pr-3" data-label="Bild">
+                            <td class="p-4 whitespace-nowrap" data-label="Bild">
                                 <?php
                                 $thumbSrc = !empty($product['image_path'])
                                     ? asset($product['image_path'])
@@ -421,23 +421,23 @@ ob_start();
                                 </div>
                                 <?php endif; ?>
                             </td>
-                            <td class="py-3 font-semibold text-gray-800 dark:text-gray-100" data-label="Name">
+                            <td class="p-4 font-semibold text-gray-800 dark:text-gray-100 whitespace-nowrap" data-label="Name">
                                 <?php echo htmlspecialchars($product['name']); ?>
                             </td>
-                            <td class="py-3 text-gray-500 dark:text-gray-400 max-w-xs hidden md:table-cell" data-label="Beschreibung">
+                            <td class="p-4 text-gray-500 dark:text-gray-400 max-w-xs hidden md:table-cell" data-label="Beschreibung">
                                 <span class="line-clamp-2"><?php echo htmlspecialchars($product['description'] ?? ''); ?></span>
                             </td>
-                            <td class="py-3 text-right font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap" data-label="Preis">
+                            <td class="p-4 text-right font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap" data-label="Preis">
                                 <?php echo number_format((float) $product['base_price'], 2, ',', '.'); ?> €
                             </td>
-                            <td class="py-3 text-center hidden sm:table-cell" data-label="Status">
+                            <td class="p-4 text-center whitespace-nowrap hidden sm:table-cell" data-label="Status">
                                 <?php if ($product['active']): ?>
                                 <span class="px-2 py-1 bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 rounded-full text-xs font-medium">Aktiv</span>
                                 <?php else: ?>
                                 <span class="px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded-full text-xs font-medium">Inaktiv</span>
                                 <?php endif; ?>
                             </td>
-                            <td class="py-3 text-center hidden sm:table-cell" data-label="Lagerbestand">
+                            <td class="p-4 text-center whitespace-nowrap hidden sm:table-cell" data-label="Lagerbestand">
                                 <?php
                                 $namedVariants = array_values(array_filter($product['variants'], fn($v) => $v['type'] !== '' || $v['value'] !== ''));
                                 $totalStock   = array_sum(array_column($product['variants'], 'stock_quantity'));
@@ -467,7 +467,7 @@ ob_start();
                                     <?php endif; ?>
                                 </div>
                             </td>
-                            <td class="py-3 text-right" data-label="Aktionen">
+                            <td class="p-4 text-right whitespace-nowrap" data-label="Aktionen">
                                 <button type="button"
                                         onclick="openProductModal(<?php echo htmlspecialchars(json_encode($product), ENT_QUOTES); ?>)"
                                         class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg text-xs font-medium transition-colors">
