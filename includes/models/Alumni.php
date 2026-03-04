@@ -27,17 +27,12 @@ class Alumni extends Database {
             FROM alumni_profiles 
             WHERE id = ?
         ";
-        $missingCols = [];
         try {
             $stmt = $db->prepare($sql);
         } catch (PDOException $pdoEx) {
+            // SQLSTATE 42S22 = unknown column; replace ALL optional columns with NULL as fallback
             if ($pdoEx->getCode() === '42S22') {
                 foreach (['skills', 'cv_path'] as $col) {
-                    if (strpos($pdoEx->getMessage(), $col) !== false) {
-                        $missingCols[] = $col;
-                    }
-                }
-                foreach ($missingCols as $col) {
                     $sql = str_replace($col . ',', 'NULL AS ' . $col . ',', $sql);
                 }
                 $stmt = $db->prepare($sql);
@@ -66,17 +61,12 @@ class Alumni extends Database {
             FROM alumni_profiles 
             WHERE user_id = ?
         ";
-        $missingCols = [];
         try {
             $stmt = $db->prepare($sql);
         } catch (PDOException $pdoEx) {
+            // SQLSTATE 42S22 = unknown column; replace ALL optional columns with NULL as fallback
             if ($pdoEx->getCode() === '42S22') {
                 foreach (['skills', 'cv_path'] as $col) {
-                    if (strpos($pdoEx->getMessage(), $col) !== false) {
-                        $missingCols[] = $col;
-                    }
-                }
-                foreach ($missingCols as $col) {
                     $sql = str_replace($col . ',', 'NULL AS ' . $col . ',', $sql);
                 }
                 $stmt = $db->prepare($sql);
@@ -149,15 +139,13 @@ class Alumni extends Database {
             $stmt = $db->prepare($buildInsertSql($insertColumns));
             return $stmt->execute($insertParams);
         } catch (PDOException $e) {
-            // SQLSTATE 42S22 = unknown column; fall back if optional columns don't exist yet
+            // SQLSTATE 42S22 = unknown column; remove ALL optional columns from INSERT as fallback
             if ($e->getCode() === '42S22') {
                 foreach (['skills', 'cv_path'] as $optCol) {
-                    if (strpos($e->getMessage(), $optCol) !== false) {
-                        $idx = array_search($optCol, $insertColumns);
-                        if ($idx !== false) {
-                            array_splice($insertColumns, $idx, 1);
-                            array_splice($insertParams, $idx, 1);
-                        }
+                    $idx = array_search($optCol, $insertColumns);
+                    if ($idx !== false) {
+                        array_splice($insertColumns, $idx, 1);
+                        array_splice($insertParams, $idx, 1);
                     }
                 }
                 $stmt = $db->prepare($buildInsertSql($insertColumns));
@@ -238,15 +226,13 @@ class Alumni extends Database {
             $stmt = $db->prepare($sql);
             return $stmt->execute($values);
         } catch (PDOException $e) {
-            // SQLSTATE 42S22 = unknown column; fall back if optional columns don't exist yet
+            // SQLSTATE 42S22 = unknown column; remove ALL optional columns from UPDATE as fallback
             if ($e->getCode() === '42S22') {
                 foreach (['skills', 'cv_path'] as $optCol) {
-                    if (strpos($e->getMessage(), $optCol) !== false) {
-                        $optIdx = array_search($optCol . ' = ?', $fields);
-                        if ($optIdx !== false) {
-                            array_splice($fields, $optIdx, 1);
-                            array_splice($values, $optIdx, 1);
-                        }
+                    $optIdx = array_search($optCol . ' = ?', $fields);
+                    if ($optIdx !== false) {
+                        array_splice($fields, $optIdx, 1);
+                        array_splice($values, $optIdx, 1);
                     }
                 }
                 if (empty($fields)) {

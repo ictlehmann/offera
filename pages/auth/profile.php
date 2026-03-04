@@ -62,7 +62,8 @@ if (!$profile) {
         'position' => '',
         'gender' => $user['gender'] ?? '',
         'birthday' => $user['birthday'] ?? '',
-        'show_birthday' => $user['show_birthday'] ?? 1
+        'show_birthday' => $user['show_birthday'] ?? 1,
+        'cv_path' => null
     ];
 } else {
     // Ensure gender, birthday, show_birthday, and about_me from users table are included
@@ -206,10 +207,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // Delete old CV if it exists
                 if (!empty($profile['cv_path'])) {
                     $projectRootCheck = realpath(__DIR__ . '/../../');
-                    $oldCvFull = $projectRootCheck . '/' . ltrim($profile['cv_path'], '/');
-                    $realOld = realpath($oldCvFull);
-                    if ($realOld !== false && str_starts_with($realOld, $projectRootCheck)) {
-                        @unlink($realOld);
+                    if ($projectRootCheck !== false) {
+                        $oldCvFull = $projectRootCheck . '/' . ltrim($profile['cv_path'], '/');
+                        $realOld = realpath($oldCvFull);
+                        if ($realOld !== false && str_starts_with($realOld, $projectRootCheck . DIRECTORY_SEPARATOR)) {
+                            @unlink($realOld);
+                        }
                     }
                 }
                 $cvProjectRoot = realpath(__DIR__ . '/../../');
@@ -1309,9 +1312,8 @@ document.addEventListener('DOMContentLoaded', function() {
             btn.className = 'ml-1 text-teal-600 dark:text-teal-400 hover:text-red-500 focus:outline-none';
             btn.innerHTML = '<i class="fas fa-times text-xs"></i>';
             btn.setAttribute('aria-label', 'Entfernen');
-            const tagValue = tag;
             btn.addEventListener('click', function() {
-                const pos = tags.indexOf(tagValue);
+                const pos = tags.indexOf(tag);
                 if (pos !== -1) { tags.splice(pos, 1); }
                 renderTags();
                 syncHidden();
@@ -1328,7 +1330,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function addTag(value) {
-        const trimmed = value.trim().replace(/,/g, '').trim();
+        const trimmed = value.trim().replace(/,/g, '');
         if (!trimmed) return;
         // Check length limit (combined)
         const combined = [...tags, trimmed].join(', ');
