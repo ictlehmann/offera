@@ -649,6 +649,29 @@ class ShopPaymentService {
         if (isset($eventStatusMap[$eventType])) {
             $invoiceStatus = $eventStatusMap[$eventType];
 
+            // Idempotency / replay-attack guard: if this is a completed-payment event and
+            // the shop order (identified via custom_id) is already marked as 'paid', there
+            // is nothing left to do.  Acknowledging with 200 prevents PayPal from retrying
+            // the event indefinitely while ensuring no side-effects are executed twice.
+            if ($invoiceStatus === 'paid') {
+                $shopOrderId = (int) ($resource['custom_id'] ?? 0);
+                if ($shopOrderId > 0) {
+                    try {
+                        if (self::isOrderAlreadyPaid($shopOrderId)) {
+                            http_response_code(200);
+                            echo json_encode(['received' => true]);
+                            exit;
+                        }
+                    } catch (\Exception $e) {
+                        // Cannot verify order status – respond with 500 so PayPal retries later.
+                        error_log("ShopPaymentService::handlePayPalWebhook – Idempotenzprüfung fehlgeschlagen für Bestellung #{$shopOrderId}: " . $e->getMessage());
+                        http_response_code(500);
+                        echo json_encode(['error' => 'Internal server error']);
+                        exit;
+                    }
+                }
+            }
+
             // Extract the internal ID from custom_id (set when creating the PayPal order).
             // Falls back to a lookup by capture/transaction ID when custom_id is absent.
             $internalId = (int) ($resource['custom_id'] ?? 0);
@@ -670,6 +693,27 @@ class ShopPaymentService {
         http_response_code(200);
         echo json_encode(['received' => true]);
         exit;
+    }
+
+    /**
+     * Check whether a shop order already has payment_status = 'paid' in the
+     * Content DB.  Used as an idempotency guard in handlePayPalWebhook to
+     * prevent replay-attacks or duplicate webhook deliveries from triggering
+     * side-effects (inventory changes, confirmation e-mails) more than once.
+     *
+     * Exceptions are intentionally NOT caught here so that database errors
+     * propagate to the caller, which can then respond with HTTP 500 and let
+     * PayPal retry the webhook later rather than silently skipping processing.
+     *
+     * @param int $orderId  shop_orders.id
+     * @return bool         True when the order is already marked as paid
+     */
+    private static function isOrderAlreadyPaid(int $orderId): bool {
+        $db   = Database::getContentDB();
+        $stmt = $db->prepare("SELECT payment_status FROM shop_orders WHERE id = ? LIMIT 1");
+        $stmt->execute([$orderId]);
+        $row  = $stmt->fetch();
+        return $row && $row['payment_status'] === 'paid';
     }
 
     /**
