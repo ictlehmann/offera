@@ -4,6 +4,40 @@
  */
 
 /**
+ * Check form-specific rate limit using a per-action session timer.
+ *
+ * Only explicit POST requests for content creation should be limited.
+ * Harmless GET requests (e.g. user search, notifications) must NOT
+ * call this function – they are exempt from rate limiting by design.
+ *
+ * @param string $sessionKey    A unique session key per form action,
+ *                              e.g. 'last_support_submit_time',
+ *                              'last_idea_submit_time', 'last_job_submit_time'.
+ * @param int    $cooldown      Minimum seconds required between submissions (default: 60).
+ * @return int   0 if the request is allowed; positive integer = remaining seconds to wait.
+ */
+function checkFormRateLimit(string $sessionKey, int $cooldown = 60): int {
+    if (isset($_SESSION[$sessionKey])) {
+        $elapsed = time() - (int)$_SESSION[$sessionKey];
+        if ($elapsed < $cooldown) {
+            return $cooldown - $elapsed;
+        }
+    }
+    return 0;
+}
+
+/**
+ * Record the time of a successful form submission for rate limiting purposes.
+ *
+ * Call this after a form has been successfully processed to start the cooldown timer.
+ *
+ * @param string $sessionKey The same key used in checkFormRateLimit().
+ */
+function recordFormSubmit(string $sessionKey): void {
+    $_SESSION[$sessionKey] = time();
+}
+
+/**
  * Initialize PHP session with secure parameters
  * Only starts the session if it has not been started yet
  */

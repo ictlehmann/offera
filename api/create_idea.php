@@ -32,6 +32,14 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 CSRFHandler::verifyToken($_POST['csrf_token'] ?? '');
 
+// Per-form rate limiting: prevent idea-submission spam without affecting other actions
+$rateLimitWait = checkFormRateLimit('last_idea_submit_time');
+if ($rateLimitWait > 0) {
+    http_response_code(429);
+    echo json_encode(['success' => false, 'error' => 'Bitte warte noch ' . $rateLimitWait . ' ' . ($rateLimitWait === 1 ? 'Sekunde' : 'Sekunden') . ', bevor du erneut eine Idee einreichst.']);
+    exit;
+}
+
 $user        = Auth::user();
 $title       = trim($_POST['title'] ?? '');
 $description = trim($_POST['description'] ?? '');
@@ -61,6 +69,7 @@ try {
             error_log('create_idea.php email error: ' . $e->getMessage());
         }
 
+        recordFormSubmit('last_idea_submit_time');
         echo json_encode(['success' => true, 'id' => $result['id']]);
     } else {
         http_response_code(500);
