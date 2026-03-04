@@ -317,7 +317,7 @@ class Member {
             'first_name', 'last_name', 'email', 'mobile_phone',
             'linkedin_url', 'xing_url', 'industry', 'company', 
             'position', 'image_path', 'study_program', 'semester', 
-            'angestrebter_abschluss', 'degree', 'graduation_year', 'skills'
+            'angestrebter_abschluss', 'degree', 'graduation_year', 'skills', 'cv_path'
         ];
         
         foreach ($allowedFields as $field) {
@@ -339,12 +339,16 @@ class Member {
             $stmt = $db->prepare($sql);
             return $stmt->execute($values);
         } catch (PDOException $e) {
-            // SQLSTATE 42S22 = unknown column; fall back if skills column doesn't exist yet
-            if ($e->getCode() === '42S22' && strpos($e->getMessage(), 'skills') !== false) {
-                $skillsIdx = array_search('skills = ?', $fields);
-                if ($skillsIdx !== false) {
-                    array_splice($fields, $skillsIdx, 1);
-                    array_splice($values, $skillsIdx, 1);
+            // SQLSTATE 42S22 = unknown column; fall back if optional columns don't exist yet
+            if ($e->getCode() === '42S22') {
+                foreach (['skills', 'cv_path'] as $optCol) {
+                    if (strpos($e->getMessage(), $optCol) !== false) {
+                        $optIdx = array_search($optCol . ' = ?', $fields);
+                        if ($optIdx !== false) {
+                            array_splice($fields, $optIdx, 1);
+                            array_splice($values, $optIdx, 1);
+                        }
+                    }
                 }
                 if (empty($fields)) {
                     return true;

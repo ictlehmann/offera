@@ -62,7 +62,7 @@ if (!$profile) {
         'position' => '',
         'gender' => $user['gender'] ?? '',
         'birthday' => $user['birthday'] ?? '',
-        'show_birthday' => $user['show_birthday'] ?? 0
+        'show_birthday' => $user['show_birthday'] ?? 1
     ];
 } else {
     // Ensure gender, birthday, show_birthday, and about_me from users table are included
@@ -88,6 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'about_me' => mb_substr(trim($_POST['about_me'] ?? ''), 0, 400), // Limit to 400 chars
                 'skills' => mb_substr(trim($_POST['skills'] ?? ''), 0, 500), // Limit to 500 chars
                 'image_path' => $profile['image_path'] ?? '', // Keep existing image by default
+                'cv_path' => $profile['cv_path'] ?? null, // Keep existing CV by default
                 'gender' => trim($_POST['gender'] ?? ''),
                 'birthday' => trim($_POST['birthday'] ?? ''),
                 'show_birthday' => isset($_POST['show_birthday']) ? 1 : 0
@@ -173,6 +174,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 } finally {
                     @unlink($tmpFile);
                 }
+            }
+            
+            // Handle CV upload (PDF only)
+            if (!empty($_FILES['cv_file']['name'])) {
+                $cvFile = $_FILES['cv_file'];
+                if ($cvFile['error'] !== UPLOAD_ERR_OK) {
+                    throw new Exception('Fehler beim Hochladen des Lebenslaufs (Code: ' . $cvFile['error'] . ')');
+                }
+                // Enforce 10 MB size limit for CV
+                if ($cvFile['size'] > 10485760) {
+                    throw new Exception('Lebenslauf ist zu groß. Maximum: 10MB');
+                }
+                // Validate actual MIME type
+                $finfo = finfo_open(FILEINFO_MIME_TYPE);
+                $cvMime = finfo_file($finfo, $cvFile['tmp_name']);
+                finfo_close($finfo);
+                if ($cvMime !== 'application/pdf') {
+                    throw new Exception('Nur PDF-Dateien sind als Lebenslauf erlaubt');
+                }
+                $cvUploadDir = __DIR__ . '/../../uploads/cv/';
+                if (!is_dir($cvUploadDir)) {
+                    mkdir($cvUploadDir, 0755, true);
+                }
+                $cvFilename = 'cv_' . $user['id'] . '_' . bin2hex(random_bytes(8)) . '.pdf';
+                $cvUploadPath = $cvUploadDir . $cvFilename;
+                if (!move_uploaded_file($cvFile['tmp_name'], $cvUploadPath)) {
+                    throw new Exception('Fehler beim Speichern des Lebenslaufs');
+                }
+                chmod($cvUploadPath, 0644);
+                // Delete old CV if it exists
+                if (!empty($profile['cv_path'])) {
+                    $projectRootCheck = realpath(__DIR__ . '/../../');
+                    $oldCvFull = $projectRootCheck . '/' . ltrim($profile['cv_path'], '/');
+                    $realOld = realpath($oldCvFull);
+                    if ($realOld !== false && str_starts_with($realOld, $projectRootCheck)) {
+                        @unlink($realOld);
+                    }
+                }
+                $cvProjectRoot = realpath(__DIR__ . '/../../');
+                $realCvPath = realpath($cvUploadPath);
+                $cvRelativePath = str_replace('\\', '/', substr($realCvPath, strlen($cvProjectRoot) + 1));
+                $profileData['cv_path'] = $cvRelativePath;
             }
             
             // Update user fields (about_me, gender, birthday, show_birthday, job_title, company) in users table
@@ -883,21 +926,52 @@ ob_start();
                     ><?php echo htmlspecialchars($profile['about_me'] ?? ''); ?></textarea>
                 </div>
                 
-                <!-- Skills - Full Width -->
+                <!-- Skills - Full Width (Tag Input) -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         Fähigkeiten / Skills
-                        <span class="text-xs text-gray-500 dark:text-gray-400 ml-1">(kommagetrennt)</span>
                     </label>
+                    <!-- Tag display area -->
+                    <div id="skills-tag-container" class="flex flex-wrap gap-2 p-2 min-h-[44px] bg-white border border-gray-300 dark:bg-gray-800 dark:border-gray-600 rounded-lg cursor-text" onclick="document.getElementById('skills-input').focus()">
+                        <!-- Tags are inserted here by JS -->
+                        <input
+                            type="text"
+                            id="skills-input"
+                            class="flex-1 min-w-[120px] outline-none bg-transparent text-gray-900 dark:text-white text-sm py-0.5"
+                            placeholder="Fähigkeit eingeben und Enter drücken..."
+                            autocomplete="off"
+                        >
+                    </div>
+                    <!-- Hidden field for form submission -->
+                    <input type="hidden" name="skills" id="skills-hidden" value="<?php echo htmlspecialchars($profile['skills'] ?? ''); ?>" maxlength="500">
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Drücke <kbd class="px-1 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-xs">Enter</kbd> oder <kbd class="px-1 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-xs">,</kbd> um eine Fähigkeit hinzuzufügen. Klicke auf <i class="fas fa-times text-xs"></i> zum Entfernen. Fähigkeiten sind in der Mitgliedersuche auffindbar.</p>
+                </div>
+                
+                <!-- CV Upload - Full Width -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <i class="fas fa-file-pdf text-red-500 mr-1"></i>
+                        Lebenslauf (CV)
+                        <span class="text-xs text-gray-500 dark:text-gray-400 ml-1">(PDF, max. 10MB)</span>
+                    </label>
+                    <?php if (!empty($profile['cv_path'])): ?>
+                    <div class="mb-2 flex items-center gap-3 p-3 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700">
+                        <i class="fas fa-file-pdf text-red-500 text-xl"></i>
+                        <div class="flex-1">
+                            <p class="text-sm font-medium text-gray-800 dark:text-gray-200">Lebenslauf hochgeladen</p>
+                            <a href="<?php echo htmlspecialchars(asset($profile['cv_path']), ENT_QUOTES, 'UTF-8'); ?>" target="_blank" rel="noopener noreferrer" class="text-xs text-blue-600 hover:underline">
+                                <i class="fas fa-download mr-1"></i>Herunterladen
+                            </a>
+                        </div>
+                    </div>
+                    <?php endif; ?>
                     <input
-                        type="text"
-                        name="skills"
-                        value="<?php echo htmlspecialchars($profile['skills'] ?? ''); ?>"
-                        maxlength="500"
-                        class="w-full px-4 py-2 bg-white border border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 rounded-lg"
-                        placeholder="z.B. Python, Projektmanagement, Excel, SQL"
+                        type="file"
+                        name="cv_file"
+                        accept="application/pdf,.pdf"
+                        class="w-full text-sm text-gray-700 dark:text-gray-300 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 dark:file:bg-blue-900/30 dark:file:text-blue-300 dark:hover:file:bg-blue-900/50"
                     >
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Trenne Fähigkeiten mit Kommas. Diese sind in der Mitgliedersuche auffindbar.</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Lade deinen Lebenslauf als PDF hoch. <?php if (!empty($profile['cv_path'])): ?>Das Hochladen einer neuen Datei ersetzt den bestehenden Lebenslauf.<?php endif; ?></p>
                 </div>
                 
                 <button type="submit" name="update_profile" class="w-full btn-primary">
@@ -1208,6 +1282,92 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+</script>
+
+<script>
+// Skills tag input UI
+(function() {
+    const container = document.getElementById('skills-tag-container');
+    const input = document.getElementById('skills-input');
+    const hidden = document.getElementById('skills-hidden');
+    if (!container || !input || !hidden) return;
+
+    let tags = hidden.value
+        ? hidden.value.split(',').map(s => s.trim()).filter(Boolean)
+        : [];
+
+    function renderTags() {
+        // Remove all existing tag elements (keep the input)
+        Array.from(container.querySelectorAll('.skills-tag')).forEach(el => el.remove());
+        // Insert tags before the input
+        tags.forEach(function(tag) {
+            const span = document.createElement('span');
+            span.className = 'skills-tag inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-teal-100 text-teal-800 dark:bg-teal-900/40 dark:text-teal-300 border border-teal-200 dark:border-teal-700';
+            span.textContent = tag;
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'ml-1 text-teal-600 dark:text-teal-400 hover:text-red-500 focus:outline-none';
+            btn.innerHTML = '<i class="fas fa-times text-xs"></i>';
+            btn.setAttribute('aria-label', 'Entfernen');
+            const tagValue = tag;
+            btn.addEventListener('click', function() {
+                const pos = tags.indexOf(tagValue);
+                if (pos !== -1) { tags.splice(pos, 1); }
+                renderTags();
+                syncHidden();
+            });
+            span.appendChild(btn);
+            container.insertBefore(span, input);
+        });
+        // Update placeholder visibility
+        input.placeholder = tags.length > 0 ? '' : 'Fähigkeit eingeben und Enter drücken...';
+    }
+
+    function syncHidden() {
+        hidden.value = tags.join(', ');
+    }
+
+    function addTag(value) {
+        const trimmed = value.trim().replace(/,/g, '').trim();
+        if (!trimmed) return;
+        // Check length limit (combined)
+        const combined = [...tags, trimmed].join(', ');
+        if (combined.length > 500) return;
+        if (!tags.includes(trimmed)) {
+            tags.push(trimmed);
+            renderTags();
+            syncHidden();
+        }
+        input.value = '';
+    }
+
+    input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ',') {
+            e.preventDefault();
+            addTag(input.value);
+        } else if (e.key === 'Backspace' && input.value === '' && tags.length > 0) {
+            tags.pop();
+            renderTags();
+            syncHidden();
+        }
+    });
+
+    input.addEventListener('blur', function() {
+        if (input.value.trim()) {
+            addTag(input.value);
+        }
+    });
+
+    // Paste support: split by commas
+    input.addEventListener('paste', function(e) {
+        e.preventDefault();
+        const pasted = (e.clipboardData || window.clipboardData).getData('text');
+        pasted.split(',').forEach(function(s) { addTag(s); });
+    });
+
+    // Initialize with existing tags
+    renderTags();
+}());
 </script>
 
 <script>

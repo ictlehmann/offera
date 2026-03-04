@@ -94,11 +94,13 @@ COMMENT='Financial statistics for events - tracks sales and calculations with ye
 -- NOTE: For existing databases, run:
 --   ALTER TABLE alumni_profiles ADD COLUMN bio TEXT DEFAULT NULL AFTER last_reminder_sent_at;
 --   ALTER TABLE alumni_profiles ADD COLUMN skills TEXT DEFAULT NULL COMMENT 'Comma-separated list of skills/competencies' AFTER bio;
--- Migration: add bio and skills columns if not already present
+--   ALTER TABLE alumni_profiles ADD COLUMN cv_path VARCHAR(500) DEFAULT NULL COMMENT 'Path to uploaded CV/resume PDF' AFTER skills;
+-- Migration: add bio, skills and cv_path columns if not already present
 -- Note: ALTER TABLE ... ADD COLUMN IF NOT EXISTS is not supported in MySQL.
 -- For existing databases that are missing these columns, run manually:
 --   ALTER TABLE alumni_profiles ADD COLUMN bio TEXT DEFAULT NULL AFTER last_reminder_sent_at;
 --   ALTER TABLE alumni_profiles ADD COLUMN skills TEXT DEFAULT NULL COMMENT 'Comma-separated list of skills/competencies' AFTER bio;
+--   ALTER TABLE alumni_profiles ADD COLUMN cv_path VARCHAR(500) DEFAULT NULL COMMENT 'Path to uploaded CV/resume PDF' AFTER skills;
 -- ================================================
 CREATE TABLE IF NOT EXISTS `alumni_profiles` (
   `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -123,6 +125,7 @@ CREATE TABLE IF NOT EXISTS `alumni_profiles` (
   `last_reminder_sent_at` DATETIME DEFAULT NULL,
   `bio` TEXT,
   `skills` TEXT DEFAULT NULL COMMENT 'Comma-separated list of skills/competencies',
+  `cv_path` VARCHAR(500) DEFAULT NULL COMMENT 'Path to uploaded CV/resume PDF',
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   UNIQUE KEY `unique_user_id` (`user_id`),
