@@ -29,6 +29,7 @@ if (isset($_SESSION['error_message'])) {
 }
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    CSRFHandler::verifyToken($_POST['csrf_token'] ?? '');
     if (isset($_POST['update_privacy'])) {
         $privacyData = [
             'privacy_hide_email'  => isset($_POST['privacy_hide_email'])  ? 1 : 0,
@@ -262,12 +263,14 @@ ob_start();
                     <div>
                         <?php if ($user['tfa_enabled']): ?>
                         <form method="POST" onsubmit="return confirm('Möchtest du 2FA wirklich deaktivieren?');">
+                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(CSRFHandler::getToken(), ENT_QUOTES, 'UTF-8'); ?>">
                             <button type="submit" name="disable_2fa" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
                                 <i class="fas fa-times mr-2"></i>2FA deaktivieren
                             </button>
                         </form>
                         <?php else: ?>
                         <form method="POST">
+                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(CSRFHandler::getToken(), ENT_QUOTES, 'UTF-8'); ?>">
                             <button type="submit" name="enable_2fa" class="btn-primary">
                                 <i class="fas fa-plus mr-2"></i>2FA aktivieren
                             </button>
@@ -297,6 +300,7 @@ ob_start();
                     </div>
 
                     <form method="POST" class="space-y-4">
+                        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(CSRFHandler::getToken(), ENT_QUOTES, 'UTF-8'); ?>">
                         <input type="hidden" name="secret" value="<?php echo htmlspecialchars($secret); ?>">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">6-stelliger Code</label>
@@ -345,6 +349,7 @@ ob_start();
                     Verborgen gestellte Daten sind weiterhin für Vorstände und Alumni sichtbar.
                 </p>
                 <form method="POST" class="space-y-4">
+                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(CSRFHandler::getToken(), ENT_QUOTES, 'UTF-8'); ?>">
                     <?php
                     $privacyItems = [
                         ['key' => 'privacy_hide_email',  'label' => 'E-Mail verbergen',         'icon' => 'fa-envelope'],
@@ -390,6 +395,7 @@ ob_start();
                 </div>
                 <div class="p-6">
                 <form method="POST" class="space-y-4">
+                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(CSRFHandler::getToken(), ENT_QUOTES, 'UTF-8'); ?>">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <!-- Light Theme -->
                         <label class="flex flex-col items-center p-4 border-2 rounded-xl cursor-pointer transition-all hover:border-purple-500 <?php echo ($user['theme_preference'] ?? 'auto') === 'light' ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20' : 'border-gray-200 dark:border-gray-700'; ?>">
