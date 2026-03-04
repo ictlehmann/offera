@@ -204,12 +204,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 $otherGender = null;
                             }
                             if ($otherGender) {
-                                $dataCopy               = $data;
-                                $dataCopy['gender']     = $otherGender;
-                                $dataCopy['image_path'] = null; // Images are gender-specific; admin can add them separately
+                                $dataCopy           = $data;
+                                $dataCopy['gender'] = $otherGender;
+                                // image_path is null for new products; gallery images are copied below
                                 $copyId = Shop::createProduct($dataCopy);
                                 if ($copyId) {
-                                    Shop::setVariants($copyId, $variants);
+                                    // Build variants for the other-gender product
+                                    $otherGenderVariants = $variants;
+                                    // If non-bulk and other-gender stock was provided, use it
+                                    if (!$data['is_bulk_order'] && !empty($_POST['also_gender_variants'])) {
+                                        $agGroups = $_POST['also_gender_variants'];
+                                        $agFlat   = [];
+                                        foreach ($agGroups as $gIdx => $agGroup) {
+                                            $typeName = trim($agGroup['name'] ?? '');
+                                            if ($typeName === '') {
+                                                continue;
+                                            }
+                                            foreach ($agGroup['values'] ?? [] as $vData) {
+                                                $valueName = trim($vData['value'] ?? '');
+                                                if ($valueName !== '') {
+                                                    $agFlat[] = [
+                                                        'type'           => $typeName,
+                                                        'value'          => $valueName,
+                                                        'stock_quantity' => (int) ($vData['stock'] ?? 0),
+                                                    ];
+                                                }
+                                            }
+                                        }
+                                        if (!empty($agFlat)) {
+                                            $otherGenderVariants = $agFlat;
+                                        }
+                                    }
+                                    Shop::setVariants($copyId, $otherGenderVariants);
+
+                                    // Copy gallery images from the main product to the copy
+                                    $mainImages = Shop::getProductImages($pid);
+                                    foreach ($mainImages as $img) {
+                                        Shop::addProductImage($copyId, $img['image_path'], (int) $img['sort_order']);
+                                    }
                                 }
                             }
                         }
@@ -979,6 +1011,22 @@ ob_start();
                     </div><!-- end p-6 -->
                 </div>
 
+                <!-- ══ ROW 3: Other-gender stock (shown only when applicable) ══ -->
+                <div id="modal-other-gender-stock-section" class="hidden border-t-4 border-pink-400 dark:border-pink-600 bg-pink-50/40 dark:bg-pink-900/10">
+                    <div class="px-6 py-4 flex items-center gap-3 border-b border-pink-100 dark:border-pink-800/40">
+                        <div class="w-8 h-8 rounded-xl bg-pink-500 flex items-center justify-center shadow-sm">
+                            <i class="fas fa-venus text-white text-sm"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-gray-800 dark:text-gray-100" id="modal-other-gender-stock-title">Lagerbestand Damen</h3>
+                            <p class="text-xs text-pink-600 dark:text-pink-400 mt-0.5">Lagerbestand für das automatisch erstellte Produkt</p>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div id="other-gender-stock-container" class="space-y-4"></div>
+                    </div>
+                </div>
+
             </div><!-- end scrollable body -->
 
             <!-- Modal footer -->
@@ -993,6 +1041,7 @@ ob_start();
                 <div id="modal-also-gender-area" class="hidden">
                     <label class="flex items-center gap-2 cursor-pointer text-sm text-gray-600 dark:text-gray-300">
                         <input type="checkbox" name="also_create_other_gender" id="modal-also-gender" value="1"
+                               onchange="updateAlsoGenderStockSection()"
                                class="w-4 h-4 text-blue-600 rounded border-gray-300 dark:border-gray-600 focus:ring-blue-500">
                         <span id="modal-also-gender-label">Auch für Damen anlegen</span>
                     </label>
@@ -1120,6 +1169,9 @@ function openProductModal(product) {
     // Build variant UI
     buildVariantUI(isEdit ? (product.variants || []) : []);
 
+    // Update "also gender stock" section after variants are built
+    updateAlsoGenderStockSection();
+
     document.getElementById('product-modal').classList.remove('hidden');
     document.body.style.overflow = 'hidden';
     document.getElementById('modal-name').focus();
@@ -1143,6 +1195,80 @@ function updateAlsoGenderArea(isEdit) {
         area.classList.add('hidden');
         document.getElementById('modal-also-gender').checked = false;
     }
+    updateAlsoGenderStockSection();
+}
+
+function updateAlsoGenderStockSection() {
+    const section   = document.getElementById('modal-other-gender-stock-section');
+    const title     = document.getElementById('modal-other-gender-stock-title');
+    const container = document.getElementById('other-gender-stock-container');
+
+    const alsoChecked = document.getElementById('modal-also-gender').checked;
+    const isBulk      = document.getElementById('modal-is-bulk-order').checked;
+    const hasVariants = document.getElementById('modal-has-variants').checked;
+    const gender      = document.getElementById('modal-gender').value;
+
+    if (!alsoChecked || isBulk || !hasVariants) {
+        section.classList.add('hidden');
+        return;
+    }
+
+    const otherGender = gender === 'Herren' ? 'Damen' : 'Herren';
+    title.textContent = 'Lagerbestand ' + otherGender;
+    section.classList.remove('hidden');
+
+    // Build stock inputs mirroring the current variant structure
+    container.innerHTML = '';
+    const blocks = document.querySelectorAll('#variants-container .variant-block');
+    blocks.forEach(function(block, gIdx) {
+        const colorInput = block.querySelector('input[name^="variants"][name$="[name]"]');
+        const typeName   = colorInput ? colorInput.value : '';
+        const valueRows  = block.querySelectorAll('.value-row');
+
+        const card = document.createElement('div');
+        card.className = 'border border-pink-100 dark:border-pink-800/50 rounded-xl bg-white dark:bg-gray-800 overflow-hidden shadow-sm';
+
+        let rowsHtml = '';
+        valueRows.forEach(function(row, valIdx) {
+            const valueInput = row.querySelector('input[type="text"]');
+            const sizeName   = valueInput ? escapeHtml(valueInput.value) : '';
+            rowsHtml += `<div class="grid grid-cols-[1fr_auto] gap-x-3 items-center">
+                <span class="px-2.5 py-1.5 text-sm text-gray-700 dark:text-gray-200">${sizeName}</span>
+                <input type="number" name="also_gender_variants[${gIdx}][values][${valIdx}][stock]"
+                       value="0" min="0"
+                       data-also-gender-value="${sizeName}"
+                       class="w-24 px-2.5 py-1.5 border border-red-200 dark:border-red-700 rounded-lg text-sm text-right focus:ring-2 focus:ring-pink-500 focus:border-transparent transition bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300"
+                       oninput="updateStockColor(this)">
+            </div>`;
+        });
+
+        card.innerHTML = `
+            <input type="hidden" name="also_gender_variants[${gIdx}][name]" value="${escapeHtml(typeName)}">
+            <div class="flex items-center gap-2 px-4 py-3 bg-pink-50 dark:bg-pink-900/20 border-b border-pink-100 dark:border-pink-800/50">
+                <i class="fas fa-palette text-pink-400 text-xs"></i>
+                <span class="text-xs font-semibold text-pink-500 dark:text-pink-400 uppercase tracking-wide">${escapeHtml(typeName)}</span>
+            </div>
+            <div class="px-4 py-3">
+                <div class="grid grid-cols-[1fr_auto] gap-x-3 mb-1.5 px-1">
+                    <span class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide">Größe</span>
+                    <span class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide text-right w-24">Lagerbestand</span>
+                </div>
+                <div class="space-y-2">${rowsHtml}</div>
+            </div>`;
+
+        // Append hidden inputs for size names (set via DOM after innerHTML to avoid injection)
+        valueRows.forEach(function(row, valIdx) {
+            const valueInput = row.querySelector('input[type="text"]');
+            const sizeName   = valueInput ? valueInput.value : '';
+            const hidden = document.createElement('input');
+            hidden.type  = 'hidden';
+            hidden.name  = `also_gender_variants[${gIdx}][values][${valIdx}][value]`;
+            hidden.value = sizeName;
+            card.appendChild(hidden);
+        });
+
+        container.appendChild(card);
+    });
 }
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -1159,6 +1285,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function toggleBulkOrderFields(show) {
     document.getElementById('modal-bulk-fields').classList.toggle('hidden', !show);
+    updateAlsoGenderStockSection();
 }
 
 // ── Existing images grid ──────────────────────────────────────────────────────
@@ -1443,6 +1570,7 @@ function toggleVariantMode(hasVariants) {
             createVariantBlock(variantCount++, '', [{value:'',stock_quantity:0}])
         );
     }
+    updateAlsoGenderStockSection();
 }
 
 // ── Delete product ────────────────────────────────────────────────────────────
