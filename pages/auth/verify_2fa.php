@@ -117,12 +117,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['verify_2fa'])) {
                         // Set is_onboarded flag from pending session data
                         $_SESSION['is_onboarded'] = (bool)($_SESSION['pending_2fa_is_onboarded'] ?? false);
 
+                        // Restore role notice flag if set during Microsoft login
+                        if (!empty($_SESSION['pending_2fa_show_role_notice'])) {
+                            $_SESSION['show_role_notice'] = true;
+                        }
+
                         // Clear pending 2FA data
                         unset($_SESSION['pending_2fa_user_id']);
                         unset($_SESSION['pending_2fa_email']);
                         unset($_SESSION['pending_2fa_role']);
                         unset($_SESSION['pending_2fa_profile_complete']);
                         unset($_SESSION['pending_2fa_is_onboarded']);
+                        unset($_SESSION['pending_2fa_show_role_notice']);
 
                         // Update last login
                         $stmt = $db->prepare("UPDATE users SET last_login = NOW() WHERE id = ?");

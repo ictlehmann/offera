@@ -749,6 +749,7 @@ class AuthHandler {
             $_SESSION['pending_2fa_role'] = $roleName;
             $_SESSION['pending_2fa_profile_complete'] = $userCheck['profile_complete'] ?? 1;
             $_SESSION['pending_2fa_is_onboarded'] = $userCheck['is_onboarded'] ?? 0;
+            $_SESSION['pending_2fa_show_role_notice'] = empty($azureRoles);
             
             // Log 2FA required
             self::logSystemAction($userId, 'login_2fa_required', 'user', $userId, 'Microsoft login successful, 2FA verification required');
@@ -776,6 +777,11 @@ class AuthHandler {
         // Show 2FA nudge popup if 2FA is not enabled
         if ($userCheck && intval($userCheck['tfa_enabled'] ?? 0) !== 1) {
             $_SESSION['show_2fa_nudge'] = true;
+        }
+
+        // Show role notice popup when user had no Azure roles and was assigned the default 'mitglied' role
+        if (empty($azureRoles)) {
+            $_SESSION['show_role_notice'] = true;
         }
         
         // Regenerate session ID to prevent session fixation attacks (mirrors Auth::createSession())
