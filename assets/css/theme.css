@@ -6106,7 +6106,10 @@ body.dark-mode .sidebar {
 
 /* ── Light Mode: Elevated main content background ──────── */
 body:not(.dark-mode) {
-    background: linear-gradient(135deg, #f0f4f8 0%, #e8edf4 100%) !important;
+    background:
+        radial-gradient(ellipse at 0% 0%, rgba(0, 102, 179, 0.055) 0%, transparent 55%),
+        radial-gradient(ellipse at 100% 100%, rgba(0, 166, 81, 0.04) 0%, transparent 55%),
+        linear-gradient(160deg, #f0f4f8 0%, #edf1f7 50%, #e8edf4 100%) !important;
 }
 
 body:not(.dark-mode) main {
@@ -7300,3 +7303,289 @@ thead.sticky-top th {
 body.dark-mode thead.sticky-top th {
     background-color: #1f2937 !important;
 }
+
+/* ============================================================
+   ENHANCED LIGHT MODE DESIGN SYSTEM 2026
+   Richer, more impressive light mode with depth and vibrancy
+   ============================================================ */
+
+/* ── Light Mode: Body background with subtle mesh ──────────── */
+body:not(.dark-mode) {
+    background-attachment: fixed !important;
+}
+
+/* ── Light Mode: Premium card design with depth ────────────── */
+body:not(.dark-mode) .card {
+    background: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.06) !important;
+    box-shadow:
+        0 1px 3px rgba(0, 0, 0, 0.04),
+        0 6px 20px rgba(0, 0, 0, 0.06),
+        0 0 0 1px rgba(255, 255, 255, 0.8) inset !important;
+    position: relative;
+}
+
+/* Colored top border accent on hover */
+body:not(.dark-mode) .card::before {
+    content: '' !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: 3px !important;
+    background: linear-gradient(90deg, var(--ibc-blue) 0%, var(--ibc-green) 100%) !important;
+    opacity: 0 !important;
+    transition: opacity 0.25s ease !important;
+    border-radius: 1rem 1rem 0 0 !important;
+}
+
+body:not(.dark-mode) .card:hover::before {
+    opacity: 1 !important;
+}
+
+body:not(.dark-mode) .card:hover {
+    box-shadow:
+        0 4px 12px rgba(0, 0, 0, 0.07),
+        0 16px 48px rgba(0, 0, 0, 0.09),
+        0 0 0 1px rgba(0, 102, 179, 0.06) inset !important;
+    transform: translateY(-3px) !important;
+    border-color: rgba(0, 102, 179, 0.12) !important;
+}
+
+/* ── Light Mode: Main content area subtle inner sheen ───────── */
+body:not(.dark-mode) main {
+    background: transparent !important;
+}
+
+/* ── Light Mode: Page title gradient text effect ─────────────── */
+body:not(.dark-mode) .page-title,
+body:not(.dark-mode) h1.gradient-heading {
+    background: linear-gradient(135deg, #0f1f3d 0%, #0066b3 60%, #005a9e 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ── Light Mode: Stat card accent colors ─────────────────────── */
+body:not(.dark-mode) .stat-card {
+    background: #ffffff !important;
+    border: 1px solid rgba(0, 0, 0, 0.06) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05), 0 4px 20px rgba(0, 0, 0, 0.07) !important;
+}
+
+body:not(.dark-mode) .stat-card:hover {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.09), 0 12px 40px rgba(0, 0, 0, 0.10) !important;
+}
+
+/* ── Light Mode: Table header enhanced gradient ───────────────── */
+body:not(.dark-mode) th {
+    background: linear-gradient(160deg, #f1f5fb 0%, #e6ecf5 100%) !important;
+    color: #334155 !important;
+    border-bottom: 2px solid #c9d6e8 !important;
+}
+
+/* ── Light Mode: Input fields with depth ─────────────────────── */
+body:not(.dark-mode) input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+body:not(.dark-mode) textarea,
+body:not(.dark-mode) select {
+    background: #ffffff !important;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+}
+
+body:not(.dark-mode) input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):focus,
+body:not(.dark-mode) textarea:focus,
+body:not(.dark-mode) select:focus {
+    background: #ffffff !important;
+    box-shadow:
+        inset 0 1px 3px rgba(0, 0, 0, 0.04),
+        0 0 0 3px rgba(0, 102, 179, 0.14) !important;
+}
+
+/* ── Light Mode: Hero section gradient (dashboard greeting) ──── */
+body:not(.dark-mode) .hero-gradient {
+    background: linear-gradient(135deg, #0052a3 0%, #0066b3 35%, #0d8a44 70%, #00a651 100%) !important;
+    box-shadow: 0 8px 32px rgba(0, 102, 179, 0.22), 0 2px 8px rgba(0, 102, 179, 0.16) !important;
+}
+
+/* ── Light Mode: Button polish ───────────────────────────────── */
+body:not(.dark-mode) .btn-primary,
+body:not(.dark-mode) .btn.btn-primary {
+    box-shadow: 0 2px 8px rgba(0, 102, 179, 0.30), 0 1px 2px rgba(0, 102, 179, 0.20) !important;
+}
+
+body:not(.dark-mode) .btn-primary:hover,
+body:not(.dark-mode) .btn.btn-primary:hover {
+    box-shadow: 0 6px 20px rgba(0, 102, 179, 0.40), 0 2px 6px rgba(0, 102, 179, 0.24) !important;
+}
+
+/* ── Light Mode: Alert boxes enhanced ───────────────────────── */
+body:not(.dark-mode) .alert-success {
+    background: linear-gradient(135deg, rgba(0, 166, 81, 0.08) 0%, rgba(0, 166, 81, 0.04) 100%) !important;
+    border-left-color: #00a651 !important;
+    color: #064e3b !important;
+}
+
+body:not(.dark-mode) .alert-info {
+    background: linear-gradient(135deg, rgba(0, 102, 179, 0.08) 0%, rgba(0, 102, 179, 0.04) 100%) !important;
+    border-left-color: #0066b3 !important;
+    color: #1e3a5f !important;
+}
+
+body:not(.dark-mode) .alert-danger,
+body:not(.dark-mode) .alert-error {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.08) 0%, rgba(239, 68, 68, 0.04) 100%) !important;
+    border-left-color: #ef4444 !important;
+    color: #7f1d1d !important;
+}
+
+body:not(.dark-mode) .alert-warning {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(245, 158, 11, 0.04) 100%) !important;
+    border-left-color: #f59e0b !important;
+    color: #78350f !important;
+}
+
+/* ── Light Mode: Scrollbar premium style ─────────────────────── */
+body:not(.dark-mode)::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+body:not(.dark-mode)::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 99px;
+}
+
+body:not(.dark-mode)::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #c4d0e0 0%, #a8bacf 100%);
+    border-radius: 99px;
+    border: 2px solid #f1f5f9;
+    background-clip: padding-box;
+}
+
+body:not(.dark-mode)::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #a8bacf 0%, #8fa3bc 100%);
+    background-clip: padding-box;
+}
+
+body:not(.dark-mode) {
+    scrollbar-width: thin;
+    scrollbar-color: #c4d0e0 #f1f5f9;
+}
+
+/* ── Light Mode: Page-section dividers with gradient ──────────── */
+body:not(.dark-mode) .page-section-title::after {
+    background: linear-gradient(90deg, var(--ibc-blue) 0%, var(--ibc-green) 60%, transparent 100%) !important;
+    opacity: 0.20 !important;
+}
+
+/* ── Light Mode: Badge/chip refinements ───────────────────────── */
+body:not(.dark-mode) .badge,
+body:not(.dark-mode) [class*="badge-"] {
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.10);
+}
+
+/* ── Light Mode: Modal dialog premium look ────────────────────── */
+body:not(.dark-mode) .modal-content {
+    background: #ffffff !important;
+    box-shadow: 0 25px 70px rgba(0, 0, 0, 0.18), 0 0 0 1px rgba(0, 0, 0, 0.04) !important;
+}
+
+body:not(.dark-mode) .modal-header {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+}
+
+/* ── Light Mode: Dropdown menu premium look ──────────────────── */
+body:not(.dark-mode) .dropdown-menu {
+    background: #ffffff !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.07), 0 0 0 1px rgba(0, 0, 0, 0.04) !important;
+}
+
+body:not(.dark-mode) .dropdown-item:hover {
+    background: linear-gradient(135deg, rgba(0, 102, 179, 0.07) 0%, rgba(0, 102, 179, 0.03) 100%) !important;
+    color: var(--ibc-blue) !important;
+}
+
+/* ── Light Mode: Sidebar active state IBC-green accent ─────────── */
+body:not(.dark-mode) .sidebar nav a[class*="bg-white/20"],
+body:not(.dark-mode) .sidebar nav a.active,
+body:not(.dark-mode) .sidebar a[class*="bg-white/20"],
+body:not(.dark-mode) .sidebar a.active {
+    background: rgba(255, 255, 255, 0.20) !important;
+    border-left: 3px solid var(--ibc-green) !important;
+    border-radius: 10px !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.15), 0 2px 8px rgba(0,0,0,0.12) !important;
+    font-weight: 600 !important;
+}
+
+/* ── Light Mode: Progress bars vivid ─────────────────────────── */
+body:not(.dark-mode) .progress-bar {
+    background: linear-gradient(90deg, #0077cc 0%, #00a651 100%) !important;
+    box-shadow: 0 2px 6px rgba(0, 102, 179, 0.30) !important;
+}
+
+/* ── Light Mode: Better section title underline ──────────────── */
+body:not(.dark-mode) .page-header {
+    border-bottom: 2px solid #e2e8f0 !important;
+}
+
+body:not(.dark-mode) .page-header h1 {
+    color: #0f2040 !important;
+    -webkit-text-fill-color: initial !important;
+}
+
+/* ── Light Mode: Focus rings more vivid ──────────────────────── */
+body:not(.dark-mode) :focus-visible {
+    outline: 2.5px solid #0066b3 !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 0 4px rgba(0, 102, 179, 0.15) !important;
+}
+
+/* ── Light Mode: Stat widget card icon backgrounds ──────────── */
+body:not(.dark-mode) .stat-icon {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.10);
+}
+
+/* ── Light Mode: Table row hover gradient ─────────────────────── */
+body:not(.dark-mode) tbody tr:hover {
+    background: linear-gradient(90deg, rgba(0, 102, 179, 0.04) 0%, rgba(0, 166, 81, 0.03) 100%) !important;
+}
+
+/* ── Light Mode: nav-pills active with IBC blue gradient ────── */
+body:not(.dark-mode) .nav-pills .nav-link.active {
+    background: linear-gradient(135deg, #0077cc 0%, #0066b3 100%) !important;
+    box-shadow: 0 3px 10px rgba(0, 102, 179, 0.30) !important;
+}
+
+/* ── Light Mode: Card grid gap tightening for a polished look ── */
+body:not(.dark-mode) .card-grid {
+    gap: 1.25rem;
+}
+
+/* ── Light Mode: Breadcrumb subtle improvement ───────────────── */
+body:not(.dark-mode) .breadcrumb {
+    background: rgba(241, 245, 249, 0.9) !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* ── Light Mode: Directory card hover extra polish ───────────── */
+body:not(.dark-mode) .directory-card:hover {
+    box-shadow: 0 12px 40px rgba(0, 102, 179, 0.14), 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* ── Light Mode: Pagination active page bright ───────────────── */
+body:not(.dark-mode) .pagination .page-item.active .page-link {
+    background: linear-gradient(135deg, #0077cc 0%, #0066b3 100%) !important;
+    box-shadow: 0 3px 10px rgba(0, 102, 179, 0.35) !important;
+    border-color: transparent !important;
+}
+
+/* ── Light Mode: Link appearance on hover ────────────────────── */
+body:not(.dark-mode) a:not(.btn):not(.no-hover):not(.sidebar a):hover {
+    color: var(--ibc-blue) !important;
+}
+
+/* ============================================================
+   END ENHANCED LIGHT MODE DESIGN SYSTEM 2026
+   ============================================================ */

@@ -8,6 +8,7 @@
 -- ================================================
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci;
 START TRANSACTION;
 SET time_zone = "+00:00";
 
