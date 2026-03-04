@@ -40,6 +40,7 @@ $title = 'Inventar - IBC Intranet';
 ob_start();
 ?>
 
+<div class="pb-28">
 <?php if ($checkoutSuccess): ?>
 <div class="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
     <i class="fas fa-check-circle mr-2"></i><?php echo htmlspecialchars($checkoutSuccess); ?>
@@ -250,10 +251,12 @@ ob_start();
 </div>
 <?php endif; ?>
 
+</div><!-- /.pb-28 -->
+
 <!-- ─── Floating Cart Button ─── -->
 <button id="cartFloatingBtn"
         onclick="openCartPanel()"
-        class="fixed left-4 bottom-4 md:left-auto md:right-8 md:bottom-auto md:top-24 z-40 w-16 h-16 bg-gradient-to-br from-purple-600 to-blue-600 text-white rounded-full shadow-2xl hover:shadow-purple-500/30 flex items-center justify-center transition-all hover:scale-110 focus:outline-none focus:ring-4 focus:ring-purple-300"
+        class="fixed left-4 bottom-4 md:left-auto md:right-8 md:bottom-auto md:top-24 z-50 w-16 h-16 bg-gradient-to-br from-purple-600 to-blue-600 text-white rounded-full shadow-xl hover:shadow-purple-500/30 flex items-center justify-center transition-all hover:scale-110 focus:outline-none focus:ring-4 focus:ring-purple-300"
         aria-label="Warenkorb öffnen">
     <span class="text-2xl leading-none">🛒</span>
     <span id="cartBadge"
@@ -267,7 +270,7 @@ ob_start();
 
 <!-- ─── Cart Overlay ─── -->
 <div id="cartOverlay"
-     class="fixed inset-0 z-40 hidden"
+     class="fixed inset-0 z-50 shadow-xl hidden"
      style="background: rgba(15,23,42,0.55); backdrop-filter: blur(3px);"
      onclick="closeCartPanel()"></div>
 
