@@ -303,7 +303,7 @@ ob_start();
 
                 <!-- Price row -->
                 <div class="flex items-baseline gap-4 mb-5">
-                    <span class="text-4xl font-extrabold text-blue-600 dark:text-blue-400">
+                    <span class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-blue-600 dark:text-blue-400">
                         <?php echo number_format((float) $product['base_price'], 2, ',', '.'); ?> €
                     </span>
                     <?php if (!empty($product['shipping_cost']) && (float) $product['shipping_cost'] > 0): ?>

@@ -295,7 +295,7 @@ ob_start();
         </div>
         
         <!-- Title with Gradient Effect -->
-        <h1 class="text-4xl font-bold mb-8 bg-gradient-to-r from-purple-600 via-blue-600 to-purple-600 bg-clip-text text-transparent">
+        <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold mb-8 bg-gradient-to-r from-purple-600 via-blue-600 to-purple-600 bg-clip-text text-transparent break-words">
             <?php echo htmlspecialchars($project['title']); ?>
         </h1>
         

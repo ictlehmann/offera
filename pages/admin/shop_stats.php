@@ -87,7 +87,7 @@ ob_start();
             <div class="px-6 pt-6 pb-2 flex items-start justify-between">
                 <div>
                     <p class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">Gesamtumsatz</p>
-                    <p class="text-4xl font-extrabold text-gray-900 dark:text-gray-50 leading-none"><?php echo number_format($totalRevenue, 2, ',', '.'); ?> <span class="text-2xl">€</span></p>
+                    <p class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-gray-50 leading-none"><?php echo number_format($totalRevenue, 2, ',', '.'); ?> <span class="text-2xl">€</span></p>
                     <p class="text-xs text-gray-400 dark:text-gray-500 mt-2">Letzte 12 Monate</p>
                 </div>
                 <div class="w-12 h-12 bg-green-50 dark:bg-green-900/30 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -102,7 +102,7 @@ ob_start();
             <div class="px-6 pt-6 pb-2 flex items-start justify-between">
                 <div>
                     <p class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">Ø Bestellwert</p>
-                    <p class="text-4xl font-extrabold text-gray-900 dark:text-gray-50 leading-none"><?php echo number_format($avgRevenue, 2, ',', '.'); ?> <span class="text-2xl">€</span></p>
+                    <p class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-gray-900 dark:text-gray-50 leading-none"><?php echo number_format($avgRevenue, 2, ',', '.'); ?> <span class="text-2xl">€</span></p>
                     <p class="text-xs text-gray-400 dark:text-gray-500 mt-2">Pro Bestellung</p>
                 </div>
                 <div class="w-12 h-12 bg-purple-50 dark:bg-purple-900/30 rounded-xl flex items-center justify-center flex-shrink-0">
