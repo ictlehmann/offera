@@ -3,6 +3,7 @@ require_once __DIR__ . '/../../src/Auth.php';
 require_once __DIR__ . '/../../includes/handlers/CSRFHandler.php';
 require_once __DIR__ . '/../../includes/models/JobBoard.php';
 require_once __DIR__ . '/../../src/Database.php';
+require_once __DIR__ . '/../../includes/helpers.php';
 
 // Check authentication
 if (!Auth::check()) {
@@ -21,103 +22,110 @@ $description = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     CSRFHandler::verifyToken($_POST['csrf_token'] ?? '');
 
-    $title       = trim($_POST['title'] ?? '');
-    $searchType  = trim($_POST['search_type'] ?? '');
-    $description = trim($_POST['description'] ?? '');
+    // Per-form rate limiting: prevent job-posting spam without affecting other actions
+    $rateLimitWait = checkFormRateLimit('last_job_submit_time');
+    if ($rateLimitWait > 0) {
+        $errors[] = 'Bitte warte noch ' . $rateLimitWait . ' ' . ($rateLimitWait === 1 ? 'Sekunde' : 'Sekunden') . ', bevor du erneut ein Gesuch aufgibst.';
+    } else {
+        $title       = trim($_POST['title'] ?? '');
+        $searchType  = trim($_POST['search_type'] ?? '');
+        $description = trim($_POST['description'] ?? '');
 
-    // Validate required fields
-    if (empty($title)) {
-        $errors[] = 'Bitte geben Sie einen Titel ein.';
-    }
+        // Validate required fields
+        if (empty($title)) {
+            $errors[] = 'Bitte geben Sie einen Titel ein.';
+        }
 
-    if (empty($searchType) || !in_array($searchType, JobBoard::SEARCH_TYPES, true)) {
-        $errors[] = 'Bitte wählen Sie einen gültigen Typ aus.';
-    }
+        if (empty($searchType) || !in_array($searchType, JobBoard::SEARCH_TYPES, true)) {
+            $errors[] = 'Bitte wählen Sie einen gültigen Typ aus.';
+        }
 
-    if (empty($description)) {
-        $errors[] = 'Bitte geben Sie eine Beschreibung ein.';
-    }
+        if (empty($description)) {
+            $errors[] = 'Bitte geben Sie eine Beschreibung ein.';
+        }
 
-    $pdfPath = null;
+        $pdfPath = null;
 
-    // Handle PDF upload (optional but strictly validated)
-    if (isset($_FILES['cv_pdf']) && $_FILES['cv_pdf']['error'] !== UPLOAD_ERR_NO_FILE) {
-        $file = $_FILES['cv_pdf'];
+        // Handle PDF upload (optional but strictly validated)
+        if (isset($_FILES['cv_pdf']) && $_FILES['cv_pdf']['error'] !== UPLOAD_ERR_NO_FILE) {
+            $file = $_FILES['cv_pdf'];
 
-        if ($file['error'] === UPLOAD_ERR_INI_SIZE || $file['error'] === UPLOAD_ERR_FORM_SIZE) {
-            $errors[] = 'Die hochgeladene Datei ist zu groß. Maximum: 5 MB.';
-        } elseif ($file['error'] !== UPLOAD_ERR_OK) {
-            $errors[] = 'Fehler beim Hochladen der Datei (Code: ' . (int)$file['error'] . ').';
-        } else {
-            // --- Strict PDF validation ---
+            if ($file['error'] === UPLOAD_ERR_INI_SIZE || $file['error'] === UPLOAD_ERR_FORM_SIZE) {
+                $errors[] = 'Die hochgeladene Datei ist zu groß. Maximum: 5 MB.';
+            } elseif ($file['error'] !== UPLOAD_ERR_OK) {
+                $errors[] = 'Fehler beim Hochladen der Datei (Code: ' . (int)$file['error'] . ').';
+            } else {
+                // --- Strict PDF validation ---
 
-            // 1. Size check (5 MB)
-            if ($file['size'] > 5 * 1024 * 1024) {
-                $errors[] = 'Die Datei überschreitet die maximale Größe von 5 MB.';
-            }
-
-            // 2. MIME type check via finfo (not spoofable via $_FILES['type'])
-            if (empty($errors)) {
-                $finfo = new finfo(FILEINFO_MIME_TYPE);
-                $mime  = $finfo->file($file['tmp_name']);
-                if ($mime !== 'application/pdf') {
-                    $errors[] = 'Die hochgeladene Datei ist keine gültige PDF-Datei.';
+                // 1. Size check (5 MB)
+                if ($file['size'] > 5 * 1024 * 1024) {
+                    $errors[] = 'Die Datei überschreitet die maximale Größe von 5 MB.';
                 }
-            }
 
-            // 3. Magic-bytes check – PDF starts with "%PDF"
-            if (empty($errors)) {
-                $handle = fopen($file['tmp_name'], 'rb');
-                $magic  = fread($handle, 4);
-                fclose($handle);
-                if ($magic !== '%PDF') {
-                    $errors[] = 'Die Datei enthält keine gültigen PDF-Daten.';
+                // 2. MIME type check via finfo (not spoofable via $_FILES['type'])
+                if (empty($errors)) {
+                    $finfo = new finfo(FILEINFO_MIME_TYPE);
+                    $mime  = $finfo->file($file['tmp_name']);
+                    if ($mime !== 'application/pdf') {
+                        $errors[] = 'Die hochgeladene Datei ist keine gültige PDF-Datei.';
+                    }
                 }
-            }
 
-            // 4. Move file if all checks passed
-            if (empty($errors)) {
-                $uploadDir = __DIR__ . '/../../uploads/jobs/';
-                if (!is_dir($uploadDir)) {
-                    mkdir($uploadDir, 0755, true);
+                // 3. Magic-bytes check – PDF starts with "%PDF"
+                if (empty($errors)) {
+                    $handle = fopen($file['tmp_name'], 'rb');
+                    $magic  = fread($handle, 4);
+                    fclose($handle);
+                    if ($magic !== '%PDF') {
+                        $errors[] = 'Die Datei enthält keine gültigen PDF-Daten.';
+                    }
                 }
-                if (!is_writable($uploadDir)) {
-                    $errors[] = 'Das Upload-Verzeichnis ist nicht beschreibbar.';
-                } else {
-                    $safeName = bin2hex(random_bytes(16)) . '.pdf';
-                    $destPath = $uploadDir . $safeName;
-                    if (move_uploaded_file($file['tmp_name'], $destPath)) {
-                        $pdfPath = 'uploads/jobs/' . $safeName;
+
+                // 4. Move file if all checks passed
+                if (empty($errors)) {
+                    $uploadDir = __DIR__ . '/../../uploads/jobs/';
+                    if (!is_dir($uploadDir)) {
+                        mkdir($uploadDir, 0755, true);
+                    }
+                    if (!is_writable($uploadDir)) {
+                        $errors[] = 'Das Upload-Verzeichnis ist nicht beschreibbar.';
                     } else {
-                        $errors[] = 'Die Datei konnte nicht gespeichert werden.';
+                        $safeName = bin2hex(random_bytes(16)) . '.pdf';
+                        $destPath = $uploadDir . $safeName;
+                        if (move_uploaded_file($file['tmp_name'], $destPath)) {
+                            $pdfPath = 'uploads/jobs/' . $safeName;
+                        } else {
+                            $errors[] = 'Die Datei konnte nicht gespeichert werden.';
+                        }
                     }
                 }
             }
         }
-    }
 
-    if (empty($errors)) {
-        $newId = JobBoard::create([
-            'user_id'     => $userId,
-            'title'       => $title,
-            'search_type' => $searchType,
-            'description' => $description,
-            'pdf_path'    => $pdfPath,
-        ]);
+        if (empty($errors)) {
+            $newId = JobBoard::create([
+                'user_id'     => $userId,
+                'title'       => $title,
+                'search_type' => $searchType,
+                'description' => $description,
+                'pdf_path'    => $pdfPath,
+            ]);
 
-        if ($newId) {
-            $_SESSION['success_message'] = 'Dein Gesuch wurde erfolgreich aufgegeben!';
-            header('Location: index.php');
-            exit;
-        } else {
-            $errors[] = 'Das Gesuch konnte nicht gespeichert werden. Bitte versuche es erneut.';
-            // Clean up uploaded file to avoid orphaned files on disk
-            if ($pdfPath !== null) {
-                $uploadedFile = __DIR__ . '/../../' . $pdfPath;
-                $allowedDir = realpath(__DIR__ . '/../../uploads/jobs');
-                $realUploadedFile = realpath($uploadedFile);
-                if ($realUploadedFile !== false && $allowedDir !== false && strpos($realUploadedFile, $allowedDir . DIRECTORY_SEPARATOR) === 0) {
-                    unlink($realUploadedFile);
+            if ($newId) {
+                recordFormSubmit('last_job_submit_time');
+                $_SESSION['success_message'] = 'Dein Gesuch wurde erfolgreich aufgegeben!';
+                header('Location: index.php');
+                exit;
+            } else {
+                $errors[] = 'Das Gesuch konnte nicht gespeichert werden. Bitte versuche es erneut.';
+                // Clean up uploaded file to avoid orphaned files on disk
+                if ($pdfPath !== null) {
+                    $uploadedFile = __DIR__ . '/../../' . $pdfPath;
+                    $allowedDir = realpath(__DIR__ . '/../../uploads/jobs');
+                    $realUploadedFile = realpath($uploadedFile);
+                    if ($realUploadedFile !== false && $allowedDir !== false && strpos($realUploadedFile, $allowedDir . DIRECTORY_SEPARATOR) === 0) {
+                        unlink($realUploadedFile);
+                    }
                 }
             }
         }
