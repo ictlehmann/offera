@@ -212,13 +212,13 @@ ob_start();
     </div>
     <?php endif; ?>
 
-    <div class="card p-8">
+    <div class="card p-4 sm:p-6 md:p-8">
         <div class="mb-6">
-            <h1 class="text-3xl font-bold text-gray-800">
-                <i class="fas fa-<?php echo $isEdit ? 'edit' : 'plus-circle'; ?> text-blue-600 mr-2"></i>
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-100">
+                <i class="fas fa-<?php echo $isEdit ? 'edit' : 'plus-circle'; ?> text-blue-600 dark:text-blue-400 mr-2"></i>
                 <?php echo $isEdit ? 'Beitrag bearbeiten' : 'Neuen Beitrag erstellen'; ?>
             </h1>
-            <p class="text-gray-600 mt-2">
+            <p class="text-gray-600 dark:text-gray-300 mt-2">
                 <?php echo $isEdit ? 'Bearbeite die Details Deines Beitrags.' : 'Erstelle einen neuen Beitrag für News & Updates.'; ?>
             </p>
         </div>
@@ -235,7 +235,7 @@ ob_start();
                     required 
                     value="<?php echo htmlspecialchars($title); ?>"
                     placeholder="Geben Sie einen aussagekräftigen Titel ein"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400"
                 >
             </div>
 
@@ -245,7 +245,7 @@ ob_start();
                 <select 
                     name="category" 
                     required 
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100"
                 >
                     <option value="">-- Kategorie wählen --</option>
                     <option value="Allgemein" <?php echo $category === 'Allgemein' ? 'selected' : ''; ?>>Allgemein</option>
@@ -268,10 +268,10 @@ ob_start();
                     required 
                     rows="10"
                     placeholder="Schreibe Deinen Beitrag hier..."
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-sans"
+                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-sans dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400"
                     style="resize: vertical; min-height: 200px;"
                 ><?php echo htmlspecialchars($content); ?></textarea>
-                <p class="text-sm text-gray-500 mt-2">
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
                     Der Inhalt wird als reiner Text gespeichert. HTML-Tags werden nicht unterstützt.
                 </p>
             </div>
@@ -284,19 +284,19 @@ ob_start();
                     name="external_link" 
                     value="<?php echo htmlspecialchars($externalLink); ?>"
                     placeholder="https://beispiel.de/artikel"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400"
                 >
-                <p class="text-sm text-gray-500 mt-2">
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
                     Link zu einer externen Quelle oder weiteren Informationen.
                 </p>
             </div>
 
             <!-- Image Upload -->
-            <div class="pb-6 border-b">
+            <div class="pb-6 border-b border-gray-200 dark:border-gray-700">
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Bild (optional)</label>
                 <?php if ($imagePath): ?>
                 <div class="mb-4">
-                    <p class="text-sm text-gray-600 mb-2">Aktuelles Bild:</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">Aktuelles Bild:</p>
                     <img src="/<?php echo htmlspecialchars($imagePath); ?>" alt="Aktuelles Bild" class="w-64 h-48 object-cover rounded-lg shadow-md">
                 </div>
                 <?php endif; ?>
@@ -304,16 +304,16 @@ ob_start();
                     type="file" 
                     name="image" 
                     accept="image/jpeg,image/png,image/gif,image/webp"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-gray-300"
                 >
-                <p class="text-sm text-gray-500 mt-2">
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
                     Erlaubt: JPG, PNG, GIF, WebP. Maximum: 5MB. Das Bild wird sicher verarbeitet und validiert.
                 </p>
             </div>
 
             <!-- Submit Buttons -->
             <div class="flex justify-end space-x-4 pt-6">
-                <a href="index.php" class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
+                <a href="index.php" class="px-6 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition">
                     Abbrechen
                 </a>
                 <button type="submit" class="px-6 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg hover:shadow-xl">

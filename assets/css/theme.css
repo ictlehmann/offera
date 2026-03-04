@@ -4795,6 +4795,55 @@ body {
     font-weight: 600 !important;
 }
 
+/* Bootstrap text utility dark mode overrides */
+.dark-mode .text-secondary {
+    color: #9ca3af !important; /* gray-400 */
+}
+
+.dark-mode .text-dark {
+    color: #e5e7eb !important; /* gray-200 */
+}
+
+.dark-mode .text-body {
+    color: var(--text-main) !important;
+}
+
+/* Bootstrap table dark mode */
+.dark-mode .table {
+    color: var(--text-main) !important;
+    --bs-table-color: var(--text-main);
+    --bs-table-bg: var(--bg-card);
+    --bs-table-border-color: var(--border-color);
+    --bs-table-striped-bg: rgba(255,255,255,0.03);
+    --bs-table-hover-bg: rgba(255,255,255,0.05);
+}
+
+.dark-mode .table th,
+.dark-mode .table td {
+    border-color: var(--border-color) !important;
+    color: var(--text-main) !important;
+}
+
+.dark-mode .table thead th {
+    background-color: var(--bg-body) !important;
+    color: var(--text-main) !important;
+}
+
+/* Bootstrap card dark mode */
+.dark-mode .card-header,
+.dark-mode .card-footer {
+    background-color: rgba(255,255,255,0.04) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-main) !important;
+}
+
+/* Bootstrap list-group dark mode */
+.dark-mode .list-group-item {
+    background-color: var(--bg-card) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-main) !important;
+}
+
 /* ===== END BOOTSTRAP 5 COMPATIBILITY OVERRIDES ===== */
 
 /* ===== GLOBAL LINK DECORATION ===== */
@@ -5408,6 +5457,20 @@ img:not([loading]) {
     color: var(--ibc-blue);
     background-color: #eff6ff;
     border-color: #bfdbfe;
+}
+
+/* Dark mode: directory contact icons */
+.dark-mode .directory-contact-icon {
+    color: #9ca3af;
+    background-color: #374151;
+    border-color: #4b5563;
+}
+
+.dark-mode .directory-contact-icon:hover,
+.dark-mode .directory-card:hover .directory-contact-icon {
+    color: var(--ibc-blue-light);
+    background-color: rgba(51, 133, 196, 0.2);
+    border-color: rgba(51, 133, 196, 0.5);
 }
 
 /* Mobile Optimization for Member Directory */

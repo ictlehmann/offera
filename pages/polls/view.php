@@ -141,7 +141,7 @@ ob_start();
             <i class="fas fa-arrow-left mr-2"></i>Zurück zu Umfragen
         </a>
         
-        <h1 class="text-4xl font-bold text-gray-800 dark:text-gray-100 mb-2">
+        <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 dark:text-gray-100 mb-2">
             <?php echo htmlspecialchars($poll['title']); ?>
         </h1>
         

@@ -141,6 +141,11 @@ if (!isset($currentUser)) {
             main h2 { font-size: 1.5rem !important; line-height: 1.3; margin-bottom: 0.875rem; }
             main h3 { font-size: 1.25rem !important; line-height: 1.4; margin-bottom: 0.75rem; }
 
+            /* Responsive large text elements that aren't headings */
+            main .text-4xl { font-size: 1.75rem !important; }
+            main .text-5xl { font-size: 2rem !important; }
+            main .text-6xl, main .text-7xl, main .text-8xl, main .text-9xl { font-size: 2.25rem !important; }
+
             /* Better image scaling on mobile */
             img:not([class*="w-"]) { max-width: 100%; height: auto; }
 

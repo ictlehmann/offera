@@ -14,7 +14,7 @@ ob_start();
 <div class="max-w-4xl mx-auto">
     <!-- Header -->
     <div class="mb-8">
-        <h1 class="text-4xl font-bold text-gray-800 dark:text-gray-100 mb-2">
+        <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 dark:text-gray-100 mb-2">
             <i class="fas fa-gavel mr-3 text-ibc-green"></i>
             Impressum
         </h1>

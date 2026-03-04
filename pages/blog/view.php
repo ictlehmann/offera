@@ -141,14 +141,15 @@ $commentReactions = BlogPost::getCommentReactions($commentIds, $userId);
 // Function to get category color classes
 function getCategoryColor($category) {
     $colors = [
-        'Allgemein' => 'bg-gray-100 text-gray-800',
-        'IT' => 'bg-blue-100 text-blue-800',
-        'Marketing' => 'bg-purple-100 text-purple-800',
-        'Human Resources' => 'bg-green-100 text-green-800',
-        'Qualitätsmanagement' => 'bg-yellow-100 text-yellow-800',
-        'Akquise' => 'bg-red-100 text-red-800'
+        'Allgemein' => 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200',
+        'IT' => 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+        'Marketing' => 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
+        'Human Resources' => 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
+        'Qualitätsmanagement' => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200',
+        'Akquise' => 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
+        'Vorstand' => 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-200',
     ];
-    return $colors[$category] ?? 'bg-gray-100 text-gray-800';
+    return $colors[$category] ?? 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
 }
 
 // Check if user can edit this post (is author OR admin/board)
@@ -198,13 +199,13 @@ ob_start();
     <div class="card overflow-hidden mb-8">
         <!-- Full Width Header Image -->
         <?php if (!empty($post['image_path'])): ?>
-            <div class="w-full h-96 overflow-hidden bg-gray-200">
+            <div class="w-full h-48 sm:h-64 md:h-96 overflow-hidden bg-gray-200 dark:bg-gray-700">
                 <img src="/<?php echo htmlspecialchars($post['image_path']); ?>" 
                      alt="<?php echo htmlspecialchars($post['title']); ?>"
                      class="w-full h-full object-cover">
             </div>
         <?php else: ?>
-            <div class="w-full h-96 overflow-hidden bg-gray-200">
+            <div class="w-full h-48 sm:h-64 md:h-96 overflow-hidden bg-gray-200 dark:bg-gray-700">
                 <img src="/<?php echo htmlspecialchars(BlogPost::DEFAULT_IMAGE); ?>"
                      alt=""
                      class="w-full h-full object-cover">
@@ -212,7 +213,7 @@ ob_start();
         <?php endif; ?>
         
         <!-- Post Content -->
-        <div class="p-8">
+        <div class="p-4 sm:p-6 md:p-8">
             <!-- Category Badge -->
             <div class="mb-4">
                 <span class="px-4 py-2 text-sm font-semibold rounded-full <?php echo getCategoryColor($post['category']); ?>">
@@ -221,18 +222,18 @@ ob_start();
             </div>
             
             <!-- Title -->
-            <h1 class="text-4xl font-bold text-gray-800 mb-4">
+            <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 dark:text-gray-100 mb-4 break-words">
                 <?php echo htmlspecialchars($post['title']); ?>
             </h1>
             
             <!-- Meta Information -->
-            <div class="flex items-center gap-6 text-gray-600 mb-6 pb-6 border-b border-gray-200">
-                <div class="flex items-center">
-                    <i class="fas fa-user-circle mr-2 text-blue-600"></i>
-                    <span><?php echo htmlspecialchars($post['author_email']); ?></span>
+            <div class="flex flex-wrap items-center gap-4 text-gray-600 dark:text-gray-400 mb-6 pb-6 border-b border-gray-200 dark:border-gray-700">
+                <div class="flex items-center min-w-0">
+                    <i class="fas fa-user-circle mr-2 text-blue-600 dark:text-blue-400 flex-shrink-0"></i>
+                    <span class="truncate"><?php echo htmlspecialchars($post['author_email']); ?></span>
                 </div>
                 <div class="flex items-center">
-                    <i class="fas fa-calendar-alt mr-2 text-blue-600"></i>
+                    <i class="fas fa-calendar-alt mr-2 text-blue-600 dark:text-blue-400 flex-shrink-0"></i>
                     <span>
                         <?php 
                             $date = new DateTime($post['created_at']);
@@ -244,7 +245,7 @@ ob_start();
             
             <!-- Full Content -->
             <div class="prose max-w-none mb-8">
-                <div class="text-gray-700 text-lg leading-relaxed whitespace-pre-wrap">
+                <div class="text-gray-700 dark:text-gray-300 text-base sm:text-lg leading-relaxed whitespace-pre-wrap break-words">
                     <?php echo htmlspecialchars($post['content']); ?>
                 </div>
             </div>
@@ -276,8 +277,8 @@ ob_start();
     </div>
 
     <!-- Interaction Section -->
-    <div class="card p-8 mb-8">
-        <h2 class="text-2xl font-bold text-gray-800 mb-6">
+    <div class="card p-4 sm:p-6 md:p-8 mb-8">
+        <h2 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6">
             <i class="fas fa-heart mr-2 text-red-500"></i>
             Interaktion
         </h2>
@@ -299,8 +300,8 @@ ob_start();
     </div>
 
     <!-- Comments Section -->
-    <div class="card p-8">
-        <h2 class="text-2xl font-bold text-gray-800 mb-6">
+    <div class="card p-4 sm:p-6 md:p-8">
+        <h2 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6">
             <i class="fas fa-comments mr-2 text-blue-500"></i>
             Kommentare (<?php echo count($post['comments']); ?>)
         </h2>
@@ -314,21 +315,21 @@ ob_start();
                     $reactions = $commentReactions[$comment['id']] ?? [];
                     $allowedReactions = ['👍', '❤️', '😄', '😮', '😢', '🎉'];
                 ?>
-                    <div class="bg-gray-50 p-6 rounded-lg border border-gray-200" id="comment-<?php echo (int)$comment['id']; ?>">
-                        <div class="flex items-center justify-between gap-4 mb-3">
-                            <div class="flex items-center gap-4">
-                                <div class="flex items-center text-gray-700">
-                                    <i class="fas fa-user-circle mr-2 text-blue-600 text-xl"></i>
-                                    <span class="font-semibold"><?php echo htmlspecialchars($comment['commenter_email']); ?></span>
+                    <div class="bg-gray-50 dark:bg-gray-800 p-4 sm:p-6 rounded-lg border border-gray-200 dark:border-gray-700" id="comment-<?php echo (int)$comment['id']; ?>">
+                        <div class="flex flex-wrap items-start justify-between gap-3 mb-3">
+                            <div class="flex flex-wrap items-center gap-3 min-w-0">
+                                <div class="flex items-center text-gray-700 dark:text-gray-300 min-w-0">
+                                    <i class="fas fa-user-circle mr-2 text-blue-600 dark:text-blue-400 text-xl flex-shrink-0"></i>
+                                    <span class="font-semibold truncate"><?php echo htmlspecialchars($comment['commenter_email']); ?></span>
                                 </div>
-                                <div class="text-sm text-gray-500">
+                                <div class="text-sm text-gray-500 dark:text-gray-400">
                                     <i class="fas fa-clock mr-1"></i>
                                     <?php 
                                         $commentDate = new DateTime($comment['created_at']);
                                         echo $commentDate->format('d.m.Y H:i');
                                     ?>
                                     <?php if (!empty($comment['updated_at']) && $comment['updated_at'] !== $comment['created_at']): ?>
-                                        <span class="ml-1 italic text-gray-400">(bearbeitet)</span>
+                                        <span class="ml-1 italic text-gray-400 dark:text-gray-500">(bearbeitet)</span>
                                     <?php endif; ?>
                                 </div>
                             </div>
@@ -336,7 +337,7 @@ ob_start();
                             <div class="flex gap-2">
                                 <?php if ($isOwner): ?>
                                 <button onclick="openEditComment(<?php echo (int)$comment['id']; ?>, <?php echo json_encode($comment['content'], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT); ?>)"
-                                        class="text-sm px-3 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition">
+                                        class="text-sm px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded hover:bg-blue-200 dark:hover:bg-blue-800 transition">
                                     <i class="fas fa-edit mr-1"></i>Bearbeiten
                                 </button>
                                 <?php endif; ?>
@@ -346,7 +347,7 @@ ob_start();
                                     <input type="hidden" name="action" value="delete_comment">
                                     <input type="hidden" name="comment_id" value="<?php echo (int)$comment['id']; ?>">
                                     <button type="submit"
-                                            class="text-sm px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200 transition">
+                                            class="text-sm px-3 py-1 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 rounded hover:bg-red-200 dark:hover:bg-red-800 transition">
                                         <i class="fas fa-trash mr-1"></i>Löschen
                                     </button>
                                 </form>
@@ -355,7 +356,7 @@ ob_start();
                         </div>
 
                         <!-- Comment content (view mode) -->
-                        <div class="text-gray-700 whitespace-pre-wrap comment-text-<?php echo (int)$comment['id']; ?>">
+                        <div class="text-gray-700 dark:text-gray-300 whitespace-pre-wrap break-words comment-text-<?php echo (int)$comment['id']; ?>">
                             <?php echo htmlspecialchars($comment['content']); ?>
                         </div>
 
@@ -368,7 +369,7 @@ ob_start();
                                 <input type="hidden" name="comment_id" value="<?php echo (int)$comment['id']; ?>">
                                 <textarea name="comment_content" rows="4" maxlength="2000" required
                                           id="edit-textarea-<?php echo (int)$comment['id']; ?>"
-                                          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-sans"
+                                          class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-sans dark:bg-gray-700 dark:text-gray-100"
                                           style="resize: vertical; min-height: 80px;"></textarea>
                                 <div class="flex gap-2">
                                     <button type="submit"
@@ -376,7 +377,7 @@ ob_start();
                                         <i class="fas fa-save mr-1"></i>Speichern
                                     </button>
                                     <button type="button" onclick="closeEditComment(<?php echo (int)$comment['id']; ?>)"
-                                            class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition text-sm">
+                                            class="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition text-sm">
                                         Abbrechen
                                     </button>
                                 </div>
@@ -390,8 +391,8 @@ ob_start();
                             <?php
                                 $reactionData = $reactions[$emoji] ?? ['count' => 0, 'reacted' => false];
                                 $activeClass  = $reactionData['reacted']
-                                    ? 'bg-blue-100 border-blue-400 text-blue-800'
-                                    : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-100';
+                                    ? 'bg-blue-100 dark:bg-blue-900 border-blue-400 dark:border-blue-600 text-blue-800 dark:text-blue-200'
+                                    : 'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600';
                             ?>
                             <form method="POST" class="inline">
                                 <input type="hidden" name="csrf_token" value="<?php echo CSRFHandler::getToken(); ?>">
@@ -412,12 +413,12 @@ ob_start();
                 <?php endforeach; ?>
             </div>
         <?php else: ?>
-            <p class="text-gray-500 mb-8">Noch keine Kommentare. Seien Sie der Erste!</p>
+            <p class="text-gray-500 dark:text-gray-400 mb-8">Noch keine Kommentare. Seien Sie der Erste!</p>
         <?php endif; ?>
         
         <!-- Write Comment Form -->
-        <div class="border-t border-gray-200 pt-6">
-            <h3 class="text-xl font-semibold text-gray-800 mb-4">
+        <div class="border-t border-gray-200 dark:border-gray-700 pt-6">
+            <h3 class="text-lg sm:text-xl font-semibold text-gray-800 dark:text-gray-100 mb-4">
                 <i class="fas fa-pen mr-2"></i>
                 Kommentar schreiben
             </h3>
@@ -434,10 +435,10 @@ ob_start();
                         rows="4"
                         maxlength="2000"
                         placeholder="Schreibe Deinen Kommentar hier..."
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-sans"
+                        class="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-sans dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-400"
                         style="resize: vertical; min-height: 100px;"
                     ></textarea>
-                    <p class="text-sm text-gray-500 mt-2">
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
                         Maximum: 2000 Zeichen
                     </p>
                 </div>
