@@ -333,6 +333,11 @@ class SecureImageUpload {
         }
 
         $fullPath = $projectRoot . DIRECTORY_SEPARATOR . ltrim(str_replace('/', DIRECTORY_SEPARATOR, $relativePath), DIRECTORY_SEPARATOR);
+
+        if (!file_exists($fullPath)) {
+            return true; // File already missing – nothing to delete
+        }
+
         $realPath = realpath($fullPath);
 
         if ($realPath === false) {
