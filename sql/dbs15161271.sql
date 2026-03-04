@@ -94,8 +94,10 @@ COMMENT='Financial statistics for events - tracks sales and calculations with ye
 --   ALTER TABLE alumni_profiles ADD COLUMN bio TEXT DEFAULT NULL AFTER last_reminder_sent_at;
 --   ALTER TABLE alumni_profiles ADD COLUMN skills TEXT DEFAULT NULL COMMENT 'Comma-separated list of skills/competencies' AFTER bio;
 -- Migration: add bio and skills columns if not already present
-ALTER TABLE `alumni_profiles` ADD COLUMN IF NOT EXISTS `bio` TEXT DEFAULT NULL AFTER `last_reminder_sent_at`;
-ALTER TABLE `alumni_profiles` ADD COLUMN IF NOT EXISTS `skills` TEXT DEFAULT NULL COMMENT 'Comma-separated list of skills/competencies' AFTER `bio`;
+-- Note: ALTER TABLE ... ADD COLUMN IF NOT EXISTS is not supported in MySQL.
+-- For existing databases that are missing these columns, run manually:
+--   ALTER TABLE alumni_profiles ADD COLUMN bio TEXT DEFAULT NULL AFTER last_reminder_sent_at;
+--   ALTER TABLE alumni_profiles ADD COLUMN skills TEXT DEFAULT NULL COMMENT 'Comma-separated list of skills/competencies' AFTER bio;
 -- ================================================
 CREATE TABLE IF NOT EXISTS `alumni_profiles` (
   `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -303,7 +305,7 @@ CREATE TABLE IF NOT EXISTS `projects` (
   `type` ENUM('internal', 'external') DEFAULT 'internal',
   `status` ENUM('draft', 'open', 'in_progress', 'completed', 'cancelled') DEFAULT 'draft',
   `max_consultants` INT UNSIGNED DEFAULT NULL,
-  `requires_application` TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Whether applicants must submit an application (0 = direct join, 1 = application required)',
+  `requires_application` TINYINT NOT NULL DEFAULT 1 COMMENT 'Whether applicants must submit an application (0 = direct join, 1 = application required)',
   `start_date` DATE DEFAULT NULL,
   `end_date` DATE DEFAULT NULL,
   `image_path` VARCHAR(500) DEFAULT NULL,
@@ -647,7 +649,7 @@ CREATE TABLE IF NOT EXISTS `mail_queue` (
   `to_email` VARCHAR(255) NOT NULL COMMENT 'Recipient email address',
   `subject` VARCHAR(500) NOT NULL COMMENT 'Email subject line',
   `body` LONGTEXT NOT NULL COMMENT 'Full HTML email body',
-  `sent` TINYINT(1) NOT NULL DEFAULT 0 COMMENT 'Send status: 0 = pending, 1 = sent',
+  `sent` TINYINT NOT NULL DEFAULT 0 COMMENT 'Send status: 0 = pending, 1 = sent',
   `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   `sent_at` DATETIME DEFAULT NULL COMMENT 'Timestamp when the email was successfully sent',
   INDEX `idx_sent` (`sent`),
@@ -664,8 +666,8 @@ CREATE TABLE IF NOT EXISTS `shop_products` (
     `description`   TEXT,
     `base_price`    DECIMAL(10,2)  NOT NULL DEFAULT 0.00,
     `image_path`    VARCHAR(500),
-    `active`        TINYINT(1)     NOT NULL DEFAULT 1,
-    `is_bulk_order` TINYINT(1)     NOT NULL DEFAULT 1 COMMENT 'Sammelbestellung aktiv',
+    `active`        TINYINT        NOT NULL DEFAULT 1,
+    `is_bulk_order` TINYINT        NOT NULL DEFAULT 1 COMMENT 'Sammelbestellung aktiv',
     `bulk_end_date` DATETIME       DEFAULT NULL COMMENT 'Ende der Sammelbestellfrist',
     `bulk_min_goal`    INT            DEFAULT NULL COMMENT 'Mindestanzahl an Vorbestellungen für Produktion',
     `sku`              VARCHAR(100)   DEFAULT NULL COMMENT 'Lagerbestandseinheit (SKU)',
