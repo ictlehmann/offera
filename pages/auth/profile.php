@@ -1269,7 +1269,7 @@ document.addEventListener('DOMContentLoaded', function() {
         saveBtn.disabled = true;
         saveBtn.textContent = 'Speichern...';
 
-        fetch('/api/upload_avatar.php', {
+        fetch('<?php echo asset('api/upload_avatar.php'); ?>', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ image: dataUrl, csrf_token: <?php echo json_encode(CSRFHandler::getToken()); ?> }),
