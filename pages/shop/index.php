@@ -10,6 +10,7 @@ require_once __DIR__ . '/../../includes/helpers.php';
 require_once __DIR__ . '/../../includes/models/Shop.php';
 require_once __DIR__ . '/../../src/ShopPaymentService.php';
 require_once __DIR__ . '/../../src/MailService.php';
+require_once __DIR__ . '/../../includes/handlers/CSRFHandler.php';
 
 // Authentication check
 if (!Auth::check()) {
@@ -71,6 +72,7 @@ if ($action === 'payment_return' && $_SERVER['REQUEST_METHOD'] === 'GET') {
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $postAction = $_POST['post_action'] ?? '';
+    CSRFHandler::verifyToken($_POST['csrf_token'] ?? '');
 
     if ($postAction === 'add_to_cart') {
         $pid             = (int) ($_POST['product_id'] ?? 0);
@@ -640,6 +642,7 @@ ob_start();
                 <?php elseif (empty($product['variants']) && empty($product['variants_csv'])): ?>
                 <form method="POST" action="<?php echo asset('pages/shop/index.php'); ?>">
                     <input type="hidden" name="post_action" value="add_to_cart">
+                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(CSRFHandler::getToken(), ENT_QUOTES, 'UTF-8'); ?>">
                     <input type="hidden" name="product_id" value="<?php echo $product['id']; ?>">
                     <input type="hidden" name="quantity" value="1">
                     <button type="submit"
@@ -766,6 +769,7 @@ ob_start();
 
                 <form method="POST" action="<?php echo asset('pages/shop/index.php?action=detail&product_id=' . $currentProduct['id']); ?>">
                     <input type="hidden" name="post_action" value="add_to_cart">
+                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(CSRFHandler::getToken(), ENT_QUOTES, 'UTF-8'); ?>">
                     <input type="hidden" name="product_id" value="<?php echo $currentProduct['id']; ?>">
 
                     <!-- Variants -->
@@ -811,6 +815,7 @@ ob_start();
                               action="<?php echo asset('pages/shop/index.php?action=detail&product_id=' . $currentProduct['id']); ?>"
                               class="mt-1 inline-block">
                             <input type="hidden" name="post_action"   value="toggle_restock_notification">
+                            <input type="hidden" name="csrf_token"    value="<?php echo htmlspecialchars(CSRFHandler::getToken(), ENT_QUOTES, 'UTF-8'); ?>">
                             <input type="hidden" name="product_id"    value="<?php echo $currentProduct['id']; ?>">
                             <input type="hidden" name="variant_type"  value="<?php echo htmlspecialchars($type); ?>">
                             <input type="hidden" name="variant_value" value="<?php echo htmlspecialchars($v['value']); ?>">
@@ -901,6 +906,7 @@ ob_start();
         <?php else: ?>
         <form method="POST" id="cart-form">
             <input type="hidden" name="post_action" value="update_cart">
+            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(CSRFHandler::getToken(), ENT_QUOTES, 'UTF-8'); ?>">
             <div class="overflow-x-auto mb-6">
                 <table class="w-full text-sm card-table">
                     <thead>
@@ -946,6 +952,7 @@ ob_start();
                             <td class="py-4 text-right" data-label="Entfernen">
                                 <form method="POST" class="inline">
                                     <input type="hidden" name="post_action" value="remove_from_cart">
+                                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(CSRFHandler::getToken(), ENT_QUOTES, 'UTF-8'); ?>">
                                     <input type="hidden" name="cart_key" value="<?php echo htmlspecialchars($key); ?>">
                                     <button type="submit" class="text-red-500 hover:text-red-700 dark:text-red-400 p-1" title="Entfernen">
                                         <i class="fas fa-trash-alt"></i>
@@ -1006,6 +1013,7 @@ ob_start();
                 </h2>
                 <form method="POST" id="checkout-form">
                     <input type="hidden" name="post_action" value="checkout">
+                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(CSRFHandler::getToken(), ENT_QUOTES, 'UTF-8'); ?>">
 
                     <!-- Shipping method selection -->
                     <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-3">Liefermethode</h3>
@@ -1761,6 +1769,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var CREATE_URL  = <?php echo json_encode(asset('api/shop/checkout.php') . '?action=create'); ?>;
     var CAPTURE_URL = <?php echo json_encode(asset('api/shop/checkout.php') . '?action=capture'); ?>;
     var SHOP_URL    = <?php echo json_encode(asset('pages/shop/index.php')); ?>;
+    var CSRF_TOKEN  = <?php echo json_encode(CSRFHandler::getToken()); ?>;
 
     if (!PAYPAL_CLIENT_ID) return;
 
@@ -1797,6 +1806,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
+                        csrf_token:       CSRF_TOKEN,
                         payment_method:   'paypal',
                         shipping_method:  shippingMethodEl  ? shippingMethodEl.value  : 'pickup',
                         shipping_country: (document.getElementById('shipping-country-select') || {value: 'DE'}).value,
@@ -1820,7 +1830,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 return fetch(CAPTURE_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ paypal_order_id: data.orderID })
+                    body: JSON.stringify({ csrf_token: CSRF_TOKEN, paypal_order_id: data.orderID })
                 })
                 .then(function (res) { return res.json(); })
                 .then(function (result) {

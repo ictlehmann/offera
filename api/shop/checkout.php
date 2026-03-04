@@ -8,6 +8,7 @@ require_once __DIR__ . '/../../includes/handlers/AuthHandler.php';
 require_once __DIR__ . '/../../includes/models/Shop.php';
 require_once __DIR__ . '/../../src/ShopPaymentService.php';
 require_once __DIR__ . '/../../src/MailService.php';
+require_once __DIR__ . '/../../includes/handlers/CSRFHandler.php';
 
 // Start session and set JSON response header
 AuthHandler::startSession();
@@ -40,6 +41,7 @@ if ($routeAction === 'create') {
         echo json_encode(['success' => false, 'message' => 'Ungültiges JSON-Format']);
         exit;
     }
+    CSRFHandler::verifyToken($input['csrf_token'] ?? '');
     $shippingMethod = in_array($input['shipping_method'] ?? '', ['pickup', 'mail'], true)
         ? $input['shipping_method']
         : 'pickup';
@@ -149,6 +151,7 @@ if ($routeAction === 'capture') {
         echo json_encode(['success' => false, 'message' => 'Ungültiges JSON-Format']);
         exit;
     }
+    CSRFHandler::verifyToken($input['csrf_token'] ?? '');
     $paypalOrderId = trim($input['paypal_order_id'] ?? '');
 
     if ($paypalOrderId === '') {

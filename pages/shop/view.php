@@ -9,6 +9,7 @@
 require_once __DIR__ . '/../../src/Auth.php';
 require_once __DIR__ . '/../../includes/helpers.php';
 require_once __DIR__ . '/../../includes/models/Shop.php';
+require_once __DIR__ . '/../../includes/handlers/CSRFHandler.php';
 
 // Authentication check
 if (!Auth::check()) {
@@ -54,6 +55,7 @@ $errorMessage   = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $postAction = $_POST['post_action'] ?? '';
+    CSRFHandler::verifyToken($_POST['csrf_token'] ?? '');
 
     if ($postAction === 'add_to_cart') {
         $pid             = (int) ($_POST['product_id'] ?? 0);
@@ -387,6 +389,7 @@ ob_start();
                       action="<?php echo asset('pages/shop/view.php?id=' . $productId); ?>"
                       class="flex flex-col gap-5">
                     <input type="hidden" name="post_action" value="add_to_cart">
+                    <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(CSRFHandler::getToken(), ENT_QUOTES, 'UTF-8'); ?>">
                     <input type="hidden" name="product_id" value="<?php echo $productId; ?>">
 
                     <!-- Structured variant selection (size, color, etc.) -->
@@ -515,6 +518,7 @@ ob_start();
                         <form method="POST"
                               action="<?php echo asset('pages/shop/view.php?id=' . $productId); ?>">
                             <input type="hidden" name="post_action"   value="toggle_restock_notification">
+                            <input type="hidden" name="csrf_token"    value="<?php echo htmlspecialchars(CSRFHandler::getToken(), ENT_QUOTES, 'UTF-8'); ?>">
                             <input type="hidden" name="product_id"    value="<?php echo $productId; ?>">
                             <input type="hidden" name="variant_type"  value="<?php echo htmlspecialchars($type); ?>">
                             <input type="hidden" name="variant_value" value="<?php echo htmlspecialchars($v['value']); ?>">
