@@ -852,7 +852,7 @@ body.dark-mode a:not(.btn-primary) {
 }
 
 /* Light Mode Links - Keep visible on white backgrounds, use appropriate color */
-body:not(.dark-mode) a:not(.btn-primary):not(.no-underline):not(.sidebar a) {
+body:not(.dark-mode) a:not(.btn-primary):not(.btn):not(.text-white):not(.no-underline):not(.sidebar a) {
     color: var(--text-main) !important; /* Dark text for visibility on white backgrounds */
     text-decoration: none;
     transition: color var(--transition-normal);
@@ -866,15 +866,15 @@ body:not(.dark-mode) .sidebar a:not(.no-underline) {
 }
 
 /* Light Mode: Animated underline on hover - scoped to text links inside paragraphs and lists */
-body:not(.dark-mode) p > a:not(.btn-primary):not(.no-underline):not(.sidebar a),
-body:not(.dark-mode) li > a:not(.btn-primary):not(.no-underline):not(.sidebar a),
-body:not(.dark-mode) td > a:not(.btn-primary):not(.no-underline):not(.sidebar a) {
+body:not(.dark-mode) p > a:not(.btn-primary):not(.btn):not(.text-white):not(.no-underline):not(.sidebar a),
+body:not(.dark-mode) li > a:not(.btn-primary):not(.btn):not(.text-white):not(.no-underline):not(.sidebar a),
+body:not(.dark-mode) td > a:not(.btn-primary):not(.btn):not(.text-white):not(.no-underline):not(.sidebar a) {
     position: relative;
 }
 
-body:not(.dark-mode) p > a:not(.btn-primary):not(.no-underline):not(.sidebar a)::after,
-body:not(.dark-mode) li > a:not(.btn-primary):not(.no-underline):not(.sidebar a)::after,
-body:not(.dark-mode) td > a:not(.btn-primary):not(.no-underline):not(.sidebar a)::after {
+body:not(.dark-mode) p > a:not(.btn-primary):not(.btn):not(.text-white):not(.no-underline):not(.sidebar a)::after,
+body:not(.dark-mode) li > a:not(.btn-primary):not(.btn):not(.text-white):not(.no-underline):not(.sidebar a)::after,
+body:not(.dark-mode) td > a:not(.btn-primary):not(.btn):not(.text-white):not(.no-underline):not(.sidebar a)::after {
     content: '';
     position: absolute;
     bottom: -2px;
@@ -885,9 +885,9 @@ body:not(.dark-mode) td > a:not(.btn-primary):not(.no-underline):not(.sidebar a)
     transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-body:not(.dark-mode) p > a:not(.btn-primary):not(.no-underline):not(.sidebar a):hover::after,
-body:not(.dark-mode) li > a:not(.btn-primary):not(.no-underline):not(.sidebar a):hover::after,
-body:not(.dark-mode) td > a:not(.btn-primary):not(.no-underline):not(.sidebar a):hover::after {
+body:not(.dark-mode) p > a:not(.btn-primary):not(.btn):not(.text-white):not(.no-underline):not(.sidebar a):hover::after,
+body:not(.dark-mode) li > a:not(.btn-primary):not(.btn):not(.text-white):not(.no-underline):not(.sidebar a):hover::after,
+body:not(.dark-mode) td > a:not(.btn-primary):not(.btn):not(.text-white):not(.no-underline):not(.sidebar a):hover::after {
     width: 100%;
 }
 
@@ -902,7 +902,7 @@ body:not(.dark-mode) .sidebar a {
     display: flex !important;
 }
 
-body:not(.dark-mode) a:not(.btn-primary):not(.no-underline):not(.sidebar a):hover {
+body:not(.dark-mode) a:not(.btn-primary):not(.btn):not(.text-white):not(.no-underline):not(.sidebar a):hover {
     color: var(--text-main) !important; /* Keep dark on hover for visibility */
 }
 
@@ -5375,12 +5375,16 @@ img:not([loading]) {
     height: 96px;
     font-size: 1.875rem;
     flex-shrink: 0;
+    border-radius: 50%;
+    overflow: hidden;
 }
 
 .directory-avatar img {
+    width: 100%;
+    height: 100%;
     object-fit: cover;
     aspect-ratio: 1 / 1;
-    border-radius: 50%;
+    display: block;
 }
 
 /* Avatar placeholder: colored circle with bold white initials (MS-Teams style) */

@@ -252,7 +252,7 @@ class Member {
             SELECT id, user_id, first_name, last_name, email, mobile_phone, 
                    linkedin_url, xing_url, industry, company, position, 
                    study_program, semester, angestrebter_abschluss, 
-                   degree, graduation_year, skills,
+                   degree, graduation_year, skills, cv_path,
                    image_path, last_verified_at, last_reminder_sent_at, created_at, updated_at
             FROM alumni_profiles 
             WHERE user_id = ?
@@ -260,9 +260,11 @@ class Member {
         try {
             $stmt = $db->prepare($sql);
         } catch (PDOException $pdoEx) {
-            // SQLSTATE 42S22 = unknown column; fall back if skills column doesn't exist yet
-            if ($pdoEx->getCode() === '42S22' && strpos($pdoEx->getMessage(), 'skills') !== false) {
-                $sql = str_replace('skills,', 'NULL AS skills,', $sql);
+            // SQLSTATE 42S22 = unknown column; replace ALL optional columns with NULL as fallback
+            if ($pdoEx->getCode() === '42S22') {
+                foreach (['skills', 'cv_path'] as $col) {
+                    $sql = str_replace($col . ',', 'NULL AS ' . $col . ',', $sql);
+                }
                 $stmt = $db->prepare($sql);
             } else {
                 throw $pdoEx;
@@ -317,7 +319,7 @@ class Member {
             'first_name', 'last_name', 'email', 'mobile_phone',
             'linkedin_url', 'xing_url', 'industry', 'company', 
             'position', 'image_path', 'study_program', 'semester', 
-            'angestrebter_abschluss', 'degree', 'graduation_year', 'skills'
+            'angestrebter_abschluss', 'degree', 'graduation_year', 'skills', 'cv_path'
         ];
         
         foreach ($allowedFields as $field) {
@@ -339,12 +341,14 @@ class Member {
             $stmt = $db->prepare($sql);
             return $stmt->execute($values);
         } catch (PDOException $e) {
-            // SQLSTATE 42S22 = unknown column; fall back if skills column doesn't exist yet
-            if ($e->getCode() === '42S22' && strpos($e->getMessage(), 'skills') !== false) {
-                $skillsIdx = array_search('skills = ?', $fields);
-                if ($skillsIdx !== false) {
-                    array_splice($fields, $skillsIdx, 1);
-                    array_splice($values, $skillsIdx, 1);
+            // SQLSTATE 42S22 = unknown column; remove ALL optional columns from UPDATE as fallback
+            if ($e->getCode() === '42S22') {
+                foreach (['skills', 'cv_path'] as $optCol) {
+                    $optIdx = array_search($optCol . ' = ?', $fields);
+                    if ($optIdx !== false) {
+                        array_splice($fields, $optIdx, 1);
+                        array_splice($values, $optIdx, 1);
+                    }
                 }
                 if (empty($fields)) {
                     return true;
