@@ -128,10 +128,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Delete old PDF file if it was replaced or removed
             if ($updatePdf && !empty($listing['pdf_path'])) {
                 $oldFile = __DIR__ . '/../../' . $listing['pdf_path'];
-                $allowedDir = realpath(__DIR__ . '/../../uploads/jobs');
-                $realOldFile = realpath($oldFile);
-                if ($realOldFile !== false && $allowedDir !== false && strpos($realOldFile, $allowedDir . DIRECTORY_SEPARATOR) === 0) {
-                    unlink($realOldFile);
+                if (file_exists($oldFile)) {
+                    $allowedDir = realpath(__DIR__ . '/../../uploads/jobs');
+                    $realOldFile = realpath($oldFile);
+                    if ($realOldFile !== false && $allowedDir !== false && strpos($realOldFile, $allowedDir . DIRECTORY_SEPARATOR) === 0) {
+                        unlink($realOldFile);
+                    }
                 }
             }
 

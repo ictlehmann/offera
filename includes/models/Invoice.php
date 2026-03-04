@@ -85,10 +85,12 @@ class Invoice {
             // Clean up uploaded file if database insertion failed
             if (isset($uploadResult['path'])) {
                 $uploadedFile = __DIR__ . '/../../' . $uploadResult['path'];
-                $allowedDir = realpath(__DIR__ . '/../../' . self::UPLOAD_DIR);
-                $realUploadedFile = realpath($uploadedFile);
-                if ($realUploadedFile !== false && $allowedDir !== false && strpos($realUploadedFile, $allowedDir . DIRECTORY_SEPARATOR) === 0) {
-                    unlink($realUploadedFile);
+                if (file_exists($uploadedFile)) {
+                    $allowedDir = realpath(__DIR__ . '/../../' . self::UPLOAD_DIR);
+                    $realUploadedFile = realpath($uploadedFile);
+                    if ($realUploadedFile !== false && $allowedDir !== false && strpos($realUploadedFile, $allowedDir . DIRECTORY_SEPARATOR) === 0) {
+                        unlink($realUploadedFile);
+                    }
                 }
             }
             return [

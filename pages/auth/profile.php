@@ -209,9 +209,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $projectRootCheck = realpath(__DIR__ . '/../../');
                     if ($projectRootCheck !== false) {
                         $oldCvFull = $projectRootCheck . '/' . ltrim($profile['cv_path'], '/');
-                        $realOld = realpath($oldCvFull);
-                        if ($realOld !== false && str_starts_with($realOld, $projectRootCheck . DIRECTORY_SEPARATOR)) {
-                            @unlink($realOld);
+                        if (file_exists($oldCvFull)) {
+                            $realOld = realpath($oldCvFull);
+                            if ($realOld !== false && str_starts_with($realOld, $projectRootCheck . DIRECTORY_SEPARATOR)) {
+                                @unlink($realOld);
+                            }
                         }
                     }
                 }
