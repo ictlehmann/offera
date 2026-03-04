@@ -40,6 +40,7 @@ try {
     $base64Data = $body['image'] ?? '';
 
     if (empty($base64Data)) {
+        error_log('upload_avatar.php: image data is empty. $_FILES: ' . print_r($_FILES, true));
         echo json_encode(['success' => false, 'message' => 'Kein Bild übermittelt']);
         exit;
     }

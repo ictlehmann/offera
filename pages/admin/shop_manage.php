@@ -43,6 +43,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errorMessage = 'Die Formulardaten konnten nicht verarbeitet werden. Möglicherweise überschreiten die hochgeladenen Bilder die maximale Dateigröße (max. ' . htmlspecialchars(ini_get('upload_max_filesize')) . ' pro Datei, ' . htmlspecialchars(ini_get('post_max_size')) . ' gesamt). Bitte wähle kleinere Bilder aus.';
     }
 
+    // Log diagnostic info when $_FILES is empty during a multipart form submission to aid diagnosing server upload issues
+    if (empty($_FILES) && !empty($_POST) && isset($_SERVER['CONTENT_TYPE']) && stripos($_SERVER['CONTENT_TYPE'], 'multipart/form-data') !== false) {
+        error_log('shop_manage.php: $_FILES is empty for multipart/form-data request. file_uploads=' . ini_get('file_uploads') . ', upload_max_filesize=' . ini_get('upload_max_filesize') . ', post_max_size=' . ini_get('post_max_size') . ', Content-Length=' . ($_SERVER['CONTENT_LENGTH'] ?? 'n/a') . '. $_POST keys: ' . implode(', ', array_keys($_POST)));
+    }
+
     // Save product (create or update)
     if ($postAction === 'save_product') {
         CSRFHandler::verifyToken($_POST['csrf_token'] ?? '');
