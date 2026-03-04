@@ -39,50 +39,103 @@ if (!empty($ideas)) {
 }
 
 $statusConfig = [
-    'new'         => ['label' => 'Neu',          'dot' => 'bg-sky-400',     'badge' => 'bg-sky-50 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300 ring-1 ring-sky-400/30'],
-    'in_review'   => ['label' => 'In Prüfung',   'dot' => 'bg-amber-400',   'badge' => 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 ring-1 ring-amber-400/30'],
-    'accepted'    => ['label' => 'Angenommen',   'dot' => 'bg-green-500',   'badge' => 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 ring-1 ring-green-500/30'],
-    'rejected'    => ['label' => 'Abgelehnt',    'dot' => 'bg-red-500',     'badge' => 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 ring-1 ring-red-500/30'],
-    'implemented' => ['label' => 'Umgesetzt',    'dot' => 'bg-purple-500',  'badge' => 'bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 ring-1 ring-purple-500/30'],
+    'new'         => ['label' => 'Neu',          'dot' => 'bg-sky-400',     'badge' => 'bg-sky-50 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300 ring-1 ring-sky-400/30',    'accent' => '#38bdf8'],
+    'in_review'   => ['label' => 'In Prüfung',   'dot' => 'bg-amber-400',   'badge' => 'bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 ring-1 ring-amber-400/30', 'accent' => '#fbbf24'],
+    'accepted'    => ['label' => 'Angenommen',   'dot' => 'bg-green-500',   'badge' => 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 ring-1 ring-green-500/30',  'accent' => '#22c55e'],
+    'rejected'    => ['label' => 'Abgelehnt',    'dot' => 'bg-red-500',     'badge' => 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300 ring-1 ring-red-500/30',    'accent' => '#ef4444'],
+    'implemented' => ['label' => 'Umgesetzt',    'dot' => 'bg-purple-500',  'badge' => 'bg-purple-50 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 ring-1 ring-purple-500/30', 'accent' => '#a855f7'],
 ];
 
 $title = 'Ideenbox - IBC Intranet';
 ob_start();
 ?>
 
+<style>
+.idea-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.idea-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.10);
+}
+.dark .idea-card:hover {
+    box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+}
+.vote-btn {
+    transition: all 0.15s ease;
+}
+.vote-btn:active {
+    transform: scale(0.88);
+}
+#ideaModal.show {
+    animation: fadeIn 0.18s ease;
+}
+#ideaModal.show > div {
+    animation: slideUp 0.22s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes fadeIn  { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { opacity: 0; transform: translateY(20px) scale(0.97); } to { opacity: 1; transform: none; } }
+</style>
+
 <div class="max-w-5xl mx-auto">
 
     <!-- Hero Header -->
-    <div class="mb-8 flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
-        <div>
-            <div class="flex items-center gap-3 mb-2">
-                <div class="w-11 h-11 rounded-2xl bg-yellow-100 dark:bg-yellow-900/40 flex items-center justify-center shadow-sm">
-                    <i class="fas fa-lightbulb text-yellow-500 text-xl drop-shadow-[0_0_6px_rgba(250,204,21,0.5)]"></i>
+    <div class="mb-8 rounded-2xl overflow-hidden relative">
+        <div class="bg-gradient-to-br from-yellow-400 via-amber-400 to-yellow-500 dark:from-yellow-500/20 dark:via-amber-600/20 dark:to-yellow-600/10 dark:border dark:border-yellow-500/20 px-6 py-6 sm:py-7">
+            <!-- subtle decorative blob -->
+            <div class="absolute -top-6 -right-6 w-36 h-36 rounded-full bg-white/10 blur-2xl pointer-events-none"></div>
+            <div class="absolute bottom-0 left-1/3 w-24 h-24 rounded-full bg-white/10 blur-2xl pointer-events-none"></div>
+            <div class="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 rounded-2xl bg-white/30 dark:bg-yellow-500/20 backdrop-blur-sm flex items-center justify-center shadow-lg flex-shrink-0">
+                        <i class="fas fa-lightbulb text-white dark:text-yellow-400 text-2xl drop-shadow"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl sm:text-3xl font-extrabold text-white dark:text-gray-50 tracking-tight leading-tight">Ideenbox</h1>
+                        <p class="text-yellow-100 dark:text-gray-400 text-sm mt-0.5">Teile Deine Ideen – stimme ab, was umgesetzt werden soll.</p>
+                    </div>
                 </div>
-                <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-50 tracking-tight">Ideenbox</h1>
+                <button
+                    id="openIdeaModal"
+                    class="inline-flex items-center gap-2 px-5 py-3 bg-white dark:bg-yellow-500 hover:bg-yellow-50 dark:hover:bg-yellow-400 text-yellow-600 dark:text-gray-900 font-bold rounded-xl shadow-md hover:shadow-lg transition-all text-sm flex-shrink-0 self-start sm:self-auto"
+                >
+                    <i class="fas fa-plus"></i>
+                    Neue Idee
+                </button>
             </div>
-            <p class="text-gray-500 dark:text-gray-400 text-sm">Teile Deine Ideen – stimme ab, was umgesetzt werden soll.</p>
+            <?php if (!empty($ideas)):
+                $totalScore = array_sum(array_map(fn($i) => ($i['upvotes'] ?? 0) - ($i['downvotes'] ?? 0), $ideas));
+            ?>
+            <div class="relative flex flex-wrap gap-4 mt-5 pt-5 border-t border-white/20 dark:border-yellow-500/20">
+                <div class="flex items-center gap-2 text-white/90 dark:text-gray-300 text-sm font-medium">
+                    <i class="fas fa-list-ul text-white/70 dark:text-yellow-400/70 text-xs"></i>
+                    <span><?php echo count($ideas); ?> Idee<?php echo count($ideas) !== 1 ? 'n' : ''; ?></span>
+                </div>
+                <div class="flex items-center gap-2 text-white/90 dark:text-gray-300 text-sm font-medium">
+                    <i class="fas fa-star text-white/70 dark:text-yellow-400/70 text-xs"></i>
+                    <span><?php echo $totalScore; ?> Gesamtstimmen</span>
+                </div>
+            </div>
+            <?php endif; ?>
         </div>
-        <button
-            id="openIdeaModal"
-            class="inline-flex items-center gap-2 px-5 py-2.5 bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold rounded-xl shadow-sm hover:shadow-md transition-all text-sm flex-shrink-0"
-        >
-            <i class="fas fa-plus"></i>
-            Neue Idee
-        </button>
     </div>
 
     <!-- Idea Cards -->
     <?php if (empty($ideas)): ?>
-    <div class="py-20 text-center">
-        <div class="w-20 h-20 mx-auto mb-5 rounded-full bg-yellow-50 dark:bg-yellow-900/20 flex items-center justify-center">
-            <i class="fas fa-lightbulb text-4xl text-yellow-400"></i>
+    <div class="py-16 text-center">
+        <div class="relative w-24 h-24 mx-auto mb-6">
+            <div class="w-24 h-24 rounded-3xl bg-yellow-50 dark:bg-yellow-900/20 flex items-center justify-center shadow-sm">
+                <i class="fas fa-lightbulb text-5xl text-yellow-400 dark:text-yellow-500"></i>
+            </div>
+            <div class="absolute -top-1 -right-1 w-7 h-7 rounded-full bg-yellow-400 dark:bg-yellow-500 flex items-center justify-center shadow-md">
+                <i class="fas fa-plus text-white text-xs"></i>
+            </div>
         </div>
-        <p class="text-xl font-semibold text-gray-700 dark:text-gray-200 mb-2">Noch keine Ideen vorhanden</p>
-        <p class="text-gray-500 dark:text-gray-400 mb-6 text-sm">Sei der Erste und reiche Deine Idee ein!</p>
+        <p class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">Noch keine Ideen vorhanden</p>
+        <p class="text-gray-500 dark:text-gray-400 mb-7 text-sm max-w-xs mx-auto">Sei der Erste und teile Deine Idee mit dem Team!</p>
         <button onclick="document.getElementById('openIdeaModal').click()"
-            class="inline-flex items-center gap-2 px-5 py-2.5 bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold rounded-xl shadow-sm transition-all text-sm">
-            <i class="fas fa-plus"></i>Neue Idee einreichen
+            class="inline-flex items-center gap-2 px-6 py-3 bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold rounded-xl shadow-sm hover:shadow-md transition-all text-sm">
+            <i class="fas fa-lightbulb"></i>Erste Idee einreichen
         </button>
     </div>
     <?php else: ?>
@@ -97,82 +150,89 @@ ob_start();
             $upvotes        = (int) ($idea['upvotes'] ?? 0);
             $downvotes      = (int) ($idea['downvotes'] ?? 0);
             $score          = $upvotes - $downvotes;
+            $accentColor    = $sc['accent'];
         ?>
-        <div class="group bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md hover:border-yellow-300 dark:hover:border-yellow-700/50 transition-all duration-200 flex gap-0 overflow-hidden"
+        <div class="idea-card group bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm overflow-hidden flex flex-col"
+             style="border-top: 3px solid <?php echo $accentColor; ?>;"
              data-idea-id="<?php echo $idea['id']; ?>">
 
-            <!-- Vote Column -->
-            <div class="flex flex-col items-center justify-center gap-1.5 px-4 py-5 bg-gray-50 dark:bg-gray-800/60 border-r border-gray-100 dark:border-gray-800 min-w-[72px]">
-                <button
-                    onclick="castVote(<?php echo $idea['id']; ?>, 'up')"
-                    title="Upvote"
-                    class="vote-btn upvote w-9 h-9 rounded-xl flex items-center justify-center transition-all <?php echo $userVote === 'up' ? 'bg-green-500 text-white shadow-md' : 'bg-white dark:bg-gray-700 text-gray-400 dark:text-gray-500 hover:bg-green-50 dark:hover:bg-green-900/30 hover:text-green-500 dark:hover:text-green-400 border border-gray-200 dark:border-gray-600'; ?>"
-                >
-                    <i class="fas fa-chevron-up text-sm"></i>
-                </button>
-                <span class="vote-score text-xl font-extrabold leading-none <?php echo $score > 0 ? 'text-green-600 dark:text-green-400' : ($score < 0 ? 'text-red-500 dark:text-red-400' : 'text-gray-400 dark:text-gray-500'); ?>">
-                    <?php echo $score; ?>
-                </span>
-                <button
-                    onclick="castVote(<?php echo $idea['id']; ?>, 'down')"
-                    title="Downvote"
-                    class="vote-btn downvote w-9 h-9 rounded-xl flex items-center justify-center transition-all <?php echo $userVote === 'down' ? 'bg-red-500 text-white shadow-md' : 'bg-white dark:bg-gray-700 text-gray-400 dark:text-gray-500 hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-500 dark:hover:text-red-400 border border-gray-200 dark:border-gray-600'; ?>"
-                >
-                    <i class="fas fa-chevron-down text-sm"></i>
-                </button>
+            <!-- Card Top: Vote + Content -->
+            <div class="flex gap-0 flex-1">
+
+                <!-- Vote Column -->
+                <div class="flex flex-col items-center justify-center gap-2 px-3 py-5 bg-gray-50 dark:bg-gray-800/50 border-r border-gray-100 dark:border-gray-800 min-w-[64px]">
+                    <button
+                        onclick="castVote(<?php echo $idea['id']; ?>, 'up')"
+                        title="Upvote"
+                        class="vote-btn upvote w-9 h-9 rounded-full flex items-center justify-center <?php echo $userVote === 'up' ? 'bg-green-500 text-white shadow-md ring-2 ring-green-300 dark:ring-green-700' : 'bg-white dark:bg-gray-700 text-gray-400 dark:text-gray-500 hover:bg-green-50 dark:hover:bg-green-900/30 hover:text-green-500 dark:hover:text-green-400 border border-gray-200 dark:border-gray-600'; ?>"
+                    >
+                        <i class="fas fa-chevron-up text-xs"></i>
+                    </button>
+                    <span class="vote-score text-lg font-extrabold leading-none tabular-nums <?php echo $score > 0 ? 'text-green-600 dark:text-green-400' : ($score < 0 ? 'text-red-500 dark:text-red-400' : 'text-gray-400 dark:text-gray-500'); ?>">
+                        <?php echo $score; ?>
+                    </span>
+                    <button
+                        onclick="castVote(<?php echo $idea['id']; ?>, 'down')"
+                        title="Downvote"
+                        class="vote-btn downvote w-9 h-9 rounded-full flex items-center justify-center <?php echo $userVote === 'down' ? 'bg-red-500 text-white shadow-md ring-2 ring-red-300 dark:ring-red-700' : 'bg-white dark:bg-gray-700 text-gray-400 dark:text-gray-500 hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-500 dark:hover:text-red-400 border border-gray-200 dark:border-gray-600'; ?>"
+                    >
+                        <i class="fas fa-chevron-down text-xs"></i>
+                    </button>
+                </div>
+
+                <!-- Content -->
+                <div class="flex-1 p-4 min-w-0 flex flex-col">
+                    <div class="flex items-start justify-between gap-2 mb-2">
+                        <h3 class="font-bold text-gray-900 dark:text-gray-50 text-[15px] leading-snug break-words"><?php echo htmlspecialchars($idea['title']); ?></h3>
+                        <div class="flex items-center gap-1.5 flex-shrink-0">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold <?php echo $sc['badge']; ?>">
+                                <span class="w-1.5 h-1.5 rounded-full flex-shrink-0 <?php echo $sc['dot']; ?>"></span>
+                                <?php echo $sc['label']; ?>
+                            </span>
+                            <?php if (Auth::isBoard()): ?>
+                            <div class="relative">
+                                <button
+                                    onclick="toggleStatusMenu(this)"
+                                    title="Status ändern"
+                                    class="w-7 h-7 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                >
+                                    <i class="fas fa-ellipsis-v text-xs"></i>
+                                </button>
+                                <div class="status-menu hidden absolute right-0 top-8 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl shadow-xl z-20 w-44 py-1.5">
+                                    <?php foreach ($statusConfig as $sKey => $sCfg): ?>
+                                    <button
+                                        onclick="changeIdeaStatus(<?php echo $idea['id']; ?>, '<?php echo $sKey; ?>')"
+                                        class="w-full text-left px-3.5 py-2 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/60 flex items-center gap-2.5 transition-colors"
+                                    >
+                                        <span class="w-2 h-2 rounded-full flex-shrink-0 <?php echo $sCfg['dot']; ?>"></span>
+                                        <?php echo $sCfg['label']; ?>
+                                    </button>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+
+                    <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed line-clamp-3 break-words flex-1"><?php echo nl2br(htmlspecialchars($idea['description'])); ?></p>
+                </div>
             </div>
 
-            <!-- Content -->
-            <div class="flex-1 p-5 min-w-0">
-                <div class="flex items-start justify-between gap-3 mb-2">
-                    <h3 class="font-semibold text-gray-900 dark:text-gray-50 text-base leading-snug break-words"><?php echo htmlspecialchars($idea['title']); ?></h3>
-                    <div class="flex items-center gap-2 flex-shrink-0">
-                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium <?php echo $sc['badge']; ?>">
-                            <span class="w-1.5 h-1.5 rounded-full flex-shrink-0 <?php echo $sc['dot']; ?>"></span>
-                            <?php echo $sc['label']; ?>
-                        </span>
-                        <?php if (Auth::isBoard()): ?>
-                        <div class="relative">
-                            <button
-                                onclick="toggleStatusMenu(this)"
-                                title="Status ändern"
-                                class="w-7 h-7 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                            >
-                                <i class="fas fa-ellipsis-v text-xs"></i>
-                            </button>
-                            <div class="status-menu hidden absolute right-0 top-8 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl shadow-lg z-20 w-40 py-1">
-                                <?php foreach ($statusConfig as $sKey => $sCfg): ?>
-                                <button
-                                    onclick="changeIdeaStatus(<?php echo $idea['id']; ?>, '<?php echo $sKey; ?>')"
-                                    class="w-full text-left px-3 py-2 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center gap-2 transition-colors"
-                                >
-                                    <span class="w-2 h-2 rounded-full flex-shrink-0 <?php echo $sCfg['dot']; ?>"></span>
-                                    <?php echo $sCfg['label']; ?>
-                                </button>
-                                <?php endforeach; ?>
-                            </div>
-                        </div>
-                        <?php endif; ?>
-                    </div>
+            <!-- Card Footer / Meta -->
+            <div class="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-gray-400 dark:text-gray-500 px-4 py-2.5 border-t border-gray-50 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/30">
+                <div class="flex items-center gap-1.5">
+                    <span class="w-5 h-5 rounded-full flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0"
+                          style="background-color: <?php echo htmlspecialchars($avatarColor); ?>">
+                        <?php echo htmlspecialchars($initials); ?>
+                    </span>
+                    <span class="truncate max-w-[100px] sm:max-w-[160px] font-medium text-gray-500 dark:text-gray-400"><?php echo htmlspecialchars($submitterName); ?></span>
                 </div>
-
-                <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-3 line-clamp-3 break-words"><?php echo nl2br(htmlspecialchars($idea['description'])); ?></p>
-
-                <!-- Meta -->
-                <div class="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-gray-400 dark:text-gray-500">
-                    <div class="flex items-center gap-1.5">
-                        <span class="w-5 h-5 rounded-full flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0"
-                              style="background-color: <?php echo htmlspecialchars($avatarColor); ?>">
-                            <?php echo htmlspecialchars($initials); ?>
-                        </span>
-                        <span class="truncate max-w-[100px] sm:max-w-[160px]"><?php echo htmlspecialchars($submitterName); ?></span>
-                    </div>
-                    <span class="hidden sm:inline">·</span>
-                    <span><?php echo date('d.m.Y', strtotime($idea['created_at'])); ?></span>
-                    <span class="hidden sm:inline">·</span>
-                    <span class="inline-flex items-center gap-1"><i class="fas fa-arrow-up text-green-500"></i><?php echo $upvotes; ?></span>
-                    <span class="inline-flex items-center gap-1"><i class="fas fa-arrow-down text-red-400"></i><?php echo $downvotes; ?></span>
-                </div>
+                <span>·</span>
+                <span><?php echo date('d.m.Y', strtotime($idea['created_at'])); ?></span>
+                <span class="ml-auto flex items-center gap-2.5">
+                    <span class="inline-flex items-center gap-1 text-green-600 dark:text-green-400 font-medium"><i class="fas fa-arrow-up text-[10px]"></i><?php echo $upvotes; ?></span>
+                    <span class="inline-flex items-center gap-1 text-red-400 dark:text-red-400 font-medium"><i class="fas fa-arrow-down text-[10px]"></i><?php echo $downvotes; ?></span>
+                </span>
             </div>
         </div>
         <?php endforeach; ?>
@@ -182,15 +242,18 @@ ob_start();
 </div>
 
 <!-- New Idea Modal -->
-<div id="ideaModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+<div id="ideaModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4" style="display:none">
     <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
         <!-- Modal Header -->
-        <div class="px-6 py-5 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
+        <div class="px-6 py-5 flex items-center justify-between bg-gradient-to-r from-yellow-400/10 to-amber-400/5 dark:from-yellow-500/10 dark:to-amber-600/5 border-b border-yellow-100 dark:border-yellow-900/30">
             <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-xl bg-yellow-100 dark:bg-yellow-900/40 flex items-center justify-center">
-                    <i class="fas fa-lightbulb text-yellow-500"></i>
+                <div class="w-10 h-10 rounded-xl bg-yellow-400/20 dark:bg-yellow-500/20 flex items-center justify-center">
+                    <i class="fas fa-lightbulb text-yellow-500 dark:text-yellow-400 text-base"></i>
                 </div>
-                <h2 class="text-lg font-bold text-gray-900 dark:text-gray-50">Neue Idee einreichen</h2>
+                <div>
+                    <h2 class="text-base font-bold text-gray-900 dark:text-gray-50 leading-tight">Neue Idee einreichen</h2>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Dein Vorschlag zählt!</p>
+                </div>
             </div>
             <button id="closeIdeaModal" class="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                 <i class="fas fa-times"></i>
@@ -199,24 +262,30 @@ ob_start();
 
         <!-- Modal Body -->
         <div class="p-6 space-y-4">
-            <div id="ideaFormError" class="hidden p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-sm text-red-700 dark:text-red-300"></div>
+            <div id="ideaFormError" class="hidden p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-sm text-red-700 dark:text-red-300 flex items-start gap-2">
+                <i class="fas fa-exclamation-circle mt-0.5 flex-shrink-0"></i>
+                <span id="ideaFormErrorText"></span>
+            </div>
 
             <div>
-                <label for="ideaTitle" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
-                    Titel <span class="text-red-500">*</span>
-                </label>
+                <div class="flex items-center justify-between mb-1.5">
+                    <label for="ideaTitle" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+                        Titel <span class="text-red-500">*</span>
+                    </label>
+                    <span id="titleCount" class="text-xs text-gray-400 dark:text-gray-500 tabular-nums">0 / 200</span>
+                </div>
                 <input
                     type="text"
                     id="ideaTitle"
                     maxlength="200"
                     required
                     placeholder="Kurzer, aussagekräftiger Titel…"
-                    class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-yellow-400/50 focus:border-yellow-400 dark:focus:border-yellow-500 transition-colors text-sm"
+                    class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-yellow-400/50 focus:border-yellow-400 dark:focus:border-yellow-500 transition-colors text-sm outline-none"
                 >
             </div>
 
             <div>
-                <label for="ideaDescription" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                <label for="ideaDescription" class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">
                     Beschreibung <span class="text-red-500">*</span>
                 </label>
                 <textarea
@@ -224,7 +293,7 @@ ob_start();
                     rows="5"
                     required
                     placeholder="Beschreibe Deine Idee so detailliert wie möglich…"
-                    class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-yellow-400/50 focus:border-yellow-400 dark:focus:border-yellow-500 transition-colors text-sm resize-none"
+                    class="w-full px-4 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-yellow-400/50 focus:border-yellow-400 dark:focus:border-yellow-500 transition-colors text-sm resize-none outline-none"
                 ></textarea>
             </div>
 
@@ -242,7 +311,7 @@ ob_start();
             <button
                 id="submitIdeaBtn"
                 type="button"
-                class="flex-1 flex items-center justify-center gap-2 px-5 py-2.5 bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-semibold rounded-xl shadow-sm hover:shadow-md transition-all text-sm"
+                class="flex-1 flex items-center justify-center gap-2 px-5 py-2.5 bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold rounded-xl shadow-sm hover:shadow-md transition-all text-sm"
             >
                 <i class="fas fa-paper-plane"></i>
                 Einreichen
@@ -250,7 +319,7 @@ ob_start();
             <button
                 id="cancelIdeaBtn"
                 type="button"
-                class="px-5 py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-all text-sm"
+                class="px-5 py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 font-semibold rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 transition-all text-sm"
             >
                 Abbrechen
             </button>
@@ -265,20 +334,32 @@ const VOTE_URL   = <?php echo json_encode(asset('api/vote_idea.php')); ?>;
 const STATUS_URL = <?php echo json_encode(asset('api/update_idea_status.php')); ?>;
 
 // ── Modal ──────────────────────────────────────────────────────────────────
-const ideaModal  = document.getElementById('ideaModal');
-const openBtn    = document.getElementById('openIdeaModal');
-const closeBtn   = document.getElementById('closeIdeaModal');
-const cancelBtn  = document.getElementById('cancelIdeaBtn');
-const submitBtn  = document.getElementById('submitIdeaBtn');
-const titleInput = document.getElementById('ideaTitle');
-const descInput  = document.getElementById('ideaDescription');
-const formError  = document.getElementById('ideaFormError');
+const ideaModal   = document.getElementById('ideaModal');
+const openBtn     = document.getElementById('openIdeaModal');
+const closeBtn    = document.getElementById('closeIdeaModal');
+const cancelBtn   = document.getElementById('cancelIdeaBtn');
+const submitBtn   = document.getElementById('submitIdeaBtn');
+const titleInput  = document.getElementById('ideaTitle');
+const descInput   = document.getElementById('ideaDescription');
+const formError   = document.getElementById('ideaFormError');
+const formErrText = document.getElementById('ideaFormErrorText');
+const titleCount  = document.getElementById('titleCount');
 
-function openModal()  { ideaModal.classList.remove('hidden'); titleInput.focus(); }
+titleInput.addEventListener('input', () => {
+    titleCount.textContent = titleInput.value.length + ' / 200';
+});
+
+function openModal() {
+    ideaModal.style.display = 'flex';
+    ideaModal.classList.add('show');
+    titleInput.focus();
+}
 function closeModal() {
-    ideaModal.classList.add('hidden');
+    ideaModal.style.display = 'none';
+    ideaModal.classList.remove('show');
     titleInput.value = '';
     descInput.value  = '';
+    titleCount.textContent = '0 / 200';
     formError.classList.add('hidden');
 }
 
@@ -294,7 +375,7 @@ submitBtn.addEventListener('click', async () => {
     formError.classList.add('hidden');
 
     if (!title || !desc) {
-        formError.textContent = 'Bitte fülle alle Pflichtfelder aus.';
+        formErrText.textContent = 'Bitte fülle alle Pflichtfelder aus.';
         formError.classList.remove('hidden');
         return;
     }
@@ -316,11 +397,11 @@ submitBtn.addEventListener('click', async () => {
             closeModal();
             window.location.reload();
         } else {
-            formError.textContent = data.error || 'Unbekannter Fehler.';
+            formErrText.textContent = data.error || 'Unbekannter Fehler.';
             formError.classList.remove('hidden');
         }
     } catch (err) {
-        formError.textContent = 'Netzwerkfehler. Bitte versuche es erneut.';
+        formErrText.textContent = 'Netzwerkfehler. Bitte versuche es erneut.';
         formError.classList.remove('hidden');
     } finally {
         submitBtn.disabled = false;
@@ -348,16 +429,16 @@ async function castVote(ideaId, direction) {
         const scoreEl = card.querySelector('.vote-score');
         const score   = data.upvotes - data.downvotes;
 
-        const inactiveUp   = 'vote-btn upvote w-9 h-9 rounded-xl flex items-center justify-center transition-all bg-white dark:bg-gray-700 text-gray-400 dark:text-gray-500 hover:bg-green-50 dark:hover:bg-green-900/30 hover:text-green-500 dark:hover:text-green-400 border border-gray-200 dark:border-gray-600';
-        const activeUp     = 'vote-btn upvote w-9 h-9 rounded-xl flex items-center justify-center transition-all bg-green-500 text-white shadow-md';
-        const inactiveDown = 'vote-btn downvote w-9 h-9 rounded-xl flex items-center justify-center transition-all bg-white dark:bg-gray-700 text-gray-400 dark:text-gray-500 hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-500 dark:hover:text-red-400 border border-gray-200 dark:border-gray-600';
-        const activeDown   = 'vote-btn downvote w-9 h-9 rounded-xl flex items-center justify-center transition-all bg-red-500 text-white shadow-md';
+        const inactiveUp   = 'vote-btn upvote w-9 h-9 rounded-full flex items-center justify-center bg-white dark:bg-gray-700 text-gray-400 dark:text-gray-500 hover:bg-green-50 dark:hover:bg-green-900/30 hover:text-green-500 dark:hover:text-green-400 border border-gray-200 dark:border-gray-600';
+        const activeUp     = 'vote-btn upvote w-9 h-9 rounded-full flex items-center justify-center bg-green-500 text-white shadow-md ring-2 ring-green-300 dark:ring-green-700';
+        const inactiveDown = 'vote-btn downvote w-9 h-9 rounded-full flex items-center justify-center bg-white dark:bg-gray-700 text-gray-400 dark:text-gray-500 hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-500 dark:hover:text-red-400 border border-gray-200 dark:border-gray-600';
+        const activeDown   = 'vote-btn downvote w-9 h-9 rounded-full flex items-center justify-center bg-red-500 text-white shadow-md ring-2 ring-red-300 dark:ring-red-700';
 
         upBtn.className   = data.user_vote === 'up'   ? activeUp   : inactiveUp;
         downBtn.className = data.user_vote === 'down' ? activeDown : inactiveDown;
 
         scoreEl.textContent = score;
-        scoreEl.className   = 'vote-score text-xl font-extrabold leading-none ' + (score > 0 ? 'text-green-600 dark:text-green-400' : score < 0 ? 'text-red-500 dark:text-red-400' : 'text-gray-400 dark:text-gray-500');
+        scoreEl.className   = 'vote-score text-lg font-extrabold leading-none tabular-nums ' + (score > 0 ? 'text-green-600 dark:text-green-400' : score < 0 ? 'text-red-500 dark:text-red-400' : 'text-gray-400 dark:text-gray-500');
     } catch (err) {
         console.error('Vote error:', err);
     }
