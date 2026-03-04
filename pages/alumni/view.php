@@ -451,7 +451,10 @@ ob_start();
     <?php endif; ?>
 
     <!-- Fähigkeiten / Skills -->
-    <?php if (!empty($profile['skills'])): ?>
+    <?php
+    $skillsList = !empty($profile['skills']) ? array_values(array_filter(array_map('trim', explode(',', $profile['skills'])))) : [];
+    if (!empty($skillsList)):
+    ?>
     <div class="card p-6 mb-6">
         <h2 class="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
             <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-teal-100 text-teal-600">
@@ -460,10 +463,7 @@ ob_start();
             Fähigkeiten
         </h2>
         <div class="flex flex-wrap gap-2">
-            <?php
-            $skillsList = array_filter(array_map('trim', explode(',', $profile['skills'])));
-            foreach ($skillsList as $skill):
-            ?>
+            <?php foreach ($skillsList as $skill): ?>
             <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-teal-100 text-teal-800 dark:bg-teal-900/40 dark:text-teal-300 border border-teal-200 dark:border-teal-700">
                 <?php echo htmlspecialchars($skill, ENT_QUOTES, 'UTF-8'); ?>
             </span>
