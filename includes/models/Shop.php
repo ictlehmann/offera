@@ -641,14 +641,14 @@ class Shop {
                     continue;
                 }
                 $stmt = $db->prepare("
-                    SELECT sv.stock_quantity, sv.type, sv.value, sp.name
+                    SELECT sv.stock_quantity, sv.type, sv.value, sp.name, sp.is_bulk_order
                     FROM shop_variants sv
                     JOIN shop_products sp ON sp.id = sv.product_id
                     WHERE sv.id = ?
                 ");
                 $stmt->execute([(int) $item['variant_id']]);
                 $variant = $stmt->fetch();
-                if ($variant && (int) $variant['stock_quantity'] < (int) $item['quantity']) {
+                if ($variant && !$variant['is_bulk_order'] && (int) $variant['stock_quantity'] < (int) $item['quantity']) {
                     $errors[] = 'Artikel ' . $variant['name'] . ' ist leider nicht mehr verfügbar';
                 }
             }
@@ -709,7 +709,7 @@ class Shop {
 
             $stmt = $db->prepare("
                 SELECT oi.variant_id, oi.quantity,
-                       sv.stock_quantity, sv.type, sv.value, sp.name
+                       sv.stock_quantity, sv.type, sv.value, sp.name, sp.is_bulk_order
                 FROM shop_order_items oi
                 JOIN shop_variants sv ON sv.id = oi.variant_id
                 JOIN shop_products sp ON sp.id = sv.product_id
@@ -720,7 +720,7 @@ class Shop {
             $items = $stmt->fetchAll();
 
             foreach ($items as $item) {
-                if ((int) $item['stock_quantity'] < (int) $item['quantity']) {
+                if (!$item['is_bulk_order'] && (int) $item['stock_quantity'] < (int) $item['quantity']) {
                     $errors[] = 'Artikel ' . $item['name'] . ' ist leider nicht mehr verfügbar';
                 }
             }

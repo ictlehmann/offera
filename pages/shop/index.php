@@ -528,8 +528,8 @@ ob_start();
 
     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5" id="product-grid">
         <?php foreach ($products as $product):
-            $productOutOfStock = !empty($product['variants']) && array_sum(array_column($product['variants'], 'stock_quantity')) === 0;
             $isBulk = !empty($product['is_bulk_order']);
+            $productOutOfStock = !$isBulk && !empty($product['variants']) && array_sum(array_column($product['variants'], 'stock_quantity')) === 0;
             $bulkProgress = $isBulk ? Shop::getBulkOrderProgress($product['id']) : 0;
             $bulkGoal     = $isBulk ? (int) $product['bulk_min_goal'] : 0;
             $allImages    = $product['images'] ?? [];
@@ -784,7 +784,7 @@ ob_start();
                         </label>
                         <div class="flex flex-wrap gap-2">
                             <?php foreach ($variants as $v): ?>
-                            <?php $outOfStock = $v['stock_quantity'] <= 0; ?>
+                            <?php $outOfStock = empty($currentProduct['is_bulk_order']) && $v['stock_quantity'] <= 0; ?>
                             <label class="relative cursor-pointer<?php echo $outOfStock ? ' opacity-60' : ''; ?>">
                                 <input type="radio" name="variant_id" value="<?php echo $v['id']; ?>"
                                        <?php echo $outOfStock ? 'disabled' : ''; ?>
@@ -802,6 +802,7 @@ ob_start();
                         </div>
 
                         <!-- Restock notification for sold-out variants in this type group -->
+                        <?php if (empty($currentProduct['is_bulk_order'])): ?>
                         <?php foreach ($variants as $v):
                             if ($v['stock_quantity'] > 0) continue;
                             $hasNotif = Shop::hasRestockNotification($userId, $currentProduct['id'], $type, $v['value']);
@@ -825,6 +826,7 @@ ob_start();
                             </button>
                         </form>
                         <?php endforeach; ?>
+                        <?php endif; ?>
                     </div>
                     <?php endforeach; ?>
                     <?php endif; ?>
@@ -860,9 +862,10 @@ ob_start();
                     </div>
 
                     <?php
-                        $anyInStock = !empty($currentProduct['variants'])
-                            ? array_sum(array_column($currentProduct['variants'], 'stock_quantity')) > 0
-                            : true;
+                        $anyInStock = !empty($currentProduct['is_bulk_order'])
+                            || (!empty($currentProduct['variants'])
+                                ? array_sum(array_column($currentProduct['variants'], 'stock_quantity')) > 0
+                                : true);
                     ?>
                     <?php if ($anyInStock): ?>
                     <button type="submit"
