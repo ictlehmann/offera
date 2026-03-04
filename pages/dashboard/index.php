@@ -8,6 +8,7 @@ require_once __DIR__ . '/../../includes/poll_helpers.php';
 require_once __DIR__ . '/../../includes/handlers/CSRFHandler.php';
 require_once __DIR__ . '/../../includes/models/BlogPost.php';
 require_once __DIR__ . '/../../includes/models/Alumni.php';
+require_once __DIR__ . '/../../includes/models/Member.php';
 
 // Update event statuses (pseudo-cron)
 require_once __DIR__ . '/../../includes/pseudo_cron.php';
@@ -190,20 +191,36 @@ try {
 }
 
 // Calculate profile completeness for the gamification widget
+// Only the following fields count towards completeness:
+// Vorname, Nachname, Über mich, Zweite Email, Telefonnummer, Geschlecht, Geburtstag
 $profileCompletenessPercent = 0;
 if (in_array($userRole, $rolesRequiringProfile)) {
     try {
-        $alumniProfile = Alumni::getProfileByUserId($userId);
-        $completenessFields = ['image_path', 'mobile_phone', 'bio', 'study_program'];
-        $filledCount = 0;
-        if ($alumniProfile) {
-            foreach ($completenessFields as $field) {
-                if (!empty($alumniProfile[$field])) {
-                    $filledCount++;
-                }
-            }
+        // Fetch the profile record depending on the user's role
+        $profileRecord = null;
+        if (isMemberRole($userRole)) {
+            $profileRecord = Member::getProfileByUserId($userId);
+        } else {
+            $profileRecord = Alumni::getProfileByUserId($userId);
         }
-        $profileCompletenessPercent = (int)round(($filledCount / count($completenessFields)) * 100);
+
+        // Fields from the users table (already available in $user)
+        $filledCount = 0;
+        $totalFields = 7;
+
+        if (!empty($user['first_name']))  $filledCount++;
+        if (!empty($user['last_name']))   $filledCount++;
+        if (!empty($user['about_me']))    $filledCount++;
+        if (!empty($user['gender']))      $filledCount++;
+        if (!empty($user['birthday']))    $filledCount++;
+
+        // Fields from the profile record
+        if ($profileRecord) {
+            if (!empty($profileRecord['secondary_email'])) $filledCount++;
+            if (!empty($profileRecord['mobile_phone']))    $filledCount++;
+        }
+
+        $profileCompletenessPercent = (int)round(($filledCount / $totalFields) * 100);
     } catch (Exception $e) {
         error_log('dashboard: profile completeness check failed: ' . $e->getMessage());
     }

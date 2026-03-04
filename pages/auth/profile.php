@@ -669,7 +669,7 @@ ob_start();
                     </div>
                     
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">LinkedIn URL</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">LinkedIn URL <span class="text-gray-400 font-normal">(optional)</span></label>
                         <input 
                             type="url" 
                             name="linkedin_url" 
@@ -680,7 +680,7 @@ ob_start();
                     </div>
                     
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Xing URL</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Xing URL <span class="text-gray-400 font-normal">(optional)</span></label>
                         <input 
                             type="url" 
                             name="xing_url" 
