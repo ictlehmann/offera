@@ -321,6 +321,17 @@ if (mb_strlen($studyProgram) > ALUMNI_MAX_PROGRAM_LENGTH) {
     exit;
 }
 
+// ── Duplicate-pending check ────────────────────────────────────────────────────
+// Prevent unnecessary DB duplicates: if a pending request for this e-mail
+// already exists, abort cleanly and return a friendly informational message.
+if (AlumniAccessRequest::hasPendingRequest($newEmail)) {
+    echo json_encode([
+        'success' => true,
+        'message' => 'Deine Anfrage wird bereits geprüft',
+    ]);
+    exit;
+}
+
 // ── Persist via AlumniAccessRequest model (status defaults to 'pending') ──────
 try {
     AlumniAccessRequest::create([
