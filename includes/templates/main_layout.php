@@ -492,6 +492,16 @@ if (!isset($currentUser)) {
                 </a>
                 <?php endif; ?>
 
+                <!-- Alumni-Anfragen (Alumni-Führung + Vorstand) -->
+                <?php if (Auth::hasRole(['alumni_finanz', 'alumni_vorstand', 'vorstand_finanzen', 'vorstand_extern', 'vorstand_intern'])): ?>
+                <a href="<?php echo asset('pages/admin/alumni_requests.php'); ?>"
+                   class="flex items-center justify-start px-4 py-2 text-white hover:bg-white/10 transition-colors duration-200 <?php echo isActivePath('/admin/alumni_requests.php') ? 'bg-white/20 text-white border-l-4 border-ibc-green' : ''; ?>"
+                   <?php echo isActivePath('/admin/alumni_requests.php') ? 'aria-current="page"' : ''; ?>>
+                    <i class="fas fa-user-graduate w-5 mr-3" aria-hidden="true"></i>
+                    <span>Alumni-Anfragen</span>
+                </a>
+                <?php endif; ?>
+
                 <!-- Masseneinladungen (Admins only) -->
                 <?php if (Auth::isAdmin()): ?>
                 <a href="<?php echo asset('pages/admin/mass_invitations.php'); ?>" 
