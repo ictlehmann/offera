@@ -48,7 +48,50 @@ function sendGenericSuccess(): void {
 }
 
 // ── Determine client IP ────────────────────────────────────────────────────────
+/**
+ * Return the best-available client IP address for rate-limiting purposes.
+ *
+ * Priority (highest → lowest):
+ *  1. HTTP_X_FORWARDED_FOR – may contain a comma-separated chain of IPs added
+ *     by successive proxies.  The leftmost public IP is the original client.
+ *     Private / reserved ranges (RFC 1918, loopback, link-local, …) are
+ *     skipped so that internal reverse-proxy IPs do not shadow the real client.
+ *  2. HTTP_CLIENT_IP – set by some load-balancers; accepted if it is a valid IP.
+ *  3. REMOTE_ADDR – direct TCP peer; always available and trusted as last resort.
+ *
+ * Each candidate is validated with filter_var() to guard against malformed or
+ * injected header values being stored / hashed as the rate-limit key.
+ *
+ * @return string A validated IP address string, or '0.0.0.0' as a safe fallback.
+ */
 function getClientIp(): string {
+    // 1. X-Forwarded-For: "client, proxy1, proxy2"  →  take first public IP
+    if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        foreach (explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']) as $part) {
+            $candidate = trim($part);
+            if (filter_var(
+                $candidate,
+                FILTER_VALIDATE_IP,
+                FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
+            ) !== false) {
+                return $candidate;
+            }
+        }
+    }
+
+    // 2. Client-IP header (set by some proxies / load-balancers)
+    if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+        $candidate = trim($_SERVER['HTTP_CLIENT_IP']);
+        if (filter_var(
+            $candidate,
+            FILTER_VALIDATE_IP,
+            FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
+        ) !== false) {
+            return $candidate;
+        }
+    }
+
+    // 3. Direct TCP peer address – always present, used as final fallback
     return $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
 }
 
