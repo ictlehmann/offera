@@ -134,13 +134,18 @@ if (!is_array($input)) {
 /**
  * Verify a reCAPTCHA v3 token against Google's siteverify endpoint.
  *
- * @param string $token     Token submitted by the client
- * @param string $secretKey RECAPTCHA_SECRET_KEY from config
- * @param string $remoteIp  Client IP for additional signal
+ * Uses cURL instead of file_get_contents() so that the request works even when
+ * allow_url_fopen is disabled on the server.
+ *
+ * @param string $token          Token submitted by the client
+ * @param string $secretKey      RECAPTCHA_SECRET_KEY from config
+ * @param string $remoteIp       Client IP for additional signal
  * @param float  $scoreThreshold Minimum acceptable reCAPTCHA score
- * @return bool  true = human (success=true AND score >= threshold), false = bot / error
+ * @return bool|null  true = human (success=true AND score >= threshold),
+ *                    false = bot / invalid token,
+ *                    null = network / timeout error (service unavailable)
  */
-function verifyRecaptcha(string $token, string $secretKey, string $remoteIp, float $scoreThreshold): bool {
+function verifyRecaptcha(string $token, string $secretKey, string $remoteIp, float $scoreThreshold): ?bool {
     if ($token === '' || $secretKey === '') {
         return false;
     }
@@ -151,19 +156,30 @@ function verifyRecaptcha(string $token, string $secretKey, string $remoteIp, flo
         'remoteip' => $remoteIp,
     ]);
 
-    $context  = stream_context_create([
-        'http' => [
-            'method'  => 'POST',
-            'header'  => 'Content-Type: application/x-www-form-urlencoded',
-            'content' => $postData,
-            'timeout' => 5,
-        ],
+    $ch = curl_init('https://www.google.com/recaptcha/api/siteverify');
+    if ($ch === false) {
+        error_log('alumni_recovery: curl_init failed');
+        return null;
+    }
+
+    curl_setopt_array($ch, [
+        CURLOPT_POST           => true,
+        CURLOPT_POSTFIELDS     => $postData,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_CONNECTTIMEOUT => 5,
+        CURLOPT_SSL_VERIFYPEER => true,
+        CURLOPT_HTTPHEADER     => ['Content-Type: application/x-www-form-urlencoded'],
     ]);
 
-    $response = @file_get_contents('https://www.google.com/recaptcha/api/siteverify', false, $context);
-    if ($response === false) {
-        error_log('alumni_recovery: reCAPTCHA request failed (network error)');
-        return false;
+    $response  = curl_exec($ch);
+    $errno     = curl_errno($ch);
+    $curlError = curl_error($ch);
+    curl_close($ch);
+
+    if ($errno !== CURLE_OK) {
+        error_log('alumni_recovery: reCAPTCHA cURL request failed (errno ' . $errno . ': ' . $curlError . ')');
+        return null; // Network / timeout error – signal caller to return friendly message
     }
 
     $result = json_decode($response, true);
@@ -174,8 +190,16 @@ function verifyRecaptcha(string $token, string $secretKey, string $remoteIp, flo
     return ($result['success'] === true) && (($result['score'] ?? 0.0) >= $scoreThreshold);
 }
 
-$recaptchaToken = trim($input['recaptcha_token'] ?? '');
-if (!verifyRecaptcha($recaptchaToken, RECAPTCHA_SECRET_KEY, $clientIp, ALUMNI_RECAPTCHA_THRESHOLD)) {
+$recaptchaToken        = trim($input['recaptcha_token'] ?? '');
+$recaptchaVerification = verifyRecaptcha($recaptchaToken, RECAPTCHA_SECRET_KEY, $clientIp, ALUMNI_RECAPTCHA_THRESHOLD);
+
+if ($recaptchaVerification === null) {
+    http_response_code(503);
+    echo json_encode(['success' => false, 'message' => 'Die Überprüfung konnte momentan nicht abgeschlossen werden. Bitte versuche es in wenigen Minuten erneut.']);
+    exit;
+}
+
+if ($recaptchaVerification === false) {
     http_response_code(403);
     echo json_encode(['success' => false, 'message' => 'reCAPTCHA-Überprüfung fehlgeschlagen']);
     exit;
