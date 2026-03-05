@@ -95,23 +95,23 @@ ob_start();
                 <?php foreach ($requests as $req): ?>
                 <tr class="hover:bg-gray-50 dark:hover:bg-slate-800/60 transition-colors" id="row-<?php echo (int)$req['id']; ?>">
                     <td class="px-4 py-3 font-medium text-gray-800 dark:text-gray-100">
-                        <?php echo htmlspecialchars($req['first_name'] . ' ' . $req['last_name']); ?>
+                        <?php echo htmlspecialchars($req['first_name'] . ' ' . $req['last_name'], ENT_QUOTES, 'UTF-8'); ?>
                     </td>
                     <td class="px-4 py-3 text-gray-600 dark:text-gray-400 break-all">
-                        <?php echo htmlspecialchars($req['new_email']); ?>
+                        <?php echo htmlspecialchars($req['new_email'], ENT_QUOTES, 'UTF-8'); ?>
                     </td>
                     <td class="px-4 py-3 text-gray-500 dark:text-gray-500 hidden md:table-cell break-all">
                         <?php if ($req['old_email']): ?>
-                            <?php echo htmlspecialchars($req['old_email']); ?>
+                            <?php echo htmlspecialchars($req['old_email'], ENT_QUOTES, 'UTF-8'); ?>
                         <?php else: ?>
                             <span class="italic text-gray-400">—</span>
                         <?php endif; ?>
                     </td>
                     <td class="px-4 py-3 text-gray-600 dark:text-gray-400 hidden lg:table-cell">
-                        <?php echo htmlspecialchars($req['study_program']); ?>
+                        <?php echo htmlspecialchars($req['study_program'], ENT_QUOTES, 'UTF-8'); ?>
                     </td>
                     <td class="px-4 py-3 text-gray-600 dark:text-gray-400 hidden lg:table-cell">
-                        <?php echo htmlspecialchars($req['graduation_semester']); ?>
+                        <?php echo htmlspecialchars($req['graduation_semester'], ENT_QUOTES, 'UTF-8'); ?>
                     </td>
                     <td class="px-4 py-3 text-gray-500 dark:text-gray-500 hidden sm:table-cell whitespace-nowrap">
                         <?php echo date('d.m.Y H:i', strtotime($req['created_at'])); ?>
@@ -123,7 +123,7 @@ ob_start();
                             'approved' => ['label' => 'Akzeptiert', 'class' => 'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300'],
                             'rejected' => ['label' => 'Abgelehnt',  'class' => 'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300'],
                         ];
-                        $s = $statusMap[$req['status']] ?? ['label' => htmlspecialchars($req['status']), 'class' => 'bg-gray-100 text-gray-700'];
+                        $s = $statusMap[$req['status']] ?? ['label' => htmlspecialchars($req['status'], ENT_QUOTES, 'UTF-8'), 'class' => 'bg-gray-100 text-gray-700'];
                         ?>
                         <span class="status-badge-<?php echo (int)$req['id']; ?> px-2.5 py-0.5 rounded-full text-xs font-semibold <?php echo $s['class']; ?>">
                             <?php echo $s['label']; ?>
