@@ -34,7 +34,7 @@ function _env($key, $default = '') {
 
 // Application Settings
 if (!defined('BASE_URL')) {
-    define('BASE_URL', rtrim(_env('BASE_URL', ''), '/'));
+    define('BASE_URL', rtrim(_env('BASE_URL', 'https://intra.business-consulting.de'), '/'));
 }
 define('ENVIRONMENT', _env('ENVIRONMENT', 'production'));
 

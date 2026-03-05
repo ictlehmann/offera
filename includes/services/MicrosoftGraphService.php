@@ -617,7 +617,7 @@ class MicrosoftGraphService {
      */
     public function inviteGuestUser(string $email, string $firstName, string $lastName): string {
         $displayName   = trim($firstName . ' ' . $lastName);
-        $redirectUrl   = defined('BASE_URL') ? BASE_URL : '';
+        $redirectUrl   = defined('BASE_URL') ? BASE_URL : 'https://intra.business-consulting.de';
         $invitationUrl = 'https://graph.microsoft.com/v1.0/invitations';
 
         try {
