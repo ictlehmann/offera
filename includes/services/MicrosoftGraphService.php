@@ -517,6 +517,177 @@ class MicrosoftGraphService {
     }
 
     /**
+     * Look up a user in Microsoft Entra by their e-mail address.
+     *
+     * @param string $email E-mail address to search for
+     * @return array|null User data array with at least 'id', 'displayName', 'mail',
+     *                    or null if no account with that address was found
+     * @throws Exception If the API request fails for any reason other than "not found"
+     */
+    public function getUserByEmail(string $email): ?array {
+        // Escape the e-mail for use inside an OData single-quoted string literal.
+        // The only character that can break out of the literal is a single quote;
+        // the OData specification requires it to be doubled ('').
+        $safeEmail = str_replace("'", "''", $email);
+
+        $url = "https://graph.microsoft.com/v1.0/users"
+             . "?\$filter=mail eq '{$safeEmail}' or userPrincipalName eq '{$safeEmail}'"
+             . "&\$select=id,displayName,mail,userPrincipalName,accountEnabled"
+             . "&\$top=1";
+
+        try {
+            $response = $this->httpClient->get($url, [
+                'headers' => [
+                    'Authorization'    => 'Bearer ' . $this->accessToken,
+                    'Content-Type'     => 'application/json',
+                    'ConsistencyLevel' => 'eventual',
+                ]
+            ]);
+
+            $body = json_decode($response->getBody()->getContents(), true);
+
+            if (!isset($body['value']) || !is_array($body['value']) || count($body['value']) === 0) {
+                return null;
+            }
+
+            $user = $body['value'][0];
+
+            return [
+                'id'               => $user['id'] ?? '',
+                'displayName'      => $user['displayName'] ?? '',
+                'mail'             => $user['mail'] ?? '',
+                'userPrincipalName'=> $user['userPrincipalName'] ?? '',
+                'accountEnabled'   => $user['accountEnabled'] ?? true,
+            ];
+
+        } catch (GuzzleException $e) {
+            throw new Exception('Failed to look up user by e-mail: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Disable a Microsoft Entra user account by e-mail address.
+     * Sets accountEnabled = false, which blocks sign-in immediately.
+     *
+     * @param string $email E-mail address of the account to disable
+     * @return bool True if the account was found and disabled, false if no account exists
+     * @throws Exception If the API request fails
+     */
+    public function disableUserByEmail(string $email): bool {
+        $user = $this->getUserByEmail($email);
+
+        if ($user === null) {
+            return false; // No account – nothing to disable
+        }
+
+        $userId  = $user['id'];
+        $patchUrl = "https://graph.microsoft.com/v1.0/users/{$userId}";
+
+        try {
+            $this->httpClient->patch($patchUrl, [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $this->accessToken,
+                    'Content-Type'  => 'application/json',
+                ],
+                'json' => ['accountEnabled' => false],
+            ]);
+
+            return true;
+
+        } catch (GuzzleException $e) {
+            throw new Exception('Failed to disable user account: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Invite an external guest user via Microsoft Entra B2B Collaboration.
+     * A guest invitation e-mail is sent to the address. Returns the new user's
+     * Object ID so callers can add the account to groups straight away.
+     *
+     * @param string $email     Guest's e-mail address
+     * @param string $firstName Guest's first name
+     * @param string $lastName  Guest's last name
+     * @return string Object ID of the newly created guest account
+     * @throws Exception If the invitation API call fails
+     */
+    public function inviteGuestUser(string $email, string $firstName, string $lastName): string {
+        $displayName   = trim($firstName . ' ' . $lastName);
+        $redirectUrl   = defined('BASE_URL') ? BASE_URL : '';
+        $invitationUrl = 'https://graph.microsoft.com/v1.0/invitations';
+
+        try {
+            $response = $this->httpClient->post($invitationUrl, [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $this->accessToken,
+                    'Content-Type'  => 'application/json',
+                ],
+                'json' => [
+                    'invitedUserEmailAddress'    => $email,
+                    'invitedUserDisplayName'     => $displayName,
+                    'inviteRedirectUrl'          => $redirectUrl,
+                    'sendInvitationMessage'      => true,
+                    'invitedUserType'            => 'Guest',
+                ],
+            ]);
+
+            $body = json_decode($response->getBody()->getContents(), true);
+
+            if (!isset($body['invitedUser']['id'])) {
+                throw new Exception('User ID not found in guest invitation response');
+            }
+
+            return $body['invitedUser']['id'];
+
+        } catch (GuzzleException $e) {
+            throw new Exception('Failed to invite guest user: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Add a user to a Microsoft Entra group (e.g. an e-mail distribution list).
+     *
+     * @param string $userId  Object ID of the user to add
+     * @param string $groupId Object ID of the target group
+     * @return bool True if the user was added (201) or was already a member (400 with "already exists" error)
+     * @throws Exception If the API call fails for any other reason
+     */
+    public function addUserToGroup(string $userId, string $groupId): bool {
+        $membersUrl = "https://graph.microsoft.com/v1.0/groups/{$groupId}/members/\$ref";
+
+        try {
+            $response = $this->httpClient->post($membersUrl, [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $this->accessToken,
+                    'Content-Type'  => 'application/json',
+                ],
+                'json' => [
+                    '@odata.id' => "https://graph.microsoft.com/v1.0/directoryObjects/{$userId}",
+                ],
+            ]);
+
+            return $response->getStatusCode() === 204;
+
+        } catch (GuzzleException $e) {
+            // Microsoft Graph returns 400 with error code "Request_BadRequest" and a
+            // message containing "already exists" when the user is already a member.
+            // Treat this as an idempotent success so the caller can continue safely.
+            if ($e->hasResponse()) {
+                $statusCode = $e->getResponse()->getStatusCode();
+                if ($statusCode === 400) {
+                    $errorBody = json_decode($e->getResponse()->getBody()->getContents(), true);
+                    $errorCode = $errorBody['error']['code'] ?? '';
+                    $errorMsg  = $errorBody['error']['message'] ?? '';
+                    if ($errorCode === 'Request_BadRequest' && stripos($errorMsg, 'already exists') !== false) {
+                        return true; // Already a member – idempotent success
+                    }
+                }
+            }
+
+            throw new Exception('Failed to add user to group: ' . $e->getMessage());
+        }
+    }
+
+    /**
      * Get member groups for the current user (requires user access token)
      * This method uses the /me endpoint and requires a user access token (not service account)
      * 
