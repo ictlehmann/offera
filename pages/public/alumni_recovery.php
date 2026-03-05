@@ -222,7 +222,7 @@ ob_start();
         errorList.innerHTML = '';
 
         btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Wird gesendet…';
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Wird verarbeitet...';
 
         // grecaptcha.execute() is called ONLY at this exact moment (button click),
         // so the token is always freshly minted and can never have expired.

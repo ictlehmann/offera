@@ -67,6 +67,23 @@ class AlumniAccessRequest {
         return $counts;
     }
 
+    /**
+     * Check whether a pending request for the given e-mail address already exists.
+     *
+     * The method normalises $newEmail internally (trim + lower-case).
+     *
+     * @param string $newEmail  New e-mail address to look up (normalisation applied internally)
+     * @return bool  true = a pending duplicate exists, false = no duplicate
+     */
+    public static function hasPendingRequest(string $newEmail): bool {
+        $db   = Database::getContentDB();
+        $stmt = $db->prepare(
+            "SELECT COUNT(*) FROM alumni_access_requests WHERE new_email = ? AND status = 'pending'"
+        );
+        $stmt->execute([strtolower(trim($newEmail))]);
+        return (int) $stmt->fetchColumn() > 0;
+    }
+
     // ---------------------------------------------------------------------------
     // Write
     // ---------------------------------------------------------------------------
