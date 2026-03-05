@@ -571,7 +571,7 @@ class MicrosoftGraphService {
      *
      * @param string $email E-mail address of the account to disable
      * @return bool True if the account was found and disabled, false if no account exists
-     * @throws Exception If the API request fails
+     * @throws Exception If the API request fails for any reason other than "not found"
      */
     public function disableUserByEmail(string $email): bool {
         $user = $this->getUserByEmail($email);
@@ -595,6 +595,11 @@ class MicrosoftGraphService {
             return true;
 
         } catch (GuzzleException $e) {
+            // 404 means the user was removed between the lookup and the PATCH –
+            // treat this as "nothing to disable" instead of a fatal error.
+            if ($e->hasResponse() && $e->getResponse()->getStatusCode() === 404) {
+                return false;
+            }
             throw new Exception('Failed to disable user account: ' . $e->getMessage());
         }
     }
