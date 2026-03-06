@@ -49,13 +49,25 @@ if ($zip->open($zipFilePath, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== TRU
     exit;
 }
 
+// Allowed base directory for invoice files
+$invoicesDir = realpath(__DIR__ . '/../uploads/invoices');
+
 // Add files to ZIP
 $fileCount = 0;
 foreach ($invoices as $invoice) {
     if (!empty($invoice['file_path'])) {
-        $filePath = __DIR__ . '/../' . $invoice['file_path'];
-        
-        if (file_exists($filePath)) {
+        $filePath = realpath(__DIR__ . '/../' . ltrim($invoice['file_path'], '/'));
+
+        // Path-traversal guard: skip any file that resolves outside uploads/invoices
+        if (
+            $filePath === false ||
+            $invoicesDir === false ||
+            !str_starts_with($filePath, $invoicesDir . DIRECTORY_SEPARATOR)
+        ) {
+            continue;
+        }
+
+        if (is_file($filePath)) {
             // Create a meaningful filename
             $extension = pathinfo($filePath, PATHINFO_EXTENSION);
             $safeDescription = preg_replace('/[^a-zA-Z0-9_-]/', '_', substr($invoice['description'], 0, 50));
