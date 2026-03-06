@@ -17,13 +17,13 @@ header('Content-Type: application/json');
 // Roles that are allowed to become feedback contacts
 const FEEDBACK_CONTACT_ROLES = ['alumni', 'alumni_vorstand', 'alumni_finanz', 'ehrenmitglied'];
 
-try {
-    if (!Auth::check()) {
-        http_response_code(401);
-        echo json_encode(['success' => false, 'message' => 'Nicht authentifiziert']);
-        exit;
-    }
+if (!Auth::check()) {
+    http_response_code(401);
+    echo json_encode(['success' => false, 'message' => 'Nicht authentifiziert']);
+    exit;
+}
 
+try {
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         http_response_code(405);
         echo json_encode(['success' => false, 'message' => 'Nur POST-Anfragen erlaubt']);

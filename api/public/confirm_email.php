@@ -1,12 +1,19 @@
 <?php
 /**
- * Email Change Confirmation API
- * Validates token and updates user email address
+ * Email Change Confirmation API (Public Gateway)
+ * Validates a one-time token sent to the user's new e-mail address and updates
+ * the user's e-mail in the database.
+ *
+ * SECURITY NOTICE: This script is intentionally placed in the public-API folder.
+ * The confirmation link is sent to the new e-mail address; the user may not be
+ * logged in at the time they click the link.  Security is provided by the
+ * single-use, cryptographically random token stored in the database.
+ * No sensitive data is returned – the endpoint only redirects to the settings page.
  */
 
-require_once __DIR__ . '/../config/config.php';
-require_once __DIR__ . '/../src/Auth.php';
-require_once __DIR__ . '/../includes/models/User.php';
+require_once __DIR__ . '/../../config/config.php';
+require_once __DIR__ . '/../../src/Auth.php';
+require_once __DIR__ . '/../../includes/models/User.php';
 
 // Start session with secure parameters
 init_session();
