@@ -21,6 +21,10 @@ require_once __DIR__ . '/../includes/database.php';
 require_once __DIR__ . '/../src/MailService.php';
 
 if (PHP_SAPI !== 'cli') {
+    if (empty($_ENV['CRON_TOKEN']) || !is_string($_ENV['CRON_TOKEN']) || strlen($_ENV['CRON_TOKEN']) < 16) {
+        http_response_code(500);
+        exit('CRON_TOKEN not configured securely');
+    }
     $__cronToken = CRON_TOKEN;
     if ($__cronToken === '' || !isset($_GET['token']) || !is_string($_GET['token']) || !hash_equals($__cronToken, $_GET['token'])) {
         http_response_code(403);
