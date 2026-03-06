@@ -126,6 +126,31 @@ define('EASYVEREIN_API_TOKEN', _env('EASYVEREIN_API_TOKEN', ''));
 define('RECAPTCHA_SITE_KEY',   _env('RECAPTCHA_SITE_KEY',   ''));
 define('RECAPTCHA_SECRET_KEY', _env('RECAPTCHA_SECRET_KEY', ''));
 
+// Trusted reverse-proxy IP addresses (comma-separated in .env).
+// X-Forwarded-For is only honoured when REMOTE_ADDR exactly matches one of
+// these IPs; leave the env variable empty when there is no reverse proxy.
+// Each entry is validated with filter_var() – malformed values are discarded
+// and logged so misconfigurations are caught early.
+define('TRUSTED_PROXIES', (static function (): array {
+    $raw = _env('TRUSTED_PROXIES', '');
+    if ($raw === '') {
+        return [];
+    }
+    $result = [];
+    foreach (explode(',', $raw) as $entry) {
+        $ip = trim($entry);
+        if ($ip === '') {
+            continue;
+        }
+        if (filter_var($ip, FILTER_VALIDATE_IP) !== false) {
+            $result[] = $ip;
+        } else {
+            error_log('TRUSTED_PROXIES: invalid IP address ignored: ' . $ip);
+        }
+    }
+    return $result;
+})());
+
 // Bank Transfer / Shop Payment Settings
 define('VEREIN_IBAN', _env('VEREIN_IBAN', ''));
 

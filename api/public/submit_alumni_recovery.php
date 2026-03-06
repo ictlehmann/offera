@@ -49,50 +49,51 @@ function sendGenericSuccess(): void {
 
 // ── Determine client IP ────────────────────────────────────────────────────────
 /**
- * Return the best-available client IP address for rate-limiting purposes.
+ * Return the client IP address to use for rate-limiting purposes.
  *
- * Priority (highest → lowest):
- *  1. HTTP_X_FORWARDED_FOR – may contain a comma-separated chain of IPs added
- *     by successive proxies.  The leftmost public IP is the original client.
- *     Private / reserved ranges (RFC 1918, loopback, link-local, …) are
- *     skipped so that internal reverse-proxy IPs do not shadow the real client.
- *  2. HTTP_CLIENT_IP – set by some load-balancers; accepted if it is a valid IP.
- *  3. REMOTE_ADDR – direct TCP peer; always available and trusted as last resort.
+ * REMOTE_ADDR (the direct TCP peer) is always the primary source because it
+ * cannot be forged by a remote attacker.  Forwarding headers such as
+ * X-Forwarded-For are user-controlled and must NEVER be trusted blindly – an
+ * attacker could supply an arbitrary value to impersonate a different IP and
+ * bypass the rate limit.
  *
- * Each candidate is validated with filter_var() to guard against malformed or
- * injected header values being stored / hashed as the rate-limit key.
+ * X-Forwarded-For is only honoured when REMOTE_ADDR exactly matches one of
+ * the IP addresses listed in the TRUSTED_PROXIES constant (configured via the
+ * TRUSTED_PROXIES environment variable).  This allows the system to sit behind
+ * a known reverse proxy (e.g. Cloudflare) while still deriving the real client
+ * IP from the header appended by that proxy.
+ *
+ * Each candidate extracted from X-Forwarded-For is validated with filter_var()
+ * and private / reserved ranges are rejected so that internal proxy IPs in the
+ * forwarding chain cannot shadow the actual client address.
  *
  * @return string A validated IP address string, or '0.0.0.0' as a safe fallback.
  */
 function getClientIp(): string {
-    // 1. X-Forwarded-For: "client, proxy1, proxy2"  →  take first public IP
-    if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-        foreach (explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']) as $part) {
-            $candidate = trim($part);
-            if (filter_var(
-                $candidate,
-                FILTER_VALIDATE_IP,
-                FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
-            ) !== false) {
-                return $candidate;
+    $remoteAddr = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+
+    // Only trust X-Forwarded-For when the direct TCP peer is a known proxy.
+    $trustedProxies = defined('TRUSTED_PROXIES') && is_array(TRUSTED_PROXIES) ? TRUSTED_PROXIES : [];
+
+    if (!empty($trustedProxies) && in_array($remoteAddr, $trustedProxies, true)) {
+        if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            // Header format: "client, proxy1, proxy2" – the leftmost entry is
+            // the original client IP as reported by the first trusted proxy.
+            foreach (explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']) as $part) {
+                $candidate = trim($part);
+                if (filter_var(
+                    $candidate,
+                    FILTER_VALIDATE_IP,
+                    FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
+                ) !== false) {
+                    return $candidate;
+                }
             }
         }
     }
 
-    // 2. Client-IP header (set by some proxies / load-balancers)
-    if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
-        $candidate = trim($_SERVER['HTTP_CLIENT_IP']);
-        if (filter_var(
-            $candidate,
-            FILTER_VALIDATE_IP,
-            FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
-        ) !== false) {
-            return $candidate;
-        }
-    }
-
-    // 3. Direct TCP peer address – always present, used as final fallback
-    return $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+    // Default: use the direct TCP peer address (cannot be spoofed).
+    return $remoteAddr;
 }
 
 // ── IP-based rate limiting (max 3 requests / hour) ────────────────────────────
