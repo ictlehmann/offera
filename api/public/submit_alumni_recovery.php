@@ -167,8 +167,8 @@ if (!checkAndRecordIpRateLimit($clientIp, ALUMNI_RATE_LIMIT_MAX, ALUMNI_RATE_LIM
 
 // ── Parse JSON request body ───────────────────────────────────────────────────
 $rawInput = file_get_contents('php://input');
-$data     = json_decode($rawInput, true);
-if (!is_array($data)) {
+$data     = json_decode($rawInput, true) ?? [];
+if (empty($data)) {
     http_response_code(400);
     echo json_encode(['success' => false, 'message' => 'Ungültiges Eingabeformat']);
     exit;
