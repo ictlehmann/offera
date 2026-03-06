@@ -31,9 +31,9 @@ $description = $listing['description'];
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     CSRFHandler::verifyToken($_POST['csrf_token'] ?? '');
 
-    $title       = trim($_POST['title'] ?? '');
-    $searchType  = trim($_POST['search_type'] ?? '');
-    $description = trim($_POST['description'] ?? '');
+    $title       = strip_tags(trim($_POST['title'] ?? ''));
+    $searchType  = strip_tags(trim($_POST['search_type'] ?? ''));
+    $description = strip_tags(trim($_POST['description'] ?? ''));
     $removePdf   = isset($_POST['remove_pdf']) && $_POST['remove_pdf'] === '1';
 
     // Validate required fields

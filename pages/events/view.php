@@ -843,7 +843,8 @@ function showMessage(message, type = 'success') {
     const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
     
     content.className = `card px-6 py-4 shadow-2xl ${bgColor}`;
-    content.innerHTML = `<i class="fas ${icon} mr-2"></i>${message}`;
+    content.innerHTML = `<i class="fas ${icon} mr-2"></i>`;
+    content.appendChild(document.createTextNode(message));
     
     container.classList.remove('hidden');
     

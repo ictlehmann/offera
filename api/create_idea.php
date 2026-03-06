@@ -41,8 +41,8 @@ if ($rateLimitWait > 0) {
 }
 
 $user        = Auth::user();
-$title       = trim($_POST['title'] ?? '');
-$description = trim($_POST['description'] ?? '');
+$title       = strip_tags(trim($_POST['title'] ?? ''));
+$description = strip_tags(trim($_POST['description'] ?? ''));
 
 if (empty($title) || empty($description)) {
     http_response_code(400);

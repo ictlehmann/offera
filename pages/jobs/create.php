@@ -27,9 +27,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($rateLimitWait > 0) {
         $errors[] = 'Bitte warte noch ' . $rateLimitWait . ' ' . ($rateLimitWait === 1 ? 'Sekunde' : 'Sekunden') . ', bevor du erneut ein Gesuch aufgibst.';
     } else {
-        $title       = trim($_POST['title'] ?? '');
-        $searchType  = trim($_POST['search_type'] ?? '');
-        $description = trim($_POST['description'] ?? '');
+        $title       = strip_tags(trim($_POST['title'] ?? ''));
+        $searchType  = strip_tags(trim($_POST['search_type'] ?? ''));
+        $description = strip_tags(trim($_POST['description'] ?? ''));
 
         // Validate required fields
         if (empty($title)) {
