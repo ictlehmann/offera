@@ -111,9 +111,9 @@ try {
 }
 
 // Get events that need helpers (for all users)
-$contentDb = Database::getContentDB();
 $helperEvents = [];
 try {
+    $contentDb = Database::getContentDB();
     $stmt = $contentDb->query("
         SELECT e.id, e.title, e.description, e.start_time, e.end_time, e.location
         FROM events e
@@ -135,14 +135,14 @@ try {
                      stripos($errorMessage, 'Unknown column') !== false ||
                      stripos($errorMessage, 'Column not found') !== false;
     
-    if (!$isColumnError) {
-        // For non-column errors, log and re-throw for proper error handling
+    if ($isColumnError) {
+        // Column not found - continue with empty $helperEvents array
+        error_log("Dashboard: needs_helpers column not found in events table. Run update_database_schema.php to add it.");
+    } else {
         error_log("Dashboard: Unexpected database error when fetching helper events: " . $errorMessage);
-        throw $e;
     }
-    
-    // Column not found - continue with empty $helperEvents array
-    error_log("Dashboard: needs_helpers column not found in events table. Run update_database_schema.php to add it.");
+} catch (Exception $e) {
+    error_log("Dashboard: Error fetching helper events: " . $e->getMessage());
 }
 
 // Get open invoices count for eligible users
