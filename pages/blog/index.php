@@ -205,7 +205,7 @@ ob_start();
                         </div>
                         
                         <!-- Excerpt -->
-                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-1 break-words">
+                        <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-1 break-words hyphens-auto">
                             <?php echo htmlspecialchars(truncateText($post['content'])); ?>
                         </p>
                         

@@ -142,11 +142,11 @@ ob_start();
                 <i class="<?php echo $icon; ?> text-ibc-green group-hover:text-white text-lg transition-colors duration-200"></i>
             </div>
             <div class="min-w-0 flex-1">
-                <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 group-hover:text-ibc-green dark:group-hover:text-ibc-green-light transition-colors duration-200 leading-snug">
+                <h3 class="text-sm font-semibold text-gray-900 dark:text-gray-100 group-hover:text-ibc-green dark:group-hover:text-ibc-green-light transition-colors duration-200 leading-snug break-words hyphens-auto">
                     <?php echo htmlspecialchars($link['title'] ?? '', ENT_QUOTES, 'UTF-8'); ?>
                 </h3>
                 <?php if (!empty($link['description'])): ?>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed break-words hyphens-auto">
                     <?php echo htmlspecialchars($link['description'], ENT_QUOTES, 'UTF-8'); ?>
                 </p>
                 <?php endif; ?>

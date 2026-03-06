@@ -356,7 +356,7 @@ ob_start();
                         </div>
 
                         <!-- Comment content (view mode) -->
-                        <div class="text-gray-700 dark:text-gray-300 whitespace-pre-wrap break-words comment-text-<?php echo (int)$comment['id']; ?>">
+                        <div class="text-gray-700 dark:text-gray-300 whitespace-pre-wrap break-words hyphens-auto comment-text-<?php echo (int)$comment['id']; ?>">
                             <?php echo htmlspecialchars($comment['content']); ?>
                         </div>
 

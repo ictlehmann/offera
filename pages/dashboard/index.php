@@ -1046,7 +1046,7 @@ function dismissProfileReviewPrompt() {
                 </div>
                 <!-- Title & meta -->
                 <div class="flex-1 min-w-0">
-                    <h3 class="font-bold text-base leading-snug line-clamp-2 mb-1.5" style="color: var(--text-main)">
+                    <h3 class="font-bold text-base leading-snug line-clamp-2 mb-1.5 break-words hyphens-auto" style="color: var(--text-main)">
                         <?php echo htmlspecialchars($event['title']); ?>
                     </h3>
                     <div class="space-y-1 text-xs" style="color: var(--text-muted)">
@@ -1252,7 +1252,7 @@ function dismissProfileReviewPrompt() {
                         <?php echo htmlspecialchars($post['category'] ?? 'Allgemein'); ?>
                     </span>
                 </div>
-                <h3 class="font-bold text-base leading-snug line-clamp-2 mb-1.5" style="color: var(--text-main)">
+                <h3 class="font-bold text-base leading-snug line-clamp-2 mb-1.5 break-words hyphens-auto" style="color: var(--text-main)">
                     <?php echo htmlspecialchars($post['title']); ?>
                 </h3>
                 <p class="text-xs mb-2" style="color: var(--text-muted)">

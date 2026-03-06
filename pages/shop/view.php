@@ -299,7 +299,7 @@ ob_start();
                 </div>
 
                 <!-- Product name -->
-                <h1 class="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-gray-50 mb-3 leading-tight">
+                <h1 class="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-gray-50 mb-3 leading-tight break-words hyphens-auto">
                     <?php echo htmlspecialchars($product['name']); ?>
                 </h1>
 
@@ -339,7 +339,7 @@ ob_start();
 
                 <!-- Description -->
                 <?php if (!empty($product['description'])): ?>
-                <p class="text-gray-600 dark:text-gray-300 mb-5 leading-relaxed text-[0.95rem] break-words">
+                <p class="text-gray-600 dark:text-gray-300 mb-5 leading-relaxed text-[0.95rem] break-words hyphens-auto">
                     <?php echo nl2br(htmlspecialchars($product['description'])); ?>
                 </p>
                 <?php endif; ?>
@@ -549,7 +549,7 @@ ob_start();
                         </div>
                         <div>
                             <p class="font-semibold text-gray-700 dark:text-gray-300 text-xs uppercase tracking-wide mb-0.5">Abholort</p>
-                            <p><?php echo htmlspecialchars($product['pickup_location']); ?></p>
+                            <p class="break-words hyphens-auto"><?php echo htmlspecialchars($product['pickup_location']); ?></p>
                         </div>
                     </div>
                     <?php endif; ?>

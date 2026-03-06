@@ -295,7 +295,7 @@ ob_start();
         </div>
         
         <!-- Title with Gradient Effect -->
-        <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold mb-8 bg-gradient-to-r from-purple-600 via-blue-600 to-purple-600 bg-clip-text text-transparent break-words">
+        <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold mb-8 bg-gradient-to-r from-purple-600 via-blue-600 to-purple-600 bg-clip-text text-transparent break-words hyphens-auto">
             <?php echo htmlspecialchars($project['title']); ?>
         </h1>
         
@@ -332,7 +332,7 @@ ob_start();
                     </div>
                     Team Status
                 </h3>
-                <span class="text-2xl font-bold text-purple-600">
+                <span class="text-lg sm:text-xl md:text-2xl font-bold text-purple-600">
                     <?php echo $teamSize; ?> / <?php echo $maxConsultants; ?>
                 </span>
             </div>
@@ -361,7 +361,7 @@ ob_start();
         <?php if (!empty($project['description'])): ?>
         <div class="mb-6">
             <h2 class="text-lg sm:text-xl font-bold text-gray-800 mb-3">Beschreibung</h2>
-            <div class="text-gray-700 leading-relaxed whitespace-pre-line break-words">
+            <div class="text-gray-700 leading-relaxed whitespace-pre-line break-words hyphens-auto">
                 <?php echo htmlspecialchars($project['description']); ?>
             </div>
         </div>
@@ -374,7 +374,7 @@ ob_start();
                 <i class="fas fa-file-alt text-green-600 mr-2"></i>
                 Projekt-Dokumentation
             </h2>
-            <div class="text-gray-700 leading-relaxed whitespace-pre-line bg-white p-4 rounded-lg shadow-sm break-words">
+            <div class="text-gray-700 leading-relaxed whitespace-pre-line bg-white p-4 rounded-lg shadow-sm break-words hyphens-auto">
                 <?php echo htmlspecialchars($project['documentation']); ?>
             </div>
         </div>
@@ -531,7 +531,7 @@ ob_start();
                             <?php if (!empty($userApplication['motivation'])): ?>
                             <div class="mt-4">
                                 <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">Deine Motivation:</span>
-                                <div class="mt-2 p-3 bg-white rounded border border-gray-200 text-gray-700 whitespace-pre-line break-words">
+                                <div class="mt-2 p-3 bg-white rounded border border-gray-200 text-gray-700 whitespace-pre-line break-words hyphens-auto">
                                     <?php echo htmlspecialchars($userApplication['motivation']); ?>
                                 </div>
                             </div>

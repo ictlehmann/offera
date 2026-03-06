@@ -183,7 +183,7 @@ ob_start();
                 <!-- Content -->
                 <div class="flex-1 p-4 min-w-0 flex flex-col">
                     <div class="flex items-start justify-between gap-2 mb-2">
-                        <h3 class="font-bold text-gray-900 dark:text-gray-50 text-[15px] leading-snug break-words"><?php echo htmlspecialchars($idea['title']); ?></h3>
+                        <h3 class="font-bold text-gray-900 dark:text-gray-50 text-[15px] leading-snug break-words hyphens-auto"><?php echo htmlspecialchars($idea['title']); ?></h3>
                         <div class="flex items-center gap-1.5 flex-shrink-0">
                             <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold <?php echo $sc['badge']; ?>">
                                 <span class="w-1.5 h-1.5 rounded-full flex-shrink-0 <?php echo $sc['dot']; ?>"></span>
@@ -214,7 +214,7 @@ ob_start();
                         </div>
                     </div>
 
-                    <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed line-clamp-3 break-words flex-1"><?php echo nl2br(htmlspecialchars($idea['description'])); ?></p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed line-clamp-3 break-words hyphens-auto flex-1"><?php echo nl2br(htmlspecialchars($idea['description'])); ?></p>
                 </div>
             </div>
 

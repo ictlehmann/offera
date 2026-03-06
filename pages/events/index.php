@@ -260,7 +260,7 @@ ob_start();
 
                         <!-- Description Preview -->
                         <?php if (!empty($event['description'])): ?>
-                            <p class="text-gray-600 dark:text-gray-400 text-sm line-clamp-2 flex-1 mb-4 break-words leading-relaxed">
+                            <p class="text-gray-600 dark:text-gray-400 text-sm line-clamp-2 flex-1 mb-4 break-words hyphens-auto leading-relaxed">
                                 <?php echo htmlspecialchars(substr($event['description'], 0, 120)); ?><?php echo strlen($event['description']) > 120 ? '…' : ''; ?>
                             </p>
                         <?php else: ?>

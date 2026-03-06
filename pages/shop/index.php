@@ -594,7 +594,7 @@ ob_start();
 
             <!-- Product info -->
             <div class="p-4 flex flex-col flex-1 min-w-0">
-                <h3 class="font-semibold text-gray-900 dark:text-gray-100 text-sm mb-2 line-clamp-2 leading-snug break-words">
+                <h3 class="font-semibold text-gray-900 dark:text-gray-100 text-sm mb-2 line-clamp-2 leading-snug break-words hyphens-auto">
                     <a href="<?php echo $productUrl; ?>" class="no-underline text-inherit hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
                         <?php echo htmlspecialchars($product['name']); ?>
                     </a>
@@ -734,7 +734,7 @@ ob_start();
                     <?php echo number_format((float) $currentProduct['base_price'], 2, ',', '.'); ?> €
                 </p>
                 <?php if (!empty($currentProduct['description'])): ?>
-                <p class="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed break-words">
+                <p class="text-gray-600 dark:text-gray-300 mb-6 leading-relaxed break-words hyphens-auto">
                     <?php echo nl2br(htmlspecialchars($currentProduct['description'])); ?>
                 </p>
                 <?php endif; ?>

@@ -293,7 +293,7 @@ ob_start();
             <?php if (!empty($application['motivation'])): ?>
             <div class="mb-4">
                 <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Motivation:</span>
-                <p class="text-gray-800 dark:text-gray-200 mt-1 break-words"><?php echo nl2br(htmlspecialchars($application['motivation'])); ?></p>
+                <p class="text-gray-800 dark:text-gray-200 mt-1 break-words hyphens-auto"><?php echo nl2br(htmlspecialchars($application['motivation'])); ?></p>
             </div>
             <?php endif; ?>
 
