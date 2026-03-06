@@ -191,8 +191,8 @@ try {
 }
 
 // Calculate profile completeness for the gamification widget
-// Only the following fields count towards completeness:
-// Vorname, Nachname, Über mich, Zweite Email, Telefonnummer, Geschlecht, Geburtstag
+// Required fields (8 total): Vorname, Nachname, E-Mail, Telefon, Geschlecht, Geburtstag,
+// Fähigkeiten (mindestens ein Eintrag), Über mich
 $profileCompletenessPercent = 0;
 if (in_array($userRole, $rolesRequiringProfile)) {
     try {
@@ -206,18 +206,19 @@ if (in_array($userRole, $rolesRequiringProfile)) {
 
         // Fields from the users table (already available in $user)
         $filledCount = 0;
-        $totalFields = 7;
+        $totalFields = 8;
 
         if (!empty($user['first_name']))  $filledCount++;
         if (!empty($user['last_name']))   $filledCount++;
+        if (!empty($user['email']))       $filledCount++;
         if (!empty($user['about_me']))    $filledCount++;
         if (!empty($user['gender']))      $filledCount++;
         if (!empty($user['birthday']))    $filledCount++;
 
         // Fields from the profile record
         if ($profileRecord) {
-            if (!empty($profileRecord['secondary_email'])) $filledCount++;
-            if (!empty($profileRecord['mobile_phone']))    $filledCount++;
+            if (!empty($profileRecord['mobile_phone'])) $filledCount++;
+            if (!empty($profileRecord['skills']))       $filledCount++;
         }
 
         $profileCompletenessPercent = (int)round(($filledCount / $totalFields) * 100);
@@ -978,7 +979,7 @@ function dismissProfileReviewPrompt() {
                         🎯 Vervollständige dein Profil!
                     </h3>
                     <p class="text-sm mb-4 leading-relaxed" style="color: var(--text-muted)">
-                        Ein vollständiges Profil hilft deinen Kolleginnen und Kollegen, dich besser kennenzulernen.
+                        Für 100% werden folgende Felder benötigt: Vorname, Nachname, E-Mail, Telefon, Geschlecht, Geburtstag, mindestens eine Fähigkeit und ein „Über mich"-Text.
                         Du bist schon zu&nbsp;<strong style="color: #a855f7"><?php echo $profileCompletenessPercent; ?>%</strong>&nbsp;fertig&nbsp;– fast geschafft!
                     </p>
                     <a href="../auth/profile.php"

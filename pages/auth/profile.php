@@ -694,11 +694,21 @@ ob_start();
                     </div>
                     
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Position (optional)</label>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Position im Verein</label>
                         <input 
                             type="text" 
-                            name="job_title" 
-                            value="<?php echo htmlspecialchars($user['job_title'] ?? ''); ?>"
+                            value="<?php echo htmlspecialchars(getFormattedRoleName($userRole), ENT_QUOTES, 'UTF-8'); ?>"
+                            readonly
+                            class="w-full px-4 py-2 bg-gray-100 border border-gray-300 text-gray-600 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-400 rounded-lg cursor-not-allowed"
+                        >
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Position im Unternehmen <span class="text-gray-400 font-normal">(optional)</span></label>
+                        <input 
+                            type="text" 
+                            name="job_title"
+                            value="<?php echo htmlspecialchars($user['job_title'] ?? '', ENT_QUOTES, 'UTF-8'); ?>"
                             class="w-full px-4 py-2 bg-white border border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 rounded-lg"
                             placeholder="z.B. Senior Consultant"
                         >
@@ -770,10 +780,10 @@ ob_start();
                     
                     <?php if (isMemberRole($userRole)): ?>
                     <!-- Fields for Students: Candidates, Members, Board, and Heads -->
-                    <!-- Student View: Show Aktuelles Studium -->
+                    <!-- Student View: Show Studium -->
                     <div class="md:col-span-2">
                         <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-3 border-b border-gray-300 dark:border-gray-600 pb-2">
-                            Aktuelles Studium
+                            Studium
                         </h3>
                     </div>
                     

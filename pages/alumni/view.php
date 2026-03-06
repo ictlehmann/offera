@@ -74,10 +74,14 @@ $profileCompletenessPercent = 0;
 $isAlumniProfile = isAlumniRole($profileUserRole);
 if ($isAlumniProfile) {
     $completenessFields = [
-        'image_path'    => $profile['image_path'] ?? null,
-        'mobile_phone'  => $profile['mobile_phone'] ?? null,
-        'about_me'      => $profileUser['about_me'] ?? null,
-        'study_program' => $profile['study_program'] ?? null,
+        'first_name'   => $profileUser['first_name'] ?? null,
+        'last_name'    => $profileUser['last_name'] ?? null,
+        'email'        => $profileUser['email'] ?? null,
+        'mobile_phone' => $profile['mobile_phone'] ?? null,
+        'gender'       => $profileUser['gender'] ?? null,
+        'birthday'     => $profileUser['birthday'] ?? null,
+        'skills'       => $profile['skills'] ?? null,
+        'about_me'     => $profileUser['about_me'] ?? null,
     ];
     $filledCount = 0;
     foreach ($completenessFields as $value) {
