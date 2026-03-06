@@ -1519,7 +1519,7 @@ function valueRowHtml(vIdx, valIdx, value, stock) {
                class="w-24 px-2.5 py-1.5 border rounded-lg text-sm text-right focus:ring-2 focus:ring-purple-500 focus:border-transparent transition ${stockClass}"
                oninput="updateStockColor(this)">
         <button type="button" onclick="this.closest('.value-row').remove()"
-                class="w-7 h-7 flex items-center justify-center text-gray-300 hover:text-red-500 dark:text-gray-600 dark:hover:text-red-400 transition-colors rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20" title="Größe entfernen">
+                class="min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-300 hover:text-red-500 dark:text-gray-600 dark:hover:text-red-400 transition-colors rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20" title="Größe entfernen">
             <i class="fas fa-times text-xs"></i>
         </button>
     </div>`;

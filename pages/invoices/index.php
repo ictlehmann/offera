@@ -645,7 +645,7 @@ ob_start();
                 </div>
                 <h2 class="text-lg font-bold text-gray-900 dark:text-gray-50">Beleg einreichen</h2>
             </div>
-            <button id="closeSubmissionModal" class="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+            <button id="closeSubmissionModal" class="min-w-[44px] min-h-[44px] rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                 <i class="fas fa-times"></i>
             </button>
         </div>

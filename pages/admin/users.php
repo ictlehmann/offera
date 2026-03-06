@@ -611,7 +611,7 @@ ob_start();
                             <?php $confirmMsg = $isLocked ? 'Benutzer wirklich entsperren?' : 'Benutzer wirklich sperren?'; ?>
                             <form method="POST" class="inline mt-1" onsubmit="return confirm('<?php echo htmlspecialchars($confirmMsg, ENT_QUOTES, 'UTF-8'); ?>');">
                                 <input type="hidden" name="user_id" value="<?php echo $user['id']; ?>">
-                                <button type="submit" name="toggle_lock_user" class="inline-flex items-center px-2.5 py-1 text-xs <?php echo $isLocked ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'; ?> rounded-lg font-semibold shadow-sm hover:shadow-md transition-all">
+                                <button type="submit" name="toggle_lock_user" class="inline-flex items-center px-2.5 py-2 min-h-[44px] text-xs <?php echo $isLocked ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300' : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'; ?> rounded-lg font-semibold shadow-sm hover:shadow-md transition-all">
                                     <i class="fas <?php echo $isLocked ? 'fa-unlock' : 'fa-lock'; ?> mr-1.5"></i>
                                     <?php echo $isLocked ? 'Entsperren' : 'Sperren'; ?>
                                 </button>
@@ -627,7 +627,7 @@ ob_start();
                                 <form method="POST" class="inline">
                                     <input type="hidden" name="user_id" value="<?php echo $user['id']; ?>">
                                     <input type="hidden" name="is_validated" value="0">
-                                    <button type="submit" name="toggle_alumni_validation" class="inline-flex items-center px-2.5 py-1 text-xs bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-900/50 dark:to-emerald-900/50 text-green-700 dark:text-green-300 rounded-lg font-semibold shadow-sm hover:shadow-md transition-all">
+                                    <button type="submit" name="toggle_alumni_validation" class="inline-flex items-center px-2.5 py-2 min-h-[44px] text-xs bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-900/50 dark:to-emerald-900/50 text-green-700 dark:text-green-300 rounded-lg font-semibold shadow-sm hover:shadow-md transition-all">
                                         <i class="fas fa-check-circle mr-1.5"></i>Verifiziert
                                     </button>
                                 </form>
@@ -635,7 +635,7 @@ ob_start();
                                 <form method="POST" class="inline">
                                     <input type="hidden" name="user_id" value="<?php echo $user['id']; ?>">
                                     <input type="hidden" name="is_validated" value="1">
-                                    <button type="submit" name="toggle_alumni_validation" class="inline-flex items-center px-2.5 py-1 text-xs bg-gradient-to-r from-yellow-100 to-amber-100 dark:from-yellow-900/50 dark:to-amber-900/50 text-yellow-700 dark:text-yellow-300 rounded-lg font-semibold shadow-sm hover:shadow-md transition-all">
+                                    <button type="submit" name="toggle_alumni_validation" class="inline-flex items-center px-2.5 py-2 min-h-[44px] text-xs bg-gradient-to-r from-yellow-100 to-amber-100 dark:from-yellow-900/50 dark:to-amber-900/50 text-yellow-700 dark:text-yellow-300 rounded-lg font-semibold shadow-sm hover:shadow-md transition-all">
                                         <i class="fas fa-clock mr-1.5"></i>Ausstehend
                                     </button>
                                 </form>

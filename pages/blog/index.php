@@ -134,18 +134,18 @@ ob_start();
 
     <!-- Filter Bar -->
     <div class="mb-6 card dark:bg-gray-800 p-4">
-        <div class="flex items-center gap-2 flex-wrap">
+        <div class="flex items-center gap-4 flex-wrap">
             <span class="text-gray-700 dark:text-gray-300 font-semibold mr-2">
                 <i class="fas fa-filter mr-2"></i>
                 Kategorie:
             </span>
             <a href="index.php" 
-               class="px-4 py-2 rounded-lg font-medium transition-all <?php echo $filterCategory === null ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'; ?>">
+               class="px-4 py-2 min-h-[44px] inline-flex items-center rounded-lg font-medium transition-all <?php echo $filterCategory === null ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'; ?>">
                 Alle
             </a>
             <?php foreach ($categories as $cat => $color): ?>
                 <a href="index.php?category=<?php echo urlencode($cat); ?>" 
-                   class="px-4 py-2 rounded-lg font-medium transition-all <?php echo $filterCategory === $cat ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'; ?>">
+                   class="px-4 py-2 min-h-[44px] inline-flex items-center rounded-lg font-medium transition-all <?php echo $filterCategory === $cat ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'; ?>">
                     <?php echo htmlspecialchars($cat); ?>
                 </a>
             <?php endforeach; ?>

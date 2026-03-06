@@ -131,17 +131,17 @@ ob_start();
                     </td>
                     <td class="px-4 py-3 whitespace-nowrap">
                         <?php if ($req['status'] === 'pending'): ?>
-                        <div class="flex gap-2 flex-wrap action-buttons-<?php echo (int)$req['id']; ?>">
+                        <div class="flex gap-4 flex-wrap action-buttons-<?php echo (int)$req['id']; ?>">
                             <button
                                 onclick="handleAction(<?php echo (int)$req['id']; ?>, 'approve')"
-                                class="px-3 py-1.5 text-xs font-semibold bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-lg shadow transition-all duration-200 flex items-center gap-1"
+                                class="px-3 py-2 min-h-[44px] text-xs font-semibold bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-lg shadow transition-all duration-200 flex items-center gap-1"
                                 title="Akzeptieren & in Entra anlegen">
                                 <i class="fas fa-user-check"></i>
                                 <span class="hidden sm:inline">Akzeptieren &amp; Entra</span>
                             </button>
                             <button
                                 onclick="handleAction(<?php echo (int)$req['id']; ?>, 'reject')"
-                                class="px-3 py-1.5 text-xs font-semibold bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white rounded-lg shadow transition-all duration-200 flex items-center gap-1"
+                                class="px-3 py-2 min-h-[44px] text-xs font-semibold bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white rounded-lg shadow transition-all duration-200 flex items-center gap-1"
                                 title="Ablehnen">
                                 <i class="fas fa-user-times"></i>
                                 <span class="hidden sm:inline">Ablehnen</span>

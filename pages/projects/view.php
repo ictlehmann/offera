@@ -584,7 +584,7 @@ ob_start();
                             </div>
                             
                             <!-- Experience Confirmation Checkbox -->
-                            <div class="flex items-start">
+                            <div class="flex items-start min-h-[44px]">
                                 <input 
                                     type="checkbox" 
                                     id="experience_confirmed" 
@@ -599,7 +599,7 @@ ob_start();
                             </div>
                             
                             <!-- GDPR Consent Checkbox -->
-                            <div class="flex items-start">
+                            <div class="flex items-start min-h-[44px]">
                                 <input 
                                     type="checkbox" 
                                     id="gdpr_consent" 

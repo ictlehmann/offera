@@ -519,7 +519,7 @@ document.getElementById('deleteModal')?.addEventListener('click', (e) => {
                     <option value="high" <?php echo (($_POST['priority'] ?? $project['priority'] ?? 'medium') === 'high') ? 'selected' : ''; ?>>Hoch</option>
                 </select>
             </div>
-            <div class="flex items-center pt-6">
+            <div class="flex items-center min-h-[44px] pt-6">
                 <input
                     type="checkbox"
                     id="is_internal_checkbox"
@@ -635,7 +635,7 @@ document.getElementById('deleteModal')?.addEventListener('click', (e) => {
             ? intval($_POST['requires_application'] ?? 0)
             : intval($project['requires_application'] ?? 1);
         ?>
-        <div id="requires_application_row" class="flex items-center pt-2">
+        <div id="requires_application_row" class="flex items-center min-h-[44px] pt-2">
             <input
                 type="checkbox"
                 id="requires_application_checkbox"

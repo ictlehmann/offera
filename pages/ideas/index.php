@@ -164,7 +164,7 @@ ob_start();
                     <button
                         onclick="castVote(<?php echo $idea['id']; ?>, 'up')"
                         title="Upvote"
-                        class="vote-btn upvote w-9 h-9 rounded-full flex items-center justify-center <?php echo $userVote === 'up' ? 'bg-green-500 text-white shadow-md ring-2 ring-green-300 dark:ring-green-700' : 'bg-white dark:bg-gray-700 text-gray-400 dark:text-gray-500 hover:bg-green-50 dark:hover:bg-green-900/30 hover:text-green-500 dark:hover:text-green-400 border border-gray-200 dark:border-gray-600'; ?>"
+                        class="vote-btn upvote min-w-[44px] min-h-[44px] rounded-full flex items-center justify-center <?php echo $userVote === 'up' ? 'bg-green-500 text-white shadow-md ring-2 ring-green-300 dark:ring-green-700' : 'bg-white dark:bg-gray-700 text-gray-400 dark:text-gray-500 hover:bg-green-50 dark:hover:bg-green-900/30 hover:text-green-500 dark:hover:text-green-400 border border-gray-200 dark:border-gray-600'; ?>"
                     >
                         <i class="fas fa-chevron-up text-xs"></i>
                     </button>
@@ -174,7 +174,7 @@ ob_start();
                     <button
                         onclick="castVote(<?php echo $idea['id']; ?>, 'down')"
                         title="Downvote"
-                        class="vote-btn downvote w-9 h-9 rounded-full flex items-center justify-center <?php echo $userVote === 'down' ? 'bg-red-500 text-white shadow-md ring-2 ring-red-300 dark:ring-red-700' : 'bg-white dark:bg-gray-700 text-gray-400 dark:text-gray-500 hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-500 dark:hover:text-red-400 border border-gray-200 dark:border-gray-600'; ?>"
+                        class="vote-btn downvote min-w-[44px] min-h-[44px] rounded-full flex items-center justify-center <?php echo $userVote === 'down' ? 'bg-red-500 text-white shadow-md ring-2 ring-red-300 dark:ring-red-700' : 'bg-white dark:bg-gray-700 text-gray-400 dark:text-gray-500 hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-500 dark:hover:text-red-400 border border-gray-200 dark:border-gray-600'; ?>"
                     >
                         <i class="fas fa-chevron-down text-xs"></i>
                     </button>
@@ -194,7 +194,7 @@ ob_start();
                                 <button
                                     onclick="toggleStatusMenu(this)"
                                     title="Status ändern"
-                                    class="w-7 h-7 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                    class="min-w-[44px] min-h-[44px] rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                                 >
                                     <i class="fas fa-ellipsis-v text-xs"></i>
                                 </button>
@@ -255,7 +255,7 @@ ob_start();
                     <p class="text-xs text-gray-500 dark:text-gray-400">Dein Vorschlag zählt!</p>
                 </div>
             </div>
-            <button id="closeIdeaModal" class="w-8 h-8 rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+            <button id="closeIdeaModal" class="min-w-[44px] min-h-[44px] rounded-lg flex items-center justify-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
                 <i class="fas fa-times"></i>
             </button>
         </div>
@@ -429,10 +429,10 @@ async function castVote(ideaId, direction) {
         const scoreEl = card.querySelector('.vote-score');
         const score   = data.upvotes - data.downvotes;
 
-        const inactiveUp   = 'vote-btn upvote w-9 h-9 rounded-full flex items-center justify-center bg-white dark:bg-gray-700 text-gray-400 dark:text-gray-500 hover:bg-green-50 dark:hover:bg-green-900/30 hover:text-green-500 dark:hover:text-green-400 border border-gray-200 dark:border-gray-600';
-        const activeUp     = 'vote-btn upvote w-9 h-9 rounded-full flex items-center justify-center bg-green-500 text-white shadow-md ring-2 ring-green-300 dark:ring-green-700';
-        const inactiveDown = 'vote-btn downvote w-9 h-9 rounded-full flex items-center justify-center bg-white dark:bg-gray-700 text-gray-400 dark:text-gray-500 hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-500 dark:hover:text-red-400 border border-gray-200 dark:border-gray-600';
-        const activeDown   = 'vote-btn downvote w-9 h-9 rounded-full flex items-center justify-center bg-red-500 text-white shadow-md ring-2 ring-red-300 dark:ring-red-700';
+        const inactiveUp   = 'vote-btn upvote min-w-[44px] min-h-[44px] rounded-full flex items-center justify-center bg-white dark:bg-gray-700 text-gray-400 dark:text-gray-500 hover:bg-green-50 dark:hover:bg-green-900/30 hover:text-green-500 dark:hover:text-green-400 border border-gray-200 dark:border-gray-600';
+        const activeUp     = 'vote-btn upvote min-w-[44px] min-h-[44px] rounded-full flex items-center justify-center bg-green-500 text-white shadow-md ring-2 ring-green-300 dark:ring-green-700';
+        const inactiveDown = 'vote-btn downvote min-w-[44px] min-h-[44px] rounded-full flex items-center justify-center bg-white dark:bg-gray-700 text-gray-400 dark:text-gray-500 hover:bg-red-50 dark:hover:bg-red-900/30 hover:text-red-500 dark:hover:text-red-400 border border-gray-200 dark:border-gray-600';
+        const activeDown   = 'vote-btn downvote min-w-[44px] min-h-[44px] rounded-full flex items-center justify-center bg-red-500 text-white shadow-md ring-2 ring-red-300 dark:ring-red-700';
 
         upBtn.className   = data.user_vote === 'up'   ? activeUp   : inactiveUp;
         downBtn.className = data.user_vote === 'down' ? activeDown : inactiveDown;

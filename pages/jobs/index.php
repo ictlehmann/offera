@@ -116,18 +116,18 @@ ob_start();
 
     <!-- Filter Bar -->
     <div class="mb-6 card dark:bg-gray-800 p-4">
-        <div class="flex items-center gap-2 flex-wrap">
+        <div class="flex items-center gap-4 flex-wrap">
             <span class="text-gray-700 dark:text-gray-300 font-semibold mr-2">
                 <i class="fas fa-filter mr-2"></i>
                 Typ:
             </span>
             <a href="index.php"
-               class="px-4 py-2 rounded-lg font-medium transition-all <?php echo $filterType === null ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'; ?>">
+               class="px-4 py-2 min-h-[44px] inline-flex items-center rounded-lg font-medium transition-all <?php echo $filterType === null ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'; ?>">
                 Alle
             </a>
             <?php foreach (JobBoard::SEARCH_TYPES as $type): ?>
             <a href="index.php?type=<?php echo urlencode($type); ?>"
-               class="px-4 py-2 rounded-lg font-medium transition-all <?php echo $filterType === $type ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'; ?>">
+               class="px-4 py-2 min-h-[44px] inline-flex items-center rounded-lg font-medium transition-all <?php echo $filterType === $type ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600'; ?>">
                 <?php echo htmlspecialchars($type, ENT_QUOTES, 'UTF-8'); ?>
             </a>
             <?php endforeach; ?>
@@ -190,7 +190,7 @@ ob_start();
                     <?php if (!empty($listing['pdf_path'])): ?>
                     <a href="<?php echo htmlspecialchars(asset($listing['pdf_path']), ENT_QUOTES, 'UTF-8'); ?>"
                        download
-                       class="inline-flex items-center px-4 py-2 bg-red-50 hover:bg-red-100 text-red-700 dark:bg-red-900/30 dark:hover:bg-red-900/50 dark:text-red-300 rounded-lg text-sm font-medium transition-all">
+                       class="inline-flex items-center px-4 py-2 min-h-[44px] bg-red-50 hover:bg-red-100 text-red-700 dark:bg-red-900/30 dark:hover:bg-red-900/50 dark:text-red-300 rounded-lg text-sm font-medium transition-all">
                         <i class="fas fa-file-download mr-2"></i>Lebenslauf
                     </a>
                     <?php else: ?>
@@ -198,9 +198,9 @@ ob_start();
                     <?php endif; ?>
 
                     <?php if ((int)$listing['user_id'] === $userId): ?>
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-4">
                         <a href="edit.php?id=<?php echo (int)$listing['id']; ?>"
-                           class="inline-flex items-center px-3 py-2 bg-gray-100 hover:bg-blue-100 text-gray-500 hover:text-blue-600 dark:bg-gray-700 dark:hover:bg-blue-900/40 dark:text-gray-400 dark:hover:text-blue-400 rounded-lg text-sm transition-all">
+                           class="inline-flex items-center px-3 py-2 min-h-[44px] bg-gray-100 hover:bg-blue-100 text-gray-500 hover:text-blue-600 dark:bg-gray-700 dark:hover:bg-blue-900/40 dark:text-gray-400 dark:hover:text-blue-400 rounded-lg text-sm transition-all">
                             <i class="fas fa-edit mr-1"></i>Bearbeiten
                         </a>
                         <form method="POST" action="index.php<?php echo $filterType ? '?type=' . urlencode($filterType) : ''; ?>"
@@ -211,7 +211,7 @@ ob_start();
                             ?>">
                             <input type="hidden" name="delete_id" value="<?php echo (int)$listing['id']; ?>">
                             <button type="submit"
-                                    class="inline-flex items-center px-3 py-2 bg-gray-100 hover:bg-red-100 text-gray-500 hover:text-red-600 dark:bg-gray-700 dark:hover:bg-red-900/40 dark:text-gray-400 dark:hover:text-red-400 rounded-lg text-sm transition-all">
+                                    class="inline-flex items-center px-3 py-2 min-h-[44px] bg-gray-100 hover:bg-red-100 text-gray-500 hover:text-red-600 dark:bg-gray-700 dark:hover:bg-red-900/40 dark:text-gray-400 dark:hover:text-red-400 rounded-lg text-sm transition-all">
                                 <i class="fas fa-trash-alt mr-1"></i>Löschen
                             </button>
                         </form>

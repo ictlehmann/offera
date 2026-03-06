@@ -375,7 +375,7 @@ ob_start();
                             alt="Event Bild"
                             class="max-w-xs rounded-xl border border-gray-300 shadow-sm"
                         >
-                        <div class="mt-2">
+                        <div class="mt-2 flex items-center min-h-[44px]">
                             <input 
                                 type="checkbox" 
                                 name="delete_image" 
@@ -552,7 +552,7 @@ ob_start();
 
                 <!-- Checkboxes -->
                 <div class="md:col-span-2 space-y-4">
-                    <label class="flex items-center space-x-2">
+                    <label class="flex items-center space-x-2 min-h-[44px]">
                         <input 
                             type="checkbox" 
                             name="is_external"
@@ -569,7 +569,7 @@ ob_start();
                         <span class="text-sm font-medium text-gray-700">Externes Event</span>
                     </label>
 
-                    <label class="flex items-center space-x-2">
+                    <label class="flex items-center space-x-2 min-h-[44px]">
                         <input 
                             type="checkbox" 
                             name="needs_helpers"
@@ -604,7 +604,7 @@ ob_start();
                             foreach ($entraGroups as $groupIndex => $group): 
                             $groupIdSafe = 'group_' . $groupIndex;
                             ?>
-                            <label for="<?php echo $groupIdSafe; ?>" class="flex items-center space-x-2">
+                            <label for="<?php echo $groupIdSafe; ?>" class="flex items-center space-x-2 min-h-[44px]">
                                 <input 
                                     type="checkbox" 
                                     id="<?php echo $groupIdSafe; ?>"
@@ -638,7 +638,7 @@ ob_start();
                                 ? (!empty(array_intersect($boardEntraRoles, $allowedRoles)) || in_array('board_roles', $allowedRoles))
                                 : in_array($roleValue, $allowedRoles);
                             ?>
-                            <label for="<?php echo $roleIdSafe; ?>" class="flex items-center space-x-2">
+                            <label for="<?php echo $roleIdSafe; ?>" class="flex items-center space-x-2 min-h-[44px]">
                                 <input 
                                     type="checkbox" 
                                     id="<?php echo $roleIdSafe; ?>"

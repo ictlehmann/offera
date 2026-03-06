@@ -155,9 +155,9 @@ ob_start();
         </a>
 
         <?php if ($canManage && $linkDbId !== null): ?>
-        <div class="link-actions hidden px-5 pb-4 pt-0 flex justify-end gap-2">
+        <div class="link-actions hidden px-5 pb-4 pt-0 flex justify-end gap-4">
             <a href="edit.php?id=<?php echo (int)$linkDbId; ?>"
-               class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition font-medium">
+               class="inline-flex items-center gap-1.5 px-3 py-2 min-h-[44px] text-xs bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 transition font-medium">
                 <i class="fas fa-edit"></i>Bearbeiten
             </a>
             <form method="POST" action="index.php" data-confirm="Link wirklich löschen?" class="inline delete-form">
@@ -165,7 +165,7 @@ ob_start();
                 <input type="hidden" name="action" value="delete">
                 <input type="hidden" name="link_id" value="<?php echo (int)$linkDbId; ?>">
                 <button type="submit"
-                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/50 transition font-medium">
+                        class="inline-flex items-center gap-1.5 px-3 py-2 min-h-[44px] text-xs bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/50 transition font-medium">
                     <i class="fas fa-trash"></i>Löschen
                 </button>
             </form>
