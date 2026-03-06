@@ -93,7 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['complete_project'])) 
         $error = 'Nur laufende Projekte können abgeschlossen werden';
     } else {
         try {
-            $documentation = trim($_POST['documentation'] ?? '');
+            $documentation = strip_tags(trim($_POST['documentation'] ?? ''));
             if (empty($documentation)) {
                 throw new Exception('Bitte geben Sie eine Projektdokumentation an');
             }
@@ -124,7 +124,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['apply'])) {
         $error = 'Bewerbungen für dieses Projekt sind nicht möglich';
     } else {
         try {
-            $motivation = trim($_POST['motivation'] ?? '');
+            $motivation = strip_tags(trim($_POST['motivation'] ?? ''));
 
             // Validate motivation only when application text is required
             if ($requiresApplication && empty($motivation)) {
