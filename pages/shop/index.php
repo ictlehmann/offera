@@ -541,7 +541,7 @@ ob_start();
             $sliderId = 'slider-grid-' . $product['id'];
             $productUrl = asset('pages/shop/view.php?id=' . $product['id']);
         ?>
-        <div class="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden flex flex-col group hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-gray-700 hover:border-blue-200 dark:hover:border-blue-700 min-w-0 <?php echo $productOutOfStock ? 'opacity-70' : ''; ?>"
+        <div class="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden flex flex-col group hover:shadow-lg hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-gray-700 hover:border-blue-200 dark:hover:border-blue-700 min-w-0 <?php echo $productOutOfStock ? 'opacity-70' : ''; ?>"
              data-instock="<?php echo $productOutOfStock ? '0' : '1'; ?>"
              data-gender="<?php echo htmlspecialchars($product['gender'] ?? ''); ?>"
              data-category="<?php echo htmlspecialchars($product['category'] ?? ''); ?>"
