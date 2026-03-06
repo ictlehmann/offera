@@ -493,6 +493,7 @@ $completionDone    = count(array_filter($completionFields));
 $completionTotal   = count($completionFields);
 $completionPercent = $completionTotal > 0 ? (int) round(($completionDone / $completionTotal) * 100) : 0;
 $completionMissing = array_keys(array_filter($completionFields, fn($v) => !$v));
+$isProfileComplete = $completionPercent === 100;
 // --- End profile completion ---
 
 $title = 'Profil - IBC Intranet';
@@ -542,7 +543,7 @@ ob_start();
     </div>
 </div>
 
-<?php if ($completionPercent < 100): ?>
+<?php if (!$isProfileComplete): ?>
 <!-- Profile Completion Banner -->
 <div class="mb-6 p-5 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 border border-purple-200 dark:border-purple-700 rounded-lg">
     <div class="flex items-start gap-4">
