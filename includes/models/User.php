@@ -380,6 +380,87 @@ class User {
     }
 
     /**
+     * Get the profile picture URL for a user with the following priority:
+     *  1. User-uploaded photo (from alumni_profiles.image_path)
+     *  2. Entra ID cached photo (users.entra_photo_path) – fetched live and cached if not yet stored
+     *  3. Default profile image (assets/img/default_profil.png)
+     *
+     * The Entra ID photo is cached on disk and the path is persisted in users.entra_photo_path
+     * so the Microsoft Graph API is only called once per user (until the cache is invalidated).
+     *
+     * @param int        $userId   Local database user ID
+     * @param array|null $userData Pre-fetched user row (must contain entra_photo_path and azure_oid).
+     *                             Pass null to have the row fetched automatically.
+     * @return string              URL-ready relative image path
+     */
+    public static function getProfilePictureUrl(int $userId, ?array $userData = null): string {
+        require_once __DIR__ . '/../helpers.php';
+        $default = defined('DEFAULT_PROFILE_IMAGE') ? DEFAULT_PROFILE_IMAGE : 'assets/img/default_profil.png';
+
+        // 1. Check for user-uploaded profile photo (highest priority)
+        $uploadedPath = null;
+        try {
+            $contentDb  = Database::getContentDB();
+            $stmt       = $contentDb->prepare("SELECT image_path FROM alumni_profiles WHERE user_id = ?");
+            $stmt->execute([$userId]);
+            $row        = $stmt->fetch();
+            $uploadedPath = $row ? ($row['image_path'] ?? null) : null;
+        } catch (Exception $e) {
+            error_log('[getProfilePictureUrl] Failed to fetch uploaded image for user ' . $userId . ': ' . $e->getMessage());
+        }
+
+        if (!empty($uploadedPath)) {
+            $resolved = resolveImagePath($uploadedPath);
+            if ($resolved !== null) {
+                return $resolved;
+            }
+        }
+
+        // Lazy-load user row only when not supplied by the caller
+        if ($userData === null) {
+            try {
+                $db   = Database::getUserDB();
+                $stmt = $db->prepare("SELECT entra_photo_path, azure_oid FROM users WHERE id = ?");
+                $stmt->execute([$userId]);
+                $userData = $stmt->fetch() ?: [];
+            } catch (Exception $e) {
+                error_log('[getProfilePictureUrl] Failed to fetch user row for user ' . $userId . ': ' . $e->getMessage());
+                $userData = [];
+            }
+        }
+
+        // 2. Check for cached Entra ID photo
+        $entraPath = $userData['entra_photo_path'] ?? null;
+        if (!empty($entraPath)) {
+            $resolved = resolveImagePath($entraPath);
+            if ($resolved !== null) {
+                return $resolved;
+            }
+        }
+
+        // 2b. No valid cached Entra photo – try to fetch from Microsoft Graph (if user has an Azure OID)
+        $azureOid = $userData['azure_oid'] ?? null;
+        if (!empty($azureOid)) {
+            try {
+                require_once __DIR__ . '/../services/MicrosoftGraphService.php';
+                $graphService = new MicrosoftGraphService();
+                $photoData    = $graphService->getUserPhoto($azureOid);
+                if ($photoData !== null) {
+                    $cached = self::cacheEntraPhoto($userId, $photoData);
+                    if ($cached !== null) {
+                        return $cached;
+                    }
+                }
+            } catch (Exception $e) {
+                error_log('[getProfilePictureUrl] Entra photo fetch failed for user ' . $userId . ': ' . $e->getMessage());
+            }
+        }
+
+        // 3. Fall back to default image
+        return $default;
+    }
+
+    /**
      * Save a profile photo fetched from Entra ID to disk and record its path.
      *
      * The photo is stored in uploads/profile_photos/ using a deterministic filename
