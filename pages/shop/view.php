@@ -484,7 +484,7 @@ ob_start();
                     <!-- Add to cart button -->
                     <?php if ($anyInStock): ?>
                     <button type="submit"
-                            class="w-full py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 active:from-blue-800 text-white rounded-2xl font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-3 group active:scale-95">
+                            class="w-full py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 active:from-blue-800 text-white rounded-2xl font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out flex items-center justify-center gap-3 group active:scale-95">
                         <i class="fas fa-cart-plus text-xl transition-transform group-hover:scale-110"></i>
                         In den Warenkorb
                     </button>
