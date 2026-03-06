@@ -468,6 +468,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+// --- Profile completion calculation (8 required fields only) ---
+$completionFields = [
+    'first_name'   => !empty($profile['first_name'] ?? ''),
+    'last_name'    => !empty($profile['last_name'] ?? ''),
+    'email'        => !empty($user['email'] ?? ''),
+    'mobile_phone' => !empty($profile['mobile_phone'] ?? ''),
+    'gender'       => !empty($profile['gender'] ?? ''),
+    'birthday'     => !empty($profile['birthday'] ?? ''),
+    'skills'       => !empty($profile['skills'] ?? ''),
+    'about_me'     => !empty($profile['about_me'] ?? ''),
+];
+$completionFieldLabels = [
+    'first_name'   => 'Vorname',
+    'last_name'    => 'Nachname',
+    'email'        => 'E-Mail',
+    'mobile_phone' => 'Mobiltelefon',
+    'gender'       => 'Geschlecht',
+    'birthday'     => 'Geburtstag',
+    'skills'       => 'Fähigkeiten',
+    'about_me'     => 'Über mich',
+];
+$completionDone    = count(array_filter($completionFields));
+$completionTotal   = count($completionFields);
+$completionPercent = $completionTotal > 0 ? (int) round(($completionDone / $completionTotal) * 100) : 0;
+$completionMissing = array_keys(array_filter($completionFields, fn($v) => !$v));
+// --- End profile completion ---
+
 $title = 'Profil - IBC Intranet';
 $profile_image = asset(User::getProfilePictureUrl($user['id']));
 ob_start();
@@ -514,6 +541,36 @@ ob_start();
         </div>
     </div>
 </div>
+
+<?php if ($completionPercent < 100): ?>
+<!-- Profile Completion Banner -->
+<div class="mb-6 p-5 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 border border-purple-200 dark:border-purple-700 rounded-lg">
+    <div class="flex items-start gap-4">
+        <div class="flex-shrink-0 mt-1">
+            <i class="fas fa-user-check text-purple-600 dark:text-purple-400 text-2xl"></i>
+        </div>
+        <div class="flex-1 min-w-0">
+            <p class="text-base font-semibold text-purple-900 dark:text-purple-100 break-words hyphens-auto">
+                Vervollständige dein Profil!
+            </p>
+            <p class="text-sm text-purple-800 dark:text-purple-200 mt-1 break-words hyphens-auto">
+                Ein vollständiges Profil hilft deinen Kolleginnen und Kollegen, dich besser kennenzulernen.
+                Du bist schon zu <strong><?php echo $completionPercent; ?>%</strong> fertig – fast geschafft!
+            </p>
+            <!-- Progress bar -->
+            <div class="mt-3 w-full bg-purple-200 dark:bg-purple-800 rounded-full h-2.5" role="progressbar" aria-valuenow="<?php echo $completionPercent; ?>" aria-valuemin="0" aria-valuemax="100" aria-label="Profilfortschritt <?php echo $completionPercent; ?>%">
+                <div class="bg-purple-600 h-2.5 rounded-full transition-all duration-300" style="width: <?php echo $completionPercent; ?>%"></div>
+            </div>
+            <?php if (!empty($completionMissing)): ?>
+            <p class="text-xs text-purple-700 dark:text-purple-300 mt-2">
+                <span class="font-medium">Noch fehlende Pflichtfelder:</span>
+                <?php echo implode(', ', array_map(fn($k) => htmlspecialchars($completionFieldLabels[$k] ?? $k), $completionMissing)); ?>
+            </p>
+            <?php endif; ?>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
 
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
     <!-- Account Info -->
