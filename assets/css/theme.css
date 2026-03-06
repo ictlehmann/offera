@@ -2458,6 +2458,10 @@ a.btn-secondary {
     cursor: pointer;
     position: relative;
     overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
 }
 
 /* Light Mode: Button ripple effect on click */
@@ -2521,6 +2525,10 @@ body:not(.dark-mode) .btn-primary:active::after {
     cursor: pointer;
     position: relative;
     overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
     
     /* Transitions - Smooth animations */
     transition: transform 0.3s ease-in-out, 
@@ -3171,17 +3179,17 @@ body.dark-mode .sidebar {
     }
     
     /* Button Optimizations - Larger touch targets */
-    /* Only make standalone primary buttons and form action buttons full-width on mobile */
-    form .btn-primary,
-    .form-actions .btn-primary,
+    /* Make all standalone primary buttons full-width on mobile */
+    .btn-primary,
     .btn-block,
     .btn-mobile-full {
         min-height: 44px;
-        padding: 0.75rem 1.5rem !important;
+        padding: 0.75rem 1rem !important;
         font-size: 1rem;
         width: 100%;
-        display: block;
-        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         margin-bottom: 0.5rem;
     }
 
@@ -3344,7 +3352,7 @@ body.dark-mode .sidebar {
     button:not(.w-full),
     a.btn:not(.w-full) {
         width: auto;
-        display: inline-block;
+        display: inline-flex;
     }
 }
 
@@ -4433,6 +4441,8 @@ body:not(.dark-mode) .hero-gradient .hero-date {
     input[type="button"] {
         padding: 0.75rem 1rem !important;
         font-size: 1rem !important;
+        align-items: center !important;
+        justify-content: center !important;
     }
 }
 
@@ -6170,6 +6180,10 @@ body.dark-mode .card {
     border-radius: 10px !important;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
     padding: 0.55rem 1.25rem !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 0.5rem !important;
 }
 
 .btn:hover {

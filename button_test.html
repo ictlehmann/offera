@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Button Test</title>
+    <link rel="stylesheet" href="assets/css/theme.css">
+    <link rel="stylesheet" href="assets/css/tailwind.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous">
+    <style>
+        body { padding: 2rem; }
+        .section { margin-bottom: 2rem; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1.5rem; background: white; }
+        h2 { margin-bottom: 1rem; color: #374151; }
+        .label { font-size: 0.75rem; color: #9ca3af; margin-bottom: 0.5rem; }
+    </style>
+</head>
+<body class="bg-gray-50 text-slate-800">
+    <h1 style="font-size:1.5rem; margin-bottom:1.5rem; font-weight:bold; color:#1e3a8a;">Button Mobile Responsiveness Test</h1>
+
+    <div class="section">
+        <h2>Standard btn-primary (standalone)</h2>
+        <div class="label">Should be full-width on mobile (≤640px), inline on larger screens</div>
+        <button class="btn-primary">
+            <i class="fas fa-save"></i>
+            Speichern
+        </button>
+    </div>
+    
+    <div class="section">
+        <h2>btn-primary in flex container (grouped)</h2>
+        <div class="label">Should stay auto-width, flex items side by side</div>
+        <div class="flex gap-4">
+            <a href="#" class="btn-primary no-underline">
+                <i class="fas fa-edit"></i>
+                Bearbeiten
+            </a>
+            <button class="btn-primary">
+                <i class="fas fa-trash"></i>
+                Löschen
+            </button>
+        </div>
+    </div>
+    
+    <div class="section">
+        <h2>Bootstrap .btn classes</h2>
+        <div class="label">Should have flex centering, min-height 44px on mobile</div>
+        <div style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+            <button class="btn btn-primary">
+                <i class="fas fa-search"></i>
+                Suchen
+            </button>
+            <button class="btn btn-success">
+                <i class="fas fa-check"></i>
+                Bestätigen
+            </button>
+            <button class="btn btn-danger">
+                <i class="fas fa-times"></i>
+                Abbrechen
+            </button>
+        </div>
+    </div>
+    
+    <div class="section">
+        <h2>btn-primary with icon (no spacing class)</h2>
+        <div class="label">Icons should have proper spacing due to gap: 0.5rem</div>
+        <button class="btn-primary">
+            <i class="fas fa-paper-plane"></i>
+            Veröffentlichen
+        </button>
+    </div>
+    
+    <div class="section">
+        <h2>Anchor as btn-primary</h2>
+        <div class="label">No longer needs inline-block class – displays as inline-flex</div>
+        <a href="#" class="btn-primary no-underline">
+            <i class="fas fa-arrow-left"></i>
+            Zurück
+        </a>
+    </div>
+    
+    <div style="background:#e8f4f8; padding:1rem; border-radius:8px; margin-top:2rem;">
+        <strong>Viewport:</strong> <span id="vpw"></span>px
+        <script>document.getElementById('vpw').textContent = window.innerWidth;</script>
+    </div>
+</body>
+</html>

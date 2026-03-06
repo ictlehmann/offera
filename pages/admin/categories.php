@@ -46,7 +46,7 @@ ob_start();
             <p class="text-gray-600"><?php echo count($categories); ?> Kategorien</p>
         </div>
         <div class="mt-4 md:mt-0">
-            <a href="../inventory/index.php" class="btn-primary inline-block">
+            <a href="../inventory/index.php" class="btn-primary">
                 <i class="fas fa-arrow-left mr-2"></i>
                 Zurück zum Inventar
             </a>

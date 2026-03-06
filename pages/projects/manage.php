@@ -209,7 +209,7 @@ ob_start();
     <i class="fas fa-briefcase text-gray-400 dark:text-gray-500 text-6xl mb-4"></i>
     <h3 class="text-base sm:text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">Keine Projekte gefunden</h3>
     <p class="text-gray-500 dark:text-gray-400 mb-6">Es wurden noch keine Projekte erstellt.</p>
-    <a href="manage.php?new=1" class="btn-primary inline-block">
+    <a href="manage.php?new=1" class="btn-primary">
         <i class="fas fa-plus mr-2"></i>Erstes Projekt erstellen
     </a>
 </div>
