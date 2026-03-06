@@ -252,11 +252,11 @@ ob_start();
             
             <!-- External Link Button -->
             <?php if (!empty($post['external_link'])): ?>
-            <div class="mb-6">
+            <div class="mb-2">
                 <a href="<?php echo htmlspecialchars($post['external_link']); ?>" 
                    target="_blank"
                    rel="noopener noreferrer"
-                   class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg font-semibold hover:from-green-700 hover:to-green-800 transition-all shadow-lg">
+                   class="inline-flex items-center justify-center w-full sm:w-auto px-6 p-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg font-semibold hover:from-green-700 hover:to-green-800 transition-all shadow-lg">
                     <i class="fas fa-external-link-alt mr-2"></i>
                     Mehr Informationen
                 </a>
@@ -265,9 +265,9 @@ ob_start();
             
             <!-- Edit Button (Only for Author or Admin/Board) -->
             <?php if ($canEdit): ?>
-            <div class="mb-6">
+            <div class="mb-2">
                 <a href="edit.php?id=<?php echo (int)$post['id']; ?>" 
-                   class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg">
+                   class="inline-flex items-center justify-center w-full sm:w-auto px-6 p-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg">
                     <i class="fas fa-edit mr-2"></i>
                     Beitrag bearbeiten
                 </a>

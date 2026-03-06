@@ -94,7 +94,7 @@ ob_start();
             <p class="text-gray-600 dark:text-gray-300 leading-relaxed">Gesuche von Mitgliedern – Stelle dein Profil vor oder finde Talente</p>
         </div>
         <a href="create.php"
-           class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg">
+           class="inline-flex items-center w-full sm:w-auto justify-center px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg">
             <i class="fas fa-plus mr-2"></i>
             Gesuch aufgeben
         </a>
@@ -186,7 +186,7 @@ ob_start();
                 </p>
 
                 <!-- Footer -->
-                <div class="pt-4 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between gap-2">
+                <div class="pt-4 border-t border-gray-200 dark:border-gray-700 flex flex-wrap items-center justify-between gap-2">
                     <?php if (!empty($listing['pdf_path'])): ?>
                     <a href="<?php echo htmlspecialchars(asset($listing['pdf_path']), ENT_QUOTES, 'UTF-8'); ?>"
                        download
@@ -198,7 +198,7 @@ ob_start();
                     <?php endif; ?>
 
                     <?php if ((int)$listing['user_id'] === $userId): ?>
-                    <div class="flex items-center gap-4">
+                    <div class="flex flex-wrap items-center gap-2">
                         <a href="edit.php?id=<?php echo (int)$listing['id']; ?>"
                            class="inline-flex items-center px-3 py-2 min-h-[44px] bg-gray-100 hover:bg-blue-100 text-gray-500 hover:text-blue-600 dark:bg-gray-700 dark:hover:bg-blue-900/40 dark:text-gray-400 dark:hover:text-blue-400 rounded-lg text-sm transition-all">
                             <i class="fas fa-edit mr-1"></i>Bearbeiten
@@ -226,7 +226,7 @@ ob_start();
 
     <!-- Pagination -->
     <?php if ($page > 1 || $hasNextPage): ?>
-    <div class="mt-8 flex justify-center gap-4">
+    <div class="mt-8 flex flex-wrap justify-center gap-2">
         <?php if ($page > 1): ?>
         <a href="?page=<?php echo $page - 1; ?><?php echo $filterType ? '&type=' . urlencode($filterType) : ''; ?>"
            class="px-6 py-3 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 transition-all shadow-md">
