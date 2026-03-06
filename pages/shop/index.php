@@ -298,7 +298,7 @@ ob_start();
             <p class="text-gray-600 dark:text-gray-300">Exklusive Artikel für IBC-Mitglieder</p>
         </div>
         <a href="<?php echo asset('pages/shop/index.php?action=cart'); ?>"
-           class="relative inline-flex items-center px-5 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg font-medium no-underline">
+           class="relative inline-flex items-center px-5 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-lg hover:shadow-xl font-medium no-underline active:scale-95">
             <i class="fas fa-shopping-cart mr-2"></i>
             Warenkorb
             <?php if ($cartCount > 0): ?>
@@ -541,7 +541,7 @@ ob_start();
             $sliderId = 'slider-grid-' . $product['id'];
             $productUrl = asset('pages/shop/view.php?id=' . $product['id']);
         ?>
-        <div class="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden flex flex-col group hover:shadow-2xl transition-all duration-300 border border-gray-100 dark:border-gray-700 hover:border-blue-200 dark:hover:border-blue-700 min-w-0 <?php echo $productOutOfStock ? 'opacity-70' : ''; ?>"
+        <div class="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden flex flex-col group hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-gray-700 hover:border-blue-200 dark:hover:border-blue-700 min-w-0 <?php echo $productOutOfStock ? 'opacity-70' : ''; ?>"
              data-instock="<?php echo $productOutOfStock ? '0' : '1'; ?>"
              data-gender="<?php echo htmlspecialchars($product['gender'] ?? ''); ?>"
              data-category="<?php echo htmlspecialchars($product['category'] ?? ''); ?>"
@@ -646,13 +646,13 @@ ob_start();
                     <input type="hidden" name="product_id" value="<?php echo $product['id']; ?>">
                     <input type="hidden" name="quantity" value="1">
                     <button type="submit"
-                            class="w-full py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-semibold rounded-xl transition-all flex items-center justify-center gap-1.5 shadow-sm hover:shadow-md">
+                            class="w-full py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-semibold rounded-xl transition-all duration-300 flex items-center justify-center gap-1.5 shadow-sm hover:shadow-md active:scale-95">
                         <i class="fas fa-cart-plus text-sm"></i>In den Warenkorb
                     </button>
                 </form>
                 <?php else: ?>
                 <a href="<?php echo $productUrl; ?>"
-                   class="w-full block text-center py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-semibold rounded-xl transition-all no-underline flex items-center justify-center gap-1.5 shadow-sm hover:shadow-md">
+                   class="w-full block text-center py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-semibold rounded-xl transition-all duration-300 no-underline flex items-center justify-center gap-1.5 shadow-sm hover:shadow-md active:scale-95">
                     <i class="fas fa-cart-plus text-sm"></i>Auswählen &amp; kaufen
                 </a>
                 <?php endif; ?>
@@ -874,7 +874,7 @@ ob_start();
                     ?>
                     <?php if ($anyInStock): ?>
                     <button type="submit"
-                            class="w-full py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 font-semibold transition-all shadow-lg text-lg">
+                            class="w-full py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 font-semibold transition-all duration-300 shadow-lg hover:shadow-xl text-lg active:scale-95">
                         <i class="fas fa-cart-plus mr-2"></i>In den Warenkorb
                     </button>
                     <?php else: ?>
@@ -899,7 +899,7 @@ ob_start();
             <i class="fas fa-shopping-cart text-5xl mb-4 opacity-30"></i>
             <p class="text-base sm:text-xl mb-4">Ihr Warenkorb ist leer.</p>
             <a href="<?php echo asset('pages/shop/index.php'); ?>"
-               class="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors no-underline font-medium">
+               class="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-300 no-underline font-medium active:scale-95">
                 <i class="fas fa-arrow-left mr-2"></i>Weiter einkaufen
             </a>
         </div>
@@ -975,16 +975,16 @@ ob_start();
             </div>
             <div class="flex flex-col sm:flex-row gap-3 justify-between">
                 <a href="<?php echo asset('pages/shop/index.php'); ?>"
-                   class="px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-all text-center font-medium no-underline">
+                   class="px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-all duration-300 text-center font-medium no-underline">
                     <i class="fas fa-arrow-left mr-2"></i>Weiter einkaufen
                 </a>
                 <div class="flex gap-3">
                     <button type="submit" form="cart-form"
-                            class="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-all font-medium">
+                            class="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-all duration-300 font-medium active:scale-95">
                         <i class="fas fa-sync mr-2"></i>Aktualisieren
                     </button>
                     <a href="<?php echo asset('pages/shop/index.php?action=checkout'); ?>"
-                       class="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all font-semibold shadow-lg no-underline">
+                       class="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl no-underline active:scale-95">
                         <i class="fas fa-credit-card mr-2"></i>Zur Kasse
                     </a>
                 </div>
@@ -999,7 +999,7 @@ ob_start();
     <div class="text-center py-20 text-gray-500 dark:text-gray-400">
         <p class="text-base sm:text-xl mb-4">Ihr Warenkorb ist leer.</p>
         <a href="<?php echo asset('pages/shop/index.php'); ?>"
-           class="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors no-underline font-medium">
+           class="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-300 no-underline font-medium active:scale-95">
             <i class="fas fa-arrow-left mr-2"></i>Zum Shop
         </a>
     </div>
@@ -1151,7 +1151,7 @@ ob_start();
                     </div>
 
                     <button type="submit" form="checkout-form" id="checkout-submit-btn"
-                            class="w-full py-4 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl hover:from-purple-700 hover:to-purple-800 font-bold text-lg transition-all shadow-lg">
+                            class="w-full py-4 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-xl hover:from-purple-700 hover:to-purple-800 font-bold text-lg transition-all duration-300 shadow-lg hover:shadow-xl active:scale-95">
                         <i class="fas fa-lock mr-2"></i>
                         Kostenpflichtig bestellen – <span id="checkout-total-display"><?php echo number_format($cartTotalAmt, 2, ',', '.'); ?></span> €
                     </button>

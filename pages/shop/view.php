@@ -166,7 +166,7 @@ ob_start();
         </span>
         <!-- Cart shortcut -->
         <a href="<?php echo asset('pages/shop/index.php?action=cart'); ?>"
-           class="ml-auto relative inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all shadow-md font-medium text-sm no-underline">
+           class="ml-auto relative inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-md hover:shadow-lg font-medium text-sm no-underline active:scale-95">
             <i class="fas fa-shopping-cart"></i>
             Warenkorb
             <?php if ($cartCount > 0): ?>
@@ -484,7 +484,7 @@ ob_start();
                     <!-- Add to cart button -->
                     <?php if ($anyInStock): ?>
                     <button type="submit"
-                            class="w-full py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 active:from-blue-800 text-white rounded-2xl font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-3 group">
+                            class="w-full py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 active:from-blue-800 text-white rounded-2xl font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-3 group active:scale-95">
                         <i class="fas fa-cart-plus text-xl transition-transform group-hover:scale-110"></i>
                         In den Warenkorb
                     </button>
