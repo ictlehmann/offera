@@ -91,7 +91,7 @@ ob_start();
                 <i class="fas fa-briefcase mr-3 text-blue-600"></i>
                 Job- &amp; Praktikumsbörse
             </h1>
-            <p class="text-gray-600 dark:text-gray-300">Gesuche von Mitgliedern – Stelle dein Profil vor oder finde Talente</p>
+            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">Gesuche von Mitgliedern – Stelle dein Profil vor oder finde Talente</p>
         </div>
         <a href="create.php"
            class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg">
@@ -167,7 +167,7 @@ ob_start();
                 </div>
 
                 <!-- Title -->
-                <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2 break-words leading-snug">
+                <h3 class="text-base sm:text-lg md:text-xl font-bold text-gray-800 dark:text-gray-100 mb-2 break-words leading-snug">
                     <?php echo htmlspecialchars($listing['title'], ENT_QUOTES, 'UTF-8'); ?>
                 </h3>
 
@@ -178,7 +178,7 @@ ob_start();
                 </div>
 
                 <!-- Description excerpt -->
-                <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-1 break-words">
+                <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-1 break-words leading-relaxed">
                     <?php
                         $desc = $listing['description'];
                         echo htmlspecialchars(mb_strlen($desc) > 200 ? mb_substr($desc, 0, 200) . '…' : $desc, ENT_QUOTES, 'UTF-8');
