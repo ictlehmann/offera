@@ -8,9 +8,22 @@ if (!Auth::check()) {
     exit;
 }
 
-// Security check: Only allow EasyVerein URLs
+// Security check: Only allow EasyVerein URLs with strict hostname validation
 $url = $_GET['url'] ?? '';
-if (empty($url) || strpos($url, 'easyverein.com') === false) {
+if (empty($url)) {
+    header("HTTP/1.0 403 Forbidden");
+    exit;
+}
+
+$parsedUrl = parse_url($url);
+$scheme    = strtolower($parsedUrl['scheme'] ?? '');
+$host      = strtolower($parsedUrl['host']   ?? '');
+
+// Require HTTPS and ensure the host is easyverein.com or a subdomain of it
+if (
+    $scheme !== 'https' ||
+    ($host !== 'easyverein.com' && !str_ends_with($host, '.easyverein.com'))
+) {
     header("HTTP/1.0 403 Forbidden");
     exit;
 }
