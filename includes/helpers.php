@@ -276,16 +276,19 @@ function isMemberRole($role) {
 
 /**
  * Sanitize a value for safe inclusion in a CSV cell (CWE-1236 / CSV injection prevention).
- * If the value begins with =, +, -, or @, a single quote is prepended so that
- * spreadsheet applications (Excel, LibreOffice Calc, …) treat it as plain text
- * instead of executing it as a formula.
+ * A single quote is prepended when the value starts with (optional leading whitespace
+ * followed by) a formula-triggering character: =, +, -, @, tab (\t), or carriage
+ * return (\r). Leading whitespace is considered a potential obfuscation vector;
+ * tab and carriage return are both possible leading whitespace AND trigger characters
+ * on their own. This ensures spreadsheet applications (Excel, LibreOffice Calc, …)
+ * treat the cell as plain text instead of executing it as a formula.
  *
  * @param mixed $val The value to sanitize
  * @return string The sanitized string value
  */
 function sanitizeCsvValue($val): string {
     $val = (string)$val;
-    if (preg_match('/^[=+\-@]/', $val)) {
+    if (preg_match('/^\s*[=+\-@\t\r]/', $val)) {
         $val = "'" . $val;
     }
     return $val;
