@@ -3194,15 +3194,17 @@ body.dark-mode .sidebar {
     }
 
     /* Preserve inline/grouped buttons - keep them side-by-side on mobile */
+    /* Excludes flex-col containers where full-width is correct (e.g. flex-col sm:flex-row headers) */
     .btn-group .btn-primary,
-    .flex .btn-primary,
-    .flex a.btn,
+    .flex:not(.flex-col) .btn-primary,
+    .flex:not(.flex-col) a.btn,
     table .btn-primary,
     table a.btn,
     td .btn-primary,
     td a.btn {
         width: auto;
         display: inline-flex;
+        margin-bottom: 0;
     }
 
     /* Ensure all interactive elements meet touch target minimum */
