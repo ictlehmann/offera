@@ -110,7 +110,7 @@ ob_start();
 
 <div class="max-w-2xl mx-auto">
     <div class="card p-6">
-        <h1 class="text-2xl font-bold text-gray-800 mb-6">
+        <h1 class="text-xl sm:text-2xl font-bold text-gray-800 mb-6">
             <i class="fas fa-hand-holding-box text-purple-600 mr-2"></i>
             Artikel ausleihen
         </h1>

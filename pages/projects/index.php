@@ -155,10 +155,10 @@ ob_start();
                  alt="Keine Projekte"
                  class="w-32 h-32 mx-auto mb-5 opacity-60">
             <?php if ($searchQuery !== ''): ?>
-                <p class="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">Keine Projekte gefunden</p>
+                <p class="text-base sm:text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">Keine Projekte gefunden</p>
                 <p class="text-sm text-gray-400 dark:text-gray-500">Versuche einen anderen Suchbegriff oder wähle einen anderen Filter.</p>
             <?php else: ?>
-                <p class="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">Aktuell gibt es keine aktiven Projekte.</p>
+                <p class="text-base sm:text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">Aktuell gibt es keine aktiven Projekte.</p>
                 <p class="text-sm text-gray-400 dark:text-gray-500">Schau später wieder vorbei!</p>
             <?php endif; ?>
         </div>

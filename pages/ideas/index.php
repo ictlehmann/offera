@@ -81,7 +81,7 @@ ob_start();
 
     <!-- Hero Header -->
     <div class="mb-8 rounded-2xl overflow-hidden relative">
-        <div class="bg-gradient-to-br from-yellow-400 via-amber-400 to-yellow-500 dark:from-yellow-500/20 dark:via-amber-600/20 dark:to-yellow-600/10 dark:border dark:border-yellow-500/20 px-6 py-6 sm:py-7">
+        <div class="bg-gradient-to-br from-yellow-400 via-amber-400 to-yellow-500 dark:from-yellow-500/20 dark:via-amber-600/20 dark:to-yellow-600/10 px-6 py-6 sm:py-7">
             <!-- subtle decorative blob -->
             <div class="absolute -top-6 -right-6 w-36 h-36 rounded-full bg-white/10 blur-2xl pointer-events-none"></div>
             <div class="absolute bottom-0 left-1/3 w-24 h-24 rounded-full bg-white/10 blur-2xl pointer-events-none"></div>
@@ -131,7 +131,7 @@ ob_start();
                 <i class="fas fa-plus text-white text-xs"></i>
             </div>
         </div>
-        <p class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">Noch keine Ideen vorhanden</p>
+        <p class="text-base sm:text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">Noch keine Ideen vorhanden</p>
         <p class="text-gray-500 dark:text-gray-400 mb-7 text-sm max-w-xs mx-auto">Sei der Erste und teile Deine Idee mit dem Team!</p>
         <button onclick="document.getElementById('openIdeaModal').click()"
             class="inline-flex items-center gap-2 px-6 py-3 bg-yellow-400 hover:bg-yellow-500 text-gray-900 font-bold rounded-xl shadow-sm hover:shadow-md transition-all text-sm">
