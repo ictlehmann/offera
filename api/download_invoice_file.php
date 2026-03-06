@@ -71,19 +71,32 @@ if (empty($relativePath)) {
     exit;
 }
 
-$baseDir  = realpath(__DIR__ . '/..');
-$fullPath = realpath($baseDir . '/' . ltrim($relativePath, '/'));
+// Path-traversal guard: the resolved path must be strictly inside the dedicated
+// invoices upload folder.  A path outside that folder (e.g. reached via symlinks
+// or a tampered DB value) is treated as an authorisation failure (HTTP 403), not a
+// missing file (HTTP 404), so that the response cannot be used to probe paths.
+$invoicesDir = realpath(__DIR__ . '/../uploads/invoices');
 
-// Path-traversal guard: the resolved path must stay inside the application root
-// AND must be located within the dedicated invoices upload folder.
-$invoicesDir = realpath($baseDir . '/uploads/invoices');
+if ($invoicesDir === false) {
+    http_response_code(500);
+    header('Content-Type: application/json');
+    echo json_encode(['success' => false, 'message' => 'Server-Konfigurationsfehler']);
+    exit;
+}
 
-if (
-    $fullPath === false ||
-    $invoicesDir === false ||
-    !str_starts_with($fullPath, $invoicesDir . DIRECTORY_SEPARATOR) ||
-    !is_file($fullPath)
-) {
+// Strip any directory components from the stored filename so that a tampered
+// database value cannot escape the invoices folder via path traversal.
+$safeBasename = basename($relativePath);
+$fullPath = realpath($invoicesDir . DIRECTORY_SEPARATOR . $safeBasename);
+
+if ($fullPath !== false && !str_starts_with($fullPath, $invoicesDir . DIRECTORY_SEPARATOR)) {
+    http_response_code(403);
+    header('Content-Type: application/json');
+    echo json_encode(['success' => false, 'message' => 'Zugriff verweigert']);
+    exit;
+}
+
+if ($fullPath === false || !is_file($fullPath)) {
     http_response_code(404);
     header('Content-Type: application/json');
     echo json_encode(['success' => false, 'message' => 'Datei nicht gefunden']);
