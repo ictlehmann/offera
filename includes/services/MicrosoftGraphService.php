@@ -299,35 +299,48 @@ class MicrosoftGraphService {
     }
     
     /**
-     * Get user profile photo from Microsoft Entra ID
-     * 
-     * @param string $userId User ID (Object ID from Azure AD)
-     * @return string|null Binary content of the photo if exists, null if no photo found
+     * Get user profile photo from Microsoft Entra ID.
+     *
+     * The endpoint returns a raw binary image stream on success (HTTP 200).
+     * A 404 response means the user has no photo in Entra – in that case
+     * null is returned without throwing so callers can fall back gracefully
+     * to the default profile image.
+     *
+     * @param string $userId User Object ID from Azure AD / Microsoft Entra
+     * @return string|null Raw binary content of the photo, or null if no photo found
+     * @throws Exception For non-404 HTTP errors or network-level failures
      */
     public function getUserPhoto(string $userId): ?string {
         $photoUrl = "https://graph.microsoft.com/v1.0/users/{$userId}/photo/\$value";
-        
+
         try {
+            // Use http_errors => false so 4xx/5xx responses are returned as response
+            // objects instead of throwing GuzzleException subclasses.  This avoids
+            // calling hasResponse() / getResponse() on the GuzzleException interface,
+            // which does not declare those methods (only RequestException does).
             $response = $this->httpClient->get($photoUrl, [
-                'headers' => [
-                    'Authorization' => 'Bearer ' . $this->accessToken
-                ]
+                'headers'     => ['Authorization' => 'Bearer ' . $this->accessToken],
+                'http_errors' => false,
             ]);
-            
-            // Return binary content if photo exists (Status 200)
-            if ($response->getStatusCode() === 200) {
+
+            $statusCode = $response->getStatusCode();
+
+            // Return binary content when the photo exists
+            if ($statusCode === 200) {
                 return $response->getBody()->getContents();
             }
-            
-            return null;
-            
-        } catch (GuzzleException $e) {
-            // Return null if photo not found (404)
-            if ($e->hasResponse() && $e->getResponse()->getStatusCode() === 404) {
+
+            // User has no photo in Entra – return null so the caller falls back to
+            // the default profile image without any PHP error being raised
+            if ($statusCode === 404) {
                 return null;
             }
-            
-            // For other errors, re-throw as exception
+
+            // Any other non-success status is a genuine API error
+            throw new Exception('Failed to get user photo: HTTP ' . $statusCode);
+
+        } catch (GuzzleException $e) {
+            // Network-level failures (DNS, connection refused, timeout, …)
             throw new Exception('Failed to get user photo: ' . $e->getMessage());
         }
     }
