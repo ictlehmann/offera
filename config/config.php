@@ -44,7 +44,7 @@ define('HASH_ALGO', PASSWORD_BCRYPT);
 // Session security – must be set BEFORE session_start() is called
 ini_set('session.cookie_httponly', 1);
 ini_set('session.cookie_secure', 1);
-ini_set('session.cookie_samesite', 'Strict');
+ini_set('session.cookie_samesite', 'Lax');
 ini_set('session.use_only_cookies', 1);
 ini_set('session.use_strict_mode', 1);
 
