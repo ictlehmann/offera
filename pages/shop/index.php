@@ -541,7 +541,7 @@ ob_start();
             $sliderId = 'slider-grid-' . $product['id'];
             $productUrl = asset('pages/shop/view.php?id=' . $product['id']);
         ?>
-        <div class="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden flex flex-col group hover:shadow-lg hover:-translate-y-1 transition-all duration-300 border border-gray-100 dark:border-gray-700 hover:border-blue-200 dark:hover:border-blue-700 min-w-0 <?php echo $productOutOfStock ? 'opacity-70' : ''; ?>"
+        <div class="bg-white dark:bg-gray-800 rounded-2xl overflow-hidden flex flex-col group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 ease-in-out border border-gray-100 dark:border-gray-700 hover:border-blue-200 dark:hover:border-blue-700 min-w-0 <?php echo $productOutOfStock ? 'opacity-70' : ''; ?>"
              data-instock="<?php echo $productOutOfStock ? '0' : '1'; ?>"
              data-gender="<?php echo htmlspecialchars($product['gender'] ?? ''); ?>"
              data-category="<?php echo htmlspecialchars($product['category'] ?? ''); ?>"
@@ -646,13 +646,13 @@ ob_start();
                     <input type="hidden" name="product_id" value="<?php echo $product['id']; ?>">
                     <input type="hidden" name="quantity" value="1">
                     <button type="submit"
-                            class="w-full py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-semibold rounded-xl transition-all duration-300 flex items-center justify-center gap-1.5 shadow-sm hover:shadow-md active:scale-95">
+                            class="w-full py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-semibold rounded-xl transition-all duration-300 ease-in-out flex items-center justify-center gap-1.5 shadow-sm hover:shadow-lg active:scale-95">
                         <i class="fas fa-cart-plus text-sm"></i>In den Warenkorb
                     </button>
                 </form>
                 <?php else: ?>
                 <a href="<?php echo $productUrl; ?>"
-                   class="w-full block text-center py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-semibold rounded-xl transition-all duration-300 no-underline flex items-center justify-center gap-1.5 shadow-sm hover:shadow-md active:scale-95">
+                   class="w-full block text-center py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-semibold rounded-xl transition-all duration-300 ease-in-out no-underline flex items-center justify-center gap-1.5 shadow-sm hover:shadow-lg active:scale-95">
                     <i class="fas fa-cart-plus text-sm"></i>Auswählen &amp; kaufen
                 </a>
                 <?php endif; ?>
