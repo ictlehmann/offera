@@ -831,6 +831,18 @@ class Shop {
         $db = null;
         try {
             $db = Database::getShopDB();
+
+            // Sort cart items by variant_id ascending so that FOR UPDATE row-locks
+            // are always acquired in the same order across concurrent transactions,
+            // which makes the system fully immune to MySQL deadlocks.
+            usort($cart, function (array $a, array $b): int {
+                $aId = (isset($a['variant_id']) && $a['variant_id'] !== null && $a['variant_id'] !== '')
+                    ? (int) $a['variant_id'] : 0;
+                $bId = (isset($b['variant_id']) && $b['variant_id'] !== null && $b['variant_id'] !== '')
+                    ? (int) $b['variant_id'] : 0;
+                return $aId <=> $bId;
+            });
+
             $db->beginTransaction();
 
             $enrichedCart = [];
