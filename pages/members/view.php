@@ -349,14 +349,14 @@ ob_start();
             </div>
         </div>
 
-        <!-- Aktuelles Studium -->
+        <!-- Studium -->
         <?php if (!empty($profile['study_program']) || !empty($profile['semester']) || !empty($profile['angestrebter_abschluss']) || !empty($profile['graduation_year']) || !empty($profile['degree'])): ?>
         <div class="card p-6">
             <h2 class="text-lg font-bold text-gray-800 dark:text-gray-100 mb-4 flex items-center gap-2">
                 <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-indigo-100 text-indigo-600">
                     <i class="fas fa-graduation-cap text-sm"></i>
                 </span>
-                Aktuelles Studium
+                Studium
             </h2>
             <div class="space-y-3">
                 <?php if (!empty($profile['study_program'])): ?>

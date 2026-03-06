@@ -979,8 +979,10 @@ function dismissProfileReviewPrompt() {
                         🎯 Vervollständige dein Profil!
                     </h3>
                     <p class="text-sm mb-4 leading-relaxed" style="color: var(--text-muted)">
-                        Für 100% werden folgende Felder benötigt: Vorname, Nachname, E-Mail, Telefon, Geschlecht, Geburtstag, mindestens eine Fähigkeit und ein „Über mich"-Text.
-                        Du bist schon zu&nbsp;<strong style="color: #a855f7"><?php echo $profileCompletenessPercent; ?>%</strong>&nbsp;fertig&nbsp;– fast geschafft!
+                        <span class="hidden sm:inline">Für 100% werden folgende Felder benötigt: Vorname, Nachname, E-Mail, Telefon, Geschlecht, Geburtstag, mindestens eine Fähigkeit und ein „Über mich"-Text.
+                        Du bist schon zu&nbsp;<strong style="color: #a855f7"><?php echo $profileCompletenessPercent; ?>%</strong>&nbsp;fertig&nbsp;– fast geschafft!</span>
+                        <span class="sm:hidden">Pflichtfelder: Name, E-Mail, Telefon, Geschlecht, Geburtstag, Fähigkeit, Über mich.
+                        Du bist zu&nbsp;<strong style="color: #a855f7"><?php echo $profileCompletenessPercent; ?>%</strong>&nbsp;fertig!</span>
                     </p>
                     <a href="../auth/profile.php"
                        class="inline-flex items-center px-4 py-2.5 text-white rounded-xl font-semibold text-sm transition-all duration-300 shadow-md hover:opacity-90 hover:-translate-y-0.5"
