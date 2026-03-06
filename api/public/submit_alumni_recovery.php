@@ -250,15 +250,16 @@ if ($recaptchaVerification === false) {
 }
 
 // ── Input sanitization & validation ──────────────────────────────────────────
-// Text fields: trim, then encode HTML special characters to neutralise injections
-$firstName          = htmlspecialchars(trim($data['first_name']          ?? ''), ENT_QUOTES, 'UTF-8');
-$lastName           = htmlspecialchars(trim($data['last_name']           ?? ''), ENT_QUOTES, 'UTF-8');
-$graduationSemester = htmlspecialchars(trim($data['graduation_semester'] ?? ''), ENT_QUOTES, 'UTF-8');
-$studyProgram       = htmlspecialchars(trim($data['study_program']       ?? ''), ENT_QUOTES, 'UTF-8');
+// Strict length truncation: never trust HTML maxlength; always enforce the DB
+// column limit in PHP before any further processing, validation, or DB write.
+$firstName          = htmlspecialchars(mb_substr(trim($data['first_name']          ?? ''), 0, ALUMNI_MAX_NAME_LENGTH),     ENT_QUOTES, 'UTF-8');
+$lastName           = htmlspecialchars(mb_substr(trim($data['last_name']           ?? ''), 0, ALUMNI_MAX_NAME_LENGTH),     ENT_QUOTES, 'UTF-8');
+$graduationSemester = htmlspecialchars(mb_substr(trim($data['graduation_semester'] ?? ''), 0, ALUMNI_MAX_SEMESTER_LENGTH), ENT_QUOTES, 'UTF-8');
+$studyProgram       = htmlspecialchars(mb_substr(trim($data['study_program']       ?? ''), 0, ALUMNI_MAX_PROGRAM_LENGTH),  ENT_QUOTES, 'UTF-8');
 
-// Email fields: validate format, then normalise to lowercase
-$newEmailRaw = trim($data['new_email'] ?? '');
-$oldEmailRaw = trim($data['old_email'] ?? '');
+// Email fields: truncate to RFC/DB limit, then validate format and normalise
+$newEmailRaw = mb_substr(trim($data['new_email'] ?? ''), 0, ALUMNI_MAX_EMAIL_LENGTH);
+$oldEmailRaw = mb_substr(trim($data['old_email'] ?? ''), 0, ALUMNI_MAX_EMAIL_LENGTH);
 
 if (empty($firstName) || empty($lastName)) {
     http_response_code(400);
@@ -294,31 +295,6 @@ if (empty($graduationSemester)) {
 if (empty($studyProgram)) {
     http_response_code(400);
     echo json_encode(['success' => false, 'message' => 'Studiengang ist erforderlich']);
-    exit;
-}
-
-// Field-length guards to prevent oversized payloads reaching the database
-if (mb_strlen($firstName) > ALUMNI_MAX_NAME_LENGTH || mb_strlen($lastName) > ALUMNI_MAX_NAME_LENGTH) {
-    http_response_code(400);
-    echo json_encode(['success' => false, 'message' => 'Name ist zu lang (max. ' . ALUMNI_MAX_NAME_LENGTH . ' Zeichen)']);
-    exit;
-}
-
-if (mb_strlen($newEmail) > ALUMNI_MAX_EMAIL_LENGTH || mb_strlen($oldEmail) > ALUMNI_MAX_EMAIL_LENGTH) {
-    http_response_code(400);
-    echo json_encode(['success' => false, 'message' => 'E-Mail-Adresse ist zu lang']);
-    exit;
-}
-
-if (mb_strlen($graduationSemester) > ALUMNI_MAX_SEMESTER_LENGTH) {
-    http_response_code(400);
-    echo json_encode(['success' => false, 'message' => 'Abschlusssemester ist zu lang (max. ' . ALUMNI_MAX_SEMESTER_LENGTH . ' Zeichen)']);
-    exit;
-}
-
-if (mb_strlen($studyProgram) > ALUMNI_MAX_PROGRAM_LENGTH) {
-    http_response_code(400);
-    echo json_encode(['success' => false, 'message' => 'Studiengang ist zu lang (max. ' . ALUMNI_MAX_PROGRAM_LENGTH . ' Zeichen)']);
     exit;
 }
 
