@@ -5,7 +5,13 @@
  * Requires Azure App Permissions: User.Invite.All, AppRoleAssignment.ReadWrite.All, and User.Read.All
  */
 
-require_once __DIR__ . '/../../vendor/autoload.php';
+// Load Composer autoloader if available (vendor/ is not committed; run composer install on the server)
+$_msGraphAutoload = __DIR__ . '/../../vendor/autoload.php';
+if (file_exists($_msGraphAutoload)) {
+    require_once $_msGraphAutoload;
+}
+unset($_msGraphAutoload);
+define('MS_GRAPH_VENDOR_AVAILABLE', class_exists('GuzzleHttp\Client'));
 require_once __DIR__ . '/../../config/config.php';
 
 use GuzzleHttp\Client;
@@ -24,6 +30,9 @@ class MicrosoftGraphService {
      * @throws Exception If authentication fails or environment variables are missing
      */
     public function __construct($userAccessToken = null) {
+        if (!MS_GRAPH_VENDOR_AVAILABLE) {
+            throw new Exception('Microsoft Graph Service requires Composer dependencies. Please run "composer install" on the server.');
+        }
         // Initialize Guzzle HTTP client
         $this->httpClient = new Client([
             'timeout' => 30,

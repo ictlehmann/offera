@@ -72,7 +72,7 @@ ob_start();
             <div class="px-6 pt-6 pb-2 flex items-start justify-between">
                 <div>
                     <p class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-2">Bestellungen</p>
-                    <p class="text-5xl font-extrabold text-gray-900 dark:text-gray-50 leading-none"><?php echo number_format($totalOrders); ?></p>
+                    <p class="text-3xl sm:text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-gray-50 leading-none"><?php echo number_format($totalOrders); ?></p>
                     <p class="text-xs text-gray-400 dark:text-gray-500 mt-2">Letzte 12 Monate (bezahlt)</p>
                 </div>
                 <div class="w-12 h-12 bg-blue-50 dark:bg-blue-900/30 rounded-xl flex items-center justify-center flex-shrink-0">

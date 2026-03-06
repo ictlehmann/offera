@@ -117,10 +117,10 @@ ob_start();
             >
         </div>
         <div class="flex items-end gap-2">
-            <button type="submit" class="flex-1 btn-primary">
+            <button type="submit" class="flex-1 btn-primary min-h-[44px]">
                 <i class="fas fa-search mr-2"></i>Filtern
             </button>
-            <a href="audit.php" class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition" title="Filter zurücksetzen">
+            <a href="audit.php" class="px-4 min-h-[44px] flex items-center justify-center bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition" title="Filter zurücksetzen">
                 <i class="fas fa-times"></i>
             </a>
         </div>
@@ -164,7 +164,7 @@ ob_start();
             <!-- Content -->
             <div class="flex-1 min-w-0">
                 <div class="flex flex-wrap items-center gap-2 mb-1">
-                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold <?php echo $style['badge']; ?>">
+                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold max-w-full break-all <?php echo $style['badge']; ?>">
                         <span class="w-1.5 h-1.5 rounded-full <?php echo $style['dot']; ?> flex-shrink-0"></span>
                         <?php echo htmlspecialchars($log['action']); ?>
                     </span>
@@ -177,7 +177,7 @@ ob_start();
                 </div>
 
                 <?php if (!empty($log['details']) && $log['details'] !== '-'): ?>
-                <p class="text-sm text-gray-600 dark:text-gray-300 truncate"><?php echo htmlspecialchars($log['details']); ?></p>
+                <p class="text-sm text-gray-600 dark:text-gray-300 break-all"><?php echo htmlspecialchars($log['details']); ?></p>
                 <?php endif; ?>
 
                 <div class="flex flex-wrap items-center gap-3 mt-1.5 text-xs text-gray-400 dark:text-gray-500">

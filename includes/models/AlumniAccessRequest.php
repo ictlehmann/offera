@@ -10,16 +10,21 @@ class AlumniAccessRequest {
     // Table bootstrap
     // ---------------------------------------------------------------------------
 
-    /** @var bool Whether the table has already been verified for this request */
+    /** @var bool Whether the table check has already been attempted this request */
     private static bool $tableChecked = false;
+
+    /** @var bool Whether the table is confirmed to be available */
+    private static bool $tableReady = false;
 
     /**
      * Ensure the alumni_access_requests table exists.
      * Runs at most once per PHP request thanks to the static flag.
+     *
+     * @return bool  true if the table is ready to use, false if setup failed.
      */
-    private static function ensureTable(): void {
+    private static function ensureTable(): bool {
         if (self::$tableChecked) {
-            return;
+            return self::$tableReady;
         }
         self::$tableChecked = true;
 
@@ -41,9 +46,12 @@ class AlumniAccessRequest {
                 INDEX `idx_new_email`    (`new_email`),
                 INDEX `idx_processed_by` (`processed_by`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+            self::$tableReady = true;
         } catch (Exception $e) {
             error_log('[AlumniAccessRequest] Failed to ensure table exists: ' . $e->getMessage());
         }
+
+        return self::$tableReady;
     }
 
     // ---------------------------------------------------------------------------
@@ -54,7 +62,9 @@ class AlumniAccessRequest {
      * Get a single request by its ID.
      */
     public static function getById(int $id): array|false {
-        self::ensureTable();
+        if (!self::ensureTable()) {
+            return false;
+        }
         $db   = Database::getContentDB();
         $stmt = $db->prepare(
             "SELECT * FROM alumni_access_requests WHERE id = ?"
@@ -69,7 +79,9 @@ class AlumniAccessRequest {
      * @param string|null $status  'pending' | 'approved' | 'rejected' | null (= all)
      */
     public static function getAll(?string $status = null): array {
-        self::ensureTable();
+        if (!self::ensureTable()) {
+            return [];
+        }
         $db = Database::getContentDB();
 
         if ($status !== null) {
@@ -92,7 +104,9 @@ class AlumniAccessRequest {
      * @return array{pending: int, approved: int, rejected: int, total: int}
      */
     public static function countByStatus(): array {
-        self::ensureTable();
+        if (!self::ensureTable()) {
+            return ['pending' => 0, 'approved' => 0, 'rejected' => 0, 'total' => 0];
+        }
         $db   = Database::getContentDB();
         $stmt = $db->query(
             "SELECT status, COUNT(*) AS cnt FROM alumni_access_requests GROUP BY status"
@@ -119,7 +133,9 @@ class AlumniAccessRequest {
      * @return bool  true = a pending duplicate exists, false = no duplicate
      */
     public static function hasPendingRequest(string $newEmail): bool {
-        self::ensureTable();
+        if (!self::ensureTable()) {
+            return false;
+        }
         $db   = Database::getContentDB();
         $stmt = $db->prepare(
             "SELECT COUNT(*) FROM alumni_access_requests WHERE new_email = ? AND status = 'pending'"
@@ -140,7 +156,9 @@ class AlumniAccessRequest {
      * @return int|false   The inserted row ID, or false on failure.
      */
     public static function create(array $data): int|false {
-        self::ensureTable();
+        if (!self::ensureTable()) {
+            return false;
+        }
         $db   = Database::getContentDB();
         $stmt = $db->prepare(
             "INSERT INTO alumni_access_requests
@@ -170,7 +188,9 @@ class AlumniAccessRequest {
      * @param int    $processedBy  User ID of the admin performing the action
      */
     public static function updateStatus(int $id, string $status, int $processedBy): bool {
-        self::ensureTable();
+        if (!self::ensureTable()) {
+            return false;
+        }
         if (!in_array($status, ['approved', 'rejected'], true)) {
             return false;
         }
@@ -189,7 +209,9 @@ class AlumniAccessRequest {
      * Delete a request by ID.
      */
     public static function delete(int $id): bool {
-        self::ensureTable();
+        if (!self::ensureTable()) {
+            return false;
+        }
         $db   = Database::getContentDB();
         $stmt = $db->prepare("DELETE FROM alumni_access_requests WHERE id = ?");
         return $stmt->execute([$id]);
