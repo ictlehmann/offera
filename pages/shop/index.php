@@ -142,7 +142,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!preg_match('/^[A-Z]{2}$/', $shippingCountry)) {
             $shippingCountry = 'DE';
         }
-        $shippingCost    = ($shippingMethod === 'mail') ? Shop::calculateShippingCost($shippingCountry, cartTotal()) : 0.00;
         $shippingAddress = trim($_POST['shipping_address'] ?? '');
 
         if ($shippingMethod === 'mail' && $shippingAddress === '') {
@@ -152,94 +151,95 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $errorMessage = 'Ihr Warenkorb ist leer.';
             $action = 'cart';
         } else {
-            $stockErrors = Shop::checkStock(array_values($_SESSION['shop_cart']));
-            if (!empty($stockErrors)) {
-                $errorMessage = implode(' ', $stockErrors);
-                $action = 'cart';
-            } else {
-                // Collect selected variants from all cart items
-                $variantParts = [];
-                foreach ($_SESSION['shop_cart'] as $item) {
-                    if (!empty($item['selected_variant'])) {
-                        $variantParts[] = $item['selected_variant'];
-                    }
+            // Collect selected variants from all cart items
+            $variantParts = [];
+            foreach ($_SESSION['shop_cart'] as $item) {
+                if (!empty($item['selected_variant'])) {
+                    $variantParts[] = $item['selected_variant'];
                 }
-                $selectedVariant = implode(', ', array_unique($variantParts));
+            }
+            $selectedVariant = implode(', ', array_unique($variantParts));
 
-                $orderId = Shop::createOrder($userId, array_values($_SESSION['shop_cart']), $paymentMethod, $shippingMethod, $shippingCost, $shippingAddress, $selectedVariant);
+            $orderResult = Shop::createOrderTransactional(
+                $userId,
+                array_values($_SESSION['shop_cart']),
+                $paymentMethod,
+                $shippingMethod,
+                $shippingCountry,
+                $shippingAddress,
+                $selectedVariant
+            );
+            $orderId = $orderResult['order_id'];
 
-                if ($orderId) {
-                    if ($paymentMethod === 'paypal') {
-                        $baseUrl   = defined('BASE_URL') ? BASE_URL : '';
-                        $returnUrl = $baseUrl . '/pages/shop/index.php?action=payment_return&order=' . $orderId;
-                        $cancelUrl = $baseUrl . '/pages/shop/index.php?action=cart';
-                        $grandTotal = cartTotal() + $shippingCost;
-                        $payResult = ShopPaymentService::initiatePayPal($orderId, $grandTotal, $returnUrl, $cancelUrl);
+            if ($orderId && empty($orderResult['errors'])) {
+                $grandTotal   = $orderResult['items_total'] + $orderResult['shipping_cost'];
+                if ($paymentMethod === 'paypal') {
+                    $baseUrl   = defined('BASE_URL') ? BASE_URL : '';
+                    $returnUrl = $baseUrl . '/pages/shop/index.php?action=payment_return&order=' . $orderId;
+                    $cancelUrl = $baseUrl . '/pages/shop/index.php?action=cart';
+                    $payResult = ShopPaymentService::initiatePayPal($orderId, $grandTotal, $returnUrl, $cancelUrl);
 
-                        if ($payResult['success'] && !empty($payResult['redirect_url'])) {
-                            Shop::decrementStock($orderId);
-                            $cartForEmail = array_values($_SESSION['shop_cart']);
-                            $totalForEmail = array_sum(array_map(fn($i) => $i['price'] * $i['quantity'], $cartForEmail)) + $shippingCost;
-                            $_SESSION['shop_cart'] = [];
-                            try {
-                                MailService::sendNewOrderNotification(
-                                    $orderId,
-                                    $user['first_name'] ?? '',
-                                    $user['last_name']  ?? '',
-                                    $user['email']      ?? '',
-                                    $cartForEmail,
-                                    $paymentMethod,
-                                    $totalForEmail
-                                );
-                            } catch (Exception $e) {
-                                error_log('pages/shop/index.php – order notification email failed: ' . $e->getMessage());
-                            }
-                            header('Location: ' . $payResult['redirect_url']);
-                            exit;
-                        }
-                        $errorMessage = $payResult['error'] ?? 'PayPal-Weiterleitung fehlgeschlagen.';
-                        $action = 'cart';
-                    } elseif ($paymentMethod === 'bank_transfer') {
-                        $grandTotal   = cartTotal() + $shippingCost;
+                    if ($payResult['success'] && !empty($payResult['redirect_url'])) {
                         $cartForEmail = array_values($_SESSION['shop_cart']);
-                        Shop::decrementStock($orderId);
-                        $payResult = ShopPaymentService::initiateBankTransfer(
-                            $orderId,
-                            $grandTotal,
-                            $user['first_name'] ?? '',
-                            $user['last_name']  ?? '',
-                            $userId,
-                            $user['email']      ?? ''
-                        );
                         $_SESSION['shop_cart'] = [];
-                        if ($payResult['success']) {
-                            try {
-                                MailService::sendNewOrderNotification(
-                                    $orderId,
-                                    $user['first_name'] ?? '',
-                                    $user['last_name']  ?? '',
-                                    $user['email']      ?? '',
-                                    $cartForEmail,
-                                    $paymentMethod,
-                                    $grandTotal
-                                );
-                            } catch (Exception $e) {
-                                error_log('pages/shop/index.php – order notification email failed: ' . $e->getMessage());
-                            }
-                            $successMessage = 'Bestellung #' . $orderId . ' aufgegeben! Die Überweisungsdetails wurden per E-Mail gesendet.';
-                        } else {
-                            $errorMessage = $payResult['error'] ?? 'Banküberweisung konnte nicht initiiert werden.';
+                        try {
+                            MailService::sendNewOrderNotification(
+                                $orderId,
+                                $user['first_name'] ?? '',
+                                $user['last_name']  ?? '',
+                                $user['email']      ?? '',
+                                $cartForEmail,
+                                $paymentMethod,
+                                $grandTotal
+                            );
+                        } catch (Exception $e) {
+                            error_log('pages/shop/index.php – order notification email failed: ' . $e->getMessage());
                         }
-                        $action = 'list';
-                    } else {
-                        $_SESSION['shop_cart'] = [];
-                        $successMessage = 'Bestellung #' . $orderId . ' wurde erfolgreich aufgegeben!';
-                        $action = 'list';
+                        header('Location: ' . $payResult['redirect_url']);
+                        exit;
                     }
-                } else {
-                    $errorMessage = 'Fehler beim Erstellen der Bestellung. Bitte versuchen Sie es erneut.';
+                    $errorMessage = $payResult['error'] ?? 'PayPal-Weiterleitung fehlgeschlagen.';
                     $action = 'cart';
+                } elseif ($paymentMethod === 'bank_transfer') {
+                    $cartForEmail = array_values($_SESSION['shop_cart']);
+                    $payResult = ShopPaymentService::initiateBankTransfer(
+                        $orderId,
+                        $grandTotal,
+                        $user['first_name'] ?? '',
+                        $user['last_name']  ?? '',
+                        $userId,
+                        $user['email']      ?? ''
+                    );
+                    $_SESSION['shop_cart'] = [];
+                    if ($payResult['success']) {
+                        try {
+                            MailService::sendNewOrderNotification(
+                                $orderId,
+                                $user['first_name'] ?? '',
+                                $user['last_name']  ?? '',
+                                $user['email']      ?? '',
+                                $cartForEmail,
+                                $paymentMethod,
+                                $grandTotal
+                            );
+                        } catch (Exception $e) {
+                            error_log('pages/shop/index.php – order notification email failed: ' . $e->getMessage());
+                        }
+                        $successMessage = 'Bestellung #' . $orderId . ' aufgegeben! Die Überweisungsdetails wurden per E-Mail gesendet.';
+                    } else {
+                        $errorMessage = $payResult['error'] ?? 'Banküberweisung konnte nicht initiiert werden.';
+                    }
+                    $action = 'list';
+                } else {
+                    $_SESSION['shop_cart'] = [];
+                    $successMessage = 'Bestellung #' . $orderId . ' wurde erfolgreich aufgegeben!';
+                    $action = 'list';
                 }
+            } else {
+                $errorMessage = !empty($orderResult['errors'])
+                    ? implode(' ', $orderResult['errors'])
+                    : 'Fehler beim Erstellen der Bestellung. Bitte versuchen Sie es erneut.';
+                $action = 'cart';
             }
         }
     } elseif ($postAction === 'toggle_restock_notification') {

@@ -35,12 +35,7 @@ if ($routeAction === 'create') {
         exit;
     }
 
-    $input          = json_decode(file_get_contents('php://input'), true);
-    if (json_last_error() !== JSON_ERROR_NONE || !is_array($input)) {
-        http_response_code(400);
-        echo json_encode(['success' => false, 'message' => 'Ungültiges JSON-Format']);
-        exit;
-    }
+    $input = json_decode(file_get_contents('php://input'), true) ?? [];
     CSRFHandler::verifyToken($input['csrf_token'] ?? '');
     $shippingMethod = in_array($input['shipping_method'] ?? '', ['pickup', 'mail'], true)
         ? $input['shipping_method']
@@ -65,31 +60,18 @@ if ($routeAction === 'create') {
             exit;
         }
 
-        $stockErrors = Shop::checkStock($cart);
-        if (!empty($stockErrors)) {
-            http_response_code(400);
-            echo json_encode(['success' => false, 'message' => implode(' ', $stockErrors)]);
+        $orderResult = Shop::createOrderTransactional(
+            $userId, $cart, 'paypal', $shippingMethod, $shippingCountry, $shippingAddress
+        );
+        if (!empty($orderResult['errors'])) {
+            http_response_code($orderResult['internal_error'] ? 500 : 400);
+            echo json_encode(['success' => false, 'message' => implode(' ', $orderResult['errors'])]);
             exit;
         }
-
-        $itemsTotal  = array_sum(array_map(fn($i) => $i['price'] * $i['quantity'], $cart));
-        $shippingCost = ($shippingMethod === 'mail') ? Shop::calculateShippingCost($shippingCountry, $itemsTotal) : 0.00;
-
-        $orderId = Shop::createOrder($userId, $cart, 'paypal', $shippingMethod, $shippingCost, $shippingAddress);
-        if (!$orderId) {
-            http_response_code(500);
-            echo json_encode(['success' => false, 'message' => 'Fehler beim Erstellen der Bestellung.']);
-            exit;
-        }
-
-        $stockErrors = Shop::decrementStockAtomic($orderId);
-        if (!empty($stockErrors)) {
-            http_response_code(409);
-            echo json_encode(['success' => false, 'message' => implode(' ', $stockErrors)]);
-            exit;
-        }
-
-        $total = $itemsTotal + $shippingCost;
+        $orderId      = $orderResult['order_id'];
+        $itemsTotal   = $orderResult['items_total'];
+        $shippingCost = $orderResult['shipping_cost'];
+        $total        = $itemsTotal + $shippingCost;
 
         // Send order notification e-mail to merch team (non-blocking)
         try {
@@ -145,12 +127,7 @@ if ($routeAction === 'capture') {
         exit;
     }
 
-    $input         = json_decode(file_get_contents('php://input'), true);
-    if (json_last_error() !== JSON_ERROR_NONE || !is_array($input)) {
-        http_response_code(400);
-        echo json_encode(['success' => false, 'message' => 'Ungültiges JSON-Format']);
-        exit;
-    }
+    $input         = json_decode(file_get_contents('php://input'), true) ?? [];
     CSRFHandler::verifyToken($input['csrf_token'] ?? '');
     $paypalOrderId = trim($input['paypal_order_id'] ?? '');
 
@@ -206,12 +183,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-$input         = json_decode(file_get_contents('php://input'), true);
-if (json_last_error() !== JSON_ERROR_NONE || !is_array($input)) {
-    http_response_code(400);
-    echo json_encode(['success' => false, 'message' => 'Ungültiges JSON-Format']);
-    exit;
-}
+$input = json_decode(file_get_contents('php://input'), true) ?? [];
+CSRFHandler::verifyToken($input['csrf_token'] ?? '');
 $paymentMethod = in_array($input['payment_method'] ?? '', ['paypal', 'bank_transfer'], true)
     ? $input['payment_method']
     : 'paypal';
@@ -224,7 +197,6 @@ $shippingCountry = strtoupper(trim($input['shipping_country'] ?? 'DE'));
 if (!preg_match('/^[A-Z]{2}$/', $shippingCountry)) {
     $shippingCountry = 'DE';
 }
-// Always use server-side shipping cost to prevent client manipulation
 
 $shippingAddress = trim($input['shipping_address'] ?? '');
 
@@ -243,34 +215,20 @@ try {
         exit;
     }
 
-    // 4. Check stock in shop_variants
-    $stockErrors = Shop::checkStock($cart);
-    if (!empty($stockErrors)) {
-        http_response_code(400);
-        echo json_encode(['success' => false, 'message' => implode(' ', $stockErrors)]);
+    // 4–5a. Atomically validate quantities, fetch DB prices, check stock, create order,
+    //        and decrement stock in a single transaction with SELECT … FOR UPDATE.
+    $orderResult = Shop::createOrderTransactional(
+        $userId, $cart, $paymentMethod, $shippingMethod, $shippingCountry, $shippingAddress
+    );
+    if (!empty($orderResult['errors'])) {
+        http_response_code($orderResult['internal_error'] ? 500 : 400);
+        echo json_encode(['success' => false, 'message' => implode(' ', $orderResult['errors'])]);
         exit;
     }
-
-    $itemsTotal  = array_sum(array_map(fn($i) => $i['price'] * $i['quantity'], $cart));
-    $shippingCost = ($shippingMethod === 'mail') ? Shop::calculateShippingCost($shippingCountry, $itemsTotal) : 0.00;
-
-    // 5. Create order in shop_orders
-    $orderId = Shop::createOrder($userId, $cart, $paymentMethod, $shippingMethod, $shippingCost, $shippingAddress);
-    if (!$orderId) {
-        http_response_code(500);
-        echo json_encode(['success' => false, 'message' => 'Fehler beim Erstellen der Bestellung.']);
-        exit;
-    }
-
-    // 5a. Atomically check and decrement stock after order is created
-    $stockErrors = Shop::decrementStockAtomic($orderId);
-    if (!empty($stockErrors)) {
-        http_response_code(409);
-        echo json_encode(['success' => false, 'message' => implode(' ', $stockErrors)]);
-        exit;
-    }
-
-    $total = $itemsTotal + $shippingCost;
+    $orderId      = $orderResult['order_id'];
+    $itemsTotal   = $orderResult['items_total'];
+    $shippingCost = $orderResult['shipping_cost'];
+    $total        = $itemsTotal + $shippingCost;
 
     // 5b. Send order notification e-mail to merch team (non-blocking)
     try {

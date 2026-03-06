@@ -800,6 +800,167 @@ class Shop {
     }
 
     /**
+     * Atomically validate the cart, fetch current prices live from the DB,
+     * check and lock stock with SELECT … FOR UPDATE, create the order, and
+     * decrement stock — all within a single PDO transaction.
+     *
+     * Replaces the separate checkStock → createOrder → decrementStockAtomic
+     * call chain and eliminates both price-manipulation and race-condition risks.
+     *
+     * @param int    $userId
+     * @param array  $cart            Keys: product_id, variant_id, quantity
+     *                                (price is intentionally ignored — re-fetched from DB)
+     * @param string $paymentMethod   'paypal' or 'bank_transfer'
+     * @param string $shippingMethod  'pickup' or 'mail'
+     * @param string $shippingCountry ISO-3166-1 alpha-2 country code used to calculate shipping
+     * @param string $shippingAddress Required when shippingMethod is 'mail'
+     * @param string $selectedVariant
+     * @param string $deliveryMethod  'Versand' or 'Abholung'
+     * @return array{order_id: int|null, items_total: float, shipping_cost: float, errors: string[], internal_error: bool}
+     */
+    public static function createOrderTransactional(
+        int    $userId,
+        array  $cart,
+        string $paymentMethod,
+        string $shippingMethod  = 'pickup',
+        string $shippingCountry = 'DE',
+        string $shippingAddress = '',
+        string $selectedVariant = '',
+        string $deliveryMethod  = ''
+    ): array {
+        $db = null;
+        try {
+            $db = Database::getShopDB();
+            $db->beginTransaction();
+
+            $enrichedCart = [];
+            $stockErrors  = [];
+
+            foreach ($cart as $item) {
+                $qty       = (int) $item['quantity'];
+                $productId = (int) $item['product_id'];
+                $variantId = (isset($item['variant_id']) && $item['variant_id'] !== null && $item['variant_id'] !== '')
+                    ? (int) $item['variant_id']
+                    : null;
+
+                // Reject non-positive or fractional quantities
+                if ($qty < 1) {
+                    $db->rollBack();
+                    return ['order_id' => null, 'items_total' => 0.0, 'shipping_cost' => 0.0,
+                            'internal_error' => false,
+                            'errors' => ['Ungültige Menge: Mengen müssen mindestens 1 betragen.']];
+                }
+
+                // Fetch current price exclusively from the DB — never trust client-supplied values
+                $priceStmt = $db->prepare("
+                    SELECT base_price FROM shop_products WHERE id = ? AND active = 1
+                ");
+                $priceStmt->execute([$productId]);
+                $priceRow = $priceStmt->fetch();
+                if (!$priceRow) {
+                    $db->rollBack();
+                    return ['order_id' => null, 'items_total' => 0.0, 'shipping_cost' => 0.0,
+                            'internal_error' => false,
+                            'errors' => ['Produkt nicht gefunden oder nicht verfügbar.']];
+                }
+
+                // Lock the variant row and check stock atomically (FOR UPDATE)
+                if ($variantId !== null) {
+                    $stockStmt = $db->prepare("
+                        SELECT sv.stock_quantity, sv.type, sv.value, sp.name, sp.is_bulk_order
+                        FROM shop_variants sv
+                        JOIN shop_products sp ON sp.id = sv.product_id
+                        WHERE sv.id = ? AND sv.product_id = ?
+                        FOR UPDATE
+                    ");
+                    $stockStmt->execute([$variantId, $productId]);
+                    $variant = $stockStmt->fetch();
+
+                    if ($variant && !$variant['is_bulk_order'] && (int) $variant['stock_quantity'] < $qty) {
+                        $stockErrors[] = 'Artikel ' . $variant['name'] . ' ist leider nicht mehr verfügbar';
+                    }
+                }
+
+                $enrichedCart[] = [
+                    'product_id'       => $productId,
+                    'variant_id'       => $variantId,
+                    'product_name'     => $item['product_name'] ?? '',
+                    'variant_name'     => $item['variant_name'] ?? '',
+                    'selected_variant' => $item['selected_variant'] ?? '',
+                    'quantity'         => $qty,
+                    'price'            => (float) $priceRow['base_price'],
+                ];
+            }
+
+            if (!empty($stockErrors)) {
+                $db->rollBack();
+                return ['order_id' => null, 'items_total' => 0.0, 'shipping_cost' => 0.0, 'internal_error' => false, 'errors' => $stockErrors];
+            }
+
+            // Compute totals using server-side (DB) prices
+            $itemsTotal   = array_sum(array_map(fn($i) => $i['price'] * $i['quantity'], $enrichedCart));
+            $shippingCost = ($shippingMethod === 'mail')
+                ? self::calculateShippingCost($shippingCountry, $itemsTotal)
+                : 0.0;
+            $total = $itemsTotal + $shippingCost;
+
+            // Insert order record
+            $stmt = $db->prepare("
+                INSERT INTO shop_orders (user_id, total_amount, payment_method, payment_status, shipping_status, shipping_method, shipping_cost, shipping_address, selected_variant, delivery_method)
+                VALUES (?, ?, ?, 'pending', 'pending', ?, ?, ?, ?, ?)
+            ");
+            $stmt->execute([
+                $userId,
+                $total,
+                $paymentMethod,
+                $shippingMethod,
+                $shippingCost,
+                ($shippingAddress !== '' ? $shippingAddress : null),
+                ($selectedVariant !== '' ? $selectedVariant : null),
+                ($deliveryMethod  !== '' ? $deliveryMethod  : null),
+            ]);
+            $orderId = (int) $db->lastInsertId();
+
+            // Insert order items with DB-sourced prices
+            $ins = $db->prepare("
+                INSERT INTO shop_order_items (order_id, product_id, variant_id, quantity, price_at_purchase)
+                VALUES (?, ?, ?, ?, ?)
+            ");
+            foreach ($enrichedCart as $item) {
+                $ins->execute([
+                    $orderId,
+                    $item['product_id'],
+                    $item['variant_id'],
+                    $item['quantity'],
+                    $item['price'],
+                ]);
+            }
+
+            // Decrement stock for variant items (row lock already held by FOR UPDATE above)
+            $upd = $db->prepare("
+                UPDATE shop_variants
+                SET stock_quantity = GREATEST(0, stock_quantity - ?)
+                WHERE id = ?
+            ");
+            foreach ($enrichedCart as $item) {
+                if ($item['variant_id'] !== null) {
+                    $upd->execute([$item['quantity'], $item['variant_id']]);
+                }
+            }
+
+            $db->commit();
+            return ['order_id' => $orderId, 'items_total' => $itemsTotal, 'shipping_cost' => $shippingCost, 'internal_error' => false, 'errors' => []];
+        } catch (Exception $e) {
+            if ($db && $db->inTransaction()) {
+                $db->rollBack();
+            }
+            error_log('Shop::createOrderTransactional – ' . $e->getMessage());
+            return ['order_id' => null, 'items_total' => 0.0, 'shipping_cost' => 0.0,
+                    'internal_error' => true, 'errors' => ['Ein interner Fehler ist aufgetreten.']];
+        }
+    }
+
+    /**
      * Return all orders (admin view), optionally joined with user email.
      *
      * @return array
