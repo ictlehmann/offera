@@ -907,7 +907,7 @@ ob_start();
         <form method="POST" id="cart-form">
             <input type="hidden" name="post_action" value="update_cart">
             <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(CSRFHandler::getToken(), ENT_QUOTES, 'UTF-8'); ?>">
-            <div class="overflow-x-auto mb-6">
+            <div class="overflow-x-auto w-full mb-6">
                 <table class="w-full text-sm card-table">
                     <thead>
                         <tr class="border-b border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 text-left">

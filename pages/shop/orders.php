@@ -165,7 +165,7 @@ ob_start();
         <p class="text-lg font-medium">Noch keine Bestellungen vorhanden.</p>
     </div>
     <?php else: ?>
-    <div class="overflow-x-auto">
+    <div class="overflow-x-auto w-full">
         <table class="w-full card-table divide-y divide-gray-200 dark:divide-gray-700">
             <thead class="bg-gray-50 dark:bg-gray-900/50">
                 <tr>
@@ -242,7 +242,7 @@ ob_start();
                         </span>
                     </td>
                     <?php if ($canEdit): ?>
-                    <td class="px-4 py-3" data-label="Aktion">
+                    <td class="px-4 py-3 whitespace-nowrap" data-label="Aktion">
                         <form method="POST" action="<?php echo htmlspecialchars($_SERVER['PHP_SELF']); ?>">
                             <?php echo CSRFHandler::getTokenField(); ?>
                             <input type="hidden" name="order_id" value="<?php echo (int) $row['order_id']; ?>">

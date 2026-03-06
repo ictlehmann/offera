@@ -434,7 +434,7 @@ ob_start();
         <!-- User Database Tables -->
         <div>
             <h3 class="text-lg font-semibold text-gray-700 mb-3">User Database Tabellen</h3>
-            <div class="overflow-x-auto">
+            <div class="overflow-x-auto w-full">
                 <table class="min-w-full divide-y divide-gray-200 card-table">
                     <thead class="bg-gray-50">
                         <tr>
@@ -459,7 +459,7 @@ ob_start();
         <!-- Content Database Tables -->
         <div>
             <h3 class="text-lg font-semibold text-gray-700 mb-3">Content Database Tabellen</h3>
-            <div class="overflow-x-auto">
+            <div class="overflow-x-auto w-full">
                 <table class="min-w-full divide-y divide-gray-200 card-table">
                     <thead class="bg-gray-50">
                         <tr>

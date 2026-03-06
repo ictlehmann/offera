@@ -83,7 +83,7 @@ ob_start();
         </a>
     </div>
     <?php else: ?>
-    <div class="overflow-x-auto">
+    <div class="overflow-x-auto w-full">
         <table class="w-full card-table">
             <thead class="bg-gray-50">
                 <tr>
@@ -119,7 +119,7 @@ ob_start();
                             Aktiv
                         </span>
                     </td>
-                    <td class="px-4 py-3" data-label="Aktion">
+                    <td class="px-4 py-3 whitespace-nowrap" data-label="Aktion">
                         <button onclick="openReturnModal(<?php echo (int)$item['id']; ?>, '<?php echo htmlspecialchars($item['name'] ?? '', ENT_QUOTES); ?>', <?php echo $quantity; ?>, '<?php echo htmlspecialchars($unit, ENT_QUOTES); ?>')"
                                 class="inline-flex items-center px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition text-sm">
                             <i class="fas fa-undo mr-1"></i>Zurückgeben

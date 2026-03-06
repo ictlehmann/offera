@@ -367,7 +367,7 @@ ob_start();
     <?php if (empty($activeRentals)): ?>
     <p class="text-gray-500 dark:text-gray-400 text-center py-8">Keine aktiven Ausleihen vorhanden</p>
     <?php else: ?>
-    <div class="overflow-x-auto rounded-xl border border-green-200 dark:border-green-700">
+    <div class="overflow-x-auto w-full rounded-xl border border-green-200 dark:border-green-700">
         <table class="w-full card-table">
             <thead class="bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-900/40 dark:to-emerald-900/40">
                 <tr>
@@ -392,7 +392,7 @@ ob_start();
                         <?php echo !empty($rental['rented_at']) ? date('d.m.Y H:i', strtotime($rental['rented_at'])) : '-'; ?>
                     </td>
                     <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300 font-medium" data-label="Rückgabe Ende">-</td>
-                    <td class="px-6 py-4 text-sm" data-label="Aktionen">
+                    <td class="px-6 py-4 text-sm whitespace-nowrap" data-label="Aktionen">
                         <?php if ($rental['status'] === 'pending_return'): ?>
                         <span class="px-3 py-1.5 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300">
                             Wird vom Vorstand geprüft
@@ -425,7 +425,7 @@ ob_start();
     <?php if (empty($returnedRentals)): ?>
     <p class="text-gray-500 dark:text-gray-400 text-center py-8">Keine abgeschlossenen Ausleihen vorhanden</p>
     <?php else: ?>
-    <div class="overflow-x-auto rounded-xl border border-gray-200 dark:border-slate-700">
+    <div class="overflow-x-auto w-full rounded-xl border border-gray-200 dark:border-slate-700">
         <table class="w-full card-table">
             <thead class="bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600">
                 <tr>
@@ -502,7 +502,7 @@ if (!empty($logbookNote)):
     <?php if (empty($history)): ?>
     <p class="text-gray-500 dark:text-gray-400 text-center py-8">Keine Verlaufsdaten vorhanden</p>
     <?php else: ?>
-    <div class="overflow-x-auto rounded-xl border border-gray-200 dark:border-slate-700">
+    <div class="overflow-x-auto w-full rounded-xl border border-gray-200 dark:border-slate-700">
         <table class="w-full card-table">
             <thead class="bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600">
                 <tr>

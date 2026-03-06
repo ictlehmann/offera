@@ -376,7 +376,7 @@ ob_start();
                 </div>
 
                 <!-- Desktop Table View (hidden on small screens) -->
-                <div class="overflow-x-auto">
+                <div class="overflow-x-auto w-full">
                 <table class="hidden md:table min-w-full">
                     <thead class="bg-gray-50 dark:bg-gray-800/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700">
                         <tr>
@@ -655,7 +655,7 @@ ob_start();
             <div class="p-6 overflow-y-auto flex-1 space-y-4">
 
                 <!-- Amount + Date row -->
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                         <label for="amount" class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-1.5">
                             Betrag (€) <span class="text-red-500">*</span>

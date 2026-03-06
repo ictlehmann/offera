@@ -69,7 +69,7 @@ ob_start();
 
 <!-- Requests table -->
 <div class="card overflow-hidden">
-    <div class="overflow-x-auto">
+    <div class="overflow-x-auto w-full">
         <table class="w-full text-sm text-left">
             <thead>
                 <tr class="bg-gray-50 dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700">
@@ -129,7 +129,7 @@ ob_start();
                             <?php echo $s['label']; ?>
                         </span>
                     </td>
-                    <td class="px-4 py-3">
+                    <td class="px-4 py-3 whitespace-nowrap">
                         <?php if ($req['status'] === 'pending'): ?>
                         <div class="flex gap-2 flex-wrap action-buttons-<?php echo (int)$req['id']; ?>">
                             <button
