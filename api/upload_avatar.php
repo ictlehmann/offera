@@ -74,7 +74,7 @@ try {
         $actualMime = finfo_file($finfo, $tmpFile);
         finfo_close($finfo);
 
-        $allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+        $allowedMimes = ['image/jpeg', 'image/png', 'image/webp'];
         if (!in_array($actualMime, $allowedMimes, true)) {
             throw new RuntimeException('Ungültiger Bildtyp');
         }
@@ -89,8 +89,16 @@ try {
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0755, true);
         }
+        // Ensure PHP execution is disabled in the upload directory
+        $htaccess = $uploadDir . '.htaccess';
+        if (!file_exists($htaccess)) {
+            if (file_put_contents($htaccess, "php_flag engine off\nAddType text/plain .php .php3 .phtml\n") === false) {
+                error_log('upload_avatar.php: Failed to write .htaccess to ' . $uploadDir);
+                throw new RuntimeException('Upload-Konfiguration konnte nicht geschrieben werden');
+            }
+        }
 
-        $extMap = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp', 'image/gif' => 'gif'];
+        $extMap = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
         $ext = $extMap[$actualMime] ?? 'jpg';
 
         // Load current user

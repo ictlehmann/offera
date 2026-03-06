@@ -91,6 +91,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (!is_dir($uploadDir)) {
                     mkdir($uploadDir, 0755, true);
                 }
+                // Ensure PHP execution is disabled in the upload directory
+                $htaccess = $uploadDir . '.htaccess';
+                if (!file_exists($htaccess)) {
+                    if (file_put_contents($htaccess, "php_flag engine off\nAddType text/plain .php .php3 .phtml\n") === false) {
+                        error_log('jobs/edit.php: Failed to write .htaccess to ' . $uploadDir);
+                        $errors[] = 'Upload-Konfiguration konnte nicht geschrieben werden.';
+                    }
+                }
                 if (!is_writable($uploadDir)) {
                     $errors[] = 'Das Upload-Verzeichnis ist nicht beschreibbar.';
                 } else {

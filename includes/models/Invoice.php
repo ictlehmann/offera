@@ -15,22 +15,20 @@ class Invoice {
     private const UPLOAD_DIR = 'uploads/invoices/';
     
     /**
-     * Allowed MIME types for invoice uploads (PDF, JPG, PNG, HEIC)
+     * Allowed MIME types for invoice uploads (PDF, JPG, PNG, WebP)
      */
     private const ALLOWED_MIME_TYPES = [
         'application/pdf',
         'image/jpeg',
-        'image/jpg',
         'image/png',
-        'image/heic',
-        'image/heif'
+        'image/webp',
     ];
     
     /**
      * Allowed file extensions for invoice uploads (whitelist)
      */
     private const ALLOWED_EXTENSIONS = [
-        'pdf', 'jpg', 'jpeg', 'png', 'heic', 'heif'
+        'pdf', 'jpg', 'jpeg', 'png', 'webp'
     ];
     
     /**
@@ -150,7 +148,7 @@ class Invoice {
             return [
                 'success' => false,
                 'path' => null,
-                'error' => 'Ungültige Dateiendung. Erlaubt: PDF, JPG, JPEG, PNG, HEIC, HEIF.'
+                'error' => 'Ungültige Dateiendung. Erlaubt: PDF, JPG, JPEG, PNG, WebP.'
             ];
         }
         
@@ -163,7 +161,7 @@ class Invoice {
             return [
                 'success' => false,
                 'path' => null,
-                'error' => 'Ungültiger Dateityp. Erlaubt: JPG, PNG, HEIC, PDF. Erkannt: ' . $mimeType
+                'error' => 'Ungültiger Dateityp. Erlaubt: PDF, JPG, PNG, WebP. Erkannt: ' . $mimeType
             ];
         }
         
@@ -177,6 +175,18 @@ class Invoice {
                     'success' => false,
                     'path' => null,
                     'error' => 'Upload-Verzeichnis konnte nicht erstellt werden'
+                ];
+            }
+        }
+        // Ensure PHP execution is disabled in the upload directory
+        $htaccess = $uploadDir . '.htaccess';
+        if (!file_exists($htaccess)) {
+            if (file_put_contents($htaccess, "php_flag engine off\nAddType text/plain .php .php3 .phtml\n") === false) {
+                error_log('Invoice::handleFileUpload: Failed to write .htaccess to ' . $uploadDir);
+                return [
+                    'success' => false,
+                    'path' => null,
+                    'error' => 'Upload-Konfiguration konnte nicht geschrieben werden'
                 ];
             }
         }
@@ -229,10 +239,8 @@ class Invoice {
         $extensions = [
             'application/pdf' => '.pdf',
             'image/jpeg' => '.jpg',
-            'image/jpg' => '.jpg',
             'image/png' => '.png',
-            'image/heic' => '.heic',
-            'image/heif' => '.heic'
+            'image/webp' => '.webp',
         ];
         
         return $extensions[$mimeType] ?? '.bin';
