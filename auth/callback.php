@@ -4,18 +4,23 @@
  * This file handles the redirect callback from Azure AD after user authentication.
  */
 
-// Load Composer autoloader
-require_once __DIR__ . '/../vendor/autoload.php';
-
-// Load environment variables and configuration (sets secure session ini_set values)
+// Load configuration and helpers first (no Composer required)
 require_once __DIR__ . '/../config/config.php';
-
-// Start session – config/config.php sets session.cookie_* ini values above
-session_start();
 
 // Load AuthHandler and Database
 require_once __DIR__ . '/../includes/handlers/AuthHandler.php';
 require_once __DIR__ . '/../includes/database.php';
+
+// Verify Composer dependencies are installed before proceeding
+$_autoloadPath = __DIR__ . '/../vendor/autoload.php';
+if (!file_exists($_autoloadPath)) {
+    error_log('OAuth callback failed: vendor/autoload.php not found. Run "composer install" on the server.');
+    $loginUrl = (defined('BASE_URL') && BASE_URL) ? BASE_URL . '/pages/auth/login.php' : '/pages/auth/login.php';
+    header('Location: ' . $loginUrl . '?error=' . urlencode('Anmeldung fehlgeschlagen. Bitte Administrator kontaktieren.'));
+    exit;
+}
+require_once $_autoloadPath;
+unset($_autoloadPath);
 
 // Start session
 AuthHandler::startSession();

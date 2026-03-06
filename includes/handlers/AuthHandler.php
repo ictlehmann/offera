@@ -407,7 +407,12 @@ class AuthHandler {
      * Initiate Microsoft Entra ID OAuth login
      */
     public static function initiateMicrosoftLogin() {
-        require_once __DIR__ . '/../../vendor/autoload.php';
+        $_vendorPath = __DIR__ . '/../../vendor/autoload.php';
+        if (!file_exists($_vendorPath)) {
+            throw new Exception('Microsoft OAuth requires Composer dependencies. Run "composer install" on the server.');
+        }
+        require_once $_vendorPath;
+        unset($_vendorPath);
         
         self::startSession();
         
@@ -457,7 +462,12 @@ class AuthHandler {
      * Handle Microsoft Entra ID OAuth callback
      */
     public static function handleMicrosoftCallback() {
-        require_once __DIR__ . '/../../vendor/autoload.php';
+        $_vendorPath = __DIR__ . '/../../vendor/autoload.php';
+        if (!file_exists($_vendorPath)) {
+            throw new Exception('Microsoft OAuth requires Composer dependencies. Run "composer install" on the server.');
+        }
+        require_once $_vendorPath;
+        unset($_vendorPath);
         
         self::startSession();
         
@@ -550,7 +560,12 @@ class AuthHandler {
      * @param string|null $userAccessToken Optional user OAuth access token for Graph API photo retrieval
      */
     public static function completeMicrosoftLogin(array $claims, $existingUser = null, ?string $userAccessToken = null) {
-        require_once __DIR__ . '/../../vendor/autoload.php';
+        $_vendorPath = __DIR__ . '/../../vendor/autoload.php';
+        if (!file_exists($_vendorPath)) {
+            throw new Exception('Microsoft OAuth requires Composer dependencies. Run "composer install" on the server.');
+        }
+        require_once $_vendorPath;
+        unset($_vendorPath);
         require_once __DIR__ . '/../services/MicrosoftGraphService.php';
         require_once __DIR__ . '/../models/Alumni.php';
 
