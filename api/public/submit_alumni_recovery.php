@@ -327,7 +327,7 @@ if (mb_strlen($studyProgram) > ALUMNI_MAX_PROGRAM_LENGTH) {
 if (AlumniAccessRequest::hasPendingRequest($newEmail)) {
     echo json_encode([
         'success' => true,
-        'message' => 'Deine Anfrage wird bereits geprüft',
+        'message' => 'Deine Anfrage wird bereits geprüft.',
     ]);
     exit;
 }
