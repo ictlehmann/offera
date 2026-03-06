@@ -40,7 +40,7 @@ $title = 'Inventar - IBC Intranet';
 ob_start();
 ?>
 
-<div class="pb-28 lg:pb-0">
+<div class="pb-28 lg:pb-0" id="inventoryContent">
 <?php if ($checkoutSuccess): ?>
 <div class="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
     <i class="fas fa-check-circle mr-2"></i><?php echo htmlspecialchars($checkoutSuccess); ?>
@@ -140,9 +140,9 @@ ob_start();
 </div>
 <?php endif; ?>
 
-<!-- ─── Main Layout: Inventory Grid + Cart Sidebar ─── -->
-<div class="grid grid-cols-1 lg:grid-cols-4 lg:gap-6 items-start">
-<div class="lg:col-span-3">
+<!-- ─── Main Layout: Inventory (full-width; cart is fixed sidebar/bottom-sheet) ─── -->
+<div>
+<div>
 
 <!-- Inventory Grid -->
 <?php if (empty($inventoryObjects) && !$loadError): ?>
@@ -255,14 +255,13 @@ ob_start();
 </div>
 <?php endif; ?>
 
-</div><!-- /.lg:col-span-3 inventory -->
+</div><!-- /.inventory -->
+</div><!-- /.main layout -->
+</div><!-- /.pb-28 (outer, #inventoryContent) -->
 
-<!-- ─── Cart Sidebar (1 col on desktop, bottom sheet on mobile) ─── -->
-<div class="lg:col-span-1 lg:sticky lg:top-4">
-
-<!-- ─── Cart Panel ─── -->
+<!-- ─── Cart Panel (fixed sidebar on desktop / bottom-sheet on mobile) ─── -->
 <div id="cartPanel"
-     class="fixed bottom-0 inset-x-0 z-50 flex flex-col bg-white dark:bg-slate-900 shadow-2xl rounded-t-3xl lg:static lg:rounded-2xl lg:border lg:border-gray-100 dark:border-slate-700"
+     class="fixed bottom-0 inset-x-0 z-50 flex flex-col bg-white/95 dark:bg-slate-900/95 backdrop-blur-md shadow-2xl rounded-t-3xl transition-transform duration-300 ease-in-out lg:top-0 lg:right-0 lg:bottom-0 lg:left-auto lg:w-80 lg:rounded-none lg:border-l lg:border-gray-200 dark:border-slate-700/80"
      role="dialog" aria-modal="true" aria-label="Ausleih-Warenkorb">
 
     <!-- Drag handle (mobile bottom sheet only) -->
@@ -362,16 +361,10 @@ ob_start();
     </div>
 </div><!-- /#cartPanel -->
 
-</div><!-- /.lg:col-span-1 cart sidebar -->
-
-</div><!-- /.grid main layout -->
-
-</div><!-- /.pb-28 lg:pb-0 -->
-
 <!-- ─── Floating Cart Button (mobile only) ─── -->
 <button id="cartFloatingBtn"
         onclick="openCartPanel()"
-        class="fixed bottom-4 right-4 z-50 w-16 h-16 bg-gradient-to-br from-purple-600 to-blue-600 text-white rounded-full shadow-xl hover:shadow-purple-500/30 flex items-center justify-center transition-all hover:scale-110 focus:outline-none focus:ring-4 focus:ring-purple-300 lg:hidden"
+        class="fixed right-4 z-50 w-16 h-16 bg-gradient-to-br from-purple-600 to-blue-600 text-white rounded-full shadow-2xl hover:shadow-purple-500/40 flex items-center justify-center transition-all hover:scale-110 focus:outline-none focus:ring-4 focus:ring-purple-300 lg:hidden"
         aria-label="Warenkorb öffnen">
     <span class="text-2xl leading-none">🛒</span>
     <span id="cartBadge"
@@ -392,29 +385,36 @@ ob_start();
 <style>
 .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-/* ─── Cart Panel: bottom sheet on mobile, sticky sidebar on desktop ─── */
+/* ─── Cart sidebar width token (320px = Tailwind w-80) ─── */
+:root { --cart-sidebar-w: 320px; }
+/* ─── Cart Panel: bottom-sheet on mobile, fixed sidebar on desktop ─── */
 @media (max-width: 1023px) {
     #cartPanel {
         transform: translateY(100%);
-        transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
-        max-height: 85vh;
+        max-height: 92vh;
         overflow: hidden;
     }
 }
 @media (min-width: 1024px) {
+    /* Reserve space on the right for the fixed cart sidebar */
+    #inventoryContent {
+        padding-right: var(--cart-sidebar-w);
+    }
     #cartPanel {
-        height: calc(100vh - 6rem);
-        transform: none;
-        transition: none;
         overflow: hidden;
     }
 }
+/* ─── Floating Button: safe-area bottom offset for mobile browsers ─── */
+#cartFloatingBtn {
+    bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
+}
 @keyframes cart-pop {
     0%   { transform: scale(1); }
-    40%  { transform: scale(1.2); }
+    40%  { transform: scale(1.22); }
+    70%  { transform: scale(0.94); }
     100% { transform: scale(1); }
 }
-.cart-pop { animation: cart-pop 0.3s ease; }
+.cart-pop { animation: cart-pop 0.35s cubic-bezier(0.36,0.07,0.19,0.97); }
 /* Badge pop when item is added */
 @keyframes badge-pop {
     0%   { transform: scale(1); }
@@ -423,6 +423,12 @@ ob_start();
     100% { transform: scale(1); }
 }
 .badge-pop { animation: badge-pop 0.38s cubic-bezier(0.36,0.07,0.19,0.97); }
+/* Pulse glow on floating button when cart has items */
+@keyframes btn-pulse {
+    0%, 100% { box-shadow: 0 10px 25px rgba(124,58,237,0.35), 0 4px 10px rgba(37,99,235,0.2); }
+    50%       { box-shadow: 0 14px 40px rgba(124,58,237,0.6), 0 6px 18px rgba(37,99,235,0.4); }
+}
+#cartFloatingBtn.has-items { animation: btn-pulse 2s ease-in-out infinite; }
 /* Pulsing glow on submit button */
 @keyframes submit-glow {
     0%, 100% { box-shadow: 0 6px 24px rgba(124,58,237,0.25), 0 2px 6px rgba(37,99,235,0.15); }
@@ -441,6 +447,7 @@ ob_start();
     .cart-pop, .badge-pop, .cart-item-card { animation: none; }
     #cartPanel { transition: none !important; }
     #cartSubmitBtn { animation: none !important; }
+    #cartFloatingBtn.has-items { animation: none !important; }
 }
 </style>
 
@@ -515,12 +522,14 @@ ob_start();
     function updateCartUI() {
         var count      = cart.length;
         var badge      = document.getElementById('cartBadge');
+        var floatBtn   = document.getElementById('cartFloatingBtn');
         var panelCount = document.getElementById('cartPanelCount');
         var submitLbl  = document.getElementById('cartSubmitLabel');
         var submitBtn  = document.getElementById('cartSubmitBtn');
 
         badge.textContent         = count;
         badge.style.display       = count > 0 ? 'flex' : 'none';
+        if (floatBtn) floatBtn.classList.toggle('has-items', count > 0);
         if (panelCount) panelCount.textContent = count + ' Artikel';
         if (submitLbl)  submitLbl.textContent  = count > 1 ? count + ' Anfragen senden' : 'Anfrage senden';
         if (submitBtn)  submitBtn.disabled     = count === 0;
