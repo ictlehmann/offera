@@ -165,9 +165,9 @@ if (!checkAndRecordIpRateLimit($clientIp, ALUMNI_RATE_LIMIT_MAX, ALUMNI_RATE_LIM
 }
 
 // ── Parse JSON request body ───────────────────────────────────────────────────
-$rawBody = file_get_contents('php://input');
-$input   = json_decode($rawBody, true);
-if (!is_array($input)) {
+$rawInput = file_get_contents('php://input');
+$data     = json_decode($rawInput, true);
+if (!is_array($data)) {
     http_response_code(400);
     echo json_encode(['success' => false, 'message' => 'Ungültiges Eingabeformat']);
     exit;
@@ -233,7 +233,7 @@ function verifyRecaptcha(string $token, string $secretKey, string $remoteIp, flo
     return ($result['success'] === true) && (($result['score'] ?? 0.0) >= $scoreThreshold);
 }
 
-$recaptchaToken        = trim($input['recaptcha_token'] ?? '');
+$recaptchaToken        = trim($data['recaptcha_token'] ?? '');
 $recaptchaVerification = verifyRecaptcha($recaptchaToken, RECAPTCHA_SECRET_KEY, $clientIp, ALUMNI_RECAPTCHA_THRESHOLD);
 
 if ($recaptchaVerification === null) {
@@ -250,14 +250,14 @@ if ($recaptchaVerification === false) {
 
 // ── Input sanitization & validation ──────────────────────────────────────────
 // Text fields: trim, then encode HTML special characters to neutralise injections
-$firstName          = htmlspecialchars(trim($input['first_name']          ?? ''), ENT_QUOTES, 'UTF-8');
-$lastName           = htmlspecialchars(trim($input['last_name']           ?? ''), ENT_QUOTES, 'UTF-8');
-$graduationSemester = htmlspecialchars(trim($input['graduation_semester'] ?? ''), ENT_QUOTES, 'UTF-8');
-$studyProgram       = htmlspecialchars(trim($input['study_program']       ?? ''), ENT_QUOTES, 'UTF-8');
+$firstName          = htmlspecialchars(trim($data['first_name']          ?? ''), ENT_QUOTES, 'UTF-8');
+$lastName           = htmlspecialchars(trim($data['last_name']           ?? ''), ENT_QUOTES, 'UTF-8');
+$graduationSemester = htmlspecialchars(trim($data['graduation_semester'] ?? ''), ENT_QUOTES, 'UTF-8');
+$studyProgram       = htmlspecialchars(trim($data['study_program']       ?? ''), ENT_QUOTES, 'UTF-8');
 
 // Email fields: validate format, then normalise to lowercase
-$newEmailRaw = trim($input['new_email'] ?? '');
-$oldEmailRaw = trim($input['old_email'] ?? '');
+$newEmailRaw = trim($data['new_email'] ?? '');
+$oldEmailRaw = trim($data['old_email'] ?? '');
 
 if (empty($firstName) || empty($lastName)) {
     http_response_code(400);
