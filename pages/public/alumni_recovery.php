@@ -140,7 +140,7 @@ ob_start();
 }
 .alumni-heading p {
     color: rgba(255, 255, 255, 0.5);
-    font-size: clamp(0.8rem, 2.2vw, 0.9rem);
+    font-size: clamp(0.875rem, 2.2vw, 1rem);
     line-height: 1.65;
     max-width: 38ch;
     margin-inline: auto;
@@ -170,7 +170,7 @@ ob_start();
 .alumni-field:nth-child(6) { animation-delay: 0.45s; }
 
 .alumni-field label {
-    font-size: 0.78rem;
+    font-size: 0.875rem;
     font-weight: 600;
     letter-spacing: 0.04em;
     text-transform: uppercase;
@@ -185,7 +185,7 @@ ob_start();
     font-weight: 400;
     text-transform: none;
     letter-spacing: 0;
-    font-size: 0.75rem;
+    font-size: 0.875rem;
 }
 
 /* Input styling */
@@ -223,7 +223,7 @@ ob_start();
 
 /* Input hint text */
 .alumni-hint {
-    font-size: 0.72rem;
+    font-size: 0.875rem;
     color: rgba(255, 255, 255, 0.28);
     padding-left: 0.25rem;
     line-height: 1.4;
@@ -344,7 +344,7 @@ ob_start();
     margin-bottom: 0.5rem;
 }
 .alumni-success p {
-    font-size: 0.83rem;
+    font-size: 0.875rem;
     color: rgba(255, 255, 255, 0.45);
     line-height: 1.65;
     max-width: 36ch;
@@ -369,7 +369,7 @@ ob_start();
     gap: 0.3rem;
 }
 .alumni-error-box li {
-    font-size: 0.82rem;
+    font-size: 0.875rem;
     color: #fca5a5;
     display: flex;
     align-items: flex-start;
@@ -377,7 +377,7 @@ ob_start();
 }
 .alumni-error-box li::before {
     content: '✕';
-    font-size: 0.7rem;
+    font-size: 0.875rem;
     color: #f87171;
     margin-top: 0.1rem;
     flex-shrink: 0;
@@ -385,7 +385,7 @@ ob_start();
 
 /* reCAPTCHA note */
 .alumni-recaptcha-note {
-    font-size: 0.7rem;
+    font-size: 0.875rem;
     text-align: center;
     color: rgba(255, 255, 255, 0.22);
     line-height: 1.6;

@@ -1302,7 +1302,7 @@ select:focus {
 
     #usersTable td::before {
         content: attr(data-label);
-        font-size: 0.75rem;
+        font-size: 0.875rem;
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.05em;

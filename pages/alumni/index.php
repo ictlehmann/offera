@@ -196,7 +196,7 @@ ob_start();
                                 <?php echo htmlspecialchars($profile['company']); ?>
                             </p>
                             <?php if (!empty($profile['industry'])): ?>
-                                <p class="text-muted mt-1 mb-0 directory-card-text-truncate" style="font-size:0.75rem;">
+                                <p class="text-muted mt-1 mb-0 directory-card-text-truncate" style="font-size:0.875rem;">
                                     <i class="fas fa-briefcase me-1"></i>
                                     <?php echo htmlspecialchars($profile['industry']); ?>
                                 </p>

@@ -291,7 +291,7 @@ ob_start();
         gap: 0.4rem;
         padding: 0.4rem 0.9rem;
         border-radius: 9999px;
-        font-size: 0.8125rem;
+        font-size: 0.875rem;
         font-weight: 600;
         background: rgba(255, 255, 255, 0.18);
         backdrop-filter: blur(8px);
@@ -420,7 +420,7 @@ ob_start();
         flex-shrink: 0;
     }
     .dash-event-date-month {
-        font-size: 0.6rem;
+        font-size: 0.875rem;
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.06em;
@@ -441,7 +441,7 @@ ob_start();
         gap: 0.3rem;
         padding: 0.2rem 0.65rem;
         border-radius: 9999px;
-        font-size: 0.7rem;
+        font-size: 0.875rem;
         font-weight: 600;
         white-space: nowrap;
     }
@@ -564,7 +564,7 @@ ob_start();
 
     /* ── Hero Typography & Decorative ───────────────────── */
     .hero-date-text {
-        font-size: 0.8rem;
+        font-size: 0.875rem;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.1em;

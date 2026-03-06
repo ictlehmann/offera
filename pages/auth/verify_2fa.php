@@ -336,7 +336,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['verify_2fa'])) {
             border-top: 1px solid #e5e7eb;
             text-align: center;
             color: #6b7280;
-            font-size: 13px;
+            font-size: 14px;
         }
 
         .help-text a {

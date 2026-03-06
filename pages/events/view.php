@@ -743,7 +743,7 @@ $statusInfo = $statusLabels[$currentStatus] ?? ['label' => $currentStatus, 'icon
     .event-stat-card--orange .event-stat-icon { background: rgba(255,107,53,0.12);  color: var(--stat-amber); }
 
     .event-stat-label {
-        font-size: 0.7rem;
+        font-size: 0.875rem;
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.06em;
@@ -756,7 +756,7 @@ $statusInfo = $statusLabels[$currentStatus] ?? ['label' => $currentStatus, 'icon
         line-height: 1.3;
     }
     .event-stat-sub {
-        font-size: 0.8rem;
+        font-size: 0.875rem;
         color: var(--text-muted);
         margin-top: 0.1rem;
     }

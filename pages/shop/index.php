@@ -358,7 +358,7 @@ ob_start();
     .dark .cat-tab-item { background:#1f2937; color:#d1d5db; border-color:#374151; }
     .cat-tab-item:hover { box-shadow:0 3px 10px rgba(0,0,0,.12); transform:translateY(-1px); }
     .cat-tab-item.cat-tab-active { color:#fff; border-color:transparent; box-shadow:0 4px 14px rgba(0,0,0,.2); transform:translateY(-1px); }
-    .cat-count-badge { font-size:.7rem; font-weight:700; padding:2px 7px; border-radius:999px; background:rgba(0,0,0,.12); }
+    .cat-count-badge { font-size:0.875rem; font-weight:700; padding:2px 7px; border-radius:999px; background:rgba(0,0,0,.12); }
     .cat-tab-item.cat-tab-active .cat-count-badge { background:rgba(255,255,255,.25); }
     </style>
     <div class="mb-5 flex items-center gap-2 overflow-x-auto pb-1" id="shop-cat-tabs" aria-label="Kategorien">
@@ -388,7 +388,7 @@ ob_start();
         .dark .shop-filter-wrap { background: linear-gradient(135deg,#1e293b 0%,#1f2937 60%) !important; }
         .filter-section-card { background: rgba(255,255,255,0.7); border: 1px solid rgba(99,102,241,0.08); }
         .dark .filter-section-card { background: rgba(31,41,55,0.8); border: 1px solid rgba(99,102,241,0.15); }
-        .fpill { display: inline-flex; align-items: center; gap: 5px; padding: 6px 14px; border-radius: 9999px; font-size: 0.8125rem; font-weight: 600; border: 2px solid transparent; cursor: pointer; transition: all .18s ease; }
+        .fpill { display: inline-flex; align-items: center; gap: 5px; padding: 6px 14px; border-radius: 9999px; font-size: 0.875rem; font-weight: 600; border: 2px solid transparent; cursor: pointer; transition: all .18s ease; }
         .fpill:not(.fpill-active) { background: #f3f4f6; color: #4b5563; border-color: #e5e7eb; }
         .dark .fpill:not(.fpill-active) { background: #374151; color: #d1d5db; border-color: #4b5563; }
         .fpill:not(.fpill-active):hover { border-color: currentColor; }

@@ -377,7 +377,7 @@ ob_start();
         background: rgba(26,31,46,0.92);
     }
     .event-date-chip-month {
-        font-size: 0.65rem;
+        font-size: 0.875rem;
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.05em;

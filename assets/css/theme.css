@@ -449,7 +449,7 @@ body:not(.dark-mode) .sidebar .sidebar-logout:hover {
     width: 100%;
     padding: 0.5rem 0.75rem;
     border-radius: var(--radius-sm); /* 8px - matches sidebar nav item radius */
-    font-size: 0.8125rem; /* ~13px - readable but compact for sidebar footer */
+    font-size: 0.875rem; /* 14px – accessibility minimum */
     font-weight: 500;
     color: rgba(255, 255, 255, 0.9);
     background: rgba(255, 255, 255, 0.08);
@@ -2685,7 +2685,7 @@ a.microsoft-btn {
 .login-footer {
     text-align: center;
     margin-top: 2rem;
-    font-size: 0.85rem;
+    font-size: 0.875rem;
     color: rgba(255, 255, 255, 0.9);
     /* Color is set inline in login.php for proper contrast on dark background */
 }
@@ -2932,7 +2932,7 @@ table {
 }
 
 th {
-    font-size: 0.8rem;
+    font-size: 0.875rem;
     text-transform: uppercase;
     letter-spacing: 0.06em;
     padding: 1rem 1.25rem;
@@ -3304,7 +3304,7 @@ body.dark-mode .sidebar {
     .badge,
     [class*="badge"] {
         padding: 0.375rem 0.75rem !important;
-        font-size: 0.8125rem !important;
+        font-size: 0.875rem !important;
     }
 }
 
@@ -3688,7 +3688,7 @@ body.dark-mode .sidebar {
 
 /* Responsive text utilities */
 .text-responsive-xs {
-    font-size: 0.75rem;
+    font-size: 0.875rem;
 }
 
 .text-responsive-sm {
@@ -3700,7 +3700,7 @@ body.dark-mode .sidebar {
 }
 
 @media (min-width: 768px) {
-    .text-responsive-xs { font-size: 0.8125rem; }
+    .text-responsive-xs { font-size: 0.875rem; }
     .text-responsive-sm { font-size: 0.9375rem; }
     .text-responsive-base { font-size: 1.0625rem; }
 }
@@ -4518,7 +4518,7 @@ body:not(.dark-mode) .hero-gradient .hero-date {
     .card-table td[data-label]::before {
         content: attr(data-label);
         font-weight: 600;
-        font-size: 0.75rem;
+        font-size: 0.875rem;
         text-transform: uppercase;
         color: var(--text-muted);
         margin-right: 1rem;
@@ -5112,7 +5112,7 @@ body {
 /* Sidebar section label */
 .sidebar p[class*="uppercase"] {
     color: #b2bec3 !important;
-    font-size: 0.75rem !important;
+    font-size: 0.875rem !important;
     text-transform: uppercase !important;
     letter-spacing: 0.1em !important;
 }
@@ -5544,7 +5544,7 @@ img:not([loading]) {
 }
 
 .directory-toolbar-group label {
-    font-size: 0.7rem;
+    font-size: 0.875rem;
     font-weight: 600;
     letter-spacing: 0.05em;
     text-transform: uppercase;
@@ -5796,13 +5796,13 @@ html, body {
     [class*="badge"],
     .status-badge {
         padding: 0.25rem 0.5rem !important;
-        font-size: 0.75rem !important;
+        font-size: 0.875rem !important;
     }
 
     /* Table cells: smaller padding */
     th, td {
         padding: 0.625rem 0.625rem !important;
-        font-size: 0.8125rem !important;
+        font-size: 0.875rem !important;
     }
 
     /* Reduce button padding slightly */
@@ -6306,7 +6306,7 @@ body.dark-mode .btn.btn-outline-secondary {
 body:not(.dark-mode) .table > thead > tr > th {
     background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%) !important;
     font-weight: 700 !important;
-    font-size: 0.75rem !important;
+    font-size: 0.875rem !important;
     letter-spacing: 0.06em !important;
     text-transform: uppercase !important;
     color: #374151 !important;
@@ -6316,7 +6316,7 @@ body:not(.dark-mode) .table > thead > tr > th {
 body.dark-mode .table > thead > tr > th {
     background: linear-gradient(135deg, #1e293b 0%, #1a2535 100%) !important;
     font-weight: 700 !important;
-    font-size: 0.75rem !important;
+    font-size: 0.875rem !important;
     letter-spacing: 0.06em !important;
     text-transform: uppercase !important;
     color: #94a3b8 !important;
@@ -6584,7 +6584,7 @@ body.dark-mode .dropdown-item:hover {
 .tooltip .tooltip-inner {
     background: #1e293b !important;
     border-radius: 8px !important;
-    font-size: 0.8125rem !important;
+    font-size: 0.875rem !important;
     font-weight: 500 !important;
     padding: 0.35rem 0.75rem !important;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
@@ -6650,7 +6650,7 @@ main {
 /* ── Link button improvements in tables ────────────────── */
 .btn.btn-sm {
     padding: 0.35rem 0.75rem !important;
-    font-size: 0.8125rem !important;
+    font-size: 0.875rem !important;
     border-radius: 8px !important;
 }
 
@@ -6774,7 +6774,7 @@ body.dark-mode .card:hover {
 
 .table th {
     font-weight: 600;
-    font-size: 0.75rem;
+    font-size: 0.875rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     background-color: var(--ibc-gray-100);
@@ -7209,7 +7209,7 @@ td, th {
 .tooltip .tooltip-inner {
     background-color: var(--ibc-gray-800) !important;
     border-radius: 0.5rem !important;
-    font-size: 0.8125rem !important;
+    font-size: 0.875rem !important;
     padding: 0.375rem 0.75rem !important;
     max-width: 200px;
 }
@@ -7255,7 +7255,7 @@ td, th {
 }
 
 .stat-card .stat-label {
-    font-size: 0.8125rem;
+    font-size: 0.875rem;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -7275,7 +7275,7 @@ td, th {
     }
     .sidebar-footer-btn {
         padding: 0.625rem 0.875rem !important;
-        font-size: 0.8125rem !important;
+        font-size: 0.875rem !important;
     }
 }
 
@@ -7307,7 +7307,7 @@ td, th {
         font-size: 0.875rem;
     }
     .card-table td[data-label]::before {
-        font-size: 0.6875rem;
+        font-size: 0.875rem;
         min-width: 90px;
     }
 }
