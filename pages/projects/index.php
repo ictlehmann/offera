@@ -121,7 +121,7 @@ ob_start();
 
     <!-- Filter & Search Bar -->
     <div class="mb-6 flex flex-col sm:flex-row gap-3 items-start sm:items-center">
-        <div class="flex gap-2 flex-wrap">
+        <div class="flex gap-4 flex-wrap">
             <a href="index.php?type=all<?php echo !empty($_GET['q']) ? '&q='.urlencode($_GET['q']) : ''; ?>"
                class="projects-filter-tab <?php echo $typeFilter === 'all' ? 'projects-filter-tab--active' : ''; ?>">
                 <i class="fas fa-list mr-2"></i>Alle
@@ -311,6 +311,7 @@ ob_start();
         display: inline-flex;
         align-items: center;
         padding: 0.6rem 1.5rem;
+        min-height: 44px;
         border-radius: 9999px;
         font-weight: 600;
         font-size: 0.9rem;

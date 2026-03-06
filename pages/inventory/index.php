@@ -64,7 +64,7 @@ ob_start();
             <p class="text-slate-600 dark:text-slate-400 text-lg"><?php echo count($inventoryObjects); ?> Artikel verfügbar</p>
         </div>
         <!-- Action Buttons -->
-        <div class="flex gap-2 flex-wrap">
+        <div class="flex gap-4 flex-wrap">
             <button type="button" onclick="window.location.reload()" class="px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-xl transition-all transform hover:scale-105 shadow-lg font-semibold flex items-center" title="Ansicht aktualisieren" aria-label="Aktualisieren">
                 <i class="fas fa-rotate-right"></i>
             </button>

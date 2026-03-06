@@ -370,14 +370,14 @@ ob_start();
             <p class="text-gray-600 dark:text-gray-300">Produkte und Bestellungen verwalten</p>
         </div>
         <!-- Section tabs -->
-        <div class="flex gap-2">
+        <div class="flex gap-4">
             <a href="<?php echo asset('pages/admin/shop_manage.php?section=products'); ?>"
-               class="px-5 py-2 rounded-lg font-medium transition-colors no-underline
+               class="px-5 py-2 min-h-[44px] inline-flex items-center rounded-lg font-medium transition-colors no-underline
                       <?php echo $section === 'products' ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'; ?>">
                 <i class="fas fa-box mr-1"></i>Produkte
             </a>
             <a href="<?php echo asset('pages/admin/shop_manage.php?section=orders'); ?>"
-               class="px-5 py-2 rounded-lg font-medium transition-colors no-underline
+               class="px-5 py-2 min-h-[44px] inline-flex items-center rounded-lg font-medium transition-colors no-underline
                       <?php echo $section === 'orders' ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'; ?>">
                 <i class="fas fa-list-alt mr-1"></i>Bestellungen
             </a>

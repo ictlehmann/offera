@@ -402,7 +402,7 @@ ob_start();
                             <input type="hidden" name="csrf_token" value="<?php echo CSRFHandler::getToken(); ?>">
                             <input type="hidden" name="request_return" value="1">
                             <input type="hidden" name="rental_id" value="<?php echo (int)$rental['id']; ?>">
-                            <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition text-xs font-semibold">
+                            <button type="submit" class="inline-flex items-center px-3 py-2 min-h-[44px] bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition text-xs font-semibold">
                                 <i class="fas fa-undo mr-1" aria-hidden="true"></i>Rückgabe melden
                             </button>
                         </form>

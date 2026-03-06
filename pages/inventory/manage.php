@@ -82,8 +82,7 @@ ob_start();
             </h1>
             <p class="text-slate-600 dark:text-slate-400 text-lg"><?php echo count($items); ?> Artikel gefunden</p>
         </div>
-        <div class="flex gap-2 flex-wrap">
-            <a href="sync.php" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-5 py-3 rounded-xl flex items-center shadow-lg font-semibold transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+        <div class="flex gap-4 flex-wrap">
                 <i class="fas fa-sync-alt mr-2"></i> EasyVerein Sync
             </a>
             <a href="../admin/rental_returns.php" class="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-5 py-3 rounded-xl flex items-center shadow-lg font-semibold transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
@@ -232,11 +231,11 @@ ob_start();
                 <option value="low_stock" <?php echo (isset($_GET['filter']) && $_GET['filter'] === 'low_stock') ? 'selected' : ''; ?>>Niedriger Bestand</option>
             </select>
         </div>
-        <div class="md:col-span-2 lg:col-span-4 flex justify-end gap-2">
-            <a href="manage.php" class="px-5 py-2.5 bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-slate-600 transition font-semibold text-sm">
+        <div class="md:col-span-2 lg:col-span-4 flex justify-end gap-4">
+            <a href="manage.php" class="px-5 py-2.5 min-h-[44px] inline-flex items-center bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-slate-600 transition font-semibold text-sm">
                 <i class="fas fa-times mr-1.5"></i>Zurücksetzen
             </a>
-            <button type="submit" class="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-lg transition-all duration-300 hover:-translate-y-0.5 shadow-md font-semibold text-sm">
+            <button type="submit" class="px-5 py-2.5 min-h-[44px] bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-lg transition-all duration-300 hover:-translate-y-0.5 shadow-md font-semibold text-sm">
                 <i class="fas fa-search mr-1.5"></i>Filtern
             </button>
         </div>
@@ -329,15 +328,15 @@ ob_start();
             </div>
 
             <!-- Actions -->
-            <div class="flex gap-2">
-                <a href="view.php?id=<?php echo $item['id']; ?>" class="flex-1 py-2 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg transition text-center text-xs font-semibold border border-blue-200 dark:border-blue-800">
+            <div class="flex gap-4">
+                <a href="view.php?id=<?php echo $item['id']; ?>" class="flex-1 py-2 min-h-[44px] inline-flex items-center justify-center bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded-lg transition text-xs font-semibold border border-blue-200 dark:border-blue-800">
                     <i class="fas fa-eye mr-1"></i>Ansehen
                 </a>
-                <a href="edit.php?id=<?php echo $item['id']; ?>" class="flex-1 py-2 bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 hover:bg-purple-100 dark:hover:bg-purple-900/50 rounded-lg transition text-center text-xs font-semibold border border-purple-200 dark:border-purple-800">
+                <a href="edit.php?id=<?php echo $item['id']; ?>" class="flex-1 py-2 min-h-[44px] inline-flex items-center justify-center bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 hover:bg-purple-100 dark:hover:bg-purple-900/50 rounded-lg transition text-xs font-semibold border border-purple-200 dark:border-purple-800">
                     <i class="fas fa-edit mr-1"></i>Bearbeiten
                 </a>
                 <button
-                    class="delete-item-btn py-2 px-3 bg-red-50 dark:bg-red-900/30 text-red-500 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-lg transition text-xs border border-red-200 dark:border-red-800"
+                    class="delete-item-btn py-2 px-3 min-h-[44px] min-w-[44px] bg-red-50 dark:bg-red-900/30 text-red-500 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50 rounded-lg transition text-xs border border-red-200 dark:border-red-800"
                     data-item-id="<?php echo $item['id']; ?>"
                     data-item-name="<?php echo htmlspecialchars($item['name']); ?>"
                     title="Löschen"

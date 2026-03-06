@@ -353,20 +353,20 @@ ob_start();
                                 <?php endif; ?>
                             </div>
                             <?php if ($canEditInvoices && $invoice['status'] === 'pending'): ?>
-                            <div class="flex gap-2 mt-3" onclick="event.stopPropagation()">
+                            <div class="flex gap-4 mt-3" onclick="event.stopPropagation()">
                                 <button onclick="updateInvoiceStatus(<?php echo $invoice['id']; ?>, 'approved')"
-                                    class="flex-1 px-3 py-1.5 bg-green-600 text-white rounded-xl text-xs font-medium hover:bg-green-700 shadow-sm hover:shadow-md hover:-translate-y-0.5 transform transition-all duration-200">
+                                    class="flex-1 px-3 py-2 min-h-[44px] bg-green-600 text-white rounded-xl text-xs font-medium hover:bg-green-700 shadow-sm hover:shadow-md hover:-translate-y-0.5 transform transition-all duration-200">
                                     <i class="fas fa-check mr-1"></i>Genehmigen
                                 </button>
                                 <button onclick="updateInvoiceStatus(<?php echo $invoice['id']; ?>, 'rejected')"
-                                    class="flex-1 px-3 py-1.5 bg-red-600 text-white rounded-xl text-xs font-medium hover:bg-red-700 shadow-sm hover:shadow-md hover:-translate-y-0.5 transform transition-all duration-200">
+                                    class="flex-1 px-3 py-2 min-h-[44px] bg-red-600 text-white rounded-xl text-xs font-medium hover:bg-red-700 shadow-sm hover:shadow-md hover:-translate-y-0.5 transform transition-all duration-200">
                                     <i class="fas fa-times mr-1"></i>Ablehnen
                                 </button>
                             </div>
                             <?php elseif ($canEditInvoices && $invoice['status'] === 'approved' && $canMarkAsPaid): ?>
                             <div class="mt-3" onclick="event.stopPropagation()">
                                 <button onclick="markInvoiceAsPaid(<?php echo $invoice['id']; ?>)"
-                                    class="w-full px-3 py-1.5 bg-blue-600 text-white rounded-xl text-xs font-medium hover:bg-blue-700 shadow-sm hover:shadow-md hover:-translate-y-0.5 transform transition-all duration-200">
+                                    class="w-full px-3 py-2 min-h-[44px] bg-blue-600 text-white rounded-xl text-xs font-medium hover:bg-blue-700 shadow-sm hover:shadow-md hover:-translate-y-0.5 transform transition-all duration-200">
                                     <i class="fas fa-check-double mr-1"></i>Als Bezahlt markieren
                                 </button>
                             </div>
@@ -473,22 +473,22 @@ ob_start();
                                 <?php if ($canEditInvoices): ?>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm invoice-actions-col" onclick="event.stopPropagation()">
                                     <?php if ($invoice['status'] === 'pending'): ?>
-                                        <div class="flex gap-2">
+                                        <div class="flex gap-4">
                                             <button
                                                 onclick="updateInvoiceStatus(<?php echo $invoice['id']; ?>, 'approved')"
-                                                class="inline-flex items-center px-3 py-1.5 bg-green-600 dark:bg-green-700 text-white rounded-xl text-xs font-semibold hover:bg-green-700 dark:hover:bg-green-600 shadow-sm hover:shadow-md hover:-translate-y-0.5 transform transition-all duration-200">
+                                                class="inline-flex items-center px-3 py-2 min-h-[44px] bg-green-600 dark:bg-green-700 text-white rounded-xl text-xs font-semibold hover:bg-green-700 dark:hover:bg-green-600 shadow-sm hover:shadow-md hover:-translate-y-0.5 transform transition-all duration-200">
                                                 <i class="fas fa-check mr-1"></i>Genehmigen
                                             </button>
                                             <button
                                                 onclick="updateInvoiceStatus(<?php echo $invoice['id']; ?>, 'rejected')"
-                                                class="inline-flex items-center px-3 py-1.5 bg-red-600 dark:bg-red-700 text-white rounded-xl text-xs font-semibold hover:bg-red-700 dark:hover:bg-red-600 shadow-sm hover:shadow-md hover:-translate-y-0.5 transform transition-all duration-200">
+                                                class="inline-flex items-center px-3 py-2 min-h-[44px] bg-red-600 dark:bg-red-700 text-white rounded-xl text-xs font-semibold hover:bg-red-700 dark:hover:bg-red-600 shadow-sm hover:shadow-md hover:-translate-y-0.5 transform transition-all duration-200">
                                                 <i class="fas fa-times mr-1"></i>Ablehnen
                                             </button>
                                         </div>
                                     <?php elseif ($invoice['status'] === 'approved' && $canMarkAsPaid): ?>
                                         <button
                                             onclick="markInvoiceAsPaid(<?php echo $invoice['id']; ?>)"
-                                            class="inline-flex items-center px-3 py-1.5 bg-blue-600 dark:bg-blue-700 text-white rounded-xl text-xs font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 shadow-sm hover:shadow-md hover:-translate-y-0.5 transform transition-all duration-200">
+                                            class="inline-flex items-center px-3 py-2 min-h-[44px] bg-blue-600 dark:bg-blue-700 text-white rounded-xl text-xs font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 shadow-sm hover:shadow-md hover:-translate-y-0.5 transform transition-all duration-200">
                                             <i class="fas fa-check-circle mr-1"></i>Als Bezahlt markieren
                                         </button>
                                     <?php else: ?>
@@ -578,13 +578,13 @@ ob_start();
         <div class="px-5 pb-5 space-y-3">
             <?php if ($canEditInvoices): ?>
             <!-- Board action buttons (shown/hidden dynamically by JS) -->
-            <div id="detail-actions-pending" class="hidden flex gap-2">
+            <div id="detail-actions-pending" class="hidden flex gap-4">
                 <button onclick="updateInvoiceStatusFromDetail('approved')"
-                    class="flex-1 inline-flex items-center justify-center px-4 py-2 bg-green-600 dark:bg-green-700 text-white rounded-lg font-semibold hover:bg-green-700 dark:hover:bg-green-600 transition-all shadow-sm">
+                    class="flex-1 inline-flex items-center justify-center px-4 py-3 bg-green-600 dark:bg-green-700 text-white rounded-lg font-semibold hover:bg-green-700 dark:hover:bg-green-600 transition-all shadow-sm">
                     <i class="fas fa-check mr-2"></i>Genehmigen
                 </button>
                 <button onclick="openRejectModal()"
-                    class="flex-1 inline-flex items-center justify-center px-4 py-2 bg-red-600 dark:bg-red-700 text-white rounded-lg font-semibold hover:bg-red-700 dark:hover:bg-red-600 transition-all shadow-sm">
+                    class="flex-1 inline-flex items-center justify-center px-4 py-3 bg-red-600 dark:bg-red-700 text-white rounded-lg font-semibold hover:bg-red-700 dark:hover:bg-red-600 transition-all shadow-sm">
                     <i class="fas fa-times mr-2"></i>Ablehnen
                 </button>
             </div>
