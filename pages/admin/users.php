@@ -888,6 +888,14 @@ document.addEventListener('DOMContentLoaded', function() {
     sortBy.addEventListener('change', filterAndSortUsers);
     
     // Export to CSV functionality
+    function sanitizeCsvValue(val) {
+        var s = String(val).replace(/"/g, '""'); // escape double quotes for CSV
+        if (/^[=+\-@]/.test(s)) {
+            s = "'" + s;
+        }
+        return s;
+    }
+
     exportBtn.addEventListener('click', function() {
         const visibleRows = Array.from(userRows).filter(row => row.style.display !== 'none');
         
@@ -908,7 +916,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             const login = cells[6].textContent.trim();
             
-            csv += `${id},"${email}","${role}","${tfa}","${verif}","${login}"\n`;
+            csv += `${sanitizeCsvValue(id)},"${sanitizeCsvValue(email)}","${sanitizeCsvValue(role)}","${sanitizeCsvValue(tfa)}","${sanitizeCsvValue(verif)}","${sanitizeCsvValue(login)}"\n`;
         });
         
         // Create download link

@@ -855,7 +855,7 @@ document.addEventListener('DOMContentLoaded', function() {
             csv += 'Datenbank Speicherverbrauch\n';
             csv += 'Datenbank,Größe (MB),Auslastung (%)\n';
             <?php foreach ($databaseStats as $db): ?>
-            csv += '<?php echo htmlspecialchars($db['label']); ?>,<?php echo $db['size_mb']; ?>,<?php echo number_format($db['percentage'], 2); ?>\n';
+            csv += '<?php echo sanitizeCsvValue(htmlspecialchars($db['label'])); ?>,<?php echo $db['size_mb']; ?>,<?php echo number_format($db['percentage'], 2); ?>\n';
             <?php endforeach; ?>
             csv += '\n';
             <?php endif; ?>
@@ -865,7 +865,7 @@ document.addEventListener('DOMContentLoaded', function() {
             csv += 'Aktive Ausleihen\n';
             csv += 'Artikel,Benutzer,Ausgeliehen am,Fällig am,Überfällig\n';
             <?php foreach ($activeCheckouts as $checkout): ?>
-            csv += '"<?php echo str_replace('"', '""', $checkout['item_name']); ?>","<?php echo str_replace('"', '""', $checkout['user_name']); ?>","<?php echo $checkout['checked_out_at']; ?>","<?php echo $checkout['due_date'] ?? 'N/A'; ?>","<?php echo $checkout['is_overdue'] ? 'Ja' : 'Nein'; ?>"\n';
+            csv += '"<?php echo str_replace('"', '""', sanitizeCsvValue($checkout['item_name'])); ?>","<?php echo str_replace('"', '""', sanitizeCsvValue($checkout['user_name'])); ?>","<?php echo $checkout['checked_out_at']; ?>","<?php echo $checkout['due_date'] ?? 'N/A'; ?>","<?php echo $checkout['is_overdue'] ? 'Ja' : 'Nein'; ?>"\n';
             <?php endforeach; ?>
             csv += '\n';
             <?php endif; ?>
@@ -875,7 +875,7 @@ document.addEventListener('DOMContentLoaded', function() {
             csv += 'Projekt Bewerbungen\n';
             csv += 'Projekt,Typ,Status,Bewerbungen\n';
             <?php foreach ($projectApplications as $project): ?>
-            csv += '"<?php echo str_replace('"', '""', $project['title']); ?>","<?php echo $project['type']; ?>","<?php echo $project['status']; ?>",<?php echo $project['application_count']; ?>\n';
+            csv += '"<?php echo str_replace('"', '""', sanitizeCsvValue($project['title'])); ?>","<?php echo sanitizeCsvValue($project['type']); ?>","<?php echo sanitizeCsvValue($project['status']); ?>",<?php echo $project['application_count']; ?>\n';
             <?php endforeach; ?>
             <?php endif; ?>
             

@@ -275,6 +275,23 @@ function isMemberRole($role) {
 }
 
 /**
+ * Sanitize a value for safe inclusion in a CSV cell (CWE-1236 / CSV injection prevention).
+ * If the value begins with =, +, -, or @, a single quote is prepended so that
+ * spreadsheet applications (Excel, LibreOffice Calc, …) treat it as plain text
+ * instead of executing it as a formula.
+ *
+ * @param mixed $val The value to sanitize
+ * @return string The sanitized string value
+ */
+function sanitizeCsvValue($val): string {
+    $val = (string)$val;
+    if (preg_match('/^[=+\-@]/', $val)) {
+        $val = "'" . $val;
+    }
+    return $val;
+}
+
+/**
  * Check if role is an alumni role
  * Alumni roles: alumni, alumni_board, honorary_member
  * 

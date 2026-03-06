@@ -34,12 +34,12 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
 
     foreach ($csvItems as $item) {
         fputcsv($out, [
-            $item['name'],
-            $item['category_name'] ?? '',
+            sanitizeCsvValue($item['name']),
+            sanitizeCsvValue($item['category_name'] ?? ''),
             $item['quantity'],
             $item['quantity'] - $item['available_quantity'],
             $item['available_quantity'],
-            $item['unit'],
+            sanitizeCsvValue($item['unit']),
         ], ';');
     }
 
