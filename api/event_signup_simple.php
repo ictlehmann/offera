@@ -14,17 +14,16 @@ require_once __DIR__ . '/../includes/handlers/CSRFHandler.php';
 // Set response header
 header('Content-Type: application/json');
 
+if (!Auth::check()) {
+    http_response_code(401);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Nicht authentifiziert'
+    ]);
+    exit;
+}
+
 try {
-    // Check if user is logged in
-    if (!Auth::check()) {
-        http_response_code(401);
-        echo json_encode([
-            'success' => false,
-            'message' => 'Nicht authentifiziert'
-        ]);
-        exit;
-    }
-    
     // Only accept POST requests
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         http_response_code(405);

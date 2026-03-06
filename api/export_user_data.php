@@ -8,14 +8,14 @@ require_once __DIR__ . '/../src/Auth.php';
 require_once __DIR__ . '/../includes/handlers/CSRFHandler.php';
 require_once __DIR__ . '/../includes/helpers.php';
 
-// Only allow POST requests with a valid CSRF token
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('HTTP/1.1 405 Method Not Allowed');
+if (!Auth::check()) {
+    http_response_code(401);
     exit;
 }
 
-if (!Auth::check()) {
-    header('Location: ' . asset('pages/auth/login.php'));
+// Only allow POST requests with a valid CSRF token
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    header('HTTP/1.1 405 Method Not Allowed');
     exit;
 }
 

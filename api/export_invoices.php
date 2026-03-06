@@ -10,7 +10,7 @@ require_once __DIR__ . '/../includes/helpers.php';
 
 // Check authentication (Auth::check() calls init_session() which ensures secure session)
 if (!Auth::check()) {
-    header('Location: ../pages/auth/login.php');
+    http_response_code(401);
     exit;
 }
 

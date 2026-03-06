@@ -11,16 +11,16 @@ require_once __DIR__ . '/../src/Auth.php';
 require_once __DIR__ . '/../src/Database.php';
 require_once __DIR__ . '/../includes/handlers/CSRFHandler.php';
 
-try {
-    // Check authentication
-    if (!Auth::check()) {
-        echo json_encode([
-            'success' => false,
-            'message' => 'Nicht authentifiziert'
-        ]);
-        exit;
-    }
+if (!Auth::check()) {
+    http_response_code(401);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Nicht authentifiziert'
+    ]);
+    exit;
+}
 
+try {
     // Check if it's a POST request
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         echo json_encode([

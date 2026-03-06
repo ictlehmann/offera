@@ -15,13 +15,13 @@ require_once __DIR__ . '/../includes/models/Alumni.php';
 require_once __DIR__ . '/../includes/utils/SecureImageUpload.php';
 require_once __DIR__ . '/../includes/handlers/CSRFHandler.php';
 
-try {
-    // Authentication check
-    if (!Auth::check()) {
-        echo json_encode(['success' => false, 'message' => 'Nicht authentifiziert']);
-        exit;
-    }
+if (!Auth::check()) {
+    http_response_code(401);
+    echo json_encode(['success' => false, 'message' => 'Nicht authentifiziert']);
+    exit;
+}
 
+try {
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         echo json_encode(['success' => false, 'message' => 'Ungültige Anfrage']);
         exit;

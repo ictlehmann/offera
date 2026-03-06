@@ -1202,7 +1202,7 @@ class MailService {
         $subject = "E-Mail-Adresse bestätigen - IBC Intranet";
         
         // Build confirmation link
-        $confirmLink = BASE_URL . '/api/confirm_email.php?token=' . urlencode($token);
+        $confirmLink = BASE_URL . '/api/public/confirm_email.php?token=' . urlencode($token);
         
         // Build body content
         $bodyContent = '<p class="email-text">Hallo,</p>
