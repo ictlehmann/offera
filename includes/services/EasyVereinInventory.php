@@ -11,8 +11,10 @@ require_once __DIR__ . '/../database.php';
 
 class EasyVereinInventory {
 
-    private const API_BASE  = 'https://easyverein.com/api/v2.0';
-    private const CACHE_TTL = 300; // seconds (5 minutes)
+    private const API_BASE                    = 'https://easyverein.com/api/v2.0';
+    private const CACHE_TTL                   = 300; // seconds (5 minutes)
+    private const FALLBACK_CONTACT_NAME       = 'Intra Ausleihe';
+    private const CF_NAME_NOT_IN_EASYVEREIN   = 'Name nicht im easyverein';
 
     /** Request-level in-memory cache to avoid repeated file reads within one PHP request.
      *  This is a static property, so it persists only for the duration of the current
@@ -725,6 +727,9 @@ class EasyVereinInventory {
      *
      * 1. Loads the pending request from the local DB.
      * 2. Resolves the borrower's EasyVerein contact ID via getContactIdByName().
+     *    If the borrower is not found in EasyVerein, falls back to the placeholder
+     *    contact "Intra Ausleihe" and records the original name in the custom field
+     *    "Name nicht im easyverein".
      * 3. Creates the official lending record in EasyVerein via POST /api/v2.0/lending.
      * 4. Queries all currently active (approved) rentals for this item from the local DB
      *    (including the request being approved now) and builds multiline strings for the
@@ -732,6 +737,7 @@ class EasyVereinInventory {
      * 5. Fetches the individual fields via GET /api/v2.0/inventory-object/{id}/custom-fields,
      *    updates 'Aktuelle Ausleiher' and 'Entra E-Mail' with the multiline strings, and
      *    clears 'Zustand der letzten Rückgabe'.
+     *    When the fallback was used, also sets "Name nicht im easyverein" to $userName.
      *    For each field, PATCHes /api/v2.0/custom-field-values/{id} if a value already
      *    exists, or POSTs /api/v2.0/custom-field-values to create it otherwise.
      * 6. Updates the local DB status to 'approved'.
@@ -756,8 +762,26 @@ class EasyVereinInventory {
             throw new Exception("Inventory request #{$requestId} not found or not pending");
         }
 
-        // 2. Resolve the borrower's EasyVerein contact ID
-        $evContactId = $this->getContactIdByName($userName);
+        // 2. Resolve the borrower's EasyVerein contact ID.
+        //    If the borrower is not found, fall back to the "Intra Ausleihe" placeholder.
+        $fallbackUsed = false;
+        try {
+            $evContactId = $this->getContactIdByName($userName);
+        } catch (Exception $e) {
+            error_log(sprintf(
+                'EasyVereinInventory::approveRental: user "%s" not found in EasyVerein, falling back to "%s". Original error: %s',
+                $userName, self::FALLBACK_CONTACT_NAME, $e->getMessage()
+            ));
+            try {
+                $evContactId = $this->getContactIdByName(self::FALLBACK_CONTACT_NAME);
+            } catch (Exception $fallbackEx) {
+                throw new Exception(sprintf(
+                    'Fallback contact "%s" not found in EasyVerein: %s',
+                    self::FALLBACK_CONTACT_NAME, $fallbackEx->getMessage()
+                ));
+            }
+            $fallbackUsed = true;
+        }
 
         // 3. Create the official lending record in EasyVerein
         $this->createLending(
@@ -769,11 +793,16 @@ class EasyVereinInventory {
         );
 
         // 4. Append the new borrower to the custom fields on the inventory object.
+        //    When the fallback was used, also record the original user name.
+        $setTo = ['Zustand der letzten Rückgabe' => ''];
+        if ($fallbackUsed) {
+            $setTo[self::CF_NAME_NOT_IN_EASYVEREIN] = $userName;
+        }
         $appendTo = [];
         if ($userName  !== '') $appendTo['Aktuelle Ausleiher'] = $userName;
         if ($userEmail !== '') $appendTo['Entra E-Mail']       = $userEmail;
         $this->modifyCustomFields((int)$req['inventory_object_id'],
-            ['Zustand der letzten Rückgabe' => ''],
+            $setTo,
             $appendTo,
             []
         );
