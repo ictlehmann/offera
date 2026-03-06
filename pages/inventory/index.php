@@ -325,7 +325,7 @@ ob_start();
     </div>
 
     <!-- Cart Items (scrollable) -->
-    <div id="cartItemsList" class="flex-1 overflow-y-auto px-5 py-4 space-y-3" style="display:none"></div>
+    <div id="cartItemsList" class="flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-3" style="display:none"></div>
 
     <!-- Empty State -->
     <div id="cartEmpty" class="flex-1 flex flex-col items-center justify-center px-5 py-12 text-center">
@@ -398,6 +398,7 @@ ob_start();
         transform: translateY(100%);
         transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
         max-height: 85vh;
+        overflow: hidden;
     }
 }
 @media (min-width: 1024px) {
@@ -538,7 +539,7 @@ ob_start();
             return;
         }
 
-        list.style.display = '';
+        list.style.display = 'flex';
         if (empty) empty.style.display = 'none';
 
         list.innerHTML = cart.map(function (item) {
