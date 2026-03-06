@@ -447,7 +447,7 @@ ob_start();
             </div>
             <div class="p-6">
             <p class="text-gray-600 dark:text-gray-300 mb-5 text-sm">
-                Gemäß DSGVO Art. 20 kannst du alle zu deiner Person gespeicherten Daten als JSON-Datei herunterladen (Profil, Ausleihen, Shop-Bestellungen, Event-Teilnahmen).
+                Gemäß DSGVO Art. 20 kannst du alle zu deiner Person gespeicherten Daten als CSV-Datei herunterladen (Profil, Ausleihen, Shop-Bestellungen, Event-Teilnahmen).
             </p>
             <form method="POST" action="<?php echo asset('api/export_user_data.php'); ?>">
                 <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(CSRFHandler::getToken(), ENT_QUOTES, 'UTF-8'); ?>">

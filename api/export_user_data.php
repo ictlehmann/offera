@@ -1,7 +1,7 @@
 <?php
 /**
  * API: GDPR User Data Export
- * Collects all data linked to the authenticated user and offers it as a JSON download.
+ * Collects all data linked to the authenticated user and offers it as a CSV download.
  */
 
 require_once __DIR__ . '/../src/Auth.php';
@@ -128,30 +128,114 @@ try {
     error_log("export_user_data: project_applications query failed: " . $e->getMessage());
 }
 
-// ── Assemble export payload ───────────────────────────────────────────────────
-$exportTimestamp = gmdate('c'); // UTC ISO-8601 for consistent GDPR records
-
-$export = [
-    'export_generated_at'  => $exportTimestamp,
-    'profile'              => $profile,
-    'event_signups'        => $eventSignups,
-    'event_registrations'  => $eventRegistrations,
-    'inventory_rentals'    => $rentals,
-    'shop_orders'          => $shopOrders,
-    'project_applications' => $projectApplications,
-];
-
-// Filename uses only server-generated values; escape to prevent header injection
-$filename = 'meine_daten_' . gmdate('Y-m-d_H-i-s') . '.json';
+// ── Output CSV ────────────────────────────────────────────────────────────────
+$filename = 'meine_daten_' . gmdate('Y-m-d_H-i-s') . '.csv';
+// Sanitize filename to prevent header injection
 $safeFilename = str_replace(['"', '\\', "\r", "\n"], '', $filename);
 
-$json = json_encode($export, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-
-header('Content-Type: application/json; charset=utf-8');
+header('Content-Type: text/csv; charset=UTF-8');
 header('Content-Disposition: attachment; filename="' . $safeFilename . '"');
-header('Content-Length: ' . strlen($json));
 header('Cache-Control: no-cache, must-revalidate');
 header('Pragma: public');
 
-echo $json;
+$out = fopen('php://output', 'w');
+// UTF-8 BOM so that Excel opens the file with the correct encoding
+fputs($out, "\xEF\xBB\xBF");
+
+// ── Section: Profil ───────────────────────────────────────────────────────────
+fputcsv($out, ['=== Profil ==='], ';');
+fputcsv($out, ['Feld', 'Wert'], ';');
+foreach ($profile as $key => $value) {
+    if (is_array($value)) {
+        $value = json_encode($value, JSON_UNESCAPED_UNICODE);
+    }
+    fputcsv($out, [sanitizeCsvValue((string)$key), sanitizeCsvValue((string)($value ?? ''))], ';');
+}
+fputcsv($out, [], ';');
+
+// ── Section: Event-Anmeldungen (Slot-basiert) ─────────────────────────────────
+fputcsv($out, ['=== Event-Anmeldungen (Slot-basiert) ==='], ';');
+fputcsv($out, ['ID', 'Event-ID', 'Event-Titel', 'Startdatum', 'Slot-ID', 'Helfer-Typ-ID', 'Rollen-ID', 'Erstellt am'], ';');
+foreach ($eventSignups as $row) {
+    fputcsv($out, [
+        sanitizeCsvValue((string)($row['id'] ?? '')),
+        sanitizeCsvValue((string)($row['event_id'] ?? '')),
+        sanitizeCsvValue((string)($row['event_title'] ?? '')),
+        sanitizeCsvValue((string)($row['start_date'] ?? '')),
+        sanitizeCsvValue((string)($row['slot_id'] ?? '')),
+        sanitizeCsvValue((string)($row['helper_type_id'] ?? '')),
+        sanitizeCsvValue((string)($row['role_id'] ?? '')),
+        sanitizeCsvValue((string)($row['created_at'] ?? '')),
+    ], ';');
+}
+fputcsv($out, [], ';');
+
+// ── Section: Event-Registrierungen ───────────────────────────────────────────
+fputcsv($out, ['=== Event-Registrierungen ==='], ';');
+fputcsv($out, ['ID', 'Event-ID', 'Event-Titel', 'Startdatum', 'Status', 'Registriert am'], ';');
+foreach ($eventRegistrations as $row) {
+    fputcsv($out, [
+        sanitizeCsvValue((string)($row['id'] ?? '')),
+        sanitizeCsvValue((string)($row['event_id'] ?? '')),
+        sanitizeCsvValue((string)($row['event_title'] ?? '')),
+        sanitizeCsvValue((string)($row['start_date'] ?? '')),
+        sanitizeCsvValue((string)($row['status'] ?? '')),
+        sanitizeCsvValue((string)($row['registered_at'] ?? '')),
+    ], ';');
+}
+fputcsv($out, [], ';');
+
+// ── Section: Inventar-Ausleihen ───────────────────────────────────────────────
+fputcsv($out, ['=== Inventar-Ausleihen ==='], ';');
+fputcsv($out, ['ID', 'Artikel-ID', 'Artikelname', 'Ausleihe von', 'Ausleihe bis', 'Zurückgegeben am', 'Status', 'Notizen', 'Erstellt am'], ';');
+foreach ($rentals as $row) {
+    fputcsv($out, [
+        sanitizeCsvValue((string)($row['id'] ?? '')),
+        sanitizeCsvValue((string)($row['item_id'] ?? '')),
+        sanitizeCsvValue((string)($row['item_name'] ?? '')),
+        sanitizeCsvValue((string)($row['rental_start'] ?? '')),
+        sanitizeCsvValue((string)($row['rental_end'] ?? '')),
+        sanitizeCsvValue((string)($row['returned_at'] ?? '')),
+        sanitizeCsvValue((string)($row['status'] ?? '')),
+        sanitizeCsvValue((string)($row['notes'] ?? '')),
+        sanitizeCsvValue((string)($row['created_at'] ?? '')),
+    ], ';');
+}
+fputcsv($out, [], ';');
+
+// ── Section: Shop-Bestellungen ────────────────────────────────────────────────
+fputcsv($out, ['=== Shop-Bestellungen ==='], ';');
+fputcsv($out, ['ID', 'Status', 'Betrag (Cent)', 'Währung', 'Liefername', 'Lieferadresse', 'Stadt', 'PLZ', 'Land', 'Artikel', 'Erstellt am'], ';');
+foreach ($shopOrders as $row) {
+    fputcsv($out, [
+        sanitizeCsvValue((string)($row['id'] ?? '')),
+        sanitizeCsvValue((string)($row['status'] ?? '')),
+        sanitizeCsvValue((string)($row['total_amount_cents'] ?? '')),
+        sanitizeCsvValue((string)($row['currency'] ?? '')),
+        sanitizeCsvValue((string)($row['shipping_name'] ?? '')),
+        sanitizeCsvValue((string)($row['shipping_address'] ?? '')),
+        sanitizeCsvValue((string)($row['shipping_city'] ?? '')),
+        sanitizeCsvValue((string)($row['shipping_zip'] ?? '')),
+        sanitizeCsvValue((string)($row['shipping_country'] ?? '')),
+        sanitizeCsvValue((string)($row['items'] ?? '')),
+        sanitizeCsvValue((string)($row['created_at'] ?? '')),
+    ], ';');
+}
+fputcsv($out, [], ';');
+
+// ── Section: Projektbewerbungen ───────────────────────────────────────────────
+fputcsv($out, ['=== Projektbewerbungen ==='], ';');
+fputcsv($out, ['ID', 'Projekt-ID', 'Projekttitel', 'Status', 'Nachricht', 'Erstellt am'], ';');
+foreach ($projectApplications as $row) {
+    fputcsv($out, [
+        sanitizeCsvValue((string)($row['id'] ?? '')),
+        sanitizeCsvValue((string)($row['project_id'] ?? '')),
+        sanitizeCsvValue((string)($row['project_title'] ?? '')),
+        sanitizeCsvValue((string)($row['status'] ?? '')),
+        sanitizeCsvValue((string)($row['message'] ?? '')),
+        sanitizeCsvValue((string)($row['created_at'] ?? '')),
+    ], ';');
+}
+
+fclose($out);
 exit;
