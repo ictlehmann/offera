@@ -163,13 +163,13 @@ ob_start();
 
 <div class="max-w-4xl mx-auto">
     <!-- Back Button -->
-    <div class="mb-6 flex items-center gap-4">
+    <div class="mb-6 flex flex-wrap items-center gap-2">
         <a href="index.php" class="inline-flex items-center text-purple-600 hover:text-purple-700 transition">
             <i class="fas fa-arrow-left mr-2"></i>
             Zurück zur Übersicht
         </a>
         <?php if ($user['id'] === ($project['created_by'] ?? null) || Auth::isBoard() || Auth::hasPermission('manage_projects')): ?>
-        <a href="manage.php?edit=<?= (int)$project['id'] ?>" class="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">
+        <a href="manage.php?edit=<?= (int)$project['id'] ?>" class="inline-flex items-center px-4 py-2 min-h-[44px] bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition">
             <i class="fas fa-edit mr-2"></i>
             Projekt bearbeiten
         </a>
@@ -444,21 +444,21 @@ ob_start();
             <?php if ($isInternalProject && !$requiresApplication): ?>
                 <!-- Internal project with no application required: direct join/leave button -->
                 <?php if ($isParticipant): ?>
-                <div class="flex items-center gap-4">
+                <div class="flex flex-wrap items-center gap-2">
                     <div class="flex items-center text-green-700 bg-green-50 border border-green-200 rounded-lg px-4 py-3">
                         <i class="fas fa-check-circle mr-2"></i>
                         Du nimmst an diesem Projekt teil
                     </div>
                     <?php if (!$isLead): ?>
                     <button id="leaveProjectBtn"
-                            class="px-5 py-3 bg-red-100 text-red-700 rounded-lg font-semibold hover:bg-red-200 transition">
+                            class="w-full sm:w-auto px-5 py-3 min-h-[44px] bg-red-100 text-red-700 rounded-lg font-semibold hover:bg-red-200 transition">
                         <i class="fas fa-sign-out-alt mr-2"></i>Verlassen
                     </button>
                     <?php endif; ?>
                 </div>
                 <?php else: ?>
                 <button id="joinProjectBtn"
-                        class="inline-flex items-center px-6 py-3 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 transition shadow-md">
+                        class="inline-flex items-center justify-center w-full sm:w-auto px-6 py-3 min-h-[44px] bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 transition shadow-md">
                     <i class="fas fa-user-plus mr-2"></i>
                     Jetzt Teilnehmen
                 </button>
@@ -480,7 +480,7 @@ ob_start();
                     <input type="hidden" name="experience_confirmed" value="1">
                     <input type="hidden" name="gdpr_consent" value="1">
                     <button type="submit"
-                            class="inline-flex items-center px-6 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition shadow-md">
+                            class="inline-flex items-center justify-center w-full sm:w-auto px-6 py-3 min-h-[44px] bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition shadow-md">
                         <i class="fas fa-user-plus mr-2"></i>
                         Jetzt teilnehmen
                     </button>

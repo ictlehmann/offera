@@ -146,7 +146,7 @@ ob_start();
         </h1>
         
         <?php if (!empty($poll['description'])): ?>
-        <p class="text-gray-600 dark:text-gray-300 text-lg mb-4">
+        <p class="text-gray-600 dark:text-gray-300 text-base sm:text-lg mb-4">
             <?php echo nl2br(htmlspecialchars($poll['description'])); ?>
         </p>
         <?php endif; ?>

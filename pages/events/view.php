@@ -144,13 +144,13 @@ $statusInfo = $statusLabels[$currentStatus] ?? ['label' => $currentStatus, 'icon
 <div class="max-w-5xl mx-auto">
 
     <!-- Back Button + Edit Button -->
-    <div class="flex items-center justify-between mb-6">
+    <div class="flex flex-wrap items-center justify-between gap-2 mb-6">
         <a href="index.php" class="inline-flex items-center text-ibc-blue hover:text-ibc-blue-dark ease-premium font-medium">
             <i class="fas fa-arrow-left mr-2"></i>
             Zurück zur Übersicht
         </a>
         <?php if (Auth::hasPermission('manage_projects') || Auth::isBoard() || Auth::hasRole(['ressortleiter', 'alumni_vorstand'])): ?>
-        <a href="edit.php?id=<?php echo (int)$eventId; ?>" class="inline-flex items-center px-4 py-2 bg-ibc-blue text-white rounded-xl font-semibold text-sm hover:bg-ibc-blue-dark ease-premium shadow-soft">
+        <a href="edit.php?id=<?php echo (int)$eventId; ?>" class="inline-flex items-center px-4 py-2 min-h-[44px] bg-ibc-blue text-white rounded-xl font-semibold text-sm hover:bg-ibc-blue-dark ease-premium shadow-soft">
             <i class="fas fa-edit mr-2"></i>
             Event bearbeiten
         </a>

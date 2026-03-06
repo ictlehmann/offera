@@ -68,10 +68,10 @@ ob_start();
             <p class="text-gray-600 dark:text-gray-300 leading-relaxed">Entdecke kommende Events und melde Dich an</p>
         </div>
         
-        <div class="flex gap-3">
+        <div class="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
             <!-- Statistiken Button - Board/Alumni Vorstand only -->
             <?php if (Auth::isBoard() || Auth::hasRole(['alumni_vorstand'])): ?>
-            <a href="statistics.php" class="px-6 py-3 bg-ibc-blue text-white rounded-lg font-semibold hover:bg-ibc-blue-dark transition-all shadow-soft hover:shadow-lg">
+            <a href="statistics.php" class="inline-flex items-center justify-center w-full sm:w-auto px-6 py-3 bg-ibc-blue text-white rounded-lg font-semibold hover:bg-ibc-blue-dark transition-all shadow-soft hover:shadow-lg">
                 <i class="fas fa-chart-bar mr-2"></i>
                 Statistiken
             </a>
@@ -79,7 +79,7 @@ ob_start();
             
             <!-- Neues Event Button - Board/Resortleiter/Manager only -->
             <?php if (Auth::hasPermission('manage_projects') || Auth::isBoard() || Auth::hasRole(['ressortleiter', 'alumni_vorstand'])): ?>
-            <a href="edit.php?new=1" class="btn-primary">
+            <a href="edit.php?new=1" class="btn-primary w-full sm:w-auto justify-center">
                 <i class="fas fa-plus mr-2"></i>Neues Event
             </a>
             <?php endif; ?>
