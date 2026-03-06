@@ -214,7 +214,7 @@ ob_start();
             </span>
             Über mich
         </h2>
-        <p class="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line break-words"><?php echo htmlspecialchars($profileUser['about_me'], ENT_QUOTES, 'UTF-8'); ?></p>
+        <p class="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line break-words hyphens-auto"><?php echo htmlspecialchars($profileUser['about_me'], ENT_QUOTES, 'UTF-8'); ?></p>
     </div>
     <?php endif; ?>
 

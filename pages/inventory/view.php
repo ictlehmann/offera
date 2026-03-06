@@ -203,7 +203,7 @@ ob_start();
         <div class="card p-8 shadow-xl border border-gray-200 dark:border-slate-700">
             <div class="flex items-start justify-between mb-6">
                 <div>
-                    <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-3"><?php echo htmlspecialchars($item['name']); ?></h1>
+                    <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-3 break-words hyphens-auto"><?php echo htmlspecialchars($item['name']); ?></h1>
                     <div class="flex flex-wrap gap-2">
                         <?php if ($item['category_name']): ?>
                         <span class="px-4 py-2 text-sm font-semibold rounded-full inline-color-badge shadow-md" style="background-color: <?php echo htmlspecialchars($item['category_color']); ?>20; color: <?php echo htmlspecialchars($item['category_color']); ?>">
@@ -211,7 +211,7 @@ ob_start();
                         </span>
                         <?php endif; ?>
                         <?php if ($item['location_name']): ?>
-                        <span class="px-4 py-2 text-sm font-semibold bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 text-gray-700 dark:text-gray-300 rounded-full shadow-md">
+                        <span class="px-4 py-2 text-sm font-semibold bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 text-gray-700 dark:text-gray-300 rounded-full shadow-md break-words hyphens-auto">
                             <i class="fas fa-map-marker-alt mr-1"></i><?php echo htmlspecialchars($item['location_name']); ?>
                         </span>
                         <?php endif; ?>
@@ -268,7 +268,7 @@ ob_start();
                 <h2 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-gray-100 mb-3 flex items-center">
                     <i class="fas fa-align-left mr-2 text-purple-600"></i>Beschreibung
                 </h2>
-                <p class="text-gray-700 dark:text-gray-300 leading-relaxed"><?php echo nl2br(htmlspecialchars($item['description'])); ?></p>
+                <p class="text-gray-700 dark:text-gray-300 leading-relaxed break-words hyphens-auto"><?php echo nl2br(htmlspecialchars($item['description'])); ?></p>
             </div>
             <?php endif; ?>
 

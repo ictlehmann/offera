@@ -273,7 +273,7 @@ $statusInfo = $statusLabels[$currentStatus] ?? ['label' => $currentStatus, 'icon
                     </span>
                     Beschreibung
                 </h2>
-                <p class="text-gray-700 dark:text-gray-300 whitespace-pre-line leading-relaxed break-words event-description"><?php echo htmlspecialchars($event['description']); ?></p>
+                <p class="text-gray-700 dark:text-gray-300 whitespace-pre-line leading-relaxed break-words hyphens-auto event-description"><?php echo htmlspecialchars($event['description']); ?></p>
             </div>
             <?php endif; ?>
 
@@ -346,7 +346,7 @@ $statusInfo = $statusLabels[$currentStatus] ?? ['label' => $currentStatus, 'icon
                         <i class="fas fa-map-marker-alt text-ibc-green"></i>
                     </span>
                     <div class="flex-1">
-                        <div class="font-semibold text-gray-800 dark:text-gray-100"><?php echo htmlspecialchars($event['location']); ?></div>
+                        <div class="font-semibold text-gray-800 dark:text-gray-100 break-words hyphens-auto"><?php echo htmlspecialchars($event['location']); ?></div>
                         <?php if (!empty($event['maps_link'])): ?>
                             <a href="<?php echo htmlspecialchars($event['maps_link']); ?>"
                                target="_blank"

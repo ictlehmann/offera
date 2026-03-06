@@ -746,7 +746,7 @@ ob_start();
                 <i id="modal-header-icon" class="fas fa-plus text-white text-sm"></i>
             </div>
             <div class="flex-1 min-w-0">
-                <h2 id="modal-title" class="text-lg font-bold text-white leading-tight break-words">Neues Produkt anlegen</h2>
+                <h2 id="modal-title" class="text-lg font-bold text-white leading-tight break-words hyphens-auto">Neues Produkt anlegen</h2>
                 <p class="text-blue-100 text-xs mt-0.5">Pflichtfelder sind mit <span class="text-red-300 font-semibold">*</span> markiert</p>
             </div>
             <button type="button" onclick="closeProductModal()"
