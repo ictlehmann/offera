@@ -367,7 +367,7 @@ ob_start();
     <?php if (empty($activeRentals)): ?>
     <p class="text-gray-500 dark:text-gray-400 text-center py-8">Keine aktiven Ausleihen vorhanden</p>
     <?php else: ?>
-    <div class="overflow-x-auto w-full rounded-xl border border-green-200 dark:border-green-700">
+    <div class="overflow-x-auto w-full rounded-xl border border-green-200 dark:border-green-700 has-action-dropdown">
         <table class="w-full card-table">
             <thead class="bg-gradient-to-r from-green-100 to-emerald-100 dark:from-green-900/40 dark:to-emerald-900/40">
                 <tr>

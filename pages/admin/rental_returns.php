@@ -191,7 +191,7 @@ ob_start();
                 <p class="text-gray-500 text-lg">Keine ausstehenden Anfragen</p>
             </div>
             <?php else: ?>
-            <div class="overflow-x-auto w-full">
+            <div class="overflow-x-auto w-full has-action-dropdown">
                 <table class="w-full card-table">
                     <thead class="bg-gray-50">
                         <tr>
@@ -275,7 +275,7 @@ ob_start();
                 <p class="text-gray-500 text-lg">Keine ausstehenden Rückgaben</p>
             </div>
             <?php else: ?>
-            <div class="overflow-x-auto w-full">
+            <div class="overflow-x-auto w-full has-action-dropdown">
                 <table class="w-full card-table">
                     <thead class="bg-orange-50">
                         <tr>
@@ -380,7 +380,7 @@ ob_start();
                 <p class="text-gray-500 text-lg">Keine aktiven Ausleihen</p>
             </div>
             <?php else: ?>
-            <div class="overflow-x-auto w-full">
+            <div class="overflow-x-auto w-full has-action-dropdown">
                 <table class="w-full card-table">
                     <thead class="bg-gray-50">
                         <tr>

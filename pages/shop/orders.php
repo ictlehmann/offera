@@ -165,7 +165,7 @@ ob_start();
         <p class="text-lg font-medium">Noch keine Bestellungen vorhanden.</p>
     </div>
     <?php else: ?>
-    <div class="overflow-x-auto w-full">
+    <div class="overflow-x-auto w-full has-action-dropdown">
         <table class="w-full card-table divide-y divide-gray-200 dark:divide-gray-700">
             <thead class="bg-gray-50 dark:bg-gray-900/50">
                 <tr>
