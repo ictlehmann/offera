@@ -384,7 +384,7 @@ ob_start();
         <?php if (!empty($project['description'])): ?>
         <div class="md:col-span-2">
             <span class="text-sm font-medium text-gray-600">Beschreibung</span>
-            <p class="text-gray-800 mt-1"><?php echo nl2br(htmlspecialchars($project['description'])); ?></p>
+            <p class="text-gray-800 mt-1 break-words"><?php echo nl2br(htmlspecialchars($project['description'])); ?></p>
         </div>
         <?php endif; ?>
     </div>
@@ -456,7 +456,7 @@ ob_start();
             <?php if (!empty($application['motivation'])): ?>
             <div class="mb-4">
                 <span class="text-sm font-medium text-gray-600 dark:text-gray-400">Motivation:</span>
-                <p class="text-gray-800 dark:text-gray-200 mt-1"><?php echo nl2br(htmlspecialchars($application['motivation'])); ?></p>
+                <p class="text-gray-800 dark:text-gray-200 mt-1 break-words"><?php echo nl2br(htmlspecialchars($application['motivation'])); ?></p>
             </div>
             <?php endif; ?>
             
