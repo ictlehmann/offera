@@ -296,7 +296,7 @@ ob_start();
                         if (!empty($invoice['paid_by_user_id']) && isset($userInfoMap[$invoice['paid_by_user_id']])) {
                             $paidByName = explode('@', $userInfoMap[$invoice['paid_by_user_id']])[0];
                         }
-                        $filePath        = !empty($invoice['file_path']) ? htmlspecialchars(asset($invoice['file_path']), ENT_QUOTES, 'UTF-8') : '';
+                        $fileUrl         = !empty($invoice['file_path']) ? htmlspecialchars(asset('api/download_invoice_file.php?id=' . (int)$invoice['id']), ENT_QUOTES, 'UTF-8') : '';
                         $rejectionReason = !empty($invoice['rejection_reason']) ? htmlspecialchars($invoice['rejection_reason'], ENT_QUOTES) : '';
                         ?>
                         <div class="p-5 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer invoice-row relative overflow-hidden" data-status="<?php echo htmlspecialchars($invoice['status']); ?>"
@@ -310,7 +310,7 @@ ob_start();
                                  status: '<?php echo htmlspecialchars($invoice['status'], ENT_QUOTES); ?>',
                                  displayStatus: '<?php echo htmlspecialchars($displayStatus, ENT_QUOTES); ?>',
                                  statusLabel: '<?php echo htmlspecialchars($statusLabel, ENT_QUOTES); ?>',
-                                 filePath: '<?php echo $filePath; ?>',
+                                 filePath: '<?php echo $fileUrl; ?>',
                                  paidAt: '<?php echo $paidAt; ?>',
                                  paidBy: '<?php echo htmlspecialchars($paidByName, ENT_QUOTES); ?>',
                                  rejectionReason: <?php echo json_encode($invoice['rejection_reason'] ?? ''); ?>
@@ -337,13 +337,13 @@ ob_start();
                                 </span>
                                 <?php if (!empty($invoice['file_path'])): ?>
                                     <div class="flex items-center gap-1" onclick="event.stopPropagation()">
-                                        <a href="<?php echo $filePath; ?>"
+                                        <a href="<?php echo $fileUrl; ?>"
                                            target="_blank"
                                            title="Ansehen"
                                            class="inline-flex items-center px-2 py-1 bg-blue-600 text-white rounded-xl text-xs font-medium hover:bg-blue-700 transition-colors no-underline shadow-sm hover:shadow">
                                             <i class="fas fa-eye mr-1"></i>Ansehen
                                         </a>
-                                        <a href="<?php echo $filePath; ?>"
+                                        <a href="<?php echo $fileUrl; ?>"
                                            download
                                            title="Herunterladen"
                                            class="inline-flex items-center px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-xl text-xs font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors no-underline">
@@ -407,7 +407,7 @@ ob_start();
                             if (!empty($invoice['paid_by_user_id']) && isset($userInfoMap[$invoice['paid_by_user_id']])) {
                                 $paidByName = explode('@', $userInfoMap[$invoice['paid_by_user_id']])[0];
                             }
-                            $filePath = !empty($invoice['file_path']) ? htmlspecialchars(asset($invoice['file_path']), ENT_QUOTES, 'UTF-8') : '';
+                            $fileUrl = !empty($invoice['file_path']) ? htmlspecialchars(asset('api/download_invoice_file.php?id=' . (int)$invoice['id']), ENT_QUOTES, 'UTF-8') : '';
                             ?>
                             <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/60 transition-colors duration-150 cursor-pointer invoice-row" data-status="<?php echo htmlspecialchars($invoice['status']); ?>"
                                 onclick="openInvoiceDetail({
@@ -420,7 +420,7 @@ ob_start();
                                     status: '<?php echo htmlspecialchars($invoice['status'], ENT_QUOTES); ?>',
                                     displayStatus: '<?php echo htmlspecialchars($displayStatus, ENT_QUOTES); ?>',
                                     statusLabel: '<?php echo htmlspecialchars($statusLabel, ENT_QUOTES); ?>',
-                                    filePath: '<?php echo $filePath; ?>',
+                                    filePath: '<?php echo $fileUrl; ?>',
                                     paidAt: '<?php echo $paidAt; ?>',
                                     paidBy: '<?php echo htmlspecialchars($paidByName, ENT_QUOTES); ?>',
                                     rejectionReason: <?php echo json_encode($invoice['rejection_reason'] ?? ''); ?>
@@ -447,13 +447,13 @@ ob_start();
                                 <td class="px-6 py-4 whitespace-nowrap text-sm" onclick="event.stopPropagation()">
                                     <?php if (!empty($invoice['file_path'])): ?>
                                         <div class="flex items-center gap-2">
-                                            <a href="<?php echo $filePath; ?>"
+                                            <a href="<?php echo $fileUrl; ?>"
                                                target="_blank"
                                                title="Ansehen"
                                                class="inline-flex items-center px-2.5 py-1.5 bg-blue-600 dark:bg-blue-700 text-white rounded-xl text-xs font-semibold hover:bg-blue-700 dark:hover:bg-blue-600 transition-all shadow-sm hover:shadow hover:-translate-y-0.5 transform no-underline">
                                                 <i class="fas fa-eye mr-1"></i>Ansehen
                                             </a>
-                                            <a href="<?php echo $filePath; ?>"
+                                            <a href="<?php echo $fileUrl; ?>"
                                                download
                                                title="Herunterladen"
                                                class="inline-flex items-center px-2.5 py-1.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-xl text-xs font-semibold hover:bg-gray-200 dark:hover:bg-gray-600 transition-all shadow-sm hover:shadow hover:-translate-y-0.5 transform no-underline">

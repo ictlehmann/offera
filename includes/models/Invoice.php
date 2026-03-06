@@ -178,10 +178,24 @@ class Invoice {
                 ];
             }
         }
-        // Ensure PHP execution is disabled in the upload directory
+        // Deny all direct HTTP access; invoice files must be served exclusively through
+        // the authenticated api/download_invoice_file.php endpoint.
         $htaccess = $uploadDir . '.htaccess';
+        $htaccessContent = <<<'HTACCESS'
+# Block all direct HTTP requests – files are served via api/download_invoice_file.php
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+    Order deny,allow
+    Deny from all
+</IfModule>
+# Prevent PHP execution as an additional safety measure
+php_flag engine off
+AddType text/plain .php .php3 .phtml
+HTACCESS;
         if (!file_exists($htaccess)) {
-            if (file_put_contents($htaccess, "php_flag engine off\nAddType text/plain .php .php3 .phtml\n") === false) {
+            if (file_put_contents($htaccess, $htaccessContent) === false) {
                 error_log('Invoice::handleFileUpload: Failed to write .htaccess to ' . $uploadDir);
                 return [
                     'success' => false,
