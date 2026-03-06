@@ -123,15 +123,15 @@ ob_start();
     <div class="mb-6 flex flex-col sm:flex-row gap-3 items-start sm:items-center">
         <div class="flex gap-4 flex-wrap">
             <a href="index.php?type=all<?php echo !empty($_GET['q']) ? '&q='.urlencode($_GET['q']) : ''; ?>"
-               class="projects-filter-tab <?php echo $typeFilter === 'all' ? 'projects-filter-tab--active' : ''; ?>">
+               class="projects-filter-tab <?php echo $typeFilter === 'all' ? 'projects-filter-tab--active text-white' : ''; ?>">
                 <i class="fas fa-list mr-2"></i>Alle
             </a>
             <a href="index.php?type=internal<?php echo !empty($_GET['q']) ? '&q='.urlencode($_GET['q']) : ''; ?>"
-               class="projects-filter-tab <?php echo $typeFilter === 'internal' ? 'projects-filter-tab--active' : ''; ?>">
+               class="projects-filter-tab <?php echo $typeFilter === 'internal' ? 'projects-filter-tab--active text-white' : ''; ?>">
                 <i class="fas fa-building mr-2"></i>Intern
             </a>
             <a href="index.php?type=external<?php echo !empty($_GET['q']) ? '&q='.urlencode($_GET['q']) : ''; ?>"
-               class="projects-filter-tab <?php echo $typeFilter === 'external' ? 'projects-filter-tab--active' : ''; ?>">
+               class="projects-filter-tab <?php echo $typeFilter === 'external' ? 'projects-filter-tab--active text-white' : ''; ?>">
                 <i class="fas fa-users mr-2"></i>Extern
             </a>
         </div>

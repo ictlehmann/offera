@@ -902,9 +902,8 @@ body:not(.dark-mode) .sidebar a {
     display: flex !important;
 }
 
-body:not(.dark-mode) a:not(.btn-primary):not(.btn):not(.text-white):not(.no-underline):not(.sidebar a):hover {
-    color: var(--text-main) !important; /* Keep dark on hover for visibility */
-}
+/* Light Mode: Links show blue on hover for clear interaction feedback.
+   Exclusions: .btn/.btn-primary (buttons), .text-white (on dark backgrounds), .no-underline, sidebar links. */
 
 body:not(.dark-mode) .sidebar a:not(.no-underline):hover {
     color: #ffffff !important; /* Keep white on hover in sidebar */
@@ -7621,7 +7620,9 @@ body:not(.dark-mode) .pagination .page-item.active .page-link {
 }
 
 /* ── Light Mode: Link appearance on hover ────────────────────── */
-body:not(.dark-mode) a:not(.btn):not(.no-hover):not(.sidebar a):hover {
+/* Excludes .text-white links (on dark/colored backgrounds), .active nav items,
+   and BEM --active elements (custom filter tabs) to prevent poor-contrast hover */
+body:not(.dark-mode) a:not(.btn):not(.no-hover):not(.sidebar a):not([class~="text-white"]):not(.active):not([class*="--active"]):hover {
     color: var(--ibc-blue) !important;
 }
 

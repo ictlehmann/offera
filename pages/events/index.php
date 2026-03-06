@@ -89,12 +89,12 @@ ob_start();
     <!-- Filter Tabs -->
     <div class="mb-6 flex gap-2 flex-wrap">
         <a href="?filter=current" 
-           class="events-filter-tab <?php echo $filter === 'current' ? 'events-filter-tab--active' : ''; ?>">
+           class="events-filter-tab <?php echo $filter === 'current' ? 'events-filter-tab--active text-white' : ''; ?>">
             <i class="fas fa-calendar-day mr-2"></i>
             Aktuell
         </a>
         <a href="?filter=my_registrations" 
-           class="events-filter-tab <?php echo $filter === 'my_registrations' ? 'events-filter-tab--active' : ''; ?>">
+           class="events-filter-tab <?php echo $filter === 'my_registrations' ? 'events-filter-tab--active text-white' : ''; ?>">
             <i class="fas fa-user-check mr-2"></i>
             Meine Anmeldungen
         </a>

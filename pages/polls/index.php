@@ -101,13 +101,13 @@ ob_start();
 
     <!-- Filter Tabs -->
     <div class="mb-6 flex gap-2 flex-wrap">
-        <a href="?vote=all" class="polls-filter-tab <?php echo $voteFilter === 'all'   ? 'polls-filter-tab--active' : ''; ?>">
+        <a href="?vote=all" class="polls-filter-tab <?php echo $voteFilter === 'all'   ? 'polls-filter-tab--active text-white' : ''; ?>">
             <i class="fas fa-list mr-2"></i>Alle
         </a>
-        <a href="?vote=open" class="polls-filter-tab <?php echo $voteFilter === 'open'  ? 'polls-filter-tab--active' : ''; ?>">
+        <a href="?vote=open" class="polls-filter-tab <?php echo $voteFilter === 'open'  ? 'polls-filter-tab--active text-white' : ''; ?>">
             <i class="fas fa-clock mr-2"></i>Offen
         </a>
-        <a href="?vote=voted" class="polls-filter-tab <?php echo $voteFilter === 'voted' ? 'polls-filter-tab--active' : ''; ?>">
+        <a href="?vote=voted" class="polls-filter-tab <?php echo $voteFilter === 'voted' ? 'polls-filter-tab--active text-white' : ''; ?>">
             <i class="fas fa-check-circle mr-2"></i>Abgestimmt
         </a>
     </div>
