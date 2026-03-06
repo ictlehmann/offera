@@ -306,11 +306,11 @@ ob_start();
         </div>
 
         <!-- Actions -->
-        <div class="flex justify-end space-x-4 pt-6 border-t">
-            <a href="view.php?id=<?php echo $item['id']; ?>" class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
+        <div class="flex flex-col sm:flex-row justify-end gap-4 pt-6 border-t">
+            <a href="view.php?id=<?php echo $item['id']; ?>" class="w-full sm:w-auto px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition text-center">
                 Abbrechen
             </a>
-            <button type="submit" class="btn-primary">
+            <button type="submit" class="btn-primary w-full sm:w-auto">
                 <i class="fas fa-save mr-2"></i>Änderungen speichern
             </button>
         </div>

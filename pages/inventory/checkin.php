@@ -204,7 +204,7 @@ ob_start();
                 </p>
             </div>
 
-            <div class="flex space-x-4">
+            <div class="flex flex-col sm:flex-row gap-4">
                 <a href="my_checkouts.php" class="flex-1 px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition text-center">
                     Abbrechen
                 </a>

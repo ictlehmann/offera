@@ -173,7 +173,7 @@ ob_start();
         </div>
         
         <div class="pt-4">
-            <button type="submit" name="update_system_settings" class="btn-primary">
+            <button type="submit" name="update_system_settings" class="btn-primary w-full sm:w-auto">
                 <i class="fas fa-save mr-2"></i>
                 Einstellungen speichern
             </button>

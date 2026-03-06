@@ -55,7 +55,7 @@ ob_start();
 ?>
 
 <div class="mb-8">
-    <div class="flex items-center justify-between mb-4">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-4">
         <div>
             <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-100 mb-2">
                 <i class="fas fa-calendar-alt text-purple-600 mr-2"></i>
@@ -63,7 +63,7 @@ ob_start();
             </h1>
             <p class="text-gray-600 dark:text-gray-300"><?php echo count($events); ?> Event(s) gefunden</p>
         </div>
-        <a href="edit.php?new=1" class="btn-primary">
+        <a href="edit.php?new=1" class="btn-primary w-full sm:w-auto">
             <i class="fas fa-plus mr-2"></i>Neues Event
         </a>
     </div>
@@ -114,11 +114,11 @@ ob_start();
             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Bis Datum</label>
             <input type="date" name="end_date" value="<?php echo htmlspecialchars($_GET['end_date'] ?? ''); ?>" class="w-full px-4 py-2 bg-white border-gray-300 text-gray-900 rounded-lg focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
         </div>
-        <div class="md:col-span-2 lg:col-span-4 flex justify-end space-x-2">
-            <a href="manage.php" class="px-6 py-2 bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition">
+        <div class="md:col-span-2 lg:col-span-4 flex flex-col sm:flex-row justify-end gap-2">
+            <a href="manage.php" class="w-full sm:w-auto px-6 py-2 bg-gray-200 text-gray-700 dark:bg-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition text-center">
                 <i class="fas fa-times mr-2"></i>Zurücksetzen
             </a>
-            <button type="submit" class="btn-primary">
+            <button type="submit" class="btn-primary w-full sm:w-auto">
                 <i class="fas fa-search mr-2"></i>Filtern
             </button>
         </div>
@@ -131,7 +131,7 @@ ob_start();
     <i class="fas fa-calendar-times text-gray-400 text-6xl mb-4"></i>
     <h3 class="text-base sm:text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">Keine Events gefunden</h3>
     <p class="text-gray-500 dark:text-gray-400 mb-6">Es wurden keine Events mit den ausgewählten Filtern gefunden.</p>
-    <a href="edit.php?new=1" class="btn-primary">
+    <a href="edit.php?new=1" class="btn-primary w-full sm:w-auto">
         <i class="fas fa-plus mr-2"></i>Erstes Event erstellen
     </a>
 </div>
