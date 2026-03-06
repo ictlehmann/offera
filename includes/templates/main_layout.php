@@ -614,12 +614,11 @@ if (!isset($currentUser)) {
                 
                 // Resolve profile image for the desktop top navbar using the 3-level hierarchy:
                 // 1. User-uploaded image (alumni_profiles.image_path)
-                // 2. Entra ID cached photo (users.entra_photo_path)
-                // 3. Default profile image (no image shown in navbar)
-                $_defaultImg   = defined('DEFAULT_PROFILE_IMAGE') ? DEFAULT_PROFILE_IMAGE : 'assets/img/default_profil.png';
-                $_uploadedPath = $profile ? ($profile['image_path'] ?? null) : null;
-                $_entraPath    = $currentUser['entra_photo_path'] ?? null;
-                $_resolved     = getProfileImageUrl($_uploadedPath, $_entraPath);
+                // 2. Entra ID photo (fetched live from Microsoft Graph and cached)
+                // 3. Default profile image (no image shown in navbar – initials shown instead)
+                $_defaultImg = defined('DEFAULT_PROFILE_IMAGE') ? DEFAULT_PROFILE_IMAGE : 'assets/img/default_profil.png';
+                require_once __DIR__ . '/../models/User.php';
+                $_resolved = User::getProfilePictureUrl($currentUser['id']);
                 if ($_resolved !== $_defaultImg) {
                     $navProfileImageUrl = $_resolved;
                 }
