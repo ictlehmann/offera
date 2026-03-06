@@ -7,6 +7,46 @@
 class AlumniAccessRequest {
 
     // ---------------------------------------------------------------------------
+    // Table bootstrap
+    // ---------------------------------------------------------------------------
+
+    /** @var bool Whether the table has already been verified for this request */
+    private static bool $tableChecked = false;
+
+    /**
+     * Ensure the alumni_access_requests table exists.
+     * Runs at most once per PHP request thanks to the static flag.
+     */
+    private static function ensureTable(): void {
+        if (self::$tableChecked) {
+            return;
+        }
+        self::$tableChecked = true;
+
+        try {
+            $db = Database::getContentDB();
+            $db->exec("CREATE TABLE IF NOT EXISTS `alumni_access_requests` (
+                `id`                  INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+                `first_name`          VARCHAR(100)  NOT NULL                    COMMENT 'Applicant first name',
+                `last_name`           VARCHAR(100)  NOT NULL                    COMMENT 'Applicant last name',
+                `new_email`           VARCHAR(255)  NOT NULL                    COMMENT 'New / desired e-mail address',
+                `old_email`           VARCHAR(255)  DEFAULT NULL                COMMENT 'Previously used e-mail address (optional)',
+                `graduation_semester` VARCHAR(20)   NOT NULL                    COMMENT 'Graduation semester, e.g. WS 2019/20',
+                `study_program`       VARCHAR(255)  NOT NULL                    COMMENT 'Field of study / study programme',
+                `status`              ENUM('pending','approved','rejected') NOT NULL DEFAULT 'pending' COMMENT 'Processing status',
+                `created_at`          TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                `processed_at`        TIMESTAMP     NULL DEFAULT NULL           COMMENT 'Timestamp when the request was processed',
+                `processed_by`        INT UNSIGNED  DEFAULT NULL                COMMENT 'User ID of the admin who processed the request',
+                INDEX `idx_status`       (`status`),
+                INDEX `idx_new_email`    (`new_email`),
+                INDEX `idx_processed_by` (`processed_by`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+        } catch (Exception $e) {
+            error_log('[AlumniAccessRequest] Failed to ensure table exists: ' . $e->getMessage());
+        }
+    }
+
+    // ---------------------------------------------------------------------------
     // Read
     // ---------------------------------------------------------------------------
 
@@ -14,6 +54,7 @@ class AlumniAccessRequest {
      * Get a single request by its ID.
      */
     public static function getById(int $id): array|false {
+        self::ensureTable();
         $db   = Database::getContentDB();
         $stmt = $db->prepare(
             "SELECT * FROM alumni_access_requests WHERE id = ?"
@@ -28,6 +69,7 @@ class AlumniAccessRequest {
      * @param string|null $status  'pending' | 'approved' | 'rejected' | null (= all)
      */
     public static function getAll(?string $status = null): array {
+        self::ensureTable();
         $db = Database::getContentDB();
 
         if ($status !== null) {
@@ -50,6 +92,7 @@ class AlumniAccessRequest {
      * @return array{pending: int, approved: int, rejected: int, total: int}
      */
     public static function countByStatus(): array {
+        self::ensureTable();
         $db   = Database::getContentDB();
         $stmt = $db->query(
             "SELECT status, COUNT(*) AS cnt FROM alumni_access_requests GROUP BY status"
@@ -76,6 +119,7 @@ class AlumniAccessRequest {
      * @return bool  true = a pending duplicate exists, false = no duplicate
      */
     public static function hasPendingRequest(string $newEmail): bool {
+        self::ensureTable();
         $db   = Database::getContentDB();
         $stmt = $db->prepare(
             "SELECT COUNT(*) FROM alumni_access_requests WHERE new_email = ? AND status = 'pending'"
@@ -96,6 +140,7 @@ class AlumniAccessRequest {
      * @return int|false   The inserted row ID, or false on failure.
      */
     public static function create(array $data): int|false {
+        self::ensureTable();
         $db   = Database::getContentDB();
         $stmt = $db->prepare(
             "INSERT INTO alumni_access_requests
@@ -125,6 +170,7 @@ class AlumniAccessRequest {
      * @param int    $processedBy  User ID of the admin performing the action
      */
     public static function updateStatus(int $id, string $status, int $processedBy): bool {
+        self::ensureTable();
         if (!in_array($status, ['approved', 'rejected'], true)) {
             return false;
         }
@@ -143,6 +189,7 @@ class AlumniAccessRequest {
      * Delete a request by ID.
      */
     public static function delete(int $id): bool {
+        self::ensureTable();
         $db   = Database::getContentDB();
         $stmt = $db->prepare("DELETE FROM alumni_access_requests WHERE id = ?");
         return $stmt->execute([$id]);

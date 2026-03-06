@@ -146,12 +146,13 @@ try {
     // Sync Entra data (displayName, mail, group memberships, role) on every login.
     // Called here for existing users; new users are synced inside completeMicrosoftLogin
     // after their record is created.
+    $userTokenString = $accessToken->getToken();
     if ($existingUser && $azureOid) {
-        AuthHandler::syncEntraData($existingUser['id'], $claims, $azureOid);
+        AuthHandler::syncEntraData($existingUser['id'], $claims, $azureOid, $userTokenString);
     }
 
     // Complete the login process (role mapping, user create/update, session setup)
-    AuthHandler::completeMicrosoftLogin($claims, $existingUser);
+    AuthHandler::completeMicrosoftLogin($claims, $existingUser, $userTokenString);
 
 } catch (Exception $e) {
     // Log full diagnostic details server-side (visible in IONOS server logs)

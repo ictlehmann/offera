@@ -464,7 +464,7 @@ ob_start();
                     </div>
                 </div>
             </div>
-            <div class="flex items-center justify-between">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
                 <div class="flex items-center space-x-2">
                     <div class="px-4 py-2 bg-white dark:bg-gray-700 rounded-lg shadow-sm border border-gray-200 dark:border-gray-600">
                         <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">
@@ -475,7 +475,7 @@ ob_start();
                 </div>
                 <button 
                     id="exportUsers" 
-                    class="px-5 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl hover:from-green-700 hover:to-emerald-700 transition-all duration-200 font-semibold shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                    class="w-full sm:w-auto min-h-[44px] px-5 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl hover:from-green-700 hover:to-emerald-700 transition-all duration-200 font-semibold shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
                 >
                     <i class="fas fa-download mr-2"></i>Export CSV
                 </button>
