@@ -335,11 +335,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 } elseif (isAlumniRole($userRole)) {
                     $profile = Alumni::getProfileByUserId($user['id']);
                 }
-                // Ensure gender and birthday from users table are included in profile
+                // Ensure gender, birthday, show_birthday, and about_me from users table are included in profile
                 if ($profile) {
                     $profile['gender'] = $user['gender'] ?? ($profile['gender'] ?? '');
                     $profile['birthday'] = $user['birthday'] ?? ($profile['birthday'] ?? '');
                     $profile['show_birthday'] = $user['show_birthday'] ?? ($profile['show_birthday'] ?? 0);
+                    $profile['about_me'] = $user['about_me'] ?? ($profile['about_me'] ?? '');
                 }
                 // If neither member nor alumni role, profile will remain as-is
             } else {

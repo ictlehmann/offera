@@ -11,6 +11,8 @@ class Database {
     private static $contentConnection = null;
     private static $rechConnection = null;
     private static $shopConnection = null;
+    /** @var bool Tracks whether content-DB schema migration has run this request */
+    private static $contentMigrated = false;
 
     /**
      * Get User Database Connection
@@ -57,7 +59,45 @@ class Database {
                 throw new Exception("Database connection failed");
             }
         }
+        if (!self::$contentMigrated) {
+            self::migrateContentSchema(self::$contentConnection);
+            self::$contentMigrated = true;
+        }
         return self::$contentConnection;
+    }
+
+    /**
+     * Ensure optional columns added after the initial deployment exist in alumni_profiles.
+     * Runs at most once per request. Safe to call even when the table already has the columns.
+     */
+    private static function migrateContentSchema(PDO $db): void {
+        // Columns to add if they are missing, keyed by column name
+        $pending = [
+            'skills'  => "ALTER TABLE alumni_profiles ADD COLUMN skills TEXT DEFAULT NULL COMMENT 'Comma-separated list of skills/competencies' AFTER bio",
+            'cv_path' => "ALTER TABLE alumni_profiles ADD COLUMN cv_path VARCHAR(500) DEFAULT NULL COMMENT 'Path to uploaded CV/resume PDF' AFTER skills",
+        ];
+        foreach ($pending as $column => $alterSql) {
+            try {
+                $stmt = $db->prepare(
+                    "SELECT COLUMN_NAME
+                     FROM INFORMATION_SCHEMA.COLUMNS
+                     WHERE TABLE_SCHEMA = DATABASE()
+                       AND TABLE_NAME   = 'alumni_profiles'
+                       AND COLUMN_NAME  = ?"
+                );
+                $stmt->execute([$column]);
+                if (!$stmt->fetch()) {
+                    $db->exec($alterSql);
+                    error_log("Content schema migration applied: added column '$column' to alumni_profiles");
+                }
+            } catch (PDOException $e) {
+                // Table may not exist yet on a brand-new install, or the DB user may
+                // lack ALTER TABLE permission.  Log and continue – the existing
+                // query-level fallbacks in Alumni/Member models will still protect
+                // against hard failures.
+                error_log("Content schema migration skipped for column '$column': " . $e->getMessage());
+            }
+        }
     }
 
     /**
