@@ -374,7 +374,7 @@ ob_start();
             Letzte Benutzeraktivitäten
         </h2>
         <div class="card overflow-hidden">
-            <div class="overflow-x-auto">
+            <div class="overflow-x-auto w-full">
                 <table class="w-full card-table">
                     <thead class="bg-gray-50 dark:bg-gray-700">
                         <tr>
@@ -589,7 +589,7 @@ ob_start();
                     </div>
                 </div>
             </div>
-            <div class="max-h-64 overflow-auto">
+            <div class="max-h-64 overflow-auto w-full">
                 <table class="w-full text-sm">
                     <thead class="bg-gray-50 dark:bg-gray-700 sticky top-0">
                         <tr>
@@ -648,7 +648,7 @@ ob_start();
                     <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">Keine aktiven Ausleihen oder Tabelle nicht initialisiert</p>
                 </div>
             <?php else: ?>
-                <div class="overflow-x-auto">
+                <div class="overflow-x-auto w-full">
                     <table class="w-full card-table divide-y divide-gray-200 dark:divide-gray-700">
                         <thead class="bg-gray-50 dark:bg-gray-800">
                             <tr>
@@ -736,7 +736,7 @@ ob_start();
                     <p class="text-gray-600 dark:text-gray-300 text-lg">Keine Projekte vorhanden</p>
                 </div>
             <?php else: ?>
-                <div class="overflow-x-auto">
+                <div class="overflow-x-auto w-full">
                     <table class="w-full card-table divide-y divide-gray-200 dark:divide-gray-700">
                         <thead class="bg-gray-50 dark:bg-gray-800">
                             <tr>

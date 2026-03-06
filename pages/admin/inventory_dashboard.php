@@ -174,7 +174,7 @@ document.addEventListener('DOMContentLoaded', function () {
         <p class="text-gray-500 text-lg">Keine aktiven Ausleihen vorhanden</p>
     </div>
     <?php else: ?>
-    <div class="overflow-x-auto">
+    <div class="overflow-x-auto w-full">
         <table class="w-full card-table">
             <thead class="bg-gray-50">
                 <tr>
@@ -249,7 +249,7 @@ document.addEventListener('DOMContentLoaded', function () {
         <p class="text-gray-500 text-lg">Keine Artikel im Inventar vorhanden</p>
     </div>
     <?php else: ?>
-    <div class="overflow-x-auto">
+    <div class="overflow-x-auto w-full">
         <table class="w-full card-table">
             <thead class="bg-gray-50">
                 <tr>

@@ -130,7 +130,7 @@ ob_start();
                                 <i class="fas fa-user-tie mr-2 text-blue-600"></i>
                                 Verkäufer
                             </h3>
-                            <div class="overflow-x-auto">
+                            <div class="overflow-x-auto w-full">
                                 <table class="w-full text-sm card-table">
                                     <thead class="bg-gray-100 dark:bg-gray-700">
                                         <tr>

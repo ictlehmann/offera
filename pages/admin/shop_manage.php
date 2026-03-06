@@ -427,7 +427,7 @@ ob_start();
                 </button>
             </div>
             <?php else: ?>
-            <div class="overflow-x-auto">
+            <div class="overflow-x-auto w-full">
                 <table class="w-full text-sm card-table">
                     <thead>
                         <tr class="border-b border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 text-left">
@@ -1487,7 +1487,7 @@ function createVariantBlock(idx, typeName, values) {
             </button>
         </div>
         <div class="px-4 py-3">
-            <div class="overflow-x-auto">
+            <div class="overflow-x-auto w-full">
                 <div class="grid grid-cols-[1fr_auto_auto] gap-x-3 gap-y-0 mb-1.5 px-1 min-w-[280px]">
                     <span class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide">Größe</span>
                     <span class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wide text-right w-24">Lagerbestand</span>

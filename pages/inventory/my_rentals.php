@@ -114,7 +114,7 @@ ob_start();
         </a>
     </div>
     <?php else: ?>
-    <div class="overflow-x-auto">
+    <div class="overflow-x-auto w-full">
         <table class="w-full card-table">
             <thead class="bg-gray-50">
                 <tr>
@@ -174,7 +174,7 @@ ob_start();
                         </span>
                         <?php endif; ?>
                     </td>
-                    <td class="px-4 py-3" data-label="Aktion">
+                    <td class="px-4 py-3 whitespace-nowrap" data-label="Aktion">
                         <?php if ($isAwaitingApproval): ?>
                         <span class="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-800 rounded text-sm font-medium">
                             <i class="fas fa-clock mr-1"></i>Wartet auf Genehmigung

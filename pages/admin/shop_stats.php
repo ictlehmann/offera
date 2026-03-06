@@ -150,7 +150,7 @@ ob_start();
         <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
             <i class="fas fa-table mr-2 text-gray-500"></i>Detailübersicht
         </h2>
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto w-full">
             <table class="w-full text-sm card-table">
                 <thead>
                     <tr class="border-b border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 text-left">

@@ -191,7 +191,7 @@ ob_start();
                 <p class="text-gray-500 text-lg">Keine ausstehenden Anfragen</p>
             </div>
             <?php else: ?>
-            <div class="overflow-x-auto">
+            <div class="overflow-x-auto w-full">
                 <table class="w-full card-table">
                     <thead class="bg-gray-50">
                         <tr>
@@ -231,7 +231,7 @@ ob_start();
                                 <?php echo htmlspecialchars(date('d.m.Y H:i', strtotime($req['created_at']))); ?>
                             </td>
                             <?php if (!$readOnly): ?>
-                            <td class="px-4 py-3 text-sm" data-label="Aktionen">
+                            <td class="px-4 py-3 text-sm whitespace-nowrap" data-label="Aktionen">
                                 <div class="flex items-center gap-2">
                                     <button
                                         onclick="handleRequestAction(<?php echo (int)$req['id']; ?>, 'approve')"
@@ -275,7 +275,7 @@ ob_start();
                 <p class="text-gray-500 text-lg">Keine ausstehenden Rückgaben</p>
             </div>
             <?php else: ?>
-            <div class="overflow-x-auto">
+            <div class="overflow-x-auto w-full">
                 <table class="w-full card-table">
                     <thead class="bg-orange-50">
                         <tr>
@@ -312,7 +312,7 @@ ob_start();
                                 <span class="block text-xs text-orange-600 font-medium mt-0.5">Vorzeitige Rückgabe gemeldet</span>
                             </td>
                             <?php if (!$readOnly): ?>
-                            <td class="px-4 py-3 text-sm" data-label="Aktion">
+                            <td class="px-4 py-3 text-sm whitespace-nowrap" data-label="Aktion">
                                 <button
                                     onclick="confirmReturn(<?php echo (int)$loan['id']; ?>, 'pending-return')"
                                     class="inline-flex items-center px-3 py-1.5 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition font-medium text-sm">
@@ -349,7 +349,7 @@ ob_start();
                                 <span class="block text-xs text-orange-600 font-medium mt-0.5">Rückgabe gemeldet</span>
                             </td>
                             <?php if (!$readOnly): ?>
-                            <td class="px-4 py-3 text-sm" data-label="Aktion">
+                            <td class="px-4 py-3 text-sm whitespace-nowrap" data-label="Aktion">
                                 <button
                                     onclick="confirmRentalReturn(<?php echo (int)$rental['id']; ?>)"
                                     class="inline-flex items-center px-3 py-1.5 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition font-medium text-sm">
@@ -380,7 +380,7 @@ ob_start();
                 <p class="text-gray-500 text-lg">Keine aktiven Ausleihen</p>
             </div>
             <?php else: ?>
-            <div class="overflow-x-auto">
+            <div class="overflow-x-auto w-full">
                 <table class="w-full card-table">
                     <thead class="bg-gray-50">
                         <tr>
@@ -416,7 +416,7 @@ ob_start();
                                 <?php echo htmlspecialchars(date('d.m.Y', strtotime($loan['end_date']))); ?>
                             </td>
                             <?php if (!$readOnly): ?>
-                            <td class="px-4 py-3 text-sm" data-label="Aktion">
+                            <td class="px-4 py-3 text-sm whitespace-nowrap" data-label="Aktion">
                                 <button
                                     onclick="confirmReturn(<?php echo (int)$loan['id']; ?>)"
                                     class="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium text-sm">
