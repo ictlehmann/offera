@@ -243,7 +243,7 @@ ob_start();
                 <div class="w-20 h-20 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-5">
                     <i class="fas fa-file-invoice text-4xl text-gray-400 dark:text-gray-500"></i>
                 </div>
-                <p class="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">Keine Rechnungen vorhanden</p>
+                <p class="text-base sm:text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">Keine Rechnungen vorhanden</p>
                 <p class="text-gray-500 dark:text-gray-400 mb-5">Erstelle Deine erste Einreichung</p>
                 <?php if ($canSubmitInvoice): ?>
                 <button onclick="document.getElementById('openSubmissionModal').click()"
@@ -513,7 +513,7 @@ ob_start();
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl max-w-2xl w-full max-h-[85vh] flex flex-col overflow-hidden">
         <!-- Header -->
         <div class="p-5 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-            <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">
+            <h2 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-gray-100">
                 <i class="fas fa-file-invoice mr-2 text-blue-600 dark:text-blue-400"></i>
                 Rechnungsdetails <span id="detail-id" class="text-gray-400 dark:text-gray-500 text-base font-normal"></span>
             </h2>

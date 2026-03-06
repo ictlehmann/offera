@@ -265,7 +265,7 @@ ob_start();
             <!-- Description -->
             <?php if ($item['description']): ?>
             <div class="mb-8 p-5 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-slate-800 dark:to-slate-700 rounded-xl border border-gray-200 dark:border-slate-600">
-                <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-3 flex items-center">
+                <h2 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-gray-100 mb-3 flex items-center">
                     <i class="fas fa-align-left mr-2 text-purple-600"></i>Beschreibung
                 </h2>
                 <p class="text-gray-700 dark:text-gray-300 leading-relaxed"><?php echo nl2br(htmlspecialchars($item['description'])); ?></p>

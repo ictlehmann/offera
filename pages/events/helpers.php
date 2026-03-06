@@ -60,7 +60,7 @@ ob_start();
             <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center">
                 <i class="fas fa-info-circle text-3xl text-ibc-blue"></i>
             </div>
-            <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">Information für Alumni</h2>
+            <h2 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">Information für Alumni</h2>
             <p class="text-gray-600 dark:text-gray-300">Als Alumni-Mitglied hast Du keinen Zugriff auf das Helfersystem.</p>
         </div>
     <?php elseif (empty($events)): ?>
@@ -69,7 +69,7 @@ ob_start();
             <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-green-50 dark:bg-green-900/20 flex items-center justify-center">
                 <i class="fas fa-check-circle text-3xl text-ibc-green"></i>
             </div>
-            <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">Keine Helfer benötigt</h2>
+            <h2 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">Keine Helfer benötigt</h2>
             <p class="text-gray-600 dark:text-gray-300">Aktuell werden für keine Events Helfer gesucht.</p>
         </div>
     <?php else: ?>
@@ -80,7 +80,7 @@ ob_start();
                     <span class="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
                         <i class="fas fa-bullhorn text-white text-lg"></i>
                     </span>
-                    <h2 class="text-2xl font-bold">Wir suchen Helfer!</h2>
+                    <h2 class="text-lg sm:text-2xl font-bold">Wir suchen Helfer!</h2>
                 </div>
                 <p class="text-white/90 text-sm leading-relaxed mb-5 max-w-2xl">
                     Deine Mithilfe ist gefragt! Für die folgenden Events suchen wir noch Unterstützung.
@@ -135,7 +135,7 @@ ob_start();
                     <div class="p-6 border-b border-gray-100 dark:border-gray-800">
                         <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                             <div class="flex-1 min-w-0">
-                                <h2 class="text-xl font-bold text-gray-900 dark:text-gray-50 mb-2 leading-snug">
+                                <h2 class="text-base sm:text-xl font-bold text-gray-900 dark:text-gray-50 mb-2 leading-snug break-words hyphens-auto">
                                     <?php echo htmlspecialchars($event['title']); ?>
                                 </h2>
                                 <div class="flex flex-wrap gap-3 text-sm text-gray-500 dark:text-gray-400">

@@ -69,7 +69,7 @@ ob_start();
 
 <!-- Active Checkouts -->
 <div class="card p-6 mb-6">
-    <h2 class="text-xl font-bold text-gray-800 mb-4">
+    <h2 class="text-lg sm:text-xl font-bold text-gray-800 mb-4">
         <i class="fas fa-hourglass-half text-blue-600 mr-2"></i>
         Aktive Ausleihen
     </h2>
@@ -135,7 +135,7 @@ ob_start();
 
 <!-- History note -->
 <div class="card p-6">
-    <h2 class="text-xl font-bold text-gray-800 mb-4">
+    <h2 class="text-lg sm:text-xl font-bold text-gray-800 mb-4">
         <i class="fas fa-history text-gray-600 mr-2"></i>
         Verlauf
     </h2>
@@ -155,7 +155,7 @@ ob_start();
 
             <div class="p-6 overflow-y-auto flex-1">
                 <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-2xl font-bold text-gray-800">
+                    <h2 class="text-lg sm:text-2xl font-bold text-gray-800">
                         <i class="fas fa-undo text-green-600 mr-2"></i>
                         Artikel zurückgeben
                     </h2>

@@ -292,7 +292,7 @@ ob_start();
 
         <!-- Tab 1: Basisdaten -->
         <div id="tab-basic" class="tab-content">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">
+            <h2 class="text-lg sm:text-xl font-bold text-gray-800 mb-4">
                 <i class="fas fa-info-circle text-purple-600 mr-2"></i>
                 Basisdaten
             </h2>
@@ -403,7 +403,7 @@ ob_start();
 
         <!-- Tab 2: Zeit & Einstellungen -->
         <div id="tab-time" class="tab-content hidden">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">
+            <h2 class="text-lg sm:text-xl font-bold text-gray-800 mb-4">
                 <i class="fas fa-clock text-ibc-blue mr-2"></i>
                 Zeit & Einstellungen
             </h2>
@@ -661,7 +661,7 @@ ob_start();
 
         <!-- Tab 3: Helfer-Planung -->
         <div id="tab-helpers" class="tab-content hidden">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">
+            <h2 class="text-lg sm:text-xl font-bold text-gray-800 mb-4">
                 <i class="fas fa-hands-helping text-purple-600 mr-2"></i>
                 Helfer-Planung
             </h2>
@@ -714,7 +714,7 @@ ob_start();
 <!-- History Section -->
 <?php if ($isEdit && !empty($history)): ?>
 <div class="glass-card shadow-soft rounded-xl p-6 mt-6">
-    <h2 class="text-xl font-bold text-gray-800 mb-4">
+    <h2 class="text-lg sm:text-xl font-bold text-gray-800 mb-4">
         <i class="fas fa-history text-ibc-blue mr-2"></i>
         Änderungshistorie (letzte 10 Einträge)
     </h2>

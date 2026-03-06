@@ -215,7 +215,7 @@ ob_start();
 
         <!-- Stock Info -->
         <div class="border-t pt-6">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4">Bestandsinformationen</h2>
+            <h2 class="text-lg sm:text-xl font-semibold text-gray-800 mb-4">Bestandsinformationen</h2>
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Aktueller Bestand</label>
@@ -265,7 +265,7 @@ ob_start();
 
         <!-- Image Upload -->
         <div class="border-t pt-6">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4">Bild</h2>
+            <h2 class="text-lg sm:text-xl font-semibold text-gray-800 mb-4">Bild</h2>
             <?php if ($item['image_path']): ?>
             <div class="mb-4">
                 <p class="text-sm text-gray-600 mb-2">Aktuelles Bild:</p>

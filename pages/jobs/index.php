@@ -138,7 +138,7 @@ ob_start();
     <?php if (empty($listings)): ?>
     <div class="card dark:bg-gray-800 p-8 text-center">
         <i class="fas fa-inbox text-6xl text-gray-300 dark:text-gray-600 mb-4"></i>
-        <p class="text-xl text-gray-600 dark:text-gray-300">Keine Gesuche gefunden</p>
+        <p class="text-base sm:text-xl text-gray-600 dark:text-gray-300">Keine Gesuche gefunden</p>
         <?php if ($filterType): ?>
         <p class="text-gray-500 dark:text-gray-400 mt-2">Versuchen Sie einen anderen Filter</p>
         <?php endif; ?>
@@ -167,7 +167,7 @@ ob_start();
                 </div>
 
                 <!-- Title -->
-                <h3 class="text-base sm:text-lg md:text-xl font-bold text-gray-800 dark:text-gray-100 mb-2 break-words leading-snug">
+                <h3 class="text-base sm:text-lg md:text-xl font-bold text-gray-800 dark:text-gray-100 mb-2 break-words hyphens-auto leading-snug">
                     <?php echo htmlspecialchars($listing['title'], ENT_QUOTES, 'UTF-8'); ?>
                 </h3>
 
@@ -178,7 +178,7 @@ ob_start();
                 </div>
 
                 <!-- Description excerpt -->
-                <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-1 break-words leading-relaxed">
+                <p class="text-gray-600 dark:text-gray-300 text-sm mb-4 flex-1 break-words hyphens-auto leading-relaxed">
                     <?php
                         $desc = $listing['description'];
                         echo htmlspecialchars(mb_strlen($desc) > 200 ? mb_substr($desc, 0, 200) . '…' : $desc, ENT_QUOTES, 'UTF-8');

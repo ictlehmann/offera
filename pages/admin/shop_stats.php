@@ -116,7 +116,7 @@ ob_start();
     <?php if (empty($monthlyStats)): ?>
     <div class="card rounded-xl shadow-lg p-10 text-center text-gray-500 dark:text-gray-400">
         <i class="fas fa-chart-bar text-5xl mb-4 opacity-30"></i>
-        <p class="text-xl">Noch keine Verkaufsdaten vorhanden.</p>
+        <p class="text-base sm:text-xl">Noch keine Verkaufsdaten vorhanden.</p>
         <p class="text-sm mt-2">Sobald Bestellungen als „Bezahlt" markiert werden, erscheinen hier die Statistiken.</p>
     </div>
     <?php else: ?>
@@ -126,7 +126,7 @@ ob_start();
 
         <!-- Monthly order count chart -->
         <div class="card rounded-xl shadow-lg p-6">
-            <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
+            <h2 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
                 <i class="fas fa-shopping-bag mr-2 text-blue-500"></i>Monatliche Verkäufe (Anzahl)
             </h2>
             <div class="relative" style="height:300px">
@@ -136,7 +136,7 @@ ob_start();
 
         <!-- Monthly revenue chart -->
         <div class="card rounded-xl shadow-lg p-6">
-            <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
+            <h2 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
                 <i class="fas fa-euro-sign mr-2 text-green-500"></i>Monatlicher Umsatz (€)
             </h2>
             <div class="relative" style="height:300px">
@@ -147,7 +147,7 @@ ob_start();
 
     <!-- Data table -->
     <div class="card rounded-xl shadow-lg p-6">
-        <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
+        <h2 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
             <i class="fas fa-table mr-2 text-gray-500"></i>Detailübersicht
         </h2>
         <div class="overflow-x-auto w-full">

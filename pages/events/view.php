@@ -455,7 +455,7 @@ $statusInfo = $statusLabels[$currentStatus] ?? ['label' => $currentStatus, 'icon
     <!-- Helper Slots Section (Only for non-alumni and if event needs helpers) -->
     <?php if ($event['needs_helpers'] && $userRole !== 'alumni' && !empty($helperTypes)): ?>
         <div class="card rounded-2xl p-6 border border-gray-200 dark:border-gray-700 shadow-soft">
-            <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-1 flex items-center gap-2">
+            <h2 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-gray-100 mb-1 flex items-center gap-2">
                 <span class="w-9 h-9 rounded-xl bg-ibc-green/10 flex items-center justify-center flex-shrink-0">
                     <i class="fas fa-hands-helping text-ibc-green"></i>
                 </span>
@@ -465,7 +465,7 @@ $statusInfo = $statusLabels[$currentStatus] ?? ['label' => $currentStatus, 'icon
             
             <?php foreach ($helperTypes as $helperType): ?>
                 <div class="mb-6 last:mb-0">
-                    <h3 class="text-base font-bold text-gray-800 dark:text-gray-100 mb-1">
+                    <h3 class="text-base font-bold text-gray-800 dark:text-gray-100 mb-1 break-words hyphens-auto">
                         <?php echo htmlspecialchars($helperType['title']); ?>
                     </h3>
                     
@@ -626,7 +626,7 @@ $statusInfo = $statusLabels[$currentStatus] ?? ['label' => $currentStatus, 'icon
 <div id="addStatsModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white dark:bg-gray-800 rounded-lg w-full max-w-lg max-h-[85vh] flex flex-col overflow-hidden">
         <div class="p-6 overflow-y-auto flex-1">
-            <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
+            <h3 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
                 <i class="fas fa-chart-bar text-purple-600 mr-2"></i>
                 Statistiken nachtragen
             </h3>

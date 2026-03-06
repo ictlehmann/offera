@@ -128,7 +128,7 @@ ob_start();
                 </div>
                 <div class="text-right">
                     <p class="text-sm text-gray-500">Verfügbarer Bestand</p>
-                    <p class="text-2xl font-bold <?php echo $item['available_quantity'] <= $item['min_stock'] && $item['min_stock'] > 0 ? 'text-red-600' : 'text-gray-800'; ?>">
+                    <p class="text-xl sm:text-2xl font-bold <?php echo $item['available_quantity'] <= $item['min_stock'] && $item['min_stock'] > 0 ? 'text-red-600' : 'text-gray-800'; ?>">
                         <?php echo $item['available_quantity']; ?> <?php echo htmlspecialchars($item['unit']); ?>
                     </p>
                 </div>

@@ -515,7 +515,7 @@ ob_start();
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
     <!-- Account Info -->
     <div class="card p-6">
-        <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
+        <h2 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
             <i class="fas fa-info-circle text-blue-600 mr-2"></i>
             Kontoinformationen
         </h2>
@@ -603,7 +603,7 @@ ob_start();
     <!-- Profile Information -->
     <div class="lg:col-span-2">
         <div class="card p-6">
-            <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
+            <h2 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
                 <i class="fas fa-user-edit text-purple-600 mr-2"></i>
                 Profilangaben
             </h2>
@@ -1000,7 +1000,7 @@ ob_start();
     <!-- 2FA Settings -->
     <div class="lg:col-span-2">
         <div class="card p-6">
-            <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
+            <h2 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
                 <i class="fas fa-shield-alt text-green-600 mr-2"></i>
                 Zwei-Faktor-Authentifizierung (2FA)
             </h2>
@@ -1094,7 +1094,7 @@ ob_start();
 
 <!-- Change Request Section -->
 <div class="card p-6 mt-6">
-    <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
+    <h2 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
         <i class="fas fa-edit text-green-600 mr-2"></i>
         Änderungsantrag
     </h2>
@@ -1143,7 +1143,7 @@ ob_start();
 
 <!-- Help & Changes Card -->
 <div class="card p-6 mt-6">
-    <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">
+    <h2 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">
         <i class="fas fa-life-ring text-blue-600 mr-2"></i>
         Hilfe
     </h2>

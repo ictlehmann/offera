@@ -119,13 +119,13 @@ ob_start();
              alt="Keine Umfragen"
              class="w-32 h-32 mx-auto mb-5 opacity-60">
         <?php if ($voteFilter === 'voted'): ?>
-            <h3 class="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">Noch keine Umfragen abgestimmt</h3>
+            <h3 class="text-base sm:text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">Noch keine Umfragen abgestimmt</h3>
             <p class="text-sm text-gray-400 dark:text-gray-500">Stimme bei offenen Umfragen ab, um sie hier zu sehen.</p>
         <?php elseif ($voteFilter === 'open'): ?>
-            <h3 class="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">Aktuell gibt es keine offenen Umfragen.</h3>
+            <h3 class="text-base sm:text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">Aktuell gibt es keine offenen Umfragen.</h3>
             <p class="text-sm text-gray-400 dark:text-gray-500">Schau später wieder vorbei!</p>
         <?php else: ?>
-            <h3 class="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">Aktuell sind keine Umfragen aktiv.</h3>
+            <h3 class="text-base sm:text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">Aktuell sind keine Umfragen aktiv.</h3>
             <p class="text-sm text-gray-400 dark:text-gray-500">Schau später wieder vorbei!</p>
         <?php endif; ?>
     </div>
@@ -174,7 +174,7 @@ ob_start();
 
             <!-- Card Body -->
             <div class="flex flex-col flex-1 p-5">
-                <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100 mb-3 leading-snug line-clamp-2">
+                <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100 mb-3 leading-snug line-clamp-2 break-words hyphens-auto">
                     <?php echo htmlspecialchars($poll['title']); ?>
                 </h3>
 

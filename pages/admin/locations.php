@@ -70,7 +70,7 @@ ob_start();
     <!-- Create Location Form -->
     <div class="lg:col-span-1">
         <div class="card p-6">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">
+            <h2 class="text-lg sm:text-xl font-bold text-gray-800 mb-4">
                 <i class="fas fa-plus text-green-600 mr-2"></i>
                 Neuer Standort
             </h2>
@@ -125,7 +125,7 @@ ob_start();
     <!-- Locations List -->
     <div class="lg:col-span-2">
         <div class="card p-6">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">
+            <h2 class="text-lg sm:text-xl font-bold text-gray-800 mb-4">
                 <i class="fas fa-list text-blue-600 mr-2"></i>
                 Bestehende Standorte
             </h2>

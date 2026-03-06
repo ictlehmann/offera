@@ -305,7 +305,7 @@ ob_start();
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <!-- Quick Actions Card -->
         <div class="card p-6 rounded-xl shadow-lg dark:bg-gray-800">
-            <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
+            <h3 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
                 <i class="fas fa-bolt text-yellow-500 mr-2"></i>
                 Schnellaktionen
             </h3>
@@ -335,7 +335,7 @@ ob_start();
         
         <!-- Status Overview Card -->
         <div class="card p-6 rounded-xl shadow-lg dark:bg-gray-800">
-            <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
+            <h3 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
                 <i class="fas fa-info-circle text-blue-500 mr-2"></i>
                 Status-Übersicht
             </h3>
@@ -492,7 +492,7 @@ ob_start();
                     <div class="flex items-center justify-between mb-4">
                         <div>
                             <h3 class="text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase mb-1"><?php echo htmlspecialchars($db['label']); ?></h3>
-                            <p class="text-2xl font-bold <?php echo $colors['text']; ?>"><?php echo number_format($db['size_mb'], 2); ?> MB</p>
+                            <p class="text-xl sm:text-2xl font-bold <?php echo $colors['text']; ?>"><?php echo number_format($db['size_mb'], 2); ?> MB</p>
                         </div>
                         <div class="w-12 h-12 <?php echo $colors['icon_bg']; ?> rounded-full flex items-center justify-center">
                             <i class="fas fa-hdd <?php echo $colors['icon_text']; ?> text-xl"></i>
@@ -535,7 +535,7 @@ ob_start();
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <!-- Im Lager (In Stock) -->
         <div class="card p-6 rounded-xl shadow-lg dark:bg-gray-800">
-            <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
+            <h2 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
                 <i class="fas fa-warehouse text-green-600 dark:text-green-400 mr-2"></i>
                 Im Lager
             </h2>
@@ -572,7 +572,7 @@ ob_start();
 
         <!-- Unterwegs (In Transit / Checked Out) -->
         <div class="card p-6 rounded-xl shadow-lg dark:bg-gray-800">
-            <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
+            <h2 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
                 <i class="fas fa-truck text-orange-600 dark:text-orange-400 mr-2"></i>
                 Unterwegs
             </h2>
@@ -581,11 +581,11 @@ ob_start();
                 <div class="flex items-center justify-between p-3 bg-orange-50 dark:bg-orange-900/30 rounded-lg">
                     <div>
                         <p class="text-sm text-gray-600 dark:text-gray-400">Aktive Ausleihen</p>
-                        <p class="text-xl font-bold text-orange-700 dark:text-orange-400"><?php echo count($checkedOutStats['checkouts']); ?> Ausleihen</p>
+                        <p class="text-base sm:text-xl font-bold text-orange-700 dark:text-orange-400"><?php echo count($checkedOutStats['checkouts']); ?> Ausleihen</p>
                     </div>
                     <div>
                         <p class="text-sm text-gray-600 dark:text-gray-400">Entliehene Menge</p>
-                        <p class="text-xl font-bold text-orange-700 dark:text-orange-400"><?php echo $checkedOutStats['total_items_out']; ?> Einheiten</p>
+                        <p class="text-base sm:text-xl font-bold text-orange-700 dark:text-orange-400"><?php echo $checkedOutStats['total_items_out']; ?> Einheiten</p>
                     </div>
                 </div>
             </div>
@@ -634,7 +634,7 @@ ob_start();
     <!-- Active Checkouts Section -->
     <div class="card mb-8">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
-            <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">
+            <h2 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-gray-100">
                 <i class="fas fa-box-open mr-2 text-orange-600 dark:text-orange-400"></i>
                 Wer hat was ausgeliehen?
             </h2>
@@ -723,7 +723,7 @@ ob_start();
     <!-- Project Applications Section -->
     <div class="card">
         <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
-            <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">
+            <h2 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-gray-100">
                 <i class="fas fa-briefcase mr-2 text-purple-600 dark:text-purple-400"></i>
                 Projekt Bewerbungen
             </h2>

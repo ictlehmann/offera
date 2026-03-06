@@ -141,12 +141,12 @@ ob_start();
             <i class="fas fa-arrow-left mr-2"></i>Zurück zu Umfragen
         </a>
         
-        <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 dark:text-gray-100 mb-2">
+        <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 dark:text-gray-100 mb-2 break-words hyphens-auto">
             <?php echo htmlspecialchars($poll['title']); ?>
         </h1>
         
         <?php if (!empty($poll['description'])): ?>
-        <p class="text-gray-600 dark:text-gray-300 text-base sm:text-lg mb-4">
+        <p class="text-gray-600 dark:text-gray-300 text-base sm:text-lg mb-4 break-words hyphens-auto">
             <?php echo nl2br(htmlspecialchars($poll['description'])); ?>
         </p>
         <?php endif; ?>
