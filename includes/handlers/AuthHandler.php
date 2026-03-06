@@ -407,52 +407,43 @@ class AuthHandler {
      * Initiate Microsoft Entra ID OAuth login
      */
     public static function initiateMicrosoftLogin() {
-        $_vendorPath = __DIR__ . '/../../vendor/autoload.php';
-        if (!file_exists($_vendorPath)) {
-            throw new Exception('Microsoft OAuth requires Composer dependencies. Run "composer install" on the server.');
-        }
-        require_once $_vendorPath;
-        unset($_vendorPath);
-        
         self::startSession();
-        
+
         // Load credentials from configuration constants
-        $clientId = defined('CLIENT_ID') ? CLIENT_ID : '';
-        $clientSecret = defined('CLIENT_SECRET') ? CLIENT_SECRET : '';
+        $clientId    = defined('CLIENT_ID')    ? CLIENT_ID    : '';
         $redirectUri = defined('REDIRECT_URI') ? REDIRECT_URI : '';
-        $tenantId = defined('TENANT_ID') ? TENANT_ID : '';
-        
-        // Validate required environment variables
-        if (empty($clientId) || empty($clientSecret) || empty($redirectUri) || empty($tenantId)) {
+        $tenantId    = defined('TENANT_ID')    ? TENANT_ID    : '';
+
+        // Validate required environment variables (client_secret not needed for auth URL)
+        if (empty($clientId) || empty($redirectUri) || empty($tenantId)) {
             throw new Exception('Missing Azure OAuth configuration');
         }
-        
-        // Initialize GenericProvider with Azure endpoints using config constants
-        $provider = new \League\OAuth2\Client\Provider\GenericProvider([
-            'clientId'                => $clientId,
-            'clientSecret'            => $clientSecret,
-            'redirectUri'             => $redirectUri,
-            'urlAuthorize'            => 'https://login.microsoftonline.com/' . $tenantId . '/oauth2/v2.0/authorize',
-            'urlAccessToken'          => 'https://login.microsoftonline.com/' . $tenantId . '/oauth2/v2.0/token',
-            'urlResourceOwnerDetails' => 'https://graph.microsoft.com/v1.0/me',
-        ]);
-        
-        // Generate authorization URL with required scopes (space-separated as required by Microsoft OAuth v2.0)
-        $authorizationUrl = $provider->getAuthorizationUrl([
-            'scope' => 'openid profile email offline_access User.Read',
-        ]);
-        
+
+        // Generate cryptographically secure random state for CSRF protection
+        $state = bin2hex(random_bytes(16));
+
         // Store state in session for CSRF protection
-        $_SESSION['oauth2state'] = $provider->getState();
-        
+        $_SESSION['oauth2state'] = $state;
+
         // Log state storage for debugging (log only presence, not actual value for security)
-        error_log("[OAuth] State stored in session (length: " . strlen($_SESSION['oauth2state']) . ")");
+        error_log("[OAuth] State stored in session (length: " . strlen($state) . ")");
         error_log("[OAuth] Session ID: " . session_id());
-        
+
         // Ensure session is written to disk before redirect
         // This is critical for OAuth flow to preserve the state parameter
         session_write_close();
-        
+
+        // Build authorization URL with required scopes (space-separated as required by Microsoft OAuth v2.0)
+        $authorizationUrl = 'https://login.microsoftonline.com/' . rawurlencode($tenantId) . '/oauth2/v2.0/authorize?'
+            . http_build_query([
+                'client_id'     => $clientId,
+                'response_type' => 'code',
+                'redirect_uri'  => $redirectUri,
+                'response_mode' => 'query',
+                'scope'         => 'openid profile email offline_access User.Read',
+                'state'         => $state,
+            ]);
+
         // Redirect to authorization URL
         header('Location: ' . $authorizationUrl);
         exit;
@@ -560,12 +551,6 @@ class AuthHandler {
      * @param string|null $userAccessToken Optional user OAuth access token for Graph API photo retrieval
      */
     public static function completeMicrosoftLogin(array $claims, $existingUser = null, ?string $userAccessToken = null) {
-        $_vendorPath = __DIR__ . '/../../vendor/autoload.php';
-        if (!file_exists($_vendorPath)) {
-            throw new Exception('Microsoft OAuth requires Composer dependencies. Run "composer install" on the server.');
-        }
-        require_once $_vendorPath;
-        unset($_vendorPath);
         require_once __DIR__ . '/../services/MicrosoftGraphService.php';
         require_once __DIR__ . '/../models/Alumni.php';
 
