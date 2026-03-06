@@ -85,7 +85,7 @@ ob_start();
         <?php if (Auth::canCreatePolls()): ?>
         <a 
             href="<?php echo asset('pages/polls/create.php'); ?>"
-            class="btn-primary no-underline"
+            class="btn-primary no-underline w-full sm:w-auto"
         >
             <i class="fas fa-plus mr-2"></i>
             Neue Umfrage erstellen

@@ -47,7 +47,7 @@ ob_start();
             <p class="text-gray-600"><?php echo count($activeCheckouts); ?> aktive Ausleihen</p>
         </div>
         <div class="mt-4 md:mt-0">
-            <a href="index.php" class="btn-primary">
+            <a href="index.php" class="btn-primary w-full md:w-auto">
                 <i class="fas fa-box mr-2"></i>
                 Zum Inventar
             </a>
@@ -78,7 +78,7 @@ ob_start();
     <div class="text-center py-8">
         <i class="fas fa-inbox text-6xl text-gray-300 mb-4"></i>
         <p class="text-gray-500 text-lg mb-4">Keine aktiven Ausleihen</p>
-        <a href="index.php" class="btn-primary">
+        <a href="index.php" class="btn-primary w-full sm:w-auto">
             <i class="fas fa-search mr-2"></i>Artikel ausleihen
         </a>
     </div>

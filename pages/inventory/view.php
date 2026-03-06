@@ -218,8 +218,8 @@ ob_start();
                     </div>
                 </div>
                 <?php if (Auth::hasPermission('manager')): ?>
-                <div class="flex space-x-2">
-                    <a href="edit.php?id=<?php echo $item['id']; ?>" class="btn-primary shadow-lg hover:shadow-xl transition-all transform hover:scale-105">
+                <div class="flex flex-col sm:flex-row gap-2">
+                    <a href="edit.php?id=<?php echo $item['id']; ?>" class="btn-primary w-full sm:w-auto shadow-lg hover:shadow-xl transition-all transform hover:scale-105">
                         <i class="fas fa-edit mr-2"></i>Bearbeiten
                     </a>
                 </div>

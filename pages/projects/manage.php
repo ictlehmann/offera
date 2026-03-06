@@ -177,7 +177,7 @@ ob_start();
 <?php if (!$showForm): ?>
 <!-- Project List View -->
 <div class="mb-8">
-    <div class="flex items-center justify-between mb-4">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-4">
         <div>
             <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-100 mb-2">
                 <i class="fas fa-briefcase text-purple-600 mr-2"></i>
@@ -185,7 +185,7 @@ ob_start();
             </h1>
             <p class="text-gray-600 dark:text-gray-300"><?php echo count($projects); ?> Projekt(e) gefunden</p>
         </div>
-        <a href="manage.php?new=1" class="btn-primary">
+        <a href="manage.php?new=1" class="btn-primary w-full sm:w-auto">
             <i class="fas fa-plus mr-2"></i>Neues Projekt
         </a>
     </div>
@@ -209,7 +209,7 @@ ob_start();
     <i class="fas fa-briefcase text-gray-400 dark:text-gray-500 text-6xl mb-4"></i>
     <h3 class="text-base sm:text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">Keine Projekte gefunden</h3>
     <p class="text-gray-500 dark:text-gray-400 mb-6">Es wurden noch keine Projekte erstellt.</p>
-    <a href="manage.php?new=1" class="btn-primary">
+    <a href="manage.php?new=1" class="btn-primary w-full sm:w-auto">
         <i class="fas fa-plus mr-2"></i>Erstes Projekt erstellen
     </a>
 </div>
@@ -706,8 +706,8 @@ document.getElementById('deleteModal')?.addEventListener('click', (e) => {
         </div>
 
         <!-- Form Actions -->
-        <div class="flex space-x-4 pt-6 border-t border-gray-200 dark:border-gray-700">
-            <a href="manage.php" class="px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition no-underline">
+        <div class="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-200 dark:border-gray-700">
+            <a href="manage.php" class="w-full sm:w-auto px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition no-underline text-center">
                 Abbrechen
             </a>
             <?php if ($project): ?>
