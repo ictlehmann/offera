@@ -317,7 +317,7 @@ ob_start();
     <div class="lg:col-span-1">
         <?php if (Auth::hasPermission('manager')): ?>
         <div class="card p-6 mb-6 shadow-xl border border-blue-200 dark:border-blue-700 bg-gradient-to-br from-white to-blue-50 dark:from-slate-800 dark:to-blue-900/20">
-            <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">
+            <h2 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">
                 <i class="fas fa-sync-alt text-blue-600 mr-2"></i>
                 Bestandsverwaltung
             </h2>
@@ -360,7 +360,7 @@ ob_start();
 
 <!-- Aktive Ausleihen -->
 <div class="card p-8 mt-8 shadow-xl border border-green-200 dark:border-green-700 bg-gradient-to-br from-white to-green-50 dark:from-slate-800 dark:to-green-900/10">
-    <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6 flex items-center">
+    <h2 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6 flex items-center">
         <i class="fas fa-clipboard-list text-green-600 mr-3"></i>
         Aktive Ausleihen
     </h2>
@@ -418,7 +418,7 @@ ob_start();
 
 <!-- Verlauf (Abgeschlossen) -->
 <div class="card p-8 mt-8 shadow-xl border border-gray-200 dark:border-slate-700 bg-gradient-to-br from-white to-gray-50 dark:from-slate-800 dark:to-slate-700/10">
-    <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6 flex items-center">
+    <h2 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6 flex items-center">
         <i class="fas fa-history text-gray-600 mr-3"></i>
         Verlauf (Abgeschlossen)
     </h2>
@@ -469,7 +469,7 @@ if (!empty($logbookNote)):
     ));
 ?>
 <div class="card p-8 mt-8 shadow-xl border border-blue-200 dark:border-blue-700 bg-gradient-to-br from-white to-blue-50 dark:from-slate-800 dark:to-blue-900/10">
-    <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6 flex items-center">
+    <h2 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6 flex items-center">
         <i class="fas fa-book text-blue-600 mr-3"></i>
         Logbuch / Historie
     </h2>
@@ -495,7 +495,7 @@ if (!empty($logbookNote)):
 
 <!-- History -->
 <div class="card p-8 mt-8 shadow-xl border border-gray-200 dark:border-slate-700">
-    <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6 flex items-center">
+    <h2 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6 flex items-center">
         <i class="fas fa-history text-blue-600 mr-3"></i>
         Verlauf
     </h2>
@@ -585,7 +585,7 @@ if (!empty($logbookNote)):
 
             <div class="p-6 overflow-y-auto flex-1">
                 <div class="flex justify-between items-center mb-4">
-                    <h2 id="checkout-modal-title" class="text-2xl font-bold text-gray-800 dark:text-gray-100">
+                    <h2 id="checkout-modal-title" class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-100">
                         <i class="fas fa-hand-holding-box text-green-600 mr-2" aria-hidden="true"></i>
                         Entnehmen / Ausleihen
                     </h2>

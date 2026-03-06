@@ -646,7 +646,7 @@ ob_start();
                     <input type="hidden" name="product_id" value="<?php echo $product['id']; ?>">
                     <input type="hidden" name="quantity" value="1">
                     <button type="submit"
-                            class="w-full py-2.5 bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 text-sm font-semibold rounded-xl hover:bg-gray-700 dark:hover:bg-gray-300 transition-colors flex items-center justify-center gap-1.5">
+                            class="w-full py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-semibold rounded-xl transition-all flex items-center justify-center gap-1.5 shadow-sm hover:shadow-md">
                         <i class="fas fa-cart-plus text-sm"></i>In den Warenkorb
                     </button>
                 </form>
@@ -890,14 +890,14 @@ ob_start();
     <?php elseif ($action === 'cart'): ?>
     <!-- ── Cart ──────────────────────────────────────────────────────────────── -->
     <div class="card rounded-xl shadow-lg p-6 lg:p-8">
-        <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6">
+        <h2 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6">
             <i class="fas fa-shopping-cart mr-2 text-blue-600"></i>Warenkorb
         </h2>
 
         <?php if (empty($cartItems)): ?>
         <div class="text-center py-16 text-gray-500 dark:text-gray-400">
             <i class="fas fa-shopping-cart text-5xl mb-4 opacity-30"></i>
-            <p class="text-xl mb-4">Ihr Warenkorb ist leer.</p>
+            <p class="text-base sm:text-xl mb-4">Ihr Warenkorb ist leer.</p>
             <a href="<?php echo asset('pages/shop/index.php'); ?>"
                class="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors no-underline font-medium">
                 <i class="fas fa-arrow-left mr-2"></i>Weiter einkaufen
@@ -997,7 +997,7 @@ ob_start();
     <!-- ── Checkout ───────────────────────────────────────────────────────────── -->
     <?php if (empty($cartItems)): ?>
     <div class="text-center py-20 text-gray-500 dark:text-gray-400">
-        <p class="text-xl mb-4">Ihr Warenkorb ist leer.</p>
+        <p class="text-base sm:text-xl mb-4">Ihr Warenkorb ist leer.</p>
         <a href="<?php echo asset('pages/shop/index.php'); ?>"
            class="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors no-underline font-medium">
             <i class="fas fa-arrow-left mr-2"></i>Zum Shop
@@ -1008,7 +1008,7 @@ ob_start();
         <!-- Payment form -->
         <div class="lg:col-span-2">
             <div class="card rounded-xl shadow-lg p-6 lg:p-8">
-                <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6">
+                <h2 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6">
                     <i class="fas fa-credit-card mr-2 text-blue-600"></i>Zahlungsmethode &amp; Versand
                 </h2>
                 <form method="POST" id="checkout-form">

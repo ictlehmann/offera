@@ -124,10 +124,10 @@ ob_start();
                  alt="Keine Profile"
                  class="w-32 h-32 mx-auto mb-5 opacity-60">
             <?php if (!empty($searchKeyword) || !empty($industryFilter)): ?>
-                <p class="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">Keine Profile gefunden</p>
+                <p class="text-base sm:text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">Keine Profile gefunden</p>
                 <p class="text-sm text-gray-400 dark:text-gray-500">Bitte passe Deinen Suchfilter an.</p>
             <?php else: ?>
-                <p class="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">Noch keine Alumni-Profile vorhanden.</p>
+                <p class="text-base sm:text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">Noch keine Alumni-Profile vorhanden.</p>
                 <p class="text-sm text-gray-400 dark:text-gray-500">Schau später wieder vorbei!</p>
             <?php endif; ?>
         </div>
@@ -161,19 +161,19 @@ ob_start();
                         $avatarColor = getAvatarColor($profile['first_name'] . ' ' . $profile['last_name']);
                         // Resolve profile image using the 3-level hierarchy:
                         // 1. User-uploaded image (image_path), 2. Entra photo, 3. Default
-                        $imagePath = '../../' . getProfileImageUrl($profile['image_path'] ?? null, $profile['entra_photo_path'] ?? null);
+                        $imagePath = asset(getProfileImageUrl($profile['image_path'] ?? null, $profile['entra_photo_path'] ?? null));
                         ?>
                         <div class="directory-card-avatar-wrap">
                             <div class="directory-avatar rounded-circle overflow-hidden border border-3 border-white shadow"
-                                 style="background-color:<?php echo htmlspecialchars($avatarColor); ?>;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;">
+                                 style="background-color:<?php echo htmlspecialchars($avatarColor); ?>;position:relative;color:#fff;font-weight:700;">
                                 <img
                                     src="<?php echo htmlspecialchars($imagePath); ?>"
                                     alt="<?php echo htmlspecialchars($profile['first_name'] . ' ' . $profile['last_name']); ?>"
                                     loading="lazy"
-                                    style="width:100%;height:100%;object-fit:cover;"
-                                    onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                                    style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;"
+                                    onerror="this.style.display='none';"
                                 >
-                                <div style="display:none;width:100%;height:100%;" class="d-flex align-items-center justify-content-center">
+                                <div style="position:absolute;inset:0;" class="d-flex align-items-center justify-content-center">
                                     <?php echo htmlspecialchars($initials); ?>
                                 </div>
                             </div>
