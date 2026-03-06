@@ -210,7 +210,7 @@ function verifyRecaptcha(string $token, string $secretKey, string $remoteIp, flo
         CURLOPT_POST           => true,
         CURLOPT_POSTFIELDS     => $postData,
         CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_TIMEOUT        => 5,
+        CURLOPT_TIMEOUT        => 10,
         CURLOPT_CONNECTTIMEOUT => 5,
         CURLOPT_SSL_VERIFYPEER => true,
         CURLOPT_HTTPHEADER     => ['Content-Type: application/x-www-form-urlencoded'],
