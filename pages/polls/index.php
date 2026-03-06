@@ -224,7 +224,7 @@ ob_start();
                         Ergebnisse ansehen
                     </span>
                     <a href="<?php echo asset('pages/polls/view.php?id=' . $poll['id']); ?>"
-                       class="w-8 h-8 rounded-full bg-ibc-green/10 flex items-center justify-center hover:bg-ibc-green transition-all group no-underline">
+                       class="min-w-[44px] min-h-[44px] rounded-full bg-ibc-green/10 flex items-center justify-center hover:bg-ibc-green transition-all group no-underline">
                         <i class="fas fa-chart-bar text-xs text-ibc-green group-hover:text-white transition-colors"></i>
                     </a>
                     <?php else: ?>
@@ -233,7 +233,7 @@ ob_start();
                         Jetzt abstimmen
                     </a>
                     <a href="<?php echo asset('pages/polls/view.php?id=' . $poll['id']); ?>"
-                       class="w-8 h-8 rounded-full bg-ibc-blue/10 flex items-center justify-center hover:bg-ibc-blue transition-all group no-underline">
+                       class="min-w-[44px] min-h-[44px] rounded-full bg-ibc-blue/10 flex items-center justify-center hover:bg-ibc-blue transition-all group no-underline">
                         <i class="fas fa-vote-yea text-xs text-ibc-blue group-hover:text-white transition-colors"></i>
                     </a>
                     <?php endif; ?>

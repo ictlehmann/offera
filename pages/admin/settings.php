@@ -149,7 +149,7 @@ ob_start();
         </div>
         
         <div class="flex items-center space-x-4">
-            <label class="flex items-center space-x-2 cursor-pointer">
+            <label class="flex items-center space-x-2 cursor-pointer min-h-[44px]">
                 <input 
                     type="checkbox" 
                     name="maintenance_mode" 
@@ -161,7 +161,7 @@ ob_start();
         </div>
         
         <div class="flex items-center space-x-4">
-            <label class="flex items-center space-x-2 cursor-pointer">
+            <label class="flex items-center space-x-2 cursor-pointer min-h-[44px]">
                 <input 
                     type="checkbox" 
                     name="allow_registration" 

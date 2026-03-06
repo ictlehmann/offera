@@ -738,7 +738,7 @@ ob_start();
                     }
                     $uEntraRolesJson = htmlspecialchars(json_encode($uEntraRoles), ENT_QUOTES, 'UTF-8');
                 ?>
-                <label class="bulk-user-row flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
+                <label class="bulk-user-row flex items-center gap-3 px-4 py-3 min-h-[44px] hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
                        data-email="<?php echo htmlspecialchars(strtolower($uEmail)); ?>"
                        data-name="<?php echo htmlspecialchars(strtolower($uName)); ?>"
                        data-role="<?php echo htmlspecialchars($uRole); ?>"

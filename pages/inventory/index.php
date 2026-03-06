@@ -64,7 +64,7 @@ ob_start();
             <p class="text-slate-600 dark:text-slate-400 text-lg"><?php echo count($inventoryObjects); ?> Artikel verfügbar</p>
         </div>
         <!-- Action Buttons -->
-        <div class="flex gap-2 flex-wrap">
+        <div class="flex gap-4 flex-wrap">
             <button type="button" onclick="window.location.reload()" class="px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-xl transition-all transform hover:scale-105 shadow-lg font-semibold flex items-center" title="Ansicht aktualisieren" aria-label="Aktualisieren">
                 <i class="fas fa-rotate-right"></i>
             </button>
@@ -292,7 +292,7 @@ ob_start();
             </div>
         </div>
         <button onclick="closeCartPanel()"
-                class="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-lg flex items-center justify-center text-white transition-colors"
+                class="min-w-[44px] min-h-[44px] bg-white/20 hover:bg-white/30 rounded-lg flex items-center justify-center text-white transition-colors"
                 aria-label="Schließen">
             <i class="fas fa-times"></i>
         </button>
@@ -528,18 +528,18 @@ ob_start();
                 + '<p class="font-semibold text-slate-900 dark:text-white text-sm leading-snug mb-2 truncate" title="' + escHtml(item.name) + '">' + escHtml(item.name) + '</p>'
                 + '<div class="flex items-center gap-1.5">'
                 + '<button data-action="dec" data-id="' + escHtml(item.id) + '" '
-                + 'class="w-7 h-7 rounded-lg bg-gray-100 dark:bg-slate-700 hover:bg-purple-100 dark:hover:bg-purple-900/50 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-colors">'
+                + 'class="min-w-[44px] min-h-[44px] rounded-lg bg-gray-100 dark:bg-slate-700 hover:bg-purple-100 dark:hover:bg-purple-900/50 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-colors">'
                 + '<i class="fas fa-minus text-[10px]"></i></button>'
                 + '<span class="min-w-[2rem] text-center text-sm font-extrabold text-slate-900 dark:text-white bg-gray-50 dark:bg-slate-700 rounded-lg py-0.5 px-1.5 border border-gray-200 dark:border-slate-600">' + item.quantity + '</span>'
                 + '<button data-action="inc" data-id="' + escHtml(item.id) + '" '
-                + 'class="w-7 h-7 rounded-lg bg-gray-100 dark:bg-slate-700 hover:bg-purple-100 dark:hover:bg-purple-900/50 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-colors">'
+                + 'class="min-w-[44px] min-h-[44px] rounded-lg bg-gray-100 dark:bg-slate-700 hover:bg-purple-100 dark:hover:bg-purple-900/50 text-slate-600 dark:text-slate-300 flex items-center justify-center transition-colors">'
                 + '<i class="fas fa-plus text-[10px]"></i></button>'
                 + '<span class="text-[11px] text-slate-400 dark:text-slate-500">von ' + escHtml(String(item.pieces)) + '</span>'
                 + '</div>'
                 + '</div>'
                 // Remove button
                 + '<button data-action="remove" data-id="' + escHtml(item.id) + '" '
-                + 'class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-xl text-gray-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors" '
+                + 'class="flex-shrink-0 min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl text-gray-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors" '
                 + 'aria-label="Entfernen"><i class="fas fa-trash-alt text-xs"></i></button>'
                 + '</div>'
                 + '</div>';

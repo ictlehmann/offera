@@ -370,14 +370,14 @@ ob_start();
             <p class="text-gray-600 dark:text-gray-300">Produkte und Bestellungen verwalten</p>
         </div>
         <!-- Section tabs -->
-        <div class="flex gap-2">
+        <div class="flex gap-4">
             <a href="<?php echo asset('pages/admin/shop_manage.php?section=products'); ?>"
-               class="px-5 py-2 rounded-lg font-medium transition-colors no-underline
+               class="px-5 py-2 min-h-[44px] inline-flex items-center rounded-lg font-medium transition-colors no-underline
                       <?php echo $section === 'products' ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'; ?>">
                 <i class="fas fa-box mr-1"></i>Produkte
             </a>
             <a href="<?php echo asset('pages/admin/shop_manage.php?section=orders'); ?>"
-               class="px-5 py-2 rounded-lg font-medium transition-colors no-underline
+               class="px-5 py-2 min-h-[44px] inline-flex items-center rounded-lg font-medium transition-colors no-underline
                       <?php echo $section === 'orders' ? 'bg-blue-600 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'; ?>">
                 <i class="fas fa-list-alt mr-1"></i>Bestellungen
             </a>
@@ -1519,7 +1519,7 @@ function valueRowHtml(vIdx, valIdx, value, stock) {
                class="w-24 px-2.5 py-1.5 border rounded-lg text-sm text-right focus:ring-2 focus:ring-purple-500 focus:border-transparent transition ${stockClass}"
                oninput="updateStockColor(this)">
         <button type="button" onclick="this.closest('.value-row').remove()"
-                class="w-7 h-7 flex items-center justify-center text-gray-300 hover:text-red-500 dark:text-gray-600 dark:hover:text-red-400 transition-colors rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20" title="Größe entfernen">
+                class="min-w-[44px] min-h-[44px] flex items-center justify-center text-gray-300 hover:text-red-500 dark:text-gray-600 dark:hover:text-red-400 transition-colors rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20" title="Größe entfernen">
             <i class="fas fa-times text-xs"></i>
         </button>
     </div>`;

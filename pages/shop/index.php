@@ -421,7 +421,7 @@ ob_start();
                 </div>
             </div>
             <button id="filter-toggle" type="button"
-                    class="w-8 h-8 rounded-xl bg-white/60 dark:bg-gray-700/60 hover:bg-white dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600 flex items-center justify-center text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-all shadow-sm"
+                    class="min-w-[44px] min-h-[44px] rounded-xl bg-white/60 dark:bg-gray-700/60 hover:bg-white dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-600 flex items-center justify-center text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-all shadow-sm"
                     aria-label="Filter ein-/ausklappen">
                 <i class="fas fa-chevron-up text-xs" id="filter-toggle-icon"></i>
             </button>
@@ -558,11 +558,11 @@ ob_start();
                     <?php endforeach; ?>
                     <?php if (count($allImages) > 1): ?>
                     <button type="button" onclick="slideImg('<?php echo $sliderId; ?>',-1)" aria-label="Vorheriges Bild"
-                            class="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 dark:bg-gray-800/80 hover:bg-white dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-full w-8 h-8 flex items-center justify-center z-10 shadow transition-all opacity-0 group-hover:opacity-100">
+                            class="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 dark:bg-gray-800/80 hover:bg-white dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-full min-w-[44px] min-h-[44px] flex items-center justify-center z-10 shadow transition-all opacity-0 group-hover:opacity-100">
                         <i class="fas fa-chevron-left text-xs"></i>
                     </button>
                     <button type="button" onclick="slideImg('<?php echo $sliderId; ?>',1)" aria-label="Nächstes Bild"
-                            class="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 dark:bg-gray-800/80 hover:bg-white dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-full w-8 h-8 flex items-center justify-center z-10 shadow transition-all opacity-0 group-hover:opacity-100">
+                            class="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 dark:bg-gray-800/80 hover:bg-white dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-full min-w-[44px] min-h-[44px] flex items-center justify-center z-10 shadow transition-all opacity-0 group-hover:opacity-100">
                         <i class="fas fa-chevron-right text-xs"></i>
                     </button>
                     <?php endif; ?>
@@ -691,11 +691,11 @@ ob_start();
                     <?php endforeach; ?>
                     <?php if (count($detailImages) > 1): ?>
                     <button type="button" onclick="slideImg('<?php echo $detailSliderId; ?>',-1)" aria-label="Vorheriges Bild"
-                            class="absolute left-2 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white rounded-full w-9 h-9 flex items-center justify-center z-10 transition-colors">
+                            class="absolute left-2 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white rounded-full min-w-[44px] min-h-[44px] flex items-center justify-center z-10 transition-colors">
                         <i class="fas fa-chevron-left"></i>
                     </button>
                     <button type="button" onclick="slideImg('<?php echo $detailSliderId; ?>',1)" aria-label="Nächstes Bild"
-                            class="absolute right-2 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white rounded-full w-9 h-9 flex items-center justify-center z-10 transition-colors">
+                            class="absolute right-2 top-1/2 -translate-y-1/2 bg-black/40 hover:bg-black/60 text-white rounded-full min-w-[44px] min-h-[44px] flex items-center justify-center z-10 transition-colors">
                         <i class="fas fa-chevron-right"></i>
                     </button>
                     <!-- Dot indicators -->

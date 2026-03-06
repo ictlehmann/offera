@@ -214,14 +214,14 @@ ob_start();
         <div class="text-sm text-gray-500 dark:text-gray-400">
             Seite <?php echo $page; ?> von <?php echo $totalPages; ?>
         </div>
-        <div class="flex gap-2">
+        <div class="flex gap-4">
             <?php if ($page > 1): ?>
-            <a href="?page=<?php echo $page - 1; ?><?php echo !empty($_GET['action']) ? '&action=' . urlencode($_GET['action']) : ''; ?><?php echo !empty($_GET['user_id']) ? '&user_id=' . urlencode($_GET['user_id']) : ''; ?>" class="inline-flex items-center gap-1 px-4 py-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition text-sm text-gray-700 dark:text-gray-300">
+            <a href="?page=<?php echo $page - 1; ?><?php echo !empty($_GET['action']) ? '&action=' . urlencode($_GET['action']) : ''; ?><?php echo !empty($_GET['user_id']) ? '&user_id=' . urlencode($_GET['user_id']) : ''; ?>" class="inline-flex items-center gap-1 px-4 py-3 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition text-sm text-gray-700 dark:text-gray-300">
                 <i class="fas fa-chevron-left text-xs"></i> Zurück
             </a>
             <?php endif; ?>
             <?php if ($page < $totalPages): ?>
-            <a href="?page=<?php echo $page + 1; ?><?php echo !empty($_GET['action']) ? '&action=' . urlencode($_GET['action']) : ''; ?><?php echo !empty($_GET['user_id']) ? '&user_id=' . urlencode($_GET['user_id']) : ''; ?>" class="inline-flex items-center gap-1 px-4 py-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition text-sm text-gray-700 dark:text-gray-300">
+            <a href="?page=<?php echo $page + 1; ?><?php echo !empty($_GET['action']) ? '&action=' . urlencode($_GET['action']) : ''; ?><?php echo !empty($_GET['user_id']) ? '&user_id=' . urlencode($_GET['user_id']) : ''; ?>" class="inline-flex items-center gap-1 px-4 py-3 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition text-sm text-gray-700 dark:text-gray-300">
                 Weiter <i class="fas fa-chevron-right text-xs"></i>
             </a>
             <?php endif; ?>

@@ -258,7 +258,7 @@ ob_start();
                         <i class="fas fa-file-pdf text-red-500"></i>
                         Aktueller Lebenslauf vorhanden
                     </span>
-                    <label class="flex items-center gap-2 text-sm text-red-600 dark:text-red-400 cursor-pointer">
+                    <label class="flex items-center gap-2 min-h-[44px] text-sm text-red-600 dark:text-red-400 cursor-pointer">
                         <input type="checkbox" name="remove_pdf" value="1" class="rounded">
                         Lebenslauf entfernen
                     </label>

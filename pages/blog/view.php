@@ -334,10 +334,10 @@ ob_start();
                                 </div>
                             </div>
                             <!-- Comment actions -->
-                            <div class="flex gap-2">
+                            <div class="flex gap-4">
                                 <?php if ($isOwner): ?>
                                 <button onclick="openEditComment(<?php echo (int)$comment['id']; ?>, <?php echo json_encode($comment['content'], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT); ?>)"
-                                        class="text-sm px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded hover:bg-blue-200 dark:hover:bg-blue-800 transition">
+                                        class="text-sm px-3 py-2 min-h-[44px] inline-flex items-center bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded hover:bg-blue-200 dark:hover:bg-blue-800 transition">
                                     <i class="fas fa-edit mr-1"></i>Bearbeiten
                                 </button>
                                 <?php endif; ?>
@@ -347,7 +347,7 @@ ob_start();
                                     <input type="hidden" name="action" value="delete_comment">
                                     <input type="hidden" name="comment_id" value="<?php echo (int)$comment['id']; ?>">
                                     <button type="submit"
-                                            class="text-sm px-3 py-1 bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 rounded hover:bg-red-200 dark:hover:bg-red-800 transition">
+                                            class="text-sm px-3 py-2 min-h-[44px] inline-flex items-center bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 rounded hover:bg-red-200 dark:hover:bg-red-800 transition">
                                         <i class="fas fa-trash mr-1"></i>Löschen
                                     </button>
                                 </form>
@@ -371,13 +371,13 @@ ob_start();
                                           id="edit-textarea-<?php echo (int)$comment['id']; ?>"
                                           class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-sans dark:bg-gray-700 dark:text-gray-100"
                                           style="resize: vertical; min-height: 80px;"></textarea>
-                                <div class="flex gap-2">
+                                <div class="flex gap-4">
                                     <button type="submit"
-                                            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm">
+                                            class="px-4 py-2 min-h-[44px] inline-flex items-center bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm">
                                         <i class="fas fa-save mr-1"></i>Speichern
                                     </button>
                                     <button type="button" onclick="closeEditComment(<?php echo (int)$comment['id']; ?>)"
-                                            class="px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition text-sm">
+                                            class="px-4 py-2 min-h-[44px] inline-flex items-center bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition text-sm">
                                         Abbrechen
                                     </button>
                                 </div>
@@ -386,7 +386,7 @@ ob_start();
                         <?php endif; ?>
 
                         <!-- Reactions -->
-                        <div class="mt-4 flex flex-wrap items-center gap-2">
+                        <div class="mt-4 flex flex-wrap items-center gap-3">
                             <?php foreach ($allowedReactions as $emoji): ?>
                             <?php
                                 $reactionData = $reactions[$emoji] ?? ['count' => 0, 'reacted' => false];
@@ -400,7 +400,7 @@ ob_start();
                                 <input type="hidden" name="comment_id" value="<?php echo (int)$comment['id']; ?>">
                                 <input type="hidden" name="reaction" value="<?php echo htmlspecialchars($emoji); ?>">
                                 <button type="submit"
-                                        class="inline-flex items-center gap-1 px-2 py-1 rounded-full border text-sm transition <?php echo $activeClass; ?>">
+                                        class="inline-flex items-center gap-1 px-3 py-2 min-h-[44px] rounded-full border text-sm transition <?php echo $activeClass; ?>">
                                     <?php echo $emoji; ?>
                                     <?php if ($reactionData['count'] > 0): ?>
                                     <span class="text-xs font-semibold"><?php echo $reactionData['count']; ?></span>

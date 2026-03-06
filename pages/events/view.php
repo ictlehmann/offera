@@ -421,15 +421,15 @@ $statusInfo = $statusLabels[$currentStatus] ?? ['label' => $currentStatus, 'icon
                     <!-- Calendar Export -->
                     <div class="pt-2 border-t border-white/20">
                         <p class="text-xs text-white/60 mb-2 font-medium">In Kalender eintragen</p>
-                        <div class="flex gap-2">
+                        <div class="flex gap-4">
                             <a href="<?php echo htmlspecialchars(CalendarService::getGoogleLink($event)); ?>"
                                target="_blank"
                                rel="noopener noreferrer"
-                               class="flex-1 inline-flex items-center justify-center px-3 py-2 bg-white/15 border border-white/25 text-white rounded-lg text-sm font-semibold hover:bg-white/25 ease-premium">
+                               class="flex-1 inline-flex items-center justify-center px-3 py-2 min-h-[44px] bg-white/15 border border-white/25 text-white rounded-lg text-sm font-semibold hover:bg-white/25 ease-premium">
                                 <i class="fab fa-google mr-1.5"></i>Google
                             </a>
                             <a href="../../api/download_ics.php?event_id=<?php echo htmlspecialchars($eventId, ENT_QUOTES, 'UTF-8'); ?>"
-                               class="flex-1 inline-flex items-center justify-center px-3 py-2 bg-white/15 border border-white/25 text-white rounded-lg text-sm font-semibold hover:bg-white/25 ease-premium">
+                               class="flex-1 inline-flex items-center justify-center px-3 py-2 min-h-[44px] bg-white/15 border border-white/25 text-white rounded-lg text-sm font-semibold hover:bg-white/25 ease-premium">
                                 <i class="fas fa-download mr-1.5"></i>iCal
                             </a>
                         </div>
