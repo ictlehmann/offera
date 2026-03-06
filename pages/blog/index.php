@@ -213,7 +213,7 @@ ob_start();
                         <div class="pt-4 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between text-sm text-gray-600 dark:text-gray-300 gap-2">
                             <div class="flex items-center min-w-0">
                                 <i class="fas fa-user-circle mr-2 text-blue-600 flex-shrink-0"></i>
-                                <span class="truncate"><?php echo htmlspecialchars($post['author_email']); ?></span>
+                                <span class="break-all"><?php echo htmlspecialchars($post['author_email']); ?></span>
                             </div>
                             <div class="flex items-center gap-4">
                                 <span class="flex items-center">

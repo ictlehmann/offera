@@ -230,7 +230,7 @@ ob_start();
             <div class="flex flex-wrap items-center gap-4 text-gray-600 dark:text-gray-400 mb-6 pb-6 border-b border-gray-200 dark:border-gray-700">
                 <div class="flex items-center min-w-0">
                     <i class="fas fa-user-circle mr-2 text-blue-600 dark:text-blue-400 flex-shrink-0"></i>
-                    <span class="truncate"><?php echo htmlspecialchars($post['author_email']); ?></span>
+                    <span class="break-all"><?php echo htmlspecialchars($post['author_email']); ?></span>
                 </div>
                 <div class="flex items-center">
                     <i class="fas fa-calendar-alt mr-2 text-blue-600 dark:text-blue-400 flex-shrink-0"></i>
@@ -320,7 +320,7 @@ ob_start();
                             <div class="flex flex-wrap items-center gap-3 min-w-0">
                                 <div class="flex items-center text-gray-700 dark:text-gray-300 min-w-0">
                                     <i class="fas fa-user-circle mr-2 text-blue-600 dark:text-blue-400 text-xl flex-shrink-0"></i>
-                                    <span class="font-semibold truncate"><?php echo htmlspecialchars($comment['commenter_email']); ?></span>
+                                    <span class="font-semibold break-all"><?php echo htmlspecialchars($comment['commenter_email']); ?></span>
                                 </div>
                                 <div class="text-sm text-gray-500 dark:text-gray-400">
                                     <i class="fas fa-clock mr-1"></i>

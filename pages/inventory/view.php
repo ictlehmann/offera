@@ -385,7 +385,7 @@ ob_start();
                         <span class="font-bold text-lg text-gray-800 dark:text-gray-100"><?php echo (int)$rental['quantity']; ?></span>
                         <span class="text-gray-500 dark:text-gray-400 ml-1"><?php echo htmlspecialchars($item['unit']); ?></span>
                     </td>
-                    <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300 font-medium" data-label="Ausgeliehen von">
+                    <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300 font-medium break-all" data-label="Ausgeliehen von">
                         <?php echo htmlspecialchars($rental['user_email'] ?? ('User #' . $rental['user_id'])); ?>
                     </td>
                     <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300 font-medium" data-label="Ausleihe Start">
@@ -442,7 +442,7 @@ ob_start();
                         <span class="font-bold text-lg text-gray-800 dark:text-gray-100"><?php echo (int)$rental['quantity']; ?></span>
                         <span class="text-gray-500 dark:text-gray-400 ml-1"><?php echo htmlspecialchars($item['unit']); ?></span>
                     </td>
-                    <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300 font-medium" data-label="Ausgeliehen von">
+                    <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300 font-medium break-all" data-label="Ausgeliehen von">
                         <?php echo htmlspecialchars($rental['user_email'] ?? ('User #' . $rental['user_id'])); ?>
                     </td>
                     <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300 font-medium" data-label="Ausleihe Start">

@@ -521,7 +521,7 @@ ob_start();
         <div class="space-y-4">
             <div>
                 <label class="text-sm text-gray-500 dark:text-gray-400">E-Mail</label>
-                <p class="text-lg font-semibold text-gray-800 dark:text-gray-100"><?php echo htmlspecialchars($user['email']); ?></p>
+                <p class="text-lg font-semibold text-gray-800 dark:text-gray-100 break-all"><?php echo htmlspecialchars($user['email']); ?></p>
             </div>
             <?php 
             // Display role: Priority order is entra_roles > azure_roles > internal role
