@@ -4,14 +4,14 @@
  * This file handles the redirect callback from Azure AD after user authentication.
  */
 
-// Start session immediately – must be the first statement
-session_start();
-
 // Load Composer autoloader
 require_once __DIR__ . '/../vendor/autoload.php';
 
-// Load environment variables and configuration
+// Load environment variables and configuration (sets secure session ini_set values)
 require_once __DIR__ . '/../config/config.php';
+
+// Start session – config/config.php sets session.cookie_* ini values above
+session_start();
 
 // Load AuthHandler and Database
 require_once __DIR__ . '/../includes/handlers/AuthHandler.php';
