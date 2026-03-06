@@ -270,7 +270,7 @@ ob_start();
                     </div>
                     <div class="flex items-center mb-2">
                         <i class="fas fa-user text-gray-500 mr-2"></i>
-                        <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100">
+                        <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100 break-all">
                             <?php echo htmlspecialchars($application['user_email']); ?>
                         </h3>
                     </div>

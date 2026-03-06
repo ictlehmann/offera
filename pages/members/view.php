@@ -213,7 +213,7 @@ ob_start();
                         <?php if (!empty($profileUser['privacy_hide_email']) && !$canViewPrivate): ?>
                         <p class="text-gray-400 italic text-sm">Privat</p>
                         <?php else: ?>
-                        <a href="mailto:<?php echo htmlspecialchars($profile['email'], ENT_QUOTES, 'UTF-8'); ?>" class="text-blue-600 hover:text-blue-800 font-medium text-sm truncate block">
+                        <a href="mailto:<?php echo htmlspecialchars($profile['email'], ENT_QUOTES, 'UTF-8'); ?>" class="text-blue-600 hover:text-blue-800 font-medium text-sm break-all block">
                             <?php echo htmlspecialchars($profile['email'], ENT_QUOTES, 'UTF-8'); ?>
                         </a>
                         <?php endif; ?>
@@ -232,7 +232,7 @@ ob_start();
                         <?php if (!empty($profileUser['privacy_hide_email']) && !$canViewPrivate): ?>
                         <p class="text-gray-400 italic text-sm">Privat</p>
                         <?php else: ?>
-                        <a href="mailto:<?php echo htmlspecialchars($profile['secondary_email'], ENT_QUOTES, 'UTF-8'); ?>" class="text-blue-600 hover:text-blue-800 font-medium text-sm truncate block">
+                        <a href="mailto:<?php echo htmlspecialchars($profile['secondary_email'], ENT_QUOTES, 'UTF-8'); ?>" class="text-blue-600 hover:text-blue-800 font-medium text-sm break-all block">
                             <?php echo htmlspecialchars($profile['secondary_email'], ENT_QUOTES, 'UTF-8'); ?>
                         </a>
                         <?php endif; ?>
