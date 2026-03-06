@@ -180,7 +180,7 @@ ob_start();
     <!-- ── Section 1: Ausstehende Anfragen ────────────────────────────────── -->
     <div class="tab-pane fade show active" id="pending" role="tabpanel" aria-labelledby="pending-tab">
         <div class="card p-6">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">
+            <h2 class="text-lg sm:text-xl font-bold text-gray-800 mb-4">
                 <i class="fas fa-clock text-yellow-600 mr-2"></i>
                 Ausstehende Anfragen (<?php echo count($pendingRequests); ?>)
             </h2>
@@ -260,7 +260,7 @@ ob_start();
     <!-- ── Section 2: Gemeldete Rückgaben ────────────────────────────────── -->
     <div class="tab-pane fade" id="pending-return" role="tabpanel" aria-labelledby="pending-return-tab">
         <div class="card p-6">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">
+            <h2 class="text-lg sm:text-xl font-bold text-gray-800 mb-4">
                 <i class="fas fa-undo-alt text-orange-600 mr-2"></i>
                 Gemeldete Rückgaben (<?php echo count($pendingReturnLoans) + count($pendingRentalReturns); ?>)
             </h2>
@@ -369,7 +369,7 @@ ob_start();
     <!-- ── Section 3: Aktive Ausleihen ────────────────────────────────────── -->
     <div class="tab-pane fade" id="active" role="tabpanel" aria-labelledby="active-tab">
         <div class="card p-6">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">
+            <h2 class="text-lg sm:text-xl font-bold text-gray-800 mb-4">
                 <i class="fas fa-sign-out-alt text-green-600 mr-2"></i>
                 Aktive Ausleihen (<?php echo count($activeLoans); ?>)
             </h2>

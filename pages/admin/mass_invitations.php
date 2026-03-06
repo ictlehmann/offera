@@ -551,7 +551,7 @@ ob_start();
 
     <!-- Template Selection -->
     <div class="card p-6">
-        <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
+        <h2 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
             <i class="fas fa-file-alt text-indigo-500 mr-2"></i>
             E-Mail-Vorlage
         </h2>
@@ -662,7 +662,7 @@ ob_start();
 
     <!-- Recipients -->
     <div class="card p-6">
-        <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
+        <h2 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
             <i class="fas fa-users text-indigo-500 mr-2"></i>
             Empfänger
         </h2>

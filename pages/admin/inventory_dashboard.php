@@ -163,7 +163,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 <!-- Active Rentals Table -->
 <div class="card p-6">
-    <h2 class="text-xl font-bold text-gray-800 mb-4">
+    <h2 class="text-lg sm:text-xl font-bold text-gray-800 mb-4">
         <i class="fas fa-clipboard-list text-blue-600 mr-2"></i>
         Aktive Ausleihen
     </h2>
@@ -239,7 +239,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 <!-- Bestandsliste -->
 <div class="card p-6 mt-8">
-    <h2 class="text-xl font-bold text-gray-800 mb-4">
+    <h2 class="text-lg sm:text-xl font-bold text-gray-800 mb-4">
         <i class="fas fa-warehouse text-green-600 mr-2"></i>
         Bestandsliste
     </h2>

@@ -117,7 +117,7 @@ ob_start();
 
 <!-- General Settings -->
 <div class="card p-6 mb-6">
-    <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
+    <h2 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
         <i class="fas fa-sliders-h text-blue-600 mr-2"></i>
         Allgemeine Einstellungen
     </h2>

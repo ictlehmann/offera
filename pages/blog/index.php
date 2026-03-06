@@ -156,7 +156,7 @@ ob_start();
     <?php if (empty($posts)): ?>
         <div class="card dark:bg-gray-800 p-8 text-center">
             <i class="fas fa-inbox text-6xl text-gray-300 dark:text-gray-600 mb-4"></i>
-            <p class="text-xl text-gray-600 dark:text-gray-300">Keine Beiträge gefunden</p>
+            <p class="text-base sm:text-xl text-gray-600 dark:text-gray-300">Keine Beiträge gefunden</p>
             <?php if ($filterCategory): ?>
                 <p class="text-gray-500 dark:text-gray-400 mt-2">Versuchen Sie einen anderen Filter</p>
             <?php endif; ?>
@@ -191,7 +191,7 @@ ob_start();
                         </div>
                         
                         <!-- Title -->
-                        <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2 break-words leading-snug">
+                        <h3 class="text-base sm:text-xl font-bold text-gray-800 dark:text-gray-100 mb-2 break-words hyphens-auto leading-snug">
                             <?php echo htmlspecialchars($post['title']); ?>
                         </h3>
                         

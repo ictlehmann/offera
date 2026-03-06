@@ -47,7 +47,7 @@ ob_start();
     <?php if (empty($allDocs)): ?>
         <div class="glass-card shadow-soft rounded-xl p-12 text-center">
             <i class="fas fa-chart-line text-gray-400 text-6xl mb-4"></i>
-            <h3 class="text-xl font-semibold text-gray-700 mb-2">Noch keine Statistiken vorhanden</h3>
+            <h3 class="text-base sm:text-xl font-semibold text-gray-700 mb-2">Noch keine Statistiken vorhanden</h3>
             <p class="text-gray-500">Erstellen Sie Event-Dokumentationen, um hier Statistiken zu sehen.</p>
         </div>
     <?php else: ?>

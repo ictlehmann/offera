@@ -306,7 +306,7 @@ ob_start();
     echo $statusColor;
 ?>">
     <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
-        <h2 class="text-xl font-semibold text-gray-800 dark:text-gray-100">
+        <h2 class="text-lg sm:text-xl font-semibold text-gray-800 dark:text-gray-100">
             <i class="fas fa-heartbeat text-<?php echo $systemHealth['overall_status'] === 'healthy' ? 'green' : ($systemHealth['overall_status'] === 'warning' ? 'yellow' : 'red'); ?>-600 mr-2"></i>
             System Health Status
         </h2>
@@ -389,19 +389,19 @@ ob_start();
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
         <div class="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
             <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Aktive Sessions (24h)</p>
-            <p class="text-xl font-semibold text-gray-700 dark:text-gray-200">
+            <p class="text-base sm:text-xl font-semibold text-gray-700 dark:text-gray-200">
                 <i class="fas fa-users text-gray-400 mr-2"></i><?php echo number_format($systemHealth['active_sessions'] ?? 0); ?>
             </p>
         </div>
         <div class="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
             <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Datenbank-Größe</p>
-            <p class="text-xl font-semibold text-gray-700 dark:text-gray-200">
+            <p class="text-base sm:text-xl font-semibold text-gray-700 dark:text-gray-200">
                 <i class="fas fa-hdd text-gray-400 mr-2"></i><?php echo number_format($systemHealth['disk_usage_mb'] ?? 0, 2); ?> MB
             </p>
         </div>
         <div class="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
             <p class="text-xs text-gray-500 dark:text-gray-400 mb-1">Betriebszeit (geschätzt)</p>
-            <p class="text-xl font-semibold text-gray-700 dark:text-gray-200">
+            <p class="text-base sm:text-xl font-semibold text-gray-700 dark:text-gray-200">
                 <i class="fas fa-clock text-gray-400 mr-2"></i><?php echo number_format($systemHealth['uptime_days'] ?? 0); ?> Tage
             </p>
         </div>
@@ -410,7 +410,7 @@ ob_start();
 
 <!-- Database Overview -->
 <div class="card p-6 mb-6">
-    <h2 class="text-xl font-semibold text-gray-800 mb-4">
+    <h2 class="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
         <i class="fas fa-chart-pie text-purple-600 mr-2"></i>
         Datenbank-Übersicht
     </h2>
@@ -485,7 +485,7 @@ ob_start();
 
 <!-- Maintenance Actions -->
 <div class="card p-6">
-    <h2 class="text-xl font-semibold text-gray-800 mb-4">
+    <h2 class="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
         <i class="fas fa-tools text-orange-600 mr-2"></i>
         Wartungsaktionen
     </h2>

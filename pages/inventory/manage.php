@@ -247,7 +247,7 @@ ob_start();
 <?php if (empty($items)): ?>
 <div class="card p-12 text-center shadow-lg border border-gray-200 dark:border-slate-700">
     <i class="fas fa-box-open text-6xl text-gray-300 dark:text-gray-600 mb-4"></i>
-    <h3 class="text-xl font-semibold text-slate-600 dark:text-slate-300 mb-2">Keine Artikel gefunden</h3>
+    <h3 class="text-base sm:text-xl font-semibold text-slate-600 dark:text-slate-300 mb-2">Keine Artikel gefunden</h3>
     <p class="text-slate-500 dark:text-slate-400 mb-6">Es wurden keine Artikel mit den ausgewählten Filtern gefunden.</p>
     <a href="add.php" class="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-5 py-3 rounded-xl font-bold shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl inline-flex items-center gap-2">
         <i class="fas fa-plus"></i>Ersten Artikel erstellen
@@ -359,7 +359,7 @@ ob_start();
                 <i class="fas fa-trash text-white text-lg"></i>
             </div>
             <div>
-                <h3 id="deleteModalTitle" class="text-xl font-bold text-white">Artikel löschen</h3>
+                <h3 id="deleteModalTitle" class="text-lg sm:text-xl font-bold text-white">Artikel löschen</h3>
                 <p class="text-red-100 text-xs mt-0.5">Diese Aktion kann nicht rückgängig gemacht werden</p>
             </div>
         </div>

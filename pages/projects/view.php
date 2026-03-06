@@ -326,7 +326,7 @@ ob_start();
         <!-- Team Progress Bar -->
         <div class="mb-8 p-6 bg-purple-50 rounded-2xl border border-purple-200">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-xl font-bold text-gray-800 flex items-center">
+                <h3 class="text-base sm:text-xl font-bold text-gray-800 flex items-center">
                     <div class="w-10 h-10 rounded-xl bg-purple-600 flex items-center justify-center mr-3">
                         <i class="fas fa-users text-white"></i>
                     </div>
@@ -360,7 +360,7 @@ ob_start();
         <!-- Description -->
         <?php if (!empty($project['description'])): ?>
         <div class="mb-6">
-            <h2 class="text-xl font-bold text-gray-800 mb-3">Beschreibung</h2>
+            <h2 class="text-lg sm:text-xl font-bold text-gray-800 mb-3">Beschreibung</h2>
             <div class="text-gray-700 leading-relaxed whitespace-pre-line break-words">
                 <?php echo htmlspecialchars($project['description']); ?>
             </div>
@@ -370,7 +370,7 @@ ob_start();
         <!-- Project Documentation (Only for completed projects) -->
         <?php if ($project['status'] === 'completed' && !empty($project['documentation'])): ?>
         <div class="mb-6 p-6 bg-gradient-to-r from-green-50 to-teal-50 rounded-lg border border-green-200">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">
+            <h2 class="text-lg sm:text-xl font-bold text-gray-800 mb-4">
                 <i class="fas fa-file-alt text-green-600 mr-2"></i>
                 Projekt-Dokumentation
             </h2>
@@ -698,7 +698,7 @@ ob_start();
         <!-- Participant List -->
         <?php if (!empty($participants)): ?>
         <div class="border-t border-gray-200 pt-6 mt-6">
-            <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
+            <h2 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
                 <i class="fas fa-users text-purple-600 mr-2"></i>
                 Teilnehmer (<?php echo count($participants); ?>)
             </h2>

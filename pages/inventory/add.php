@@ -148,7 +148,7 @@ ob_start();
         
         <!-- Basisdaten Section -->
         <div class="bg-gray-50 rounded-lg p-6 <?php echo $readonlyClass; ?>">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+            <h2 class="text-lg sm:text-xl font-semibold text-gray-800 mb-4 flex items-center">
                 <i class="fas fa-info-circle text-blue-600 mr-2"></i>
                 Basisdaten
             </h2>
@@ -211,7 +211,7 @@ ob_start();
 
         <!-- Bestandsinformationen Section -->
         <div class="bg-gray-50 rounded-lg p-6">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+            <h2 class="text-lg sm:text-xl font-semibold text-gray-800 mb-4 flex items-center">
                 <i class="fas fa-boxes text-green-600 mr-2"></i>
                 Bestandsinformationen
             </h2>
@@ -257,7 +257,7 @@ ob_start();
 
         <!-- Lagerort Section -->
         <div class="bg-gray-50 rounded-lg p-6">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+            <h2 class="text-lg sm:text-xl font-semibold text-gray-800 mb-4 flex items-center">
                 <i class="fas fa-map-marker-alt text-red-600 mr-2"></i>
                 Lagerort
             </h2>
@@ -293,7 +293,7 @@ ob_start();
 
         <!-- Bild Section -->
         <div class="bg-gray-50 rounded-lg p-6">
-            <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+            <h2 class="text-lg sm:text-xl font-semibold text-gray-800 mb-4 flex items-center">
                 <i class="fas fa-image text-purple-600 mr-2"></i>
                 Bild
             </h2>

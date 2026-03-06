@@ -222,7 +222,7 @@ ob_start();
             </div>
             
             <!-- Title -->
-            <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 dark:text-gray-100 mb-4 break-words">
+            <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 dark:text-gray-100 mb-4 break-words hyphens-auto">
                 <?php echo htmlspecialchars($post['title']); ?>
             </h1>
             
@@ -245,7 +245,7 @@ ob_start();
             
             <!-- Full Content -->
             <div class="prose max-w-none mb-8">
-                <div class="text-gray-700 dark:text-gray-300 text-base sm:text-lg leading-relaxed whitespace-pre-wrap break-words">
+                <div class="text-gray-700 dark:text-gray-300 text-base sm:text-lg leading-relaxed whitespace-pre-wrap break-words hyphens-auto">
                     <?php echo htmlspecialchars($post['content']); ?>
                 </div>
             </div>

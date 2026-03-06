@@ -100,7 +100,7 @@ ob_start();
 
 <!-- Active Rentals -->
 <div class="card p-6 mb-6">
-    <h2 class="text-xl font-bold text-gray-800 mb-4">
+    <h2 class="text-lg sm:text-xl font-bold text-gray-800 mb-4">
         <i class="fas fa-hourglass-half text-blue-600 mr-2"></i>
         Meine offenen Ausleihen
     </h2>
@@ -219,7 +219,7 @@ ob_start();
 
 <!-- History note -->
 <div class="card p-6">
-    <h2 class="text-xl font-bold text-gray-800 mb-4">
+    <h2 class="text-lg sm:text-xl font-bold text-gray-800 mb-4">
         <i class="fas fa-history text-gray-600 mr-2"></i>
         Verlauf
     </h2>

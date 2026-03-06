@@ -224,7 +224,7 @@ ob_start();
 
                     <!-- Card Body -->
                     <div class="flex flex-col flex-1 p-5">
-                        <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100 mb-3 leading-snug line-clamp-2 break-words">
+                        <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100 mb-3 leading-snug line-clamp-2 break-words hyphens-auto">
                             <?php echo htmlspecialchars($event['title']); ?>
                         </h3>
 

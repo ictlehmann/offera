@@ -196,7 +196,7 @@ ob_start();
     <!-- Current Profile (Read-Only) -->
     <div class="mb-6">
         <div class="card p-6">
-            <h2 class="text-xl font-bold text-gray-800 mb-4">
+            <h2 class="text-lg sm:text-xl font-bold text-gray-800 mb-4">
                 <i class="fas fa-user text-blue-600 mr-2"></i>
                 Aktuelles Profil
             </h2>

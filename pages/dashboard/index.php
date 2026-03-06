@@ -593,7 +593,7 @@ ob_start();
                 <div class="w-12 h-12 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-4">
                     <i class="fas fa-user-edit text-white text-2xl"></i>
                 </div>
-                <h3 class="text-xl font-bold text-white">Deine Rolle wurde geändert!</h3>
+                <h3 class="text-lg sm:text-xl font-bold text-white">Deine Rolle wurde geändert!</h3>
             </div>
         </div>
         
@@ -677,7 +677,7 @@ function dismissProfileReviewPrompt() {
                     <i id="onboarding-icon-el" class="fas fa-calendar-alt text-white text-3xl"></i>
                 </div>
             </div>
-            <h3 id="onboarding-title" class="text-xl font-bold text-white text-center mt-3">Events &amp; Projekte</h3>
+            <h3 id="onboarding-title" class="text-lg sm:text-xl font-bold text-white text-center mt-3">Events &amp; Projekte</h3>
         </div>
 
         <!-- Slide content -->
@@ -1156,7 +1156,7 @@ function dismissProfileReviewPrompt() {
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         <?php foreach ($helperEvents as $event): ?>
         <div class="dash-helper-card">
-            <h3 class="text-base font-bold leading-snug" style="color: var(--text-main)">
+            <h3 class="text-base font-bold leading-snug break-words hyphens-auto" style="color: var(--text-main)">
                 <?php echo htmlspecialchars($event['title']); ?>
             </h3>
             <?php if (!empty($event['description'])): ?>
@@ -1318,7 +1318,7 @@ function dismissProfileReviewPrompt() {
                     <i class="fas fa-poll-h"></i>
                 </div>
                 <div class="flex-1 min-w-0">
-                    <h3 class="font-bold text-base mb-1.5 leading-snug" style="color: var(--text-main)">
+                    <h3 class="font-bold text-base mb-1.5 leading-snug break-words hyphens-auto" style="color: var(--text-main)">
                         <?php echo htmlspecialchars($poll['title']); ?>
                     </h3>
                     <?php if (!empty($poll['description'])): ?>

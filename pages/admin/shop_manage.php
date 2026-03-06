@@ -403,7 +403,7 @@ ob_start();
 
     <!-- Add New Product button – prominent, top-level -->
     <div class="flex items-center justify-between mb-6">
-        <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">
+        <h2 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-gray-100">
             <i class="fas fa-list mr-2 text-blue-500"></i>Alle Produkte
         </h2>
         <button type="button" onclick="openProductModal()"
@@ -571,7 +571,7 @@ ob_start();
     ═══════════════════════════════════════════════════════════════════════════ -->
     <div class="card rounded-xl shadow-lg p-6">
         <div class="flex items-center justify-between mb-6">
-            <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100">
+            <h2 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-gray-100">
                 <i class="fas fa-shopping-bag mr-2 text-blue-500"></i>Alle Bestellungen
             </h2>
             <?php if (!empty($orders)): ?>

@@ -182,7 +182,7 @@ ob_start();
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
     <!-- Quick Actions -->
     <div class="card p-6">
-        <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
+        <h2 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
             <i class="fas fa-bolt text-yellow-600 mr-2"></i>
             Schnellaktionen
         </h2>
@@ -266,7 +266,7 @@ ob_start();
     
     <!-- System Activity -->
     <div class="card p-6">
-        <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
+        <h2 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
             <i class="fas fa-chart-line text-green-600 mr-2"></i>
             Top Aktivitäten (24h)
         </h2>

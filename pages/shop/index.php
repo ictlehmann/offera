@@ -326,7 +326,7 @@ ob_start();
     <?php if (empty($products)): ?>
     <div class="text-center py-20 text-gray-500 dark:text-gray-400">
         <i class="fas fa-box-open text-5xl mb-4 opacity-40"></i>
-        <p class="text-xl">Derzeit sind keine Produkte verfügbar.</p>
+        <p class="text-base sm:text-xl">Derzeit sind keine Produkte verfügbar.</p>
     </div>
     <?php else: ?>
 
@@ -1166,7 +1166,7 @@ ob_start();
         <!-- Order summary -->
         <div>
             <div class="card rounded-xl shadow-lg p-6">
-                <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">Bestellübersicht</h3>
+                <h3 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">Bestellübersicht</h3>
                 <div class="space-y-3 divide-y divide-gray-100 dark:divide-gray-700">
                     <?php foreach ($cartItems as $item): ?>
                     <div class="flex justify-between pt-3 first:pt-0">

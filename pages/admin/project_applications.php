@@ -245,7 +245,7 @@ ob_start();
 
 <!-- Applications List -->
 <div class="card p-4 md:p-6">
-    <h2 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
+    <h2 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
         <i class="fas fa-file-alt text-purple-600 mr-2"></i>
         Offene Bewerbungen (<?php echo count($applications); ?>)
     </h2>
@@ -253,7 +253,7 @@ ob_start();
     <?php if (empty($applications)): ?>
     <div class="text-center py-12">
         <i class="fas fa-inbox text-gray-400 text-6xl mb-4"></i>
-        <h3 class="text-xl font-semibold text-gray-600 dark:text-gray-400 mb-2">Keine offenen Bewerbungen</h3>
+        <h3 class="text-base sm:text-xl font-semibold text-gray-600 dark:text-gray-400 mb-2">Keine offenen Bewerbungen</h3>
         <p class="text-gray-500 dark:text-gray-400">Aktuell liegen keine ausstehenden Bewerbungen vor.</p>
     </div>
     <?php else: ?>
@@ -327,7 +327,7 @@ ob_start();
             <input type="hidden" name="application_id" id="acceptApplicationId" value="">
             <input type="hidden" name="accept_application" value="1">
             <div class="p-6 overflow-y-auto flex-1">
-                <h3 class="text-xl font-bold text-gray-800 mb-4">
+                <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-4">
                     <i class="fas fa-check-circle text-green-600 mr-2"></i>
                     Bewerbung akzeptieren
                 </h3>
@@ -360,7 +360,7 @@ ob_start();
 <div id="rejectModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center p-4">
     <div class="bg-white rounded-lg w-full max-w-lg max-h-[85vh] flex flex-col overflow-hidden">
         <div class="p-6 overflow-y-auto flex-1">
-            <h3 class="text-xl font-bold text-gray-800 mb-4">
+            <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-4">
                 <i class="fas fa-exclamation-triangle text-red-600 mr-2"></i>
                 Bewerbung ablehnen
             </h3>

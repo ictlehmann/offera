@@ -129,7 +129,7 @@ ob_start();
 <?php if (empty($events)): ?>
 <div class="card dark:bg-gray-800 p-12 text-center">
     <i class="fas fa-calendar-times text-gray-400 text-6xl mb-4"></i>
-    <h3 class="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">Keine Events gefunden</h3>
+    <h3 class="text-base sm:text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">Keine Events gefunden</h3>
     <p class="text-gray-500 dark:text-gray-400 mb-6">Es wurden keine Events mit den ausgewählten Filtern gefunden.</p>
     <a href="edit.php?new=1" class="btn-primary inline-block">
         <i class="fas fa-plus mr-2"></i>Erstes Event erstellen
@@ -169,7 +169,7 @@ ob_start();
         </div>
 
         <!-- Title -->
-        <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">
+        <h3 class="text-base sm:text-xl font-bold text-gray-800 dark:text-gray-100 mb-2">
             <?php echo htmlspecialchars($event['title']); ?>
         </h3>
 
@@ -249,7 +249,7 @@ ob_start();
 <div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white dark:bg-gray-800 rounded-lg w-full max-w-lg max-h-[85vh] flex flex-col overflow-hidden">
         <div class="p-6 overflow-y-auto flex-1">
-            <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
+            <h3 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
                 <i class="fas fa-exclamation-triangle text-red-600 mr-2"></i>
                 Event löschen
             </h3>
@@ -279,7 +279,7 @@ ob_start();
 <div id="addStatsModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white dark:bg-gray-800 rounded-lg w-full max-w-lg max-h-[85vh] flex flex-col overflow-hidden">
         <div class="p-6 overflow-y-auto flex-1">
-            <h3 class="text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
+            <h3 class="text-lg sm:text-xl font-bold text-gray-800 dark:text-gray-100 mb-4">
                 <i class="fas fa-chart-bar text-purple-600 mr-2"></i>
                 Statistiken nachtragen
             </h3>
