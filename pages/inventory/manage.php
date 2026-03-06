@@ -83,6 +83,7 @@ ob_start();
             <p class="text-slate-600 dark:text-slate-400 text-lg"><?php echo count($items); ?> Artikel gefunden</p>
         </div>
         <div class="flex gap-4 flex-wrap">
+            <a href="sync.php" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-5 py-3 rounded-xl flex items-center shadow-lg font-semibold transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
                 <i class="fas fa-sync-alt mr-2"></i> EasyVerein Sync
             </a>
             <a href="../admin/rental_returns.php" class="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-5 py-3 rounded-xl flex items-center shadow-lg font-semibold transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
