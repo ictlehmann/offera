@@ -30,7 +30,7 @@ ob_start();
     <div class="mb-6">
         <span class="text-8xl font-extrabold text-ibc-blue dark:text-ibc-blue-light select-none">404</span>
     </div>
-    <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-3">
+    <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-100 mb-3">
         <i class="fas fa-search mr-2 text-ibc-green" aria-hidden="true"></i>
         Seite nicht gefunden
     </h1>

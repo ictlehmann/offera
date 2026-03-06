@@ -252,7 +252,7 @@ ob_start();
             <div class="flex items-center justify-between mb-3">
                 <div>
                     <h3 class="text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase mb-1">Aktive Nutzer</h3>
-                    <p class="text-3xl font-bold text-blue-600 dark:text-blue-400"><?php echo number_format($activeUsersCount); ?></p>
+                    <p class="text-2xl sm:text-3xl font-bold text-blue-600 dark:text-blue-400"><?php echo number_format($activeUsersCount); ?></p>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Letzte 7 Tage</p>
                 </div>
                 <div class="w-14 h-14 bg-blue-100 dark:bg-blue-900/50 rounded-full flex items-center justify-center">
@@ -279,7 +279,7 @@ ob_start();
             <div class="flex items-center justify-between mb-3">
                 <div>
                     <h3 class="text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase mb-1">Gesamtanzahl User</h3>
-                    <p class="text-3xl font-bold text-purple-600 dark:text-purple-400"><?php echo number_format($totalUsersCount); ?></p>
+                    <p class="text-2xl sm:text-3xl font-bold text-purple-600 dark:text-purple-400"><?php echo number_format($totalUsersCount); ?></p>
                     <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Registriert</p>
                 </div>
                 <div class="w-14 h-14 bg-purple-100 dark:bg-purple-900/50 rounded-full flex items-center justify-center">

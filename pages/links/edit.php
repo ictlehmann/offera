@@ -121,7 +121,7 @@ ob_start();
 
     <div class="card p-8">
         <div class="mb-6">
-            <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100">
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-100">
                 <i class="fas fa-<?php echo $isEdit ? 'edit' : 'plus-circle'; ?> text-ibc-green mr-2"></i>
                 <?php echo $isEdit ? 'Link bearbeiten' : 'Neuen Link erstellen'; ?>
             </h1>

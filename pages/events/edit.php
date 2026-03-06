@@ -248,7 +248,7 @@ ob_start();
 <?php endif; ?>
 
 <div class="glass-card shadow-premium rounded-xl p-6">
-    <h1 class="text-3xl font-bold text-gray-800 mb-6">
+    <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-100 mb-6">
         <i class="fas fa-<?php echo $isEdit ? 'edit' : 'plus'; ?> text-ibc-blue mr-2"></i>
         <?php echo $isEdit ? 'Event bearbeiten' : 'Neues Event erstellen'; ?>
     </h1>

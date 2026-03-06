@@ -293,7 +293,7 @@ ob_start();
                         <i class="fas fa-users text-white text-2xl"></i>
                     </div>
                     <div>
-                        <h1 class="text-3xl md:text-4xl font-bold text-white mb-1">
+                        <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-1">
                             Benutzerverwaltung
                         </h1>
                         <p class="text-white opacity-90"><?php echo count($users); ?> Benutzer im System</p>

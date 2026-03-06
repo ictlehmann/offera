@@ -54,7 +54,7 @@ ob_start();
                     <i class="fas fa-chart-bar text-blue-600 dark:text-blue-400 text-xl"></i>
                 </div>
                 <div>
-                    <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-50 tracking-tight">Shop-Statistiken</h1>
+                    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-50 tracking-tight">Shop-Statistiken</h1>
                     <p class="text-gray-500 dark:text-gray-400 text-sm">Monatliche Verkaufszahlen und Umsatz der letzten 12 Monate</p>
                 </div>
             </div>

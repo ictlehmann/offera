@@ -299,7 +299,7 @@ ob_start();
                 </div>
 
                 <!-- Product name -->
-                <h1 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-gray-50 mb-3 leading-tight">
+                <h1 class="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 dark:text-gray-50 mb-3 leading-tight">
                     <?php echo htmlspecialchars($product['name']); ?>
                 </h1>
 

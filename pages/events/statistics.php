@@ -35,7 +35,7 @@ ob_start();
 
     <!-- Page Header -->
     <div class="bg-gradient-to-br from-purple-600 to-purple-700 shadow-premium rounded-xl p-8 mb-6 text-white">
-        <h1 class="text-3xl md:text-4xl font-bold mb-2">
+        <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold mb-2">
             <i class="fas fa-chart-bar mr-3"></i>
             Event-Statistiken Historie
         </h1>
@@ -74,7 +74,7 @@ ob_start();
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-gray-600 text-sm font-semibold mb-1">Events dokumentiert</p>
-                        <p class="text-3xl font-bold text-purple-600"><?php echo $totalEvents; ?></p>
+                        <p class="text-2xl sm:text-3xl font-bold text-purple-600"><?php echo $totalEvents; ?></p>
                     </div>
                     <i class="fas fa-calendar-check text-4xl text-purple-600 opacity-20"></i>
                 </div>
@@ -84,7 +84,7 @@ ob_start();
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-gray-600 text-sm font-semibold mb-1">Verkäufer-Einträge</p>
-                        <p class="text-3xl font-bold text-blue-600"><?php echo $totalSellers; ?></p>
+                        <p class="text-2xl sm:text-3xl font-bold text-blue-600"><?php echo $totalSellers; ?></p>
                     </div>
                     <i class="fas fa-user-tie text-4xl text-blue-600 opacity-20"></i>
                 </div>
@@ -94,7 +94,7 @@ ob_start();
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-gray-600 text-sm font-semibold mb-1">Gesamtumsatz</p>
-                        <p class="text-3xl font-bold text-green-600"><?php echo number_format($totalSales, 2, ',', '.'); ?>€</p>
+                        <p class="text-2xl sm:text-3xl font-bold text-green-600"><?php echo number_format($totalSales, 2, ',', '.'); ?>€</p>
                     </div>
                     <i class="fas fa-euro-sign text-4xl text-green-600 opacity-20"></i>
                 </div>
@@ -108,7 +108,7 @@ ob_start();
                     <!-- Event Header -->
                     <div class="flex items-center justify-between mb-4 pb-4 border-b border-gray-200">
                         <div>
-                            <h2 class="text-2xl font-bold text-gray-800">
+                            <h2 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-100">
                                 <?php echo htmlspecialchars($doc['event_title']); ?>
                             </h2>
                             <p class="text-gray-600 mt-1">
@@ -174,7 +174,7 @@ ob_start();
                                 <?php foreach ($doc['sales_data'] as $sale): ?>
                                     <div class="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-700">
                                         <p class="font-semibold text-gray-800 dark:text-gray-200"><?php echo htmlspecialchars($sale['label'] ?? 'Unbenannt'); ?></p>
-                                        <p class="text-2xl font-bold text-purple-600 mt-1">
+                                        <p class="text-xl sm:text-2xl font-bold text-purple-600 mt-1">
                                             <?php echo number_format(floatval($sale['amount'] ?? 0), 2, ',', '.'); ?>€
                                         </p>
                                         <?php if (!empty($sale['date'])): ?>

@@ -128,7 +128,7 @@ ob_start();
                 <div class="w-10 h-10 rounded-2xl bg-blue-50 dark:bg-blue-900/40 flex items-center justify-center shadow-sm">
                     <i class="fas fa-file-invoice-dollar text-blue-600 dark:text-blue-400 text-lg"></i>
                 </div>
-                <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-50 tracking-tight">Rechnungen</h1>
+                <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-50 tracking-tight">Rechnungen</h1>
             </div>
             <p class="text-gray-500 dark:text-gray-400 text-sm ml-0.5">Belege einreichen und Erstattungen verfolgen</p>
         </div>

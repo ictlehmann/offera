@@ -88,7 +88,7 @@ ob_start();
 ?>
 
 <div class="mb-8">
-    <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-2">
+    <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-100 mb-2">
         <i class="fas fa-tachometer-alt text-purple-600 mr-2"></i>
         Admin Dashboard
     </h1>
@@ -102,12 +102,12 @@ ob_start();
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Gesamtbenutzer</p>
-                <p class="text-3xl font-bold text-gray-800 dark:text-gray-100">
+                <p class="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-100">
                     <?php echo number_format($metrics['total_users'] ?? 0); ?>
                 </p>
             </div>
             <div class="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center">
-                <i class="fas fa-users text-3xl text-blue-600"></i>
+                <i class="fas fa-users text-2xl sm:text-3xl text-blue-600"></i>
             </div>
         </div>
         <div class="mt-4">
@@ -122,12 +122,12 @@ ob_start();
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Aktiv (7 Tage)</p>
-                <p class="text-3xl font-bold text-gray-800 dark:text-gray-100">
+                <p class="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-100">
                     <?php echo number_format($metrics['active_users_7d'] ?? 0); ?>
                 </p>
             </div>
             <div class="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center">
-                <i class="fas fa-user-check text-3xl text-green-600"></i>
+                <i class="fas fa-user-check text-2xl sm:text-3xl text-green-600"></i>
             </div>
         </div>
         <div class="mt-4">
@@ -142,12 +142,12 @@ ob_start();
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Fehler (24h)</p>
-                <p class="text-3xl font-bold text-gray-800 dark:text-gray-100">
+                <p class="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-100">
                     <?php echo number_format($metrics['recent_errors'] ?? 0); ?>
                 </p>
             </div>
             <div class="w-16 h-16 bg-<?php echo $metrics['recent_errors'] > 10 ? 'red' : 'yellow'; ?>-100 dark:bg-<?php echo $metrics['recent_errors'] > 10 ? 'red' : 'yellow'; ?>-900/30 rounded-xl flex items-center justify-center">
-                <i class="fas fa-exclamation-triangle text-3xl text-<?php echo $metrics['recent_errors'] > 10 ? 'red' : 'yellow'; ?>-600"></i>
+                <i class="fas fa-exclamation-triangle text-2xl sm:text-3xl text-<?php echo $metrics['recent_errors'] > 10 ? 'red' : 'yellow'; ?>-600"></i>
             </div>
         </div>
         <div class="mt-4">
@@ -162,12 +162,12 @@ ob_start();
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Datenbank-Größe</p>
-                <p class="text-3xl font-bold text-gray-800 dark:text-gray-100">
+                <p class="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-100">
                     <?php echo number_format($metrics['db_size_mb'] ?? 0, 1); ?> MB
                 </p>
             </div>
             <div class="w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center">
-                <i class="fas fa-database text-3xl text-purple-600"></i>
+                <i class="fas fa-database text-2xl sm:text-3xl text-purple-600"></i>
             </div>
         </div>
         <div class="mt-4">

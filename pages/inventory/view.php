@@ -278,7 +278,7 @@ ob_start();
                     <p class="text-sm text-purple-600 dark:text-purple-400 mb-2 font-semibold flex items-center">
                         <i class="fas fa-cubes mr-2"></i>Aktueller Bestand
                     </p>
-                    <p class="text-3xl font-extrabold <?php echo $item['quantity'] <= $item['min_stock'] && $item['min_stock'] > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-800 dark:text-gray-100'; ?>">
+                    <p class="text-2xl sm:text-3xl font-extrabold <?php echo $item['quantity'] <= $item['min_stock'] && $item['min_stock'] > 0 ? 'text-red-600 dark:text-red-400' : 'text-gray-800 dark:text-gray-100'; ?>">
                         <?php echo htmlspecialchars($item['quantity']); ?>
                     </p>
                     <p class="text-sm text-purple-600 dark:text-purple-400 font-medium mt-1"><?php echo htmlspecialchars($item['unit']); ?></p>
@@ -287,20 +287,20 @@ ob_start();
                     <p class="text-sm text-blue-600 dark:text-blue-400 mb-2 font-semibold flex items-center">
                         <i class="fas fa-layer-group mr-2"></i>Mindestbestand
                     </p>
-                    <p class="text-3xl font-extrabold text-gray-800 dark:text-gray-100"><?php echo $item['min_stock']; ?></p>
+                    <p class="text-2xl sm:text-3xl font-extrabold text-gray-800 dark:text-gray-100"><?php echo $item['min_stock']; ?></p>
                     <p class="text-sm text-blue-600 dark:text-blue-400 font-medium mt-1"><?php echo htmlspecialchars($item['unit']); ?></p>
                 </div>
                 <div class="p-5 bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/30 rounded-xl border border-green-200 dark:border-green-700 shadow-md">
                     <p class="text-sm text-green-600 dark:text-green-400 mb-2 font-semibold flex items-center">
                         <i class="fas fa-euro-sign mr-2"></i>Stückpreis
                     </p>
-                    <p class="text-3xl font-extrabold text-gray-800 dark:text-gray-100"><?php echo number_format($item['unit_price'], 2); ?> €</p>
+                    <p class="text-2xl sm:text-3xl font-extrabold text-gray-800 dark:text-gray-100"><?php echo number_format($item['unit_price'], 2); ?> €</p>
                 </div>
                 <div class="p-5 bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/30 dark:to-orange-800/30 rounded-xl border border-orange-200 dark:border-orange-700 shadow-md">
                     <p class="text-sm text-orange-600 dark:text-orange-400 mb-2 font-semibold flex items-center">
                         <i class="fas fa-coins mr-2"></i>Gesamtwert
                     </p>
-                    <p class="text-3xl font-extrabold text-gray-800 dark:text-gray-100"><?php echo number_format($item['quantity'] * $item['unit_price'], 2); ?> €</p>
+                    <p class="text-2xl sm:text-3xl font-extrabold text-gray-800 dark:text-gray-100"><?php echo number_format($item['quantity'] * $item['unit_price'], 2); ?> €</p>
                 </div>
             </div>
 

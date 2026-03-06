@@ -278,7 +278,7 @@ ob_start();
 ?>
 
 <div class="mb-8">
-    <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-2">
+    <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-100 mb-2">
         <i class="fas fa-heartbeat text-blue-600 mr-2"></i>
         System Health & Wartung
     </h1>

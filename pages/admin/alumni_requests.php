@@ -36,7 +36,7 @@ ob_start();
 <div class="mb-8">
     <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-4 gap-4">
         <div>
-            <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-2">
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-100 mb-2">
                 <i class="fas fa-user-graduate text-blue-600 mr-2"></i>
                 Alumni-Anfragen
             </h1>
@@ -48,15 +48,15 @@ ob_start();
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-4">
         <div class="card p-5 border-l-4 border-yellow-400">
             <p class="text-sm text-gray-500 dark:text-gray-400">Ausstehend</p>
-            <p class="text-3xl font-bold text-yellow-600 dark:text-yellow-400"><?php echo $counts['pending']; ?></p>
+            <p class="text-2xl sm:text-3xl font-bold text-yellow-600 dark:text-yellow-400"><?php echo $counts['pending']; ?></p>
         </div>
         <div class="card p-5 border-l-4 border-green-500">
             <p class="text-sm text-gray-500 dark:text-gray-400">Akzeptiert</p>
-            <p class="text-3xl font-bold text-green-600 dark:text-green-400"><?php echo $counts['approved']; ?></p>
+            <p class="text-2xl sm:text-3xl font-bold text-green-600 dark:text-green-400"><?php echo $counts['approved']; ?></p>
         </div>
         <div class="card p-5 border-l-4 border-red-500">
             <p class="text-sm text-gray-500 dark:text-gray-400">Abgelehnt</p>
-            <p class="text-3xl font-bold text-red-600 dark:text-red-400"><?php echo $counts['rejected']; ?></p>
+            <p class="text-2xl sm:text-3xl font-bold text-red-600 dark:text-red-400"><?php echo $counts['rejected']; ?></p>
         </div>
     </div>
 </div>
