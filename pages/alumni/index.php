@@ -123,7 +123,8 @@ ob_start();
             <img src="<?php echo htmlspecialchars(BASE_URL); ?>/assets/img/cropped_maskottchen_270x270.webp"
                  alt="Keine Profile"
                  class="w-32 h-32 mx-auto mb-5 opacity-60">
-            <?php if (!empty($searchKeyword) || !empty($industryFilter)): ?>                <p class="text-base sm:text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">Keine Profile gefunden</p>
+            <?php if (!empty($searchKeyword) || !empty($industryFilter)): ?>
+                <p class="text-base sm:text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">Keine Profile gefunden</p>
                 <p class="text-sm text-gray-400 dark:text-gray-500">Bitte passe Deinen Suchfilter an.</p>
             <?php else: ?>
                 <p class="text-base sm:text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">Noch keine Alumni-Profile vorhanden.</p>
