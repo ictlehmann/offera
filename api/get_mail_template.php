@@ -30,11 +30,28 @@ if (!preg_match('/^[a-zA-Z0-9_\- ]+$/', $template)) {
     exit;
 }
 
-$templateDir = realpath(__DIR__ . '/../assets/mail_vorlage');
-$filePath    = realpath($templateDir . '/' . $template . '.json');
+// Strip any directory components as a second line of defence.
+$template = basename($template);
 
-// Ensure the resolved path is inside the allowed directory
-if ($filePath === false || strpos($filePath, $templateDir) !== 0) {
+$templateDir = realpath(__DIR__ . '/../assets/mail_vorlage');
+
+if ($templateDir === false) {
+    http_response_code(403);
+    echo json_encode(['error' => 'Zugriff verweigert.']);
+    exit;
+}
+
+$filePath = realpath($templateDir . '/' . $template . '.json');
+
+// Ensure the resolved path is strictly inside the allowed directory.
+// A path outside the template folder is treated as a forbidden request (HTTP 403).
+if ($filePath !== false && strpos($filePath, $templateDir . DIRECTORY_SEPARATOR) !== 0) {
+    http_response_code(403);
+    echo json_encode(['error' => 'Zugriff verweigert.']);
+    exit;
+}
+
+if ($filePath === false) {
     http_response_code(404);
     echo json_encode(['error' => 'Template nicht gefunden.']);
     exit;
