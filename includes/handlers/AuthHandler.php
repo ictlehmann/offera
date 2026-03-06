@@ -760,6 +760,12 @@ class AuthHandler {
             exit;
         }
 
+        // Regenerate session ID to prevent session fixation attacks.
+        // Must be called BEFORE setting any authenticated session variables so that
+        // the old guest/unauthenticated session ID is immediately invalidated and
+        // a brand-new session ID is issued for the authenticated session.
+        session_regenerate_id(true);
+
         // Set session variables (only after confirming 2FA is not required)
         $_SESSION['user_id'] = $userId;
         $_SESSION['user_email'] = $email;
@@ -783,9 +789,6 @@ class AuthHandler {
         if (empty($azureRoles)) {
             $_SESSION['show_role_notice'] = true;
         }
-        
-        // Regenerate session ID to prevent session fixation attacks (mirrors Auth::createSession())
-        session_regenerate_id(true);
         // Generate a cryptographically random session token for single-session enforcement
         $sessionToken = bin2hex(random_bytes(32));
         // Store session token in database (invalidates all other active sessions for this user).
