@@ -195,7 +195,7 @@ $statusInfo = $statusLabels[$currentStatus] ?? ['label' => $currentStatus, 'icon
                 <?php endif; ?>
             </div>
 
-            <h1 id="eventHeroTitle" class="text-3xl md:text-4xl font-bold text-white drop-shadow-lg leading-tight">
+            <h1 id="eventHeroTitle" class="text-2xl sm:text-3xl md:text-4xl font-bold text-white drop-shadow-lg leading-tight">
                 <?php echo htmlspecialchars($event['title']); ?>
             </h1>
         </div>

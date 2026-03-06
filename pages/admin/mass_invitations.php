@@ -493,7 +493,7 @@ ob_start();
             <i class="fas fa-mail-bulk text-indigo-600 dark:text-indigo-400 text-2xl"></i>
         </div>
         <div>
-            <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100">Masseneinladungen</h1>
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-100">Masseneinladungen</h1>
             <p class="text-gray-600 dark:text-gray-400">E-Mail-Einladungen mit Vorlagen an mehrere Empfänger senden</p>
         </div>
     </div>

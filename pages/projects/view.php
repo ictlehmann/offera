@@ -386,7 +386,7 @@ ob_start();
             <?php if (isset($_GET['action']) && $_GET['action'] === 'complete'): ?>
                 <!-- Show Completion Form -->
                 <div class="bg-gradient-to-r from-green-50 to-teal-50 border border-green-200 rounded-xl p-8">
-                    <h2 class="text-2xl font-bold text-gray-800 mb-6">
+                    <h2 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6">
                         <i class="fas fa-check-circle text-green-600 mr-2"></i>
                         Projekt abschließen
                     </h2>
@@ -493,7 +493,7 @@ ob_start();
                 <?php if ($userApplication): ?>
                     <!-- Show Application Status -->
                     <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
-                        <h2 class="text-2xl font-bold text-gray-800 mb-4">
+                        <h2 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-100 mb-4">
                             <i class="fas fa-check-circle text-blue-600 mr-2"></i>
                             Deine Bewerbung
                         </h2>
@@ -541,7 +541,7 @@ ob_start();
                 <?php elseif (isset($_GET['action']) && $_GET['action'] === 'apply'): ?>
                     <!-- Show Application Form -->
                     <div class="bg-white shadow-lg rounded-xl p-8 border border-gray-100">
-                        <h2 class="text-2xl font-bold text-gray-800 mb-6">
+                        <h2 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6">
                             <i class="fas fa-paper-plane text-blue-600 mr-2" aria-hidden="true"></i>
                             Jetzt bewerben
                         </h2>

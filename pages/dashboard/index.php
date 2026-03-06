@@ -871,7 +871,7 @@ function dismissProfileReviewPrompt() {
                 </div>
                 <span class="text-xs font-bold uppercase tracking-wider" style="color: #f97316">Ausleihen</span>
             </div>
-            <div class="text-4xl font-extrabold mb-1" style="color: var(--text-main)"><?php echo $openTasksCount; ?></div>
+            <div class="text-2xl sm:text-3xl md:text-4xl font-extrabold mb-1" style="color: var(--text-main)"><?php echo $openTasksCount; ?></div>
             <div class="text-sm font-semibold mb-2" style="color: var(--text-main)">Meine Ausleihen</div>
             <p class="text-xs" style="color: var(--text-muted)">
                 <?php if ($openTasksCount > 0): ?>
@@ -897,13 +897,13 @@ function dismissProfileReviewPrompt() {
                 $monthAbbrs = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
                 $monthAbbr = $monthAbbrs[(int)date('n', $ts) - 1];
             ?>
-            <div class="text-4xl font-extrabold mb-1" style="color: var(--text-main)"><?php echo count($nextEvents); ?></div>
+            <div class="text-2xl sm:text-3xl md:text-4xl font-extrabold mb-1" style="color: var(--text-main)"><?php echo count($nextEvents); ?></div>
             <div class="text-sm font-semibold mb-2 truncate" style="color: var(--text-main)">Nächstes: <?php echo htmlspecialchars($nextEvent['title']); ?></div>
             <p class="text-xs" style="color: var(--text-muted)">
                 <i class="fas fa-clock mr-1" style="color: var(--ibc-blue)"></i><?php echo date('d.m.Y', $ts); ?> &middot; <?php echo date('H:i', $ts); ?> Uhr
             </p>
             <?php else: ?>
-            <div class="text-4xl font-extrabold mb-1" style="color: var(--text-main)">0</div>
+            <div class="text-2xl sm:text-3xl md:text-4xl font-extrabold mb-1" style="color: var(--text-main)">0</div>
             <div class="text-sm font-semibold mb-2" style="color: var(--text-main)">Nächstes Event</div>
             <p class="text-xs" style="color: var(--text-muted)">
                 <i class="fas fa-info-circle mr-1"></i>Keine anstehenden Events
@@ -922,7 +922,7 @@ function dismissProfileReviewPrompt() {
                 </div>
                 <span class="text-xs font-bold uppercase tracking-wider" style="color: var(--ibc-green)">Rechnungen</span>
             </div>
-            <div class="text-4xl font-extrabold mb-1" style="color: var(--text-main)"><?php echo $openInvoicesCount; ?></div>
+            <div class="text-2xl sm:text-3xl md:text-4xl font-extrabold mb-1" style="color: var(--text-main)"><?php echo $openInvoicesCount; ?></div>
             <div class="text-sm font-semibold mb-2" style="color: var(--text-main)">Offene Rechnungen</div>
             <p class="text-xs" style="color: var(--text-muted)">
                 <?php if ($openInvoicesCount > 0): ?>

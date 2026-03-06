@@ -48,7 +48,7 @@ ob_start();
                 <div class="w-11 h-11 rounded-2xl bg-green-100 dark:bg-green-900/40 flex items-center justify-center shadow-sm">
                     <i class="fas fa-hands-helping text-ibc-green text-xl"></i>
                 </div>
-                <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-50 tracking-tight">Helfersystem</h1>
+                <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-50 tracking-tight">Helfersystem</h1>
             </div>
             <p class="text-gray-500 dark:text-gray-400 text-sm">Wir suchen Helfer für folgende Events – Unterstütze uns!</p>
         </div>

@@ -67,7 +67,7 @@ ob_start();
 <div class="mb-8">
     <div class="flex flex-col md:flex-row md:items-center md:justify-between">
         <div>
-            <h1 class="text-3xl font-bold text-gray-800 mb-2">
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-100 mb-2">
                 <i class="fas fa-boxes text-purple-600 mr-2"></i>
                 Inventar-Dashboard
             </h1>
@@ -128,7 +128,7 @@ document.addEventListener('DOMContentLoaded', function () {
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-sm font-medium text-gray-500 mb-1">Aktive Ausleihen</p>
-                <p class="text-3xl font-bold text-gray-800"><?php echo count($activeRentals); ?></p>
+                <p class="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-100"><?php echo count($activeRentals); ?></p>
             </div>
             <div class="p-3 bg-purple-100 rounded-full">
                 <i class="fas fa-hand-holding-box text-purple-600 text-2xl"></i>
@@ -139,7 +139,7 @@ document.addEventListener('DOMContentLoaded', function () {
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-sm font-medium text-gray-500 mb-1">Ausgeliehene Artikel gesamt</p>
-                <p class="text-3xl font-bold text-gray-800"><?php echo $checkedOutStats['total_items_out']; ?></p>
+                <p class="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-100"><?php echo $checkedOutStats['total_items_out']; ?></p>
             </div>
             <div class="p-3 bg-blue-100 rounded-full">
                 <i class="fas fa-cubes text-blue-600 text-2xl"></i>
@@ -150,7 +150,7 @@ document.addEventListener('DOMContentLoaded', function () {
         <div class="flex items-center justify-between">
             <div>
                 <p class="text-sm font-medium text-gray-500 mb-1">Überfällig</p>
-                <p class="text-3xl font-bold <?php echo $checkedOutStats['overdue'] > 0 ? 'text-red-600' : 'text-gray-800'; ?>">
+                <p class="text-2xl sm:text-3xl font-bold <?php echo $checkedOutStats['overdue'] > 0 ? 'text-red-600' : 'text-gray-800 dark:text-gray-100'; ?>">
                     <?php echo $checkedOutStats['overdue']; ?>
                 </p>
             </div>

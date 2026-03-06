@@ -87,7 +87,7 @@ ob_start();
             <div class="w-11 h-11 rounded-2xl bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center shadow-sm">
                 <i class="fas fa-clipboard-list text-purple-600 dark:text-purple-400 text-xl"></i>
             </div>
-            <h1 class="text-3xl font-bold text-gray-900 dark:text-gray-50 tracking-tight">Audit-Logs</h1>
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-50 tracking-tight">Audit-Logs</h1>
         </div>
         <p class="text-gray-500 dark:text-gray-400 text-sm ml-14"><?php echo number_format($totalLogs); ?> Einträge insgesamt</p>
     </div>

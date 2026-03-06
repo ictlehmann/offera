@@ -144,7 +144,7 @@ ob_start();
 
 <div class="card p-8">
     <div class="flex items-center justify-between mb-6">
-        <h1 class="text-3xl font-bold text-gray-800">
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-100">
             <i class="fas fa-edit text-purple-600 mr-2"></i>
             Artikel bearbeiten
         </h1>

@@ -186,7 +186,7 @@ ob_start();
     <div class="card p-8">
         <?php if ($hasMicrosoftFormsUrl): ?>
         <!-- Microsoft Forms Iframe -->
-        <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6">
+        <h2 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6">
             <i class="fas fa-poll mr-2 text-blue-500"></i>
             Umfrage
         </h2>
@@ -216,7 +216,7 @@ ob_start();
         
         <?php elseif (!$userVote): ?>
         <!-- Voting Form -->
-        <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6">
+        <h2 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6">
             <i class="fas fa-vote-yea mr-2 text-blue-500"></i>
             Ihre Stimme abgeben
         </h2>
@@ -251,7 +251,7 @@ ob_start();
         
         <?php else: ?>
         <!-- Results Display -->
-        <h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6">
+        <h2 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-100 mb-6">
             <i class="fas fa-chart-bar mr-2 text-blue-500"></i>
             Ergebnisse
         </h2>

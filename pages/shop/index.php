@@ -727,10 +727,10 @@ ob_start();
 
             <!-- Details & Add to cart -->
             <div class="flex flex-col">
-                <h2 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-3">
+                <h2 class="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 dark:text-gray-100 mb-3">
                     <?php echo htmlspecialchars($currentProduct['name']); ?>
                 </h2>
-                <p class="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-4">
+                <p class="text-xl sm:text-2xl md:text-3xl font-bold text-blue-600 dark:text-blue-400 mb-4">
                     <?php echo number_format((float) $currentProduct['base_price'], 2, ',', '.'); ?> €
                 </p>
                 <?php if (!empty($currentProduct['description'])): ?>

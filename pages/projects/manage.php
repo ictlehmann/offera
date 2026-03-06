@@ -179,7 +179,7 @@ ob_start();
 <div class="mb-8">
     <div class="flex items-center justify-between mb-4">
         <div>
-            <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-2">
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-100 mb-2">
                 <i class="fas fa-briefcase text-purple-600 mr-2"></i>
                 Projekt-Verwaltung
             </h1>
@@ -423,7 +423,7 @@ document.getElementById('deleteModal')?.addEventListener('click', (e) => {
 <!-- Project Form View -->
 <div class="mb-8">
     <div class="flex items-center justify-between mb-4">
-        <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100">
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-100">
             <i class="fas fa-briefcase text-purple-600 mr-2"></i>
             <?php echo $project ? 'Projekt bearbeiten' : 'Neues Projekt'; ?>
         </h1>
