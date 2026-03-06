@@ -65,7 +65,7 @@ ob_start();
                 <i class="fas fa-calendar-alt mr-3 text-ibc-blue"></i>
                 Events
             </h1>
-            <p class="text-gray-600 dark:text-gray-300">Entdecke kommende Events und melde Dich an</p>
+            <p class="text-gray-600 dark:text-gray-300 leading-relaxed">Entdecke kommende Events und melde Dich an</p>
         </div>
         
         <div class="flex gap-3">
@@ -107,11 +107,11 @@ ob_start();
                  alt="Keine Events"
                  class="w-32 h-32 mx-auto mb-5 opacity-60">
             <?php if ($filter === 'my_registrations'): ?>
-                <p class="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">Keine Anmeldungen gefunden</p>
-                <p class="text-sm text-gray-400 dark:text-gray-500">Du hast Dich noch für keine Events angemeldet.</p>
+                <p class="text-base sm:text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">Keine Anmeldungen gefunden</p>
+                <p class="text-sm text-gray-400 dark:text-gray-500 leading-relaxed">Du hast Dich noch für keine Events angemeldet.</p>
             <?php else: ?>
-                <p class="text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">Aktuell stehen keine Events an.</p>
-                <p class="text-sm text-gray-400 dark:text-gray-500">Schau später wieder vorbei!</p>
+                <p class="text-base sm:text-xl font-semibold text-gray-600 dark:text-gray-300 mb-2">Aktuell stehen keine Events an.</p>
+                <p class="text-sm text-gray-400 dark:text-gray-500 leading-relaxed">Schau später wieder vorbei!</p>
             <?php endif; ?>
         </div>
     <?php else: ?>
@@ -260,7 +260,7 @@ ob_start();
 
                         <!-- Description Preview -->
                         <?php if (!empty($event['description'])): ?>
-                            <p class="text-gray-600 dark:text-gray-400 text-sm line-clamp-2 flex-1 mb-4 break-words">
+                            <p class="text-gray-600 dark:text-gray-400 text-sm line-clamp-2 flex-1 mb-4 break-words leading-relaxed">
                                 <?php echo htmlspecialchars(substr($event['description'], 0, 120)); ?><?php echo strlen($event['description']) > 120 ? '…' : ''; ?>
                             </p>
                         <?php else: ?>

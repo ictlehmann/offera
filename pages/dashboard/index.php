@@ -264,7 +264,7 @@ ob_start();
         box-shadow: var(--shadow-soft);
     }
     .dash-section-title {
-        font-size: 1.375rem;
+        font-size: clamp(1rem, 2.5vw, 1.375rem);
         font-weight: 800;
         color: var(--text-main);
         letter-spacing: -0.01em;
@@ -977,7 +977,7 @@ function dismissProfileReviewPrompt() {
                     <h3 class="text-lg font-bold mb-1" style="color: var(--text-main)">
                         🎯 Vervollständige dein Profil!
                     </h3>
-                    <p class="text-sm mb-4" style="color: var(--text-muted)">
+                    <p class="text-sm mb-4 leading-relaxed" style="color: var(--text-muted)">
                         Ein vollständiges Profil hilft deinen Kolleginnen und Kollegen, dich besser kennenzulernen.
                         Du bist schon zu&nbsp;<strong style="color: #a855f7"><?php echo $profileCompletenessPercent; ?>%</strong>&nbsp;fertig&nbsp;– fast geschafft!
                     </p>
@@ -1159,7 +1159,7 @@ function dismissProfileReviewPrompt() {
                 <?php echo htmlspecialchars($event['title']); ?>
             </h3>
             <?php if (!empty($event['description'])): ?>
-            <p class="text-sm line-clamp-2" style="color: var(--text-muted)">
+            <p class="text-sm line-clamp-2 leading-relaxed" style="color: var(--text-muted)">
                 <?php echo htmlspecialchars(substr($event['description'], 0, 100)) . (strlen($event['description']) > 100 ? '…' : ''); ?>
             </p>
             <?php endif; ?>
@@ -1256,7 +1256,7 @@ function dismissProfileReviewPrompt() {
                     <i class="fas fa-calendar-alt mr-1 text-indigo-400"></i>
                     <?php echo $postDate->format('d.m.Y'); ?>
                 </p>
-                <p class="text-sm flex-1 line-clamp-3" style="color: var(--text-muted)">
+                <p class="text-sm flex-1 line-clamp-3 leading-relaxed" style="color: var(--text-muted)">
                     <?php echo htmlspecialchars($excerpt); ?>
                 </p>
                 <div class="mt-3 pt-3 flex items-center justify-between text-xs" style="border-top: 1px solid var(--border-color); color: var(--text-muted)">
@@ -1321,7 +1321,7 @@ function dismissProfileReviewPrompt() {
                         <?php echo htmlspecialchars($poll['title']); ?>
                     </h3>
                     <?php if (!empty($poll['description'])): ?>
-                    <p class="text-sm mb-2 line-clamp-2" style="color: var(--text-muted)">
+                    <p class="text-sm mb-2 line-clamp-2 leading-relaxed" style="color: var(--text-muted)">
                         <?php echo htmlspecialchars(substr($poll['description'], 0, 150)) . (strlen($poll['description']) > 150 ? '…' : ''); ?>
                     </p>
                     <?php endif; ?>

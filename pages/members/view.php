@@ -116,7 +116,7 @@ ob_start();
 
             <!-- Profile Info -->
             <div class="flex-1 min-w-0">
-                <h1 class="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-2">
+                <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 dark:text-gray-100 mb-2">
                     <?php echo htmlspecialchars($profile['first_name'] . ' ' . $profile['last_name'], ENT_QUOTES, 'UTF-8'); ?>
                 </h1>
 
