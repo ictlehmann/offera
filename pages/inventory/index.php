@@ -40,7 +40,7 @@ $title = 'Inventar - IBC Intranet';
 ob_start();
 ?>
 
-<div class="pb-28">
+<div class="pb-28 lg:pb-0">
 <?php if ($checkoutSuccess): ?>
 <div class="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg">
     <i class="fas fa-check-circle mr-2"></i><?php echo htmlspecialchars($checkoutSuccess); ?>
@@ -140,6 +140,10 @@ ob_start();
 </div>
 <?php endif; ?>
 
+<!-- ─── Main Layout: Inventory Grid + Cart Sidebar ─── -->
+<div class="grid grid-cols-1 lg:grid-cols-4 lg:gap-6 items-start">
+<div class="lg:col-span-3">
+
 <!-- Inventory Grid -->
 <?php if (empty($inventoryObjects) && !$loadError): ?>
 <div class="card p-12 text-center">
@@ -154,7 +158,7 @@ ob_start();
     <?php endif; ?>
 </div>
 <?php else: ?>
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
     <?php foreach ($inventoryObjects as $item):
         $itemId        = $item['id'] ?? '';
         $itemName      = $item['name'] ?? '';
@@ -251,34 +255,20 @@ ob_start();
 </div>
 <?php endif; ?>
 
-</div><!-- /.pb-28 -->
+</div><!-- /.lg:col-span-3 inventory -->
 
-<!-- ─── Floating Cart Button ─── -->
-<button id="cartFloatingBtn"
-        onclick="openCartPanel()"
-        class="fixed left-4 bottom-4 md:left-auto md:right-8 md:bottom-auto md:top-24 z-50 w-16 h-16 bg-gradient-to-br from-purple-600 to-blue-600 text-white rounded-full shadow-xl hover:shadow-purple-500/30 flex items-center justify-center transition-all hover:scale-110 focus:outline-none focus:ring-4 focus:ring-purple-300"
-        aria-label="Warenkorb öffnen">
-    <span class="text-2xl leading-none">🛒</span>
-    <span id="cartBadge"
-          style="display:none"
-          aria-live="polite"
-          aria-atomic="true"
-          class="absolute -top-2 -right-2 min-w-[1.4rem] h-[1.4rem] bg-red-500 text-white text-xs font-extrabold rounded-full flex items-center justify-center px-1 shadow-lg ring-2 ring-white">
-        0
-    </span>
-</button>
+<!-- ─── Cart Sidebar (1 col on desktop, bottom sheet on mobile) ─── -->
+<div class="lg:col-span-1 lg:sticky lg:top-4">
 
-<!-- ─── Cart Overlay ─── -->
-<div id="cartOverlay"
-     class="fixed inset-0 z-50 shadow-xl hidden"
-     style="background: rgba(15,23,42,0.55); backdrop-filter: blur(3px);"
-     onclick="closeCartPanel()"></div>
-
-<!-- ─── Cart Panel (right drawer) ─── -->
+<!-- ─── Cart Panel ─── -->
 <div id="cartPanel"
-     class="fixed top-0 right-0 h-full w-full max-w-sm z-50 flex flex-col bg-white dark:bg-slate-900 shadow-2xl"
-     style="transform: translateX(100%); transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);"
+     class="fixed bottom-0 inset-x-0 z-50 flex flex-col bg-white dark:bg-slate-900 shadow-2xl rounded-t-3xl lg:static lg:rounded-2xl lg:border lg:border-gray-100 dark:border-slate-700"
      role="dialog" aria-modal="true" aria-label="Ausleih-Warenkorb">
+
+    <!-- Drag handle (mobile bottom sheet only) -->
+    <div class="flex justify-center pt-3 pb-1 flex-shrink-0 lg:hidden">
+        <div class="w-10 h-1.5 bg-gray-300 dark:bg-slate-600 rounded-full"></div>
+    </div>
 
     <!-- Panel Header -->
     <div class="bg-gradient-to-r from-purple-600 to-blue-600 px-5 py-4 flex items-center justify-between flex-shrink-0">
@@ -292,7 +282,7 @@ ob_start();
             </div>
         </div>
         <button onclick="closeCartPanel()"
-                class="min-w-[44px] min-h-[44px] bg-white/20 hover:bg-white/30 rounded-lg flex items-center justify-center text-white transition-colors"
+                class="min-w-[44px] min-h-[44px] bg-white/20 hover:bg-white/30 rounded-lg flex items-center justify-center text-white transition-colors lg:hidden"
                 aria-label="Schließen">
             <i class="fas fa-times"></i>
         </button>
@@ -370,11 +360,54 @@ ob_start();
             <i class="fas fa-trash-alt text-xs"></i> Warenkorb leeren
         </button>
     </div>
-</div>
+</div><!-- /#cartPanel -->
+
+</div><!-- /.lg:col-span-1 cart sidebar -->
+
+</div><!-- /.grid main layout -->
+
+</div><!-- /.pb-28 lg:pb-0 -->
+
+<!-- ─── Floating Cart Button (mobile only) ─── -->
+<button id="cartFloatingBtn"
+        onclick="openCartPanel()"
+        class="fixed bottom-4 right-4 z-50 w-16 h-16 bg-gradient-to-br from-purple-600 to-blue-600 text-white rounded-full shadow-xl hover:shadow-purple-500/30 flex items-center justify-center transition-all hover:scale-110 focus:outline-none focus:ring-4 focus:ring-purple-300 lg:hidden"
+        aria-label="Warenkorb öffnen">
+    <span class="text-2xl leading-none">🛒</span>
+    <span id="cartBadge"
+          style="display:none"
+          aria-live="polite"
+          aria-atomic="true"
+          class="absolute -top-2 -right-2 min-w-[1.4rem] h-[1.4rem] bg-red-500 text-white text-xs font-extrabold rounded-full flex items-center justify-center px-1 shadow-lg ring-2 ring-white">
+        0
+    </span>
+</button>
+
+<!-- ─── Cart Overlay (mobile only) ─── -->
+<div id="cartOverlay"
+     class="fixed inset-0 z-40 hidden lg:hidden"
+     style="background: rgba(15,23,42,0.55); backdrop-filter: blur(3px);"
+     onclick="closeCartPanel()"></div>
 
 <style>
 .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+/* ─── Cart Panel: bottom sheet on mobile, sticky sidebar on desktop ─── */
+@media (max-width: 1023px) {
+    #cartPanel {
+        transform: translateY(100%);
+        transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+        max-height: 85vh;
+    }
+}
+@media (min-width: 1024px) {
+    #cartPanel {
+        height: calc(100vh - 6rem);
+        transform: none;
+        transition: none;
+        overflow: hidden;
+    }
+}
 @keyframes cart-pop {
     0%   { transform: scale(1); }
     40%  { transform: scale(1.2); }
@@ -444,7 +477,7 @@ ob_start();
         if (newQty < 1) { window.removeFromCart(id); return; }
         if (newQty > item.pieces) newQty = item.pieces;
         item.quantity = newQty;
-        if (panelOpen) renderCartItems();
+        if (panelOpen || isDesktop()) renderCartItems();
     };
 
     window.clearCart = function () {
@@ -456,23 +489,25 @@ ob_start();
 
     // ── Panel open / close ───────────────────────────────────────────────────
     window.openCartPanel = function () {
+        if (isDesktop()) return; // cart is always visible as sidebar on desktop
         panelOpen = true;
         document.getElementById('cartOverlay').classList.remove('hidden');
-        document.getElementById('cartPanel').style.transform = 'translateX(0)';
+        document.getElementById('cartPanel').style.transform = 'translateY(0)';
         document.body.style.overflow = 'hidden';
         renderCartItems();
         hideCartMsg();
     };
 
     window.closeCartPanel = function () {
+        if (isDesktop()) return;
         panelOpen = false;
         document.getElementById('cartOverlay').classList.add('hidden');
-        document.getElementById('cartPanel').style.transform = 'translateX(100%)';
+        document.getElementById('cartPanel').style.transform = 'translateY(100%)';
         document.body.style.overflow = '';
     };
 
     document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape' && panelOpen) closeCartPanel();
+        if (e.key === 'Escape' && panelOpen && !isDesktop()) closeCartPanel();
     });
 
     // ── UI helpers ───────────────────────────────────────────────────────────
@@ -488,7 +523,7 @@ ob_start();
         if (panelCount) panelCount.textContent = count + ' Artikel';
         if (submitLbl)  submitLbl.textContent  = count > 1 ? count + ' Anfragen senden' : 'Anfrage senden';
         if (submitBtn)  submitBtn.disabled     = count === 0;
-        if (panelOpen)  renderCartItems();
+        if (panelOpen || isDesktop()) renderCartItems();
     }
 
     function renderCartItems() {
@@ -572,6 +607,7 @@ ob_start();
     }
 
     function animateBadge() {
+        if (isDesktop()) return; // floating button is hidden on desktop
         var btn   = document.getElementById('cartFloatingBtn');
         var badge = document.getElementById('cartBadge');
         if (!btn) return;
@@ -683,6 +719,31 @@ ob_start();
         var el = document.getElementById('cartMsg');
         if (el) el.classList.add('hidden');
     }
+
+    // ── Viewport helpers ─────────────────────────────────────────────────────
+    function isDesktop() {
+        return window.innerWidth >= 1024;
+    }
+
+    // On resize: switch between sidebar and bottom-sheet modes
+    window.addEventListener('resize', function () {
+        var panel = document.getElementById('cartPanel');
+        if (!panel) return;
+        if (isDesktop()) {
+            // Desktop: clear any inline transform so CSS takes over (transform:none)
+            panel.style.transform = '';
+            document.getElementById('cartOverlay').classList.add('hidden');
+            document.body.style.overflow = '';
+            if (panelOpen) panelOpen = false;
+            renderCartItems();
+        } else if (!panelOpen) {
+            // Mobile: re-hide if not explicitly opened
+            panel.style.transform = 'translateY(100%)';
+        }
+    });
+
+    // Initial render for desktop (cart always visible)
+    if (isDesktop()) renderCartItems();
 
 }());
 </script>
