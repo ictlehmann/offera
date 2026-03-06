@@ -11,17 +11,6 @@ require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../includes/handlers/AuthHandler.php';
 require_once __DIR__ . '/../includes/database.php';
 
-// Verify Composer dependencies are installed before proceeding
-$_autoloadPath = __DIR__ . '/../vendor/autoload.php';
-if (!file_exists($_autoloadPath)) {
-    error_log('OAuth callback failed: vendor/autoload.php not found. Run "composer install" on the server.');
-    $loginUrl = (defined('BASE_URL') && BASE_URL) ? BASE_URL . '/pages/auth/login.php' : '/pages/auth/login.php';
-    header('Location: ' . $loginUrl . '?error=' . urlencode('Anmeldung fehlgeschlagen. Bitte Administrator kontaktieren.'));
-    exit;
-}
-require_once $_autoloadPath;
-unset($_autoloadPath);
-
 // Start session
 AuthHandler::startSession();
 
@@ -52,7 +41,7 @@ try {
         throw new Exception('No authorization code received');
     }
 
-    // Initialize GenericProvider with Azure endpoints using config constants
+    // Load credentials from configuration constants
     $clientId     = defined('CLIENT_ID') ? CLIENT_ID : '';
     $clientSecret = defined('CLIENT_SECRET') ? CLIENT_SECRET : '';
     $redirectUri  = defined('REDIRECT_URI') ? REDIRECT_URI : '';
@@ -62,37 +51,76 @@ try {
         throw new Exception('Missing Azure OAuth configuration');
     }
 
-    $provider = new \League\OAuth2\Client\Provider\GenericProvider([
-        'clientId'                => $clientId,
-        'clientSecret'            => $clientSecret,
-        'redirectUri'             => $redirectUri,
-        'urlAuthorize'            => 'https://login.microsoftonline.com/' . $tenantId . '/oauth2/v2.0/authorize',
-        'urlAccessToken'          => 'https://login.microsoftonline.com/' . $tenantId . '/oauth2/v2.0/token',
-        'urlResourceOwnerDetails' => 'https://graph.microsoft.com/v1.0/me',
+    // Exchange authorization code for access token using native PHP cURL
+    $tokenUrl  = 'https://login.microsoftonline.com/' . rawurlencode($tenantId) . '/oauth2/v2.0/token';
+    $postFields = http_build_query([
+        'client_id'     => $clientId,
+        'client_secret' => $clientSecret,
+        'code'          => $_GET['code'],
+        'redirect_uri'  => $redirectUri,
+        'grant_type'    => 'authorization_code',
     ]);
 
-    // Exchange authorization code for access token
     try {
-        $accessToken = $provider->getAccessToken('authorization_code', [
-            'code' => $_GET['code'],
-        ]);
+        $ch = curl_init($tokenUrl);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $postFields);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/x-www-form-urlencoded']);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+        $tokenResponse = curl_exec($ch);
+        $tokenHttpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlError     = curl_error($ch);
+        curl_close($ch);
+
+        if ($curlError) {
+            throw new Exception('Token exchange cURL error: ' . $curlError);
+        }
+
+        $tokenData = json_decode($tokenResponse, true);
+        if ($tokenHttpCode !== 200 || empty($tokenData['access_token'])) {
+            $errorMsg = $tokenData['error_description'] ?? $tokenData['error'] ?? 'Unknown token error (HTTP ' . $tokenHttpCode . ')';
+            error_log("[OAuth] getAccessToken() failed: " . $errorMsg);
+            die('Token-Fehler beim Austausch des Autorisierungscodes: ' . htmlspecialchars($errorMsg));
+        }
     } catch (Exception $tokenEx) {
         $tokenError = $tokenEx->getMessage();
         error_log("[OAuth] getAccessToken() failed: " . $tokenError);
-        die('Token-Fehler beim Austausch des Autorisierungscodes: ' . $tokenEx->getMessage());
+        die('Token-Fehler beim Austausch des Autorisierungscodes: ' . htmlspecialchars($tokenEx->getMessage()));
     }
+
+    $accessTokenValue = $tokenData['access_token'];
+    $idToken          = $tokenData['id_token'] ?? null;
 
     // Get resource owner (user) details and claims from Graph API
     try {
-        $resourceOwner = $provider->getResourceOwner($accessToken);
-        $claims = $resourceOwner->toArray();
+        $ch = curl_init('https://graph.microsoft.com/v1.0/me');
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Authorization: Bearer ' . $accessTokenValue]);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+        $profileResponse = curl_exec($ch);
+        $profileHttpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $profileCurlErr  = curl_error($ch);
+        curl_close($ch);
+
+        if ($profileCurlErr) {
+            throw new Exception('Profile fetch cURL error: ' . $profileCurlErr);
+        }
+        if ($profileHttpCode !== 200) {
+            throw new Exception('Graph API returned HTTP ' . $profileHttpCode . ' when fetching user profile');
+        }
+
+        $claims = json_decode($profileResponse, true) ?: [];
     } catch (Exception $roEx) {
         error_log("[OAuth] getResourceOwner() failed: " . $roEx->getMessage());
         throw new Exception('Benutzerdetails konnten nicht von Microsoft abgerufen werden: ' . $roEx->getMessage());
     }
 
-    // FIX: Extract JWT claims (Roles, OID, UPN) from the ID token
-    $idToken = $accessToken->getValues()['id_token'] ?? null;
+    // Extract JWT claims (Roles, OID, UPN) from the ID token
     if ($idToken) {
         $tokenParts = explode('.', $idToken);
         if (count($tokenParts) === 3) {
@@ -151,13 +179,12 @@ try {
     // Sync Entra data (displayName, mail, group memberships, role) on every login.
     // Called here for existing users; new users are synced inside completeMicrosoftLogin
     // after their record is created.
-    $userTokenString = $accessToken->getToken();
     if ($existingUser && $azureOid) {
-        AuthHandler::syncEntraData($existingUser['id'], $claims, $azureOid, $userTokenString);
+        AuthHandler::syncEntraData($existingUser['id'], $claims, $azureOid, $accessTokenValue);
     }
 
     // Complete the login process (role mapping, user create/update, session setup)
-    AuthHandler::completeMicrosoftLogin($claims, $existingUser, $userTokenString);
+    AuthHandler::completeMicrosoftLogin($claims, $existingUser, $accessTokenValue);
 
 } catch (Exception $e) {
     // Log full diagnostic details server-side (visible in IONOS server logs)
