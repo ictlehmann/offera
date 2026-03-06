@@ -4451,6 +4451,21 @@ body:not(.dark-mode) .hero-gradient .hero-date {
     -webkit-overflow-scrolling: touch;
 }
 
+/*
+ * Fix: overflow-x: auto implicitly forces overflow-y: auto (per CSS spec), which clips
+ * absolutely-positioned dropdown menus that extend below the table container.
+ * Adding padding-bottom gives the last row's dropdown enough scrollable space to open
+ * without being cut off. Apply .has-action-dropdown alongside overflow-x-auto on any
+ * table wrapper whose rows contain absolute-positioned dropdown menus (e.g. "Aktionen").
+ * Only applied on desktop (≥ 769 px) where the horizontal-scroll table layout is active;
+ * on mobile the card-table layout stacks rows and no padding is needed.
+ */
+@media (min-width: 769px) {
+    .has-action-dropdown {
+        padding-bottom: 12rem; /* ~192 px – enough for a typical dropdown panel */
+    }
+}
+
 .table-responsive table {
     width: 100%;
     max-width: 100%;

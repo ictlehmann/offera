@@ -69,7 +69,7 @@ ob_start();
 
 <!-- Requests table -->
 <div class="card overflow-hidden">
-    <div class="overflow-x-auto w-full">
+    <div class="overflow-x-auto w-full has-action-dropdown">
         <table class="w-full text-sm text-left">
             <thead>
                 <tr class="bg-gray-50 dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700">

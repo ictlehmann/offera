@@ -376,7 +376,7 @@ ob_start();
                 </div>
 
                 <!-- Desktop Table View (hidden on small screens) -->
-                <div class="overflow-x-auto w-full">
+                <div class="overflow-x-auto w-full has-action-dropdown">
                 <table class="hidden md:table min-w-full">
                     <thead class="bg-gray-50 dark:bg-gray-800/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700">
                         <tr>

@@ -482,7 +482,7 @@ ob_start();
             </div>
         </div>
         
-        <div class="overflow-x-auto w-full">
+        <div class="overflow-x-auto w-full has-action-dropdown">
             <table class="w-full card-table" id="usersTable">
                 <thead class="bg-gradient-to-r from-gray-100 to-slate-100 dark:from-gray-700 dark:to-gray-600 border-b-2 border-purple-200 dark:border-purple-900">
                     <tr>
