@@ -533,7 +533,7 @@ class AuthHandler {
             }
             
             // Complete the login (role mapping, user create/update, session setup)
-            self::completeMicrosoftLogin($claims, $existingUser);
+            self::completeMicrosoftLogin($claims, $existingUser, $token->getToken());
             
         } catch (Exception $e) {
             self::logSystemAction(null, 'login_failed_microsoft', 'user', null, 'Microsoft login error: ' . $e->getMessage());
@@ -545,10 +545,11 @@ class AuthHandler {
      * Complete Microsoft login after access token and initial user lookup.
      * Handles role mapping, user create/update, profile sync, and session setup.
      *
-     * @param array      $claims       Token claims from the resource owner
-     * @param array|null $existingUser Pre-fetched user row (by azure_oid) or null
+     * @param array      $claims           Token claims from the resource owner
+     * @param array|null $existingUser     Pre-fetched user row (by azure_oid) or null
+     * @param string|null $userAccessToken Optional user OAuth access token for Graph API photo retrieval
      */
-    public static function completeMicrosoftLogin(array $claims, $existingUser = null) {
+    public static function completeMicrosoftLogin(array $claims, $existingUser = null, ?string $userAccessToken = null) {
         require_once __DIR__ . '/../../vendor/autoload.php';
         require_once __DIR__ . '/../services/MicrosoftGraphService.php';
         require_once __DIR__ . '/../models/Alumni.php';
@@ -688,8 +689,9 @@ class AuthHandler {
         // Sync profile data and photo from Microsoft Graph
         try {
             // Reuse or create MicrosoftGraphService instance
+            // Prefer the delegated user token (User.Read scope) over client-credentials flow
             if (!isset($graphService) && $azureOid) {
-                $graphService = new MicrosoftGraphService();
+                $graphService = new MicrosoftGraphService($userAccessToken);
             }
             
             if ($azureOid && isset($graphService)) {
@@ -717,6 +719,28 @@ class AuthHandler {
 
                 // Store Entra roles in session for display
                 $_SESSION['entra_roles'] = $azureRoles;
+
+                // Sync profile photo for new users (existing users are handled in syncEntraData).
+                // Also re-sync for existing users when no manual upload is present.
+                if (!$existingUser) {
+                    try {
+                        require_once __DIR__ . '/../models/User.php';
+                        $contentDb   = Database::getContentDB();
+                        $profStmt    = $contentDb->prepare("SELECT image_path FROM alumni_profiles WHERE user_id = ?");
+                        $profStmt->execute([$userId]);
+                        $profRow     = $profStmt->fetch();
+                        $hasUpload   = !empty($profRow['image_path']);
+
+                        if (!$hasUpload) {
+                            $photoData = $graphService->getUserPhoto($azureOid);
+                            if ($photoData !== null) {
+                                User::cacheEntraPhoto($userId, $photoData);
+                            }
+                        }
+                    } catch (Exception $e) {
+                        error_log('[completeMicrosoftLogin] Photo sync for new user failed: ' . $e->getMessage());
+                    }
+                }
             }
         } catch (Exception $e) {
             error_log("Failed to sync profile data from Microsoft Graph: " . $e->getMessage());
@@ -819,8 +843,9 @@ class AuthHandler {
      * @param int    $userId   Local database user ID.
      * @param array  $userData Claims array from Microsoft Entra ID / OAuth token (must include 'roles').
      * @param string $azureOid Azure Object Identifier used for Graph API calls.
+     * @param string|null $userAccessToken Optional user OAuth access token for Graph API photo retrieval.
      */
-    public static function syncEntraData(int $userId, array $userData, string $azureOid): void {
+    public static function syncEntraData(int $userId, array $userData, string $azureOid, ?string $userAccessToken = null): void {
         require_once __DIR__ . '/../services/MicrosoftGraphService.php';
 
         $db = Database::getUserDB();
@@ -961,7 +986,9 @@ class AuthHandler {
             }
 
             if (!$hasUpload) {
-                $photoService = new MicrosoftGraphService();
+                // Prefer the delegated user token (User.Read scope already granted during OAuth login).
+                // Fall back to client-credentials flow only when no token was passed.
+                $photoService = new MicrosoftGraphService($userAccessToken);
                 $photoData = $photoService->getUserPhoto($azureOid);
                 if ($photoData !== null) {
                     User::cacheEntraPhoto($userId, $photoData);

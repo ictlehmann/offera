@@ -4,7 +4,13 @@
  * Handles PayPal (via PayPal Checkout SDK) and Vorkasse payment processing.
  */
 
-require_once __DIR__ . '/../vendor/autoload.php';
+// Load Composer autoloader if available (vendor/ is not committed; run composer install on the server)
+$_shopAutoloadPath = __DIR__ . '/../vendor/autoload.php';
+if (file_exists($_shopAutoloadPath)) {
+    require_once $_shopAutoloadPath;
+}
+unset($_shopAutoloadPath);
+define('SHOP_PAYMENT_VENDOR_AVAILABLE', class_exists('GuzzleHttp\Client'));
 require_once __DIR__ . '/../includes/database.php';
 require_once __DIR__ . '/MailService.php';
 
