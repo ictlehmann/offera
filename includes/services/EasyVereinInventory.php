@@ -797,6 +797,8 @@ class EasyVereinInventory {
         $setTo = ['Zustand der letzten Rückgabe' => ''];
         if ($fallbackUsed) {
             $setTo[self::CF_NAME_NOT_IN_EASYVEREIN] = $userName;
+        } else {
+            $setTo[self::CF_NAME_NOT_IN_EASYVEREIN] = '';
         }
         $appendTo = [];
         if ($userName  !== '') $appendTo['Aktuelle Ausleiher'] = $userName;
@@ -923,7 +925,7 @@ class EasyVereinInventory {
         if ($returnUserName  !== '') $removeFrom['Aktuelle Ausleiher'] = $returnUserName;
         if ($returnUserEmail !== '') $removeFrom['Entra E-Mail']       = $returnUserEmail;
         $this->modifyCustomFields((int)$req['inventory_object_id'],
-            ['Zustand der letzten Rückgabe' => $conditionText],
+            ['Zustand der letzten Rückgabe' => $conditionText, self::CF_NAME_NOT_IN_EASYVEREIN => ''],
             [],
             $removeFrom
         );
@@ -1005,7 +1007,7 @@ class EasyVereinInventory {
         if ($userEmail !== '') $removeFrom['Entra E-Mail']       = $userEmail;
         try {
             $this->modifyCustomFields($easyvereinItemId,
-                ['Zustand der letzten Rückgabe' => $returnText],
+                ['Zustand der letzten Rückgabe' => $returnText, self::CF_NAME_NOT_IN_EASYVEREIN => ''],
                 [],
                 $removeFrom
             );
