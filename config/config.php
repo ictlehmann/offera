@@ -41,6 +41,12 @@ define('ENVIRONMENT', _env('ENVIRONMENT', 'production'));
 // Password hashing algorithm
 define('HASH_ALGO', PASSWORD_BCRYPT);
 
+// Session security – must be set BEFORE session_start() is called
+ini_set('session.cookie_httponly', 1);
+ini_set('session.cookie_secure', 1);
+ini_set('session.cookie_samesite', 'Strict');
+ini_set('session.use_only_cookies', 1);
+
 // Error reporting based on environment
 if (ENVIRONMENT !== 'production') {
     ini_set('display_errors', 1);

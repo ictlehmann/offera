@@ -48,7 +48,7 @@ function init_session() {
             'path'     => '/',
             'secure'   => true,
             'httponly' => true,
-            'samesite' => 'Lax',
+            'samesite' => 'Strict',
         ]);
         session_start();
     }
