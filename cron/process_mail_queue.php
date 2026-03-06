@@ -16,14 +16,18 @@
  * Usage: php cron/process_mail_queue.php
  */
 
-if (PHP_SAPI !== 'cli') {
-    http_response_code(403);
-    exit('This script must be run from the command line.' . PHP_EOL);
-}
-
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../includes/database.php';
 require_once __DIR__ . '/../src/MailService.php';
+
+if (PHP_SAPI !== 'cli') {
+    $__cronToken = CRON_TOKEN;
+    if ($__cronToken === '' || !isset($_GET['token']) || !is_string($_GET['token']) || !hash_equals($__cronToken, $_GET['token'])) {
+        http_response_code(403);
+        exit('Forbidden.' . PHP_EOL);
+    }
+    unset($__cronToken);
+}
 
 define('MAIL_BATCH_SIZE', 200);
 define('MAIL_BATCH_COOLDOWN_MINUTES', 60);

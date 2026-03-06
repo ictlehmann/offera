@@ -128,6 +128,10 @@ define('MAIL_SHOP',      _env('SHOP_EMAIL',       'shop@business-consulting.de')
 // EasyVerein API
 define('EASYVEREIN_API_TOKEN', _env('EASYVEREIN_API_TOKEN', ''));
 
+// Cron Security Token – must be a long random secret set in .env.
+// Cron scripts allow access either via CLI or when this token is supplied via ?token=…
+define('CRON_TOKEN', _env('CRON_TOKEN', ''));
+
 // Google reCAPTCHA v3
 define('RECAPTCHA_SITE_KEY',   _env('RECAPTCHA_SITE_KEY',   ''));
 define('RECAPTCHA_SECRET_KEY', _env('RECAPTCHA_SECRET_KEY', ''));
