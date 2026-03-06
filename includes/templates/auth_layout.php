@@ -871,7 +871,7 @@ $_tailwindCssVersion = filemtime(__DIR__ . '/../../assets/css/tailwind.css');
             text-align: center;
             margin-top: 40px;
             color: rgba(255, 255, 255, 0.4);
-            font-size: 13px;
+            font-size: 14px;
             -webkit-animation: textSlideUp 1s ease-out 1.1s both;
             animation: textSlideUp 1s ease-out 1.1s both;
         }
@@ -999,7 +999,7 @@ $_tailwindCssVersion = filemtime(__DIR__ . '/../../assets/css/tailwind.css');
             }
 
             .login-footer {
-                font-size: 12px;
+                font-size: 14px;
                 margin-top: 35px;
             }
         }
@@ -1031,7 +1031,7 @@ $_tailwindCssVersion = filemtime(__DIR__ . '/../../assets/css/tailwind.css');
             }
 
             .welcome-subtitle {
-                font-size: 13px;
+                font-size: 14px;
             }
 
             .microsoft-button,
@@ -1054,7 +1054,7 @@ $_tailwindCssVersion = filemtime(__DIR__ . '/../../assets/css/tailwind.css');
             }
 
             .login-footer {
-                font-size: 11px;
+                font-size: 14px;
                 margin-top: 30px;
             }
         }
@@ -1080,13 +1080,13 @@ $_tailwindCssVersion = filemtime(__DIR__ . '/../../assets/css/tailwind.css');
             }
 
             .welcome-subtitle {
-                font-size: 12px;
+                font-size: 14px;
             }
 
             .microsoft-button,
             .microsoft-btn {
                 padding: 13px;
-                font-size: 13px;
+                font-size: 14px;
             }
 
             .microsoft-logo {

@@ -1186,7 +1186,7 @@ try {
             text-align: center;
             margin-top: 40px;
             color: rgba(255, 255, 255, 0.4);
-            font-size: 13px;
+            font-size: 14px;
             -webkit-animation: textSlideUp 1s ease-out 1.1s both;
             animation: textSlideUp 1s ease-out 1.1s both;
         }
@@ -1325,7 +1325,7 @@ try {
             }
 
             .login-footer {
-                font-size: 12px;
+                font-size: 14px;
                 margin-top: 35px;
             }
 
@@ -1364,12 +1364,12 @@ try {
             }
 
             .welcome-subtitle {
-                font-size: 13px;
+                font-size: 14px;
             }
 
             .microsoft-button {
                 padding: 13px 10px;
-                font-size: 13px;
+                font-size: 14px;
                 gap: 8px;
                 white-space: normal;
             }
@@ -1387,7 +1387,7 @@ try {
             }
 
             .login-footer {
-                font-size: 11px;
+                font-size: 14px;
                 margin-top: 30px;
             }
 
@@ -1421,12 +1421,12 @@ try {
             }
 
             .welcome-subtitle {
-                font-size: 12px;
+                font-size: 14px;
             }
 
             .microsoft-button {
                 padding: 13px;
-                font-size: 13px;
+                font-size: 14px;
             }
 
             .microsoft-logo {
@@ -1521,7 +1521,7 @@ try {
                 margin-bottom: 8px;
             }
             .welcome-subtitle {
-                font-size: 13.5px;
+                font-size: 14px;
             }
             .microsoft-button {
                 padding: 15px 16px;

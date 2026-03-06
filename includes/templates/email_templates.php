@@ -107,10 +107,10 @@ class EmailTemplates {
                     <!-- Footer -->
                     <tr>
                         <td style="padding: 30px 40px; background-color: #f9f9f9; border-radius: 0 0 16px 16px; text-align: center;">
-                            <p style="margin: 0 0 10px; font-size: 12px; color: #666666; line-height: 1.6;">
+                            <p style="margin: 0 0 10px; font-size: 14px; color: #666666; line-height: 1.6;">
                                 Diese E-Mail wurde automatisch vom IBC Intranet generiert.
                             </p>
-                            <p style="margin: 0; font-size: 12px; color: #666666;">
+                            <p style="margin: 0; font-size: 14px; color: #666666;">
                                 &copy; ' . date('Y') . ' IBC Business Consulting. Alle Rechte vorbehalten.
                             </p>
                         </td>

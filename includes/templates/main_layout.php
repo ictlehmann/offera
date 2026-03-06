@@ -159,7 +159,7 @@ if (!isset($currentUser)) {
             .stat-icon { width: 48px !important; height: 48px !important; font-size: 1.25rem !important; }
 
             /* Better badge sizing */
-            .badge, [class*="badge"] { padding: 0.375rem 0.75rem !important; font-size: 0.8125rem !important; }
+            .badge, [class*="badge"] { padding: 0.375rem 0.75rem !important; font-size: 0.875rem !important; }
 
             /* Larger touch targets and better spacing for sidebar nav on mobile */
             .sidebar nav a {
