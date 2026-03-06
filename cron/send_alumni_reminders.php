@@ -15,6 +15,15 @@ require_once __DIR__ . '/../includes/database.php';
 require_once __DIR__ . '/../includes/models/Alumni.php';
 require_once __DIR__ . '/../src/MailService.php';
 
+if (PHP_SAPI !== 'cli') {
+    $__cronToken = CRON_TOKEN;
+    if ($__cronToken === '' || !isset($_GET['token']) || !is_string($_GET['token']) || !hash_equals($__cronToken, $_GET['token'])) {
+        http_response_code(403);
+        exit('Forbidden.' . PHP_EOL);
+    }
+    unset($__cronToken);
+}
+
 // Output start message
 echo "=== Alumni Reminder Email Cron Job ===\n";
 echo "Started at: " . date('Y-m-d H:i:s') . "\n\n";
