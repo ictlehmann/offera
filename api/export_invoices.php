@@ -1,7 +1,7 @@
 <?php
 /**
  * API: Export Invoices
- * Creates a ZIP file containing all invoice files for board members
+ * Creates a CSV file containing invoice metadata for board members
  */
 
 require_once __DIR__ . '/../src/Auth.php';
@@ -36,76 +36,34 @@ if (empty($invoices)) {
     exit;
 }
 
-// Create a temporary directory for the ZIP file
-$tempDir = sys_get_temp_dir();
-$zipFileName = 'rechnungen_export_' . date('Y-m-d_H-i-s') . '.zip';
-$zipFilePath = $tempDir . '/' . $zipFileName;
+// Output CSV
+$csvFileName = 'rechnungen_export_' . date('Y-m-d_H-i-s') . '.csv';
+// Sanitize filename to prevent header injection
+$safeCsvFileName = str_replace(['"', '\\', "\r", "\n"], '', $csvFileName);
 
-// Create ZIP archive
-$zip = new ZipArchive();
-if ($zip->open($zipFilePath, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== TRUE) {
-    $_SESSION['error_message'] = 'Fehler beim Erstellen der ZIP-Datei';
-    header('Location: ' . asset('pages/invoices/index.php'));
-    exit;
-}
-
-// Allowed base directory for invoice files
-$invoicesDir = realpath(__DIR__ . '/../uploads/invoices');
-
-// Add files to ZIP
-$fileCount = 0;
-foreach ($invoices as $invoice) {
-    if (!empty($invoice['file_path'])) {
-        $filePath = realpath(__DIR__ . '/../' . ltrim($invoice['file_path'], '/'));
-
-        // Path-traversal guard: skip any file that resolves outside uploads/invoices
-        if (
-            $filePath === false ||
-            $invoicesDir === false ||
-            !str_starts_with($filePath, $invoicesDir . DIRECTORY_SEPARATOR)
-        ) {
-            continue;
-        }
-
-        if (is_file($filePath)) {
-            // Create a meaningful filename
-            $extension = pathinfo($filePath, PATHINFO_EXTENSION);
-            $safeDescription = preg_replace('/[^a-zA-Z0-9_-]/', '_', substr($invoice['description'], 0, 50));
-            $amountCents = (int)($invoice['amount'] * 100);
-            $newFileName = sprintf(
-                '%s_%s_%s_%dc.%s',
-                date('Y-m-d', strtotime($invoice['created_at'])),
-                $invoice['id'],
-                $safeDescription,
-                $amountCents,
-                $extension
-            );
-            
-            $zip->addFile($filePath, $newFileName);
-            $fileCount++;
-        }
-    }
-}
-
-$zip->close();
-
-// Check if any files were added
-if ($fileCount === 0) {
-    unlink($zipFilePath);
-    $_SESSION['error_message'] = 'Keine Dateien zum Exportieren gefunden';
-    header('Location: ' . asset('pages/invoices/index.php'));
-    exit;
-}
-
-// Send ZIP file to browser
-header('Content-Type: application/zip');
-header('Content-Disposition: attachment; filename="' . $zipFileName . '"');
-header('Content-Length: ' . filesize($zipFilePath));
+header('Content-Type: text/csv; charset=UTF-8');
+header('Content-Disposition: attachment; filename="' . $safeCsvFileName . '"');
 header('Cache-Control: no-cache, must-revalidate');
 header('Pragma: public');
 
-readfile($zipFilePath);
+$out = fopen('php://output', 'w');
+// UTF-8 BOM so that Excel opens the file with the correct encoding
+fputs($out, "\xEF\xBB\xBF");
 
-// Clean up temporary file
-unlink($zipFilePath);
+fputcsv($out, ['ID', 'Benutzer', 'Beschreibung', 'Betrag (€)', 'Status', 'Ablehnungsgrund', 'Erstellt am', 'Bezahlt am'], ';');
+
+foreach ($invoices as $invoice) {
+    fputcsv($out, [
+        sanitizeCsvValue((string)($invoice['id'] ?? '')),
+        sanitizeCsvValue((string)($invoice['user_email'] ?? '')),
+        sanitizeCsvValue((string)($invoice['description'] ?? '')),
+        sanitizeCsvValue(number_format((float)($invoice['amount'] ?? 0), 2, ',', '.')),
+        sanitizeCsvValue((string)($invoice['status'] ?? '')),
+        sanitizeCsvValue((string)($invoice['rejection_reason'] ?? '')),
+        sanitizeCsvValue((string)($invoice['created_at'] ?? '')),
+        sanitizeCsvValue((string)($invoice['paid_at'] ?? '')),
+    ], ';');
+}
+
+fclose($out);
 exit;
