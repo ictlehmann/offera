@@ -736,11 +736,13 @@ class AuthHandler {
                 if (!$wasExistingOnEntry) {
                     try {
                         require_once __DIR__ . '/../models/User.php';
-                        $contentDb   = Database::getContentDB();
-                        $profStmt    = $contentDb->prepare("SELECT image_path FROM alumni_profiles WHERE user_id = ?");
-                        $profStmt->execute([$userId]);
-                        $profRow     = $profStmt->fetch();
-                        $hasUpload   = !empty($profRow['image_path']);
+                        $userDb      = Database::getUserDB();
+                        $avatarStmt  = $userDb->prepare("SELECT avatar_path FROM users WHERE id = ?");
+                        $avatarStmt->execute([$userId]);
+                        $avatarRow   = $avatarStmt->fetch();
+                        $currentAvatar = $avatarRow ? ($avatarRow['avatar_path'] ?? null) : null;
+                        // Skip photo sync if the user already has a manually-uploaded custom photo
+                        $hasUpload   = !empty($currentAvatar) && strpos($currentAvatar, 'custom_') !== false;
 
                         if (!$hasUpload) {
                             $photoData = $graphService->getUserPhoto($azureOid);
@@ -955,11 +957,18 @@ class AuthHandler {
             require_once __DIR__ . '/../../includes/models/User.php';
             require_once __DIR__ . '/../../includes/models/Alumni.php';
 
+            // Check users.avatar_path to determine if a custom (manually uploaded) photo exists
+            $avatarStmt  = $db->prepare("SELECT avatar_path FROM users WHERE id = ?");
+            $avatarStmt->execute([$userId]);
+            $avatarRow   = $avatarStmt->fetch();
+            $currentAvatar = $avatarRow ? ($avatarRow['avatar_path'] ?? null) : null;
+            $hasUpload   = !empty($currentAvatar) && strpos($currentAvatar, 'custom_') !== false;
+
+            // Fetch alumni_profiles row for name sync below (existence check only)
             $contentDb    = Database::getContentDB();
-            $profileStmt  = $contentDb->prepare("SELECT image_path FROM alumni_profiles WHERE user_id = ?");
+            $profileStmt  = $contentDb->prepare("SELECT user_id FROM alumni_profiles WHERE user_id = ?");
             $profileStmt->execute([$userId]);
             $profileRow   = $profileStmt->fetch();
-            $hasUpload    = !empty($profileRow['image_path']);
 
             // --- Also sync first_name / last_name into alumni_profiles when available ---
             if ($firstName !== null || $lastName !== null || $mail !== null) {

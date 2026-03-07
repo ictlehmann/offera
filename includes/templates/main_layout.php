@@ -612,14 +612,13 @@ if (!isset($currentUser)) {
                 require_once __DIR__ . '/../models/Alumni.php';
                 $profile = Alumni::getProfileByUserId($currentUser['id']);
                 
-                // Resolve profile image for the desktop top navbar using the 3-level hierarchy:
-                // 1. User-uploaded image (alumni_profiles.image_path)
-                // 2. Entra ID photo (fetched live from Microsoft Graph and cached)
-                // 3. Default profile image (no image shown in navbar – initials shown instead)
+                // Resolve profile image for the desktop top navbar using avatar_path as single source of truth:
+                // If avatar_path is set AND the file physically exists → show image
+                // Otherwise → show initials (no image URL set)
                 $_defaultImg = defined('DEFAULT_PROFILE_IMAGE') ? DEFAULT_PROFILE_IMAGE : 'assets/img/default_profil.png';
                 require_once __DIR__ . '/../models/User.php';
                 // Pass $currentUser as $userData to avoid a redundant DB query (Auth::user() already
-                // fetched entra_photo_path and azure_oid via SELECT *).
+                // fetched avatar_path via SELECT *).
                 $_resolved = User::getProfilePictureUrl($currentUser['id'], $currentUser);
                 if ($_resolved !== $_defaultImg) {
                     $navProfileImageUrl = $_resolved;

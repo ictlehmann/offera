@@ -259,23 +259,6 @@ $users = User::getAll();
 $currentUser = Auth::user();
 $currentUserRole = $currentUser['role'] ?? '';
 
-// Pre-fetch profile image paths from alumni_profiles for all users (content DB)
-$profileImagePaths = [];
-try {
-    if (!empty($users)) {
-        $contentDb = Database::getContentDB();
-        $userIds = array_column($users, 'id');
-        $placeholders = implode(',', array_fill(0, count($userIds), '?'));
-        $stmt = $contentDb->prepare("SELECT user_id, image_path FROM alumni_profiles WHERE user_id IN ($placeholders)");
-        $stmt->execute($userIds);
-        foreach ($stmt->fetchAll() as $row) {
-            $profileImagePaths[(int)$row['user_id']] = $row['image_path'];
-        }
-    }
-} catch (Exception $e) {
-    // Silently ignore – avatars will fall back to default
-}
-
 $title = 'Benutzerverwaltung - IBC Intranet';
 ob_start();
 ?>
@@ -508,10 +491,7 @@ ob_start();
                     <td class="px-6 py-4 whitespace-nowrap" data-label="Profil">
                         <?php
                         $defaultImg = defined('DEFAULT_PROFILE_IMAGE') ? DEFAULT_PROFILE_IMAGE : 'assets/img/default_profil.png';
-                        $resolvedImg = getProfileImageUrl(
-                            $profileImagePaths[(int)$user['id']] ?? null,
-                            $user['entra_photo_path'] ?? null
-                        );
+                        $resolvedImg = getProfileImageUrl($user['avatar_path'] ?? null);
                         $avatarImageUrl = ($resolvedImg !== $defaultImg) ? asset($resolvedImg) : null;
                         $avatarInitials = getMemberInitials($user['first_name'] ?? '', $user['last_name'] ?? '');
                         if ($avatarInitials === '?') {
