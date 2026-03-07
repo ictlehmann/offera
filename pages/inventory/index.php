@@ -65,9 +65,6 @@ ob_start();
         </div>
         <!-- Action Buttons -->
         <div class="flex gap-4 flex-wrap">
-            <button type="button" onclick="window.location.reload()" class="px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-xl transition-all transform hover:scale-105 shadow-lg font-semibold flex items-center" title="Ansicht aktualisieren" aria-label="Aktualisieren">
-                <i class="fas fa-rotate-right"></i>
-            </button>
             <?php if (AuthHandler::isAdmin()): ?>
             <a href="sync.php" class="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-5 py-3 rounded-xl flex items-center shadow-lg font-semibold transition-all transform hover:scale-105">
                 <i class="fas fa-sync-alt mr-2"></i> EasyVerein Sync
