@@ -7,7 +7,7 @@
  *
  * Protection layers (in order):
  *  1. IP-based rate limiting  – max 3 requests per hour per IP (file-based)
- *  2. reCAPTCHA v3 validation – reject if success=false or score < 0.5
+ *  2. reCAPTCHA v2 validation – reject if success=false
  *  3. Input sanitization      – htmlspecialchars + email format validation
  *  4. DB storage              – AlumniAccessRequest::create() (status 'pending')
  *  5. Generic response        – always identical success message (no info leakage)
@@ -21,7 +21,6 @@ require_once __DIR__ . '/../../includes/models/AlumniAccessRequest.php';
 // ── Configuration constants ────────────────────────────────────────────────────
 define('ALUMNI_RATE_LIMIT_MAX',     3);    // Max requests per window
 define('ALUMNI_RATE_LIMIT_WINDOW',  3600); // Window in seconds (1 hour)
-define('ALUMNI_RECAPTCHA_THRESHOLD', 0.5); // Minimum reCAPTCHA v3 score
 
 // Field-length limits (must stay in sync with DB column definitions)
 define('ALUMNI_MAX_NAME_LENGTH',     100);
@@ -174,22 +173,21 @@ if (empty($data)) {
     exit;
 }
 
-// ── reCAPTCHA v3 validation ───────────────────────────────────────────────────
+// ── reCAPTCHA v2 validation ───────────────────────────────────────────────────
 /**
- * Verify a reCAPTCHA v3 token against Google's siteverify endpoint.
+ * Verify a reCAPTCHA v2 token against Google's siteverify endpoint.
  *
  * Uses cURL instead of file_get_contents() so that the request works even when
  * allow_url_fopen is disabled on the server.
  *
- * @param string $token          Token submitted by the client
- * @param string $secretKey      RECAPTCHA_SECRET_KEY from config
- * @param string $remoteIp       Client IP for additional signal
- * @param float  $scoreThreshold Minimum acceptable reCAPTCHA score
- * @return bool|null  true = human (success=true AND score >= threshold),
+ * @param string $token     Token submitted by the client
+ * @param string $secretKey RECAPTCHA_SECRET_KEY from config
+ * @param string $remoteIp  Client IP for additional signal
+ * @return bool|null  true = human (success=true),
  *                    false = bot / invalid token,
  *                    null = network / timeout error (service unavailable)
  */
-function verifyRecaptcha(string $token, string $secretKey, string $remoteIp, float $scoreThreshold): ?bool {
+function verifyRecaptcha(string $token, string $secretKey, string $remoteIp): ?bool {
     if ($token === '' || $secretKey === '') {
         return false;
     }
@@ -231,11 +229,11 @@ function verifyRecaptcha(string $token, string $secretKey, string $remoteIp, flo
         return false;
     }
 
-    return ($result['success'] === true) && (($result['score'] ?? 0.0) >= $scoreThreshold);
+    return ($result['success'] === true);
 }
 
 $recaptchaToken        = trim($data['recaptcha_token'] ?? '');
-$recaptchaVerification = verifyRecaptcha($recaptchaToken, RECAPTCHA_SECRET_KEY, $clientIp, ALUMNI_RECAPTCHA_THRESHOLD);
+$recaptchaVerification = verifyRecaptcha($recaptchaToken, RECAPTCHA_SECRET_KEY, $clientIp);
 
 if ($recaptchaVerification === null) {
     http_response_code(503);
@@ -243,9 +241,9 @@ if ($recaptchaVerification === null) {
     exit;
 }
 
-if ($recaptchaVerification === false) {
+if (empty($recaptchaVerification) || $recaptchaVerification !== true) {
     http_response_code(403);
-    echo json_encode(['success' => false, 'message' => 'reCAPTCHA-Überprüfung fehlgeschlagen']);
+    echo json_encode(['success' => false, 'message' => 'reCAPTCHA Validierung fehlgeschlagen.']);
     exit;
 }
 
