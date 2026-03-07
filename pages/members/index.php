@@ -157,9 +157,8 @@ ob_start();
                 // Generate initials for fallback
                 $initials = getMemberInitials($member['first_name'], $member['last_name']);
                 
-                // Resolve profile image using the 3-level hierarchy:
-                // 1. User-uploaded image (image_path), 2. Entra photo, 3. Default
-                $imageSrc = asset(getProfileImageUrl($member['image_path'] ?? null, $member['entra_photo_path'] ?? null));
+                // Resolve profile image using avatar_path as the single source of truth
+                $imageSrc = asset(getProfileImageUrl($member['avatar_path'] ?? null));
                 
                 // Info snippet: Show position, or study_program + degree
                 $infoSnippet = '';

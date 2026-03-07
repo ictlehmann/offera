@@ -498,16 +498,17 @@ $isProfileComplete = $completionPercent === 100;
 
 $title = 'Profil - IBC Intranet';
 // Pass $user as $userData to avoid a redundant DB query – Auth::user() already fetched
-// entra_photo_path and azure_oid via SELECT *.
+// avatar_path via SELECT *.
 $profile_image = asset(User::getProfilePictureUrl($user['id'], $user));
 
 // Determine the current photo source so the UI can inform the user and offer the
 // appropriate action buttons.
-// $profile['image_path'] = manually uploaded photo from alumni_profiles table
-// $user['entra_photo_path'] = Microsoft/Entra ID cached photo from users table
-// Both are checked using resolveImagePath() to ensure the file actually exists on disk.
-$hasManualUpload = !empty($profile['image_path']) && resolveImagePath($profile['image_path']) !== null;
-$hasEntraPhoto   = !empty($user['entra_photo_path']) && resolveImagePath($user['entra_photo_path']) !== null;
+// users.avatar_path holds either a custom_* (manually uploaded) or entra_* (Entra ID) path.
+// resolveImagePath() confirms the file actually exists on disk.
+$currentAvatarPath = $user['avatar_path'] ?? null;
+$hasValidAvatar    = !empty($currentAvatarPath) && resolveImagePath($currentAvatarPath) !== null;
+$hasManualUpload   = $hasValidAvatar && strpos($currentAvatarPath, 'custom_') !== false;
+$hasEntraPhoto     = $hasValidAvatar && strpos($currentAvatarPath, 'entra_') !== false;
 $photoSource = $hasManualUpload ? 'manual' : ($hasEntraPhoto ? 'entra' : 'default');
 ob_start();
 ?>

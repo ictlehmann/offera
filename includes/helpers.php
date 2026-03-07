@@ -378,31 +378,26 @@ function resolveImagePath(?string $imagePath): ?string {
 }
 
 /**
- * Get the profile image URL with fallback hierarchy:
- *  1. User-uploaded image ($imagePath from alumni_profiles.image_path)
- *  2. Entra ID cached photo ($entraPhotoPath from users.entra_photo_path)
- *  3. Default profile image (assets/img/default_profil.png)
+ * Get the profile image URL using users.avatar_path as the single source of truth.
  *
- * @param string|null $imagePath        User-uploaded image path from the database
- * @param string|null $entraPhotoPath   Entra ID cached photo path from users table
+ * Hierarchy:
+ *  1. If avatar_path is set AND the file physically exists on the server → return the path
+ *     (works for both custom_* user uploads and entra_* cached Entra ID photos)
+ *  2. Otherwise (avatar_path is empty/NULL or the file is missing) → return the default image
+ *
+ * @param string|null $avatarPath  The avatar_path value from users table (may be custom_* or entra_*)
  * @return string URL-ready image path
  */
-function getProfileImageUrl(?string $imagePath, ?string $entraPhotoPath = null): string {
+function getProfileImageUrl(?string $avatarPath): string {
     $default = defined('DEFAULT_PROFILE_IMAGE') ? DEFAULT_PROFILE_IMAGE : 'assets/img/default_profil.png';
 
-    // 1. User-uploaded image has highest priority
-    $resolved = resolveImagePath($imagePath);
+    // Return the path only if it is set and the file physically exists on the server
+    $resolved = resolveImagePath($avatarPath);
     if ($resolved !== null) {
         return $resolved;
     }
 
-    // 2. Fall back to Entra ID cached photo
-    $resolved = resolveImagePath($entraPhotoPath);
-    if ($resolved !== null) {
-        return $resolved;
-    }
-
-    // 3. Default profile image
+    // Guaranteed fallback: default profile image
     return $default;
 }
 

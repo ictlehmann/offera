@@ -128,6 +128,7 @@ class Member {
                 u.role,
                 u.entra_roles,
                 u.entra_photo_path,
+                u.avatar_path,
                 u.job_title,
                 u.created_at,
                 u.privacy_hide_email
@@ -140,9 +141,13 @@ class Member {
             $userStmt->execute($userParams);
             $users = $userStmt->fetchAll();
         } catch (PDOException $e) {
-            // SQLSTATE 42S22 = unknown column; fall back if entra_photo_path doesn't exist yet
-            if ($e->getCode() === '42S22' && strpos($e->getMessage(), 'entra_photo_path') !== false) {
-                $userSql = str_replace('u.entra_photo_path,', 'NULL AS entra_photo_path,', $userSql);
+            // SQLSTATE 42S22 = unknown column; fall back if column doesn't exist yet
+            if ($e->getCode() === '42S22') {
+                foreach (['u.entra_photo_path,' => 'NULL AS entra_photo_path,', 'u.avatar_path,' => 'NULL AS avatar_path,'] as $col => $fallback) {
+                    if (strpos($e->getMessage(), trim($col, 'u.,')) !== false) {
+                        $userSql = str_replace($col, $fallback, $userSql);
+                    }
+                }
                 $userStmt = $userDb->prepare($userSql);
                 $userStmt->execute($userParams);
                 $users = $userStmt->fetchAll();
@@ -171,6 +176,7 @@ class Member {
                 $profile['role'] = $user['role'];
                 $profile['entra_roles'] = $user['entra_roles'] ?? null;
                 $profile['entra_photo_path'] = $user['entra_photo_path'] ?? null;
+                $profile['avatar_path'] = $user['avatar_path'] ?? null;
                 $profile['job_title'] = $user['job_title'] ?? null;
                 $profile['user_created_at'] = $user['created_at'];
                 $profile['privacy_hide_email'] = $user['privacy_hide_email'] ?? 0;
@@ -364,12 +370,11 @@ class Member {
     /**
      * Get the profile image URL with fallback to default image
      *
-     * @param string|null $imagePath      User-uploaded image path from the database
-     * @param string|null $entraPhotoPath Entra ID cached photo path from users table
+     * @param string|null $avatarPath  The avatar_path from users table (may be custom_* or entra_*)
      * @return string URL-ready image path
      */
-    public static function getImageUrl(?string $imagePath, ?string $entraPhotoPath = null): string {
-        return getProfileImageUrl($imagePath, $entraPhotoPath);
+    public static function getImageUrl(?string $avatarPath): string {
+        return getProfileImageUrl($avatarPath);
     }
 
     /**

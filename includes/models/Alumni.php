@@ -387,14 +387,18 @@ class Alumni extends Database {
                 $placeholders = implode(',', array_fill(0, count($userIds), '?'));
                 // Role values are trusted internal constants – hardcoded directly in SQL
                 $alumniRoleList = "'" . implode("', '", self::ALUMNI_ROLES) . "'";
-                $userSql = "SELECT id, role, entra_roles, entra_photo_path, privacy_hide_email FROM users WHERE id IN ($placeholders) AND role IN ($alumniRoleList)";
+                $userSql = "SELECT id, role, entra_roles, entra_photo_path, avatar_path, privacy_hide_email FROM users WHERE id IN ($placeholders) AND role IN ($alumniRoleList)";
                 try {
                     $userStmt = $userDb->prepare($userSql);
                     $userStmt->execute($userIds);
                 } catch (PDOException $pdoEx) {
-                    // SQLSTATE 42S22 = unknown column; fall back if entra_photo_path doesn't exist yet
-                    if ($pdoEx->getCode() === '42S22' && strpos($pdoEx->getMessage(), 'entra_photo_path') !== false) {
-                        $userSql = str_replace('entra_photo_path', 'NULL AS entra_photo_path', $userSql);
+                    // SQLSTATE 42S22 = unknown column; fall back if column doesn't exist yet
+                    if ($pdoEx->getCode() === '42S22') {
+                        foreach (['entra_photo_path' => 'NULL AS entra_photo_path', 'avatar_path' => 'NULL AS avatar_path'] as $col => $fallback) {
+                            if (strpos($pdoEx->getMessage(), $col) !== false) {
+                                $userSql = str_replace($col, $fallback, $userSql);
+                            }
+                        }
                         $userStmt = $userDb->prepare($userSql);
                         $userStmt->execute($userIds);
                     } else {
@@ -416,6 +420,7 @@ class Alumni extends Database {
                     if (in_array($userRole, ['alumni', 'alumni_vorstand', 'alumni_finanz', 'ehrenmitglied'])) {
                         $profile['role'] = $userRole;
                         $profile['entra_photo_path'] = $userData['entra_photo_path'] ?? null;
+                        $profile['avatar_path'] = $userData['avatar_path'] ?? null;
                         $profile['privacy_hide_email'] = $userData['privacy_hide_email'] ?? 0;
                         
                         // Resolve display_role: prefer Entra display names, fall back to role label

@@ -153,8 +153,8 @@ class User {
         $db = Database::getUserDB();
         
         $sql = $role
-            ? "SELECT id, email, first_name, last_name, role, user_type, tfa_enabled, is_alumni_validated, last_login, created_at, entra_roles, entra_photo_path, azure_oid, is_locked_permanently, locked_until FROM users WHERE role = ? ORDER BY created_at DESC"
-            : "SELECT id, email, first_name, last_name, role, user_type, tfa_enabled, is_alumni_validated, last_login, created_at, entra_roles, entra_photo_path, azure_oid, is_locked_permanently, locked_until FROM users ORDER BY created_at DESC";
+            ? "SELECT id, email, first_name, last_name, role, user_type, tfa_enabled, is_alumni_validated, last_login, created_at, entra_roles, entra_photo_path, azure_oid, is_locked_permanently, locked_until, avatar_path FROM users WHERE role = ? ORDER BY created_at DESC"
+            : "SELECT id, email, first_name, last_name, role, user_type, tfa_enabled, is_alumni_validated, last_login, created_at, entra_roles, entra_photo_path, azure_oid, is_locked_permanently, locked_until, avatar_path FROM users ORDER BY created_at DESC";
         try {
             if ($role) {
                 $stmt = $db->prepare($sql);
@@ -166,7 +166,7 @@ class User {
             // SQLSTATE 42S22 = unknown column; fall back for columns that may not exist yet.
             // Replace ALL potentially-missing columns at once so a single retry suffices
             // even when multiple new columns are absent (e.g. schema not yet migrated).
-            $fallbackCols = ['entra_photo_path', 'is_locked_permanently', 'locked_until'];
+            $fallbackCols = ['entra_photo_path', 'is_locked_permanently', 'locked_until', 'avatar_path'];
             $msg = $e->getMessage();
             $isKnownMissingCol = $e->getCode() === '42S22' && array_filter($fallbackCols, fn($c) => strpos($msg, $c) !== false);
             if ($isKnownMissingCol) {
@@ -380,16 +380,15 @@ class User {
     }
 
     /**
-     * Get the profile picture URL for a user with the following priority:
-     *  1. User-uploaded photo (from alumni_profiles.image_path)
-     *  2. Entra ID cached photo (users.entra_photo_path) – fetched live and cached if not yet stored
-     *  3. Default profile image (assets/img/default_profil.png)
+     * Get the profile picture URL for a user using users.avatar_path as the single source of truth.
      *
-     * The Entra ID photo is cached on disk and the path is persisted in users.entra_photo_path
-     * so the Microsoft Graph API is only called once per user (until the cache is invalidated).
+     * Hierarchy:
+     *  1. If avatar_path (from users table) is set AND the file physically exists → return the path
+     *     (works for both custom_* user uploads and entra_* cached Entra ID photos)
+     *  2. Otherwise (avatar_path is empty/NULL or the file is missing) → return the default image
      *
      * @param int        $userId   Local database user ID
-     * @param array|null $userData Pre-fetched user row (must contain entra_photo_path and azure_oid).
+     * @param array|null $userData Pre-fetched user row (must contain avatar_path).
      *                             Pass null to have the row fetched automatically.
      * @return string              URL-ready relative image path
      */
@@ -397,66 +396,29 @@ class User {
         require_once __DIR__ . '/../helpers.php';
         $default = defined('DEFAULT_PROFILE_IMAGE') ? DEFAULT_PROFILE_IMAGE : 'assets/img/default_profil.png';
 
-        // 1. Check for user-uploaded profile photo (highest priority)
-        $uploadedPath = null;
-        try {
-            $contentDb  = Database::getContentDB();
-            $stmt       = $contentDb->prepare("SELECT image_path FROM alumni_profiles WHERE user_id = ?");
-            $stmt->execute([$userId]);
-            $row        = $stmt->fetch();
-            $uploadedPath = $row ? ($row['image_path'] ?? null) : null;
-        } catch (Exception $e) {
-            error_log('[getProfilePictureUrl] Failed to fetch uploaded image for user ' . $userId . ': ' . $e->getMessage());
-        }
-
-        if (!empty($uploadedPath)) {
-            $resolved = resolveImagePath($uploadedPath);
-            if ($resolved !== null) {
-                return $resolved;
-            }
-        }
-
-        // Lazy-load user row only when not supplied by the caller
-        if ($userData === null) {
+        // Use pre-fetched data if available, otherwise query users.avatar_path
+        $avatarPath = null;
+        if ($userData !== null && array_key_exists('avatar_path', $userData)) {
+            $avatarPath = $userData['avatar_path'];
+        } else {
             try {
                 $db   = Database::getUserDB();
-                $stmt = $db->prepare("SELECT entra_photo_path, azure_oid FROM users WHERE id = ?");
+                $stmt = $db->prepare("SELECT avatar_path FROM users WHERE id = ?");
                 $stmt->execute([$userId]);
-                $userData = $stmt->fetch() ?: [];
+                $row  = $stmt->fetch();
+                $avatarPath = $row ? ($row['avatar_path'] ?? null) : null;
             } catch (Exception $e) {
-                error_log('[getProfilePictureUrl] Failed to fetch user row for user ' . $userId . ': ' . $e->getMessage());
-                $userData = [];
+                error_log('[getProfilePictureUrl] Failed to fetch avatar_path for user ' . $userId . ': ' . $e->getMessage());
             }
         }
 
-        // 2. Check for cached Entra ID photo
-        $entraPath = $userData['entra_photo_path'] ?? null;
-        if (!empty($entraPath)) {
-            $resolved = resolveImagePath($entraPath);
-            if ($resolved !== null) {
-                return $resolved;
-            }
+        // Return the path only if it is set and the file physically exists on the server
+        $resolved = resolveImagePath($avatarPath);
+        if ($resolved !== null) {
+            return $resolved;
         }
 
-        // 2b. No valid cached Entra photo – try to fetch from Microsoft Graph (if user has an Azure OID)
-        $azureOid = $userData['azure_oid'] ?? null;
-        if (!empty($azureOid)) {
-            try {
-                require_once __DIR__ . '/../services/MicrosoftGraphService.php';
-                $graphService = new MicrosoftGraphService();
-                $photoData    = $graphService->getUserPhoto($azureOid);
-                if ($photoData !== null) {
-                    $cached = self::cacheEntraPhoto($userId, $photoData);
-                    if ($cached !== null) {
-                        return $cached;
-                    }
-                }
-            } catch (Exception $e) {
-                error_log('[getProfilePictureUrl] Entra photo fetch failed for user ' . $userId . ': ' . $e->getMessage());
-            }
-        }
-
-        // 3. Fall back to default image
+        // Guaranteed fallback: default profile image
         return $default;
     }
 
@@ -531,10 +493,22 @@ class User {
 
             $relativePath = str_replace('\\', '/', substr($realPath, strlen($projectRoot) + 1));
 
-            // Persist the path in the users table
+            // Persist the path in the users table.
+            // Always update entra_photo_path. Also update avatar_path unless the user has a
+            // manually-uploaded custom photo (identified by the custom_ filename prefix).
             $db   = Database::getUserDB();
             $stmt = $db->prepare("UPDATE users SET entra_photo_path = ? WHERE id = ?");
             $stmt->execute([$relativePath, $userId]);
+
+            // Only overwrite avatar_path if it is not already pointing to a custom upload
+            $avatarStmt = $db->prepare("SELECT avatar_path FROM users WHERE id = ?");
+            $avatarStmt->execute([$userId]);
+            $avatarFetched = $avatarStmt->fetch();
+            $currentAvatar = ($avatarFetched ?: [])['avatar_path'] ?? null;
+            if (empty($currentAvatar) || strpos($currentAvatar, 'custom_') === false) {
+                $db->prepare("UPDATE users SET avatar_path = ? WHERE id = ?")
+                   ->execute([$relativePath, $userId]);
+            }
 
             return $relativePath;
 

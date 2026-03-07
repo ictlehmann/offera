@@ -159,9 +159,8 @@ ob_start();
                         // Generate initials for fallback
                         $initials = getMemberInitials($profile['first_name'], $profile['last_name']);
                         $avatarColor = getAvatarColor($profile['first_name'] . ' ' . $profile['last_name']);
-                        // Resolve profile image using the 3-level hierarchy:
-                        // 1. User-uploaded image (image_path), 2. Entra photo, 3. Default
-                        $imagePath = asset(getProfileImageUrl($profile['image_path'] ?? null, $profile['entra_photo_path'] ?? null));
+                        // Resolve profile image using avatar_path as the single source of truth
+                        $imagePath = asset(getProfileImageUrl($profile['avatar_path'] ?? null));
                         ?>
                         <div class="directory-card-avatar-wrap">
                             <div class="directory-avatar rounded-circle overflow-hidden border border-3 border-white shadow"
