@@ -231,8 +231,8 @@ ob_start();
                                 <?php echo htmlspecialchars(date('d.m.Y H:i', strtotime($req['created_at']))); ?>
                             </td>
                             <?php if (!$readOnly): ?>
-                            <td class="px-4 py-3 text-sm whitespace-nowrap" data-label="Aktionen">
-                                <div class="flex items-center gap-2">
+                            <td class="px-4 py-3 text-sm" data-label="Aktionen">
+                                <div class="flex flex-wrap items-center gap-2">
                                     <button
                                         onclick="handleRequestAction(<?php echo (int)$req['id']; ?>, 'approve')"
                                         class="btn btn-sm d-inline-flex align-items-center gap-1"
@@ -312,7 +312,7 @@ ob_start();
                                 <span class="block text-xs text-orange-600 font-medium mt-0.5">Vorzeitige Rückgabe gemeldet</span>
                             </td>
                             <?php if (!$readOnly): ?>
-                            <td class="px-4 py-3 text-sm whitespace-nowrap" data-label="Aktion">
+                            <td class="px-4 py-3 text-sm" data-label="Aktion">
                                 <button
                                     onclick="confirmReturn(<?php echo (int)$loan['id']; ?>, 'pending-return')"
                                     class="inline-flex items-center px-3 py-1.5 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition font-medium text-sm">
@@ -349,7 +349,7 @@ ob_start();
                                 <span class="block text-xs text-orange-600 font-medium mt-0.5">Rückgabe gemeldet</span>
                             </td>
                             <?php if (!$readOnly): ?>
-                            <td class="px-4 py-3 text-sm whitespace-nowrap" data-label="Aktion">
+                            <td class="px-4 py-3 text-sm" data-label="Aktion">
                                 <button
                                     onclick="confirmRentalReturn(<?php echo (int)$rental['id']; ?>)"
                                     class="inline-flex items-center px-3 py-1.5 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition font-medium text-sm">
@@ -416,7 +416,7 @@ ob_start();
                                 <?php echo htmlspecialchars(date('d.m.Y', strtotime($loan['end_date']))); ?>
                             </td>
                             <?php if (!$readOnly): ?>
-                            <td class="px-4 py-3 text-sm whitespace-nowrap" data-label="Aktion">
+                            <td class="px-4 py-3 text-sm" data-label="Aktion">
                                 <button
                                     onclick="confirmReturn(<?php echo (int)$loan['id']; ?>)"
                                     class="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium text-sm">
