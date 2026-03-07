@@ -290,12 +290,12 @@ ob_start();
 
     <!-- Header -->
     <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
+        <div class="min-w-0">
             <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 dark:text-gray-100 mb-2">
                 <i class="fas fa-shopping-cart mr-3 text-blue-600 dark:text-blue-400"></i>
                 Shop
             </h1>
-            <p class="text-gray-600 dark:text-gray-300">Exklusive Artikel für IBC-Mitglieder</p>
+            <p class="text-gray-600 dark:text-gray-300 break-words hyphens-auto">Exklusive Artikel für IBC-Mitglieder</p>
         </div>
         <a href="<?php echo asset('pages/shop/index.php?action=cart'); ?>"
            class="relative inline-flex items-center px-5 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-300 shadow-lg hover:shadow-xl font-medium no-underline active:scale-95">
@@ -729,7 +729,7 @@ ob_start();
             </div>
 
             <!-- Details & Add to cart -->
-            <div class="flex flex-col">
+            <div class="flex flex-col min-w-0">
                 <h2 class="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800 dark:text-gray-100 mb-3">
                     <?php echo htmlspecialchars($currentProduct['name']); ?>
                 </h2>
@@ -1019,7 +1019,7 @@ ob_start();
                     <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(CSRFHandler::getToken(), ENT_QUOTES, 'UTF-8'); ?>">
 
                     <!-- Shipping method selection -->
-                    <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-3">Liefermethode</h3>
+                    <h3 class="text-lg sm:text-xl font-semibold text-gray-700 dark:text-gray-300 mb-3">Liefermethode</h3>
                     <div class="mb-6 space-y-3">
                         <label class="flex items-center gap-4 p-4 border-2 rounded-xl cursor-pointer transition-all
                                       border-gray-200 dark:border-gray-700 hover:border-green-400
@@ -1028,9 +1028,9 @@ ob_start();
                             <div class="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center flex-shrink-0">
                                 <i class="fas fa-building text-green-600 dark:text-green-400 text-xl"></i>
                             </div>
-                            <div class="flex-1">
-                                <p class="font-semibold text-gray-800 dark:text-gray-100">Selbstabholung im MiMe</p>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">kostenlos, nach Benachrichtigung</p>
+                            <div class="flex-1 min-w-0">
+                                <p class="font-semibold text-gray-800 dark:text-gray-100 break-words hyphens-auto">Selbstabholung im MiMe</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400 break-words hyphens-auto">kostenlos, nach Benachrichtigung</p>
                             </div>
                             <span class="text-green-600 dark:text-green-400 font-bold text-sm">0,00 €</span>
                         </label>
@@ -1042,9 +1042,9 @@ ob_start();
                             <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center flex-shrink-0">
                                 <i class="fas fa-truck text-blue-600 dark:text-blue-400 text-xl"></i>
                             </div>
-                            <div class="flex-1">
-                                <p class="font-semibold text-gray-800 dark:text-gray-100">Postversand</p>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">zzgl. <span id="mail-shipping-cost-hint"><?php echo number_format(Shop::calculateShippingCost('DE', $cartTotalAmt), 2, ',', '.'); ?> €</span></p>
+                            <div class="flex-1 min-w-0">
+                                <p class="font-semibold text-gray-800 dark:text-gray-100 break-words hyphens-auto">Postversand</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400 break-words hyphens-auto">zzgl. <span id="mail-shipping-cost-hint"><?php echo number_format(Shop::calculateShippingCost('DE', $cartTotalAmt), 2, ',', '.'); ?> €</span></p>
                             </div>
                             <span id="mail-shipping-cost-badge" class="text-blue-600 dark:text-blue-400 font-bold text-sm"><?php echo number_format(Shop::calculateShippingCost('DE', $cartTotalAmt), 2, ',', '.'); ?> €</span>
                         </label>
@@ -1123,7 +1123,7 @@ ob_start();
                     </div>
 
                     <!-- Payment method selection -->
-                    <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-3 mt-6">Zahlungsmethode</h3>
+                    <h3 class="text-lg sm:text-xl font-semibold text-gray-700 dark:text-gray-300 mb-3 mt-6">Zahlungsmethode</h3>
                     <div class="mb-6 space-y-3">
                         <label class="flex items-center gap-4 p-4 border-2 rounded-xl cursor-pointer transition-all
                                       border-gray-200 dark:border-gray-700 hover:border-blue-400
@@ -1132,9 +1132,9 @@ ob_start();
                             <div class="w-10 h-10 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center flex-shrink-0">
                                 <i class="fab fa-paypal text-blue-600 dark:text-blue-400 text-xl"></i>
                             </div>
-                            <div>
-                                <p class="font-semibold text-gray-800 dark:text-gray-100">PayPal</p>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Schnell und sicher mit PayPal bezahlen</p>
+                            <div class="flex-1 min-w-0">
+                                <p class="font-semibold text-gray-800 dark:text-gray-100 break-words hyphens-auto">PayPal</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400 break-words hyphens-auto">Schnell und sicher mit PayPal bezahlen</p>
                             </div>
                         </label>
 
@@ -1146,9 +1146,9 @@ ob_start();
                             <div class="w-10 h-10 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center flex-shrink-0">
                                 <i class="fas fa-university text-green-600 dark:text-green-400 text-xl"></i>
                             </div>
-                            <div>
-                                <p class="font-semibold text-gray-800 dark:text-gray-100">Überweisung</p>
-                                <p class="text-sm text-gray-500 dark:text-gray-400">Per Banküberweisung bezahlen – du erhältst die Details per E-Mail</p>
+                            <div class="flex-1 min-w-0">
+                                <p class="font-semibold text-gray-800 dark:text-gray-100 break-words hyphens-auto">Überweisung</p>
+                                <p class="text-sm text-gray-500 dark:text-gray-400 break-words hyphens-auto">Per Banküberweisung bezahlen – du erhältst die Details per E-Mail</p>
                             </div>
                         </label>
                     </div>
@@ -1844,7 +1844,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 + '<div class="inline-flex flex-col items-center gap-4">'
                                 + '<div class="w-20 h-20 bg-green-100 dark:bg-green-900 rounded-full flex items-center justify-center">'
                                 + '<i class="fas fa-check text-green-500 text-4xl"></i></div>'
-                                + '<h2 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Zahlung erfolgreich!</h2>'
+                                + '<h2 class="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-100">Zahlung erfolgreich!</h2>'
                                 + '<p class="text-gray-600 dark:text-gray-300">Bestellung #' + result.order_id
                                 + ' wurde abgeschlossen. Du erhältst eine Bestätigungs-E-Mail.</p>'
                                 + '<a href="' + SHOP_URL + '" class="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 font-medium no-underline">'
