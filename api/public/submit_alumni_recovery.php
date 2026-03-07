@@ -228,21 +228,21 @@ if ($recaptchaVerification === null) {
 
 if (empty($recaptchaVerification) || $recaptchaVerification !== true) {
     http_response_code(403);
-    echo json_encode(['success' => false, 'message' => 'reCAPTCHA Validierung fehlgeschlagen.']);
+    echo json_encode(['success' => false, 'message' => 'reCAPTCHA ungültig. Bitte Haken erneut setzen.']);
     exit;
 }
 
 // ── Input sanitization & validation ──────────────────────────────────────────
 // Strict length truncation: never trust HTML maxlength; always enforce the DB
 // column limit in PHP before any further processing, validation, or DB write.
-$firstName          = htmlspecialchars(mb_substr(trim($data['first_name']          ?? ''), 0, ALUMNI_MAX_NAME_LENGTH),     ENT_QUOTES, 'UTF-8');
-$lastName           = htmlspecialchars(mb_substr(trim($data['last_name']           ?? ''), 0, ALUMNI_MAX_NAME_LENGTH),     ENT_QUOTES, 'UTF-8');
-$graduationSemester = htmlspecialchars(mb_substr(trim($data['graduation_semester'] ?? ''), 0, ALUMNI_MAX_SEMESTER_LENGTH), ENT_QUOTES, 'UTF-8');
-$studyProgram       = htmlspecialchars(mb_substr(trim($data['study_program']       ?? ''), 0, ALUMNI_MAX_PROGRAM_LENGTH),  ENT_QUOTES, 'UTF-8');
+$firstName          = htmlspecialchars(mb_substr(trim($data['first_name']          ?? ''), 0, ALUMNI_MAX_NAME_LENGTH,     'UTF-8'), ENT_QUOTES, 'UTF-8');
+$lastName           = htmlspecialchars(mb_substr(trim($data['last_name']           ?? ''), 0, ALUMNI_MAX_NAME_LENGTH,     'UTF-8'), ENT_QUOTES, 'UTF-8');
+$graduationSemester = htmlspecialchars(mb_substr(trim($data['graduation_semester'] ?? ''), 0, ALUMNI_MAX_SEMESTER_LENGTH, 'UTF-8'), ENT_QUOTES, 'UTF-8');
+$studyProgram       = htmlspecialchars(mb_substr(trim($data['study_program']       ?? ''), 0, ALUMNI_MAX_PROGRAM_LENGTH,  'UTF-8'), ENT_QUOTES, 'UTF-8');
 
 // Email fields: truncate to RFC/DB limit, then validate format and normalise
-$newEmailRaw = mb_substr(trim($data['new_email'] ?? ''), 0, ALUMNI_MAX_EMAIL_LENGTH);
-$oldEmailRaw = mb_substr(trim($data['old_email'] ?? ''), 0, ALUMNI_MAX_EMAIL_LENGTH);
+$newEmailRaw = mb_substr(trim($data['new_email'] ?? ''), 0, ALUMNI_MAX_EMAIL_LENGTH, 'UTF-8');
+$oldEmailRaw = mb_substr(trim($data['old_email'] ?? ''), 0, ALUMNI_MAX_EMAIL_LENGTH, 'UTF-8');
 
 if (empty($firstName) || empty($lastName)) {
     http_response_code(400);
