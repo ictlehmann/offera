@@ -675,12 +675,8 @@ a:focus-visible {
 </div><!-- /alumni-page-wrap -->
 
 <?php if (RECAPTCHA_SITE_KEY !== ''): ?>
-<!-- Google reCAPTCHA v2 – loaded async/defer for performance -->
-<script
-    src="https://www.google.com/recaptcha/api.js"
-    async
-    defer
-></script>
+<!-- Google reCAPTCHA v2 -->
+<script src="https://www.google.com/recaptcha/api.js"></script>
 <?php endif; ?>
 
 <script>
@@ -793,21 +789,14 @@ a:focus-visible {
             return;
         }
 
-        setLoading(true);
-
-        if (SITE_KEY && typeof grecaptcha === 'undefined') {
-            setLoading(false);
-            showError('reCAPTCHA wurde blockiert. Bitte deaktiviere deinen Adblocker für diese Seite.');
-            return;
-        }
-
-        var token = (SITE_KEY && typeof grecaptcha !== 'undefined') ? grecaptcha.getResponse() : '';
+        var token = typeof grecaptcha !== 'undefined' ? grecaptcha.getResponse() : '';
 
         if (SITE_KEY && token === '') {
-            setLoading(false);
             showError('Bitte bestätige, dass du kein Roboter bist.');
             return;
         }
+
+        setLoading(true);
 
         function doSubmit(token) {
             var payload = {
@@ -843,11 +832,13 @@ a:focus-visible {
                 if (result.success) {
                     showSuccess();
                 } else {
+                    if (typeof grecaptcha !== 'undefined') grecaptcha.reset();
                     showError(result.message || 'Ein unbekannter Fehler ist aufgetreten. Bitte erneut versuchen.');
                 }
             })
             .catch(function () {
                 setLoading(false);
+                if (typeof grecaptcha !== 'undefined') grecaptcha.reset();
                 showError('Netzwerkfehler. Bitte Verbindung prüfen und erneut versuchen.');
             });
         }
