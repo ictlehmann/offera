@@ -392,7 +392,7 @@ ob_start();
                         <?php echo !empty($rental['rented_at']) ? date('d.m.Y H:i', strtotime($rental['rented_at'])) : '-'; ?>
                     </td>
                     <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300 font-medium" data-label="Rückgabe Ende">-</td>
-                    <td class="px-6 py-4 text-sm whitespace-nowrap" data-label="Aktionen">
+                    <td class="px-6 py-4 text-sm" data-label="Aktionen">
                         <?php if ($rental['status'] === 'pending_return'): ?>
                         <span class="px-3 py-1.5 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300">
                             Wird vom Vorstand geprüft

@@ -44,7 +44,7 @@ ob_start();
                 <i class="fas fa-clipboard-list text-purple-600 mr-2"></i>
                 Meine Ausleihen
             </h1>
-            <p class="text-gray-600"><?php echo count($activeCheckouts); ?> aktive Ausleihen</p>
+            <p class="text-gray-600 dark:text-gray-400"><?php echo count($activeCheckouts); ?> aktive Ausleihen</p>
         </div>
         <div class="mt-4 md:mt-0">
             <a href="index.php" class="btn-primary w-full md:w-auto">
@@ -119,7 +119,7 @@ ob_start();
                             Aktiv
                         </span>
                     </td>
-                    <td class="px-4 py-3 whitespace-nowrap" data-label="Aktion">
+                    <td class="px-4 py-3" data-label="Aktion">
                         <button onclick="openReturnModal(<?php echo (int)$item['id']; ?>, '<?php echo htmlspecialchars($item['name'] ?? '', ENT_QUOTES); ?>', <?php echo $quantity; ?>, '<?php echo htmlspecialchars($unit, ENT_QUOTES); ?>')"
                                 class="inline-flex items-center px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 transition text-sm">
                             <i class="fas fa-undo mr-1"></i>Zurückgeben

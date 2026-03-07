@@ -4521,7 +4521,7 @@ body:not(.dark-mode) .hero-gradient .hero-date {
         padding: 0.5rem 1rem;
         border-bottom: 1px solid var(--ibc-gray-100);
         text-align: right;
-        white-space: normal;
+        white-space: normal !important; /* override Tailwind whitespace-nowrap */
     }
     .card-table td:last-child {
         border-bottom: none;
@@ -7065,6 +7065,27 @@ body.dark-mode .modal-footer {
     color: var(--ibc-blue) !important;
     border-bottom-color: var(--bg-card) !important;
     font-weight: 600;
+}
+
+/* ── Responsive nav-tabs: horizontal scroll on small screens ── */
+@media (max-width: 575px) {
+    .nav-tabs {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none; /* Firefox */
+    }
+    .nav-tabs::-webkit-scrollbar {
+        display: none; /* Chrome/Safari */
+    }
+    .nav-tabs .nav-item {
+        flex-shrink: 0;
+    }
+    .nav-tabs .nav-link {
+        font-size: 0.8125rem;
+        padding: 0.5rem 0.875rem;
+        white-space: nowrap;
+    }
 }
 
 .nav-pills .nav-link {

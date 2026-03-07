@@ -75,7 +75,7 @@ ob_start();
                 <i class="fas fa-clipboard-list text-purple-600 mr-2"></i>
                 Meine Ausleihen
             </h1>
-            <p class="text-gray-600"><?php echo count($rentals); ?> aktive Ausleihen</p>
+            <p class="text-gray-600 dark:text-gray-400"><?php echo count($rentals); ?> aktive Ausleihen</p>
         </div>
         <div class="mt-4 md:mt-0">
             <a href="index.php" class="btn-primary w-full md:w-auto">
@@ -174,14 +174,14 @@ ob_start();
                         </span>
                         <?php endif; ?>
                     </td>
-                    <td class="px-4 py-3 whitespace-nowrap" data-label="Aktion">
+                    <td class="px-4 py-3" data-label="Aktion">
                         <?php if ($isAwaitingApproval): ?>
                         <span class="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-800 rounded text-sm font-medium">
                             <i class="fas fa-clock mr-1"></i>Wartet auf Genehmigung
                         </span>
                         <?php elseif ($isAwaitingReturn): ?>
                         <span class="inline-flex items-center px-3 py-1 bg-yellow-100 text-yellow-800 rounded text-sm font-medium">
-                            <i class="fas fa-clock mr-1"></i>Wartet auf Bestätigung durch den Vorstand
+                            <i class="fas fa-clock mr-1"></i>Wartet auf Bestätigung
                         </span>
                         <?php elseif ($isActive && $status === 'active'): ?>
                         <?php $confirmMsg = $isEarlyReturn ? 'Vorzeitige Rückgabe melden? Das Gerät wird sofort wieder freigegeben.' : 'Rückgabe für diesen Artikel melden?'; ?>
