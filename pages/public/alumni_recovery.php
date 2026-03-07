@@ -640,7 +640,11 @@ a:focus-visible {
                 </div>
 
                 <?php if (RECAPTCHA_SITE_KEY !== ''): ?>
-                <div class="g-recaptcha" data-sitekey="<?php echo htmlspecialchars(RECAPTCHA_SITE_KEY, ENT_QUOTES, 'UTF-8'); ?>"></div>
+                <div
+                    class="g-recaptcha"
+                    data-sitekey="<?php echo htmlspecialchars(RECAPTCHA_SITE_KEY, ENT_QUOTES, 'UTF-8'); ?>"
+                    data-theme="dark"
+                ></div>
                 <?php endif; ?>
 
                 <!-- Submit -->
@@ -790,6 +794,12 @@ a:focus-visible {
         }
 
         setLoading(true);
+
+        if (SITE_KEY && typeof grecaptcha === 'undefined') {
+            setLoading(false);
+            showError('reCAPTCHA wurde blockiert. Bitte deaktiviere deinen Adblocker für diese Seite.');
+            return;
+        }
 
         var token = (SITE_KEY && typeof grecaptcha !== 'undefined') ? grecaptcha.getResponse() : '';
 
