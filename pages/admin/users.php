@@ -330,22 +330,22 @@ ob_start();
     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden">
         <nav class="flex" aria-label="Tabs">
             <button 
-                class="tab-button active flex-1 py-4 px-6 text-center font-semibold transition-all duration-200 relative overflow-hidden bg-gradient-to-r from-purple-600 to-indigo-600 text-white"
+                class="tab-button active flex-1 py-3 sm:py-4 px-3 sm:px-6 text-center font-semibold transition-all duration-200 relative overflow-hidden bg-gradient-to-r from-purple-600 to-indigo-600 text-white"
                 data-tab="users"
             >
                 <span class="relative z-10 flex items-center justify-center">
                     <i class="fas fa-users mr-2"></i>
-                    Benutzerliste
+                    <span>Benutzerliste</span>
                 </span>
             </button>
             <?php if (Auth::canManageUsers()): ?>
             <button 
-                class="tab-button flex-1 py-4 px-6 text-center font-semibold transition-all duration-200 relative overflow-hidden bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600"
+                class="tab-button flex-1 py-3 sm:py-4 px-3 sm:px-6 text-center font-semibold transition-all duration-200 relative overflow-hidden bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600"
                 data-tab="entra-search"
             >
                 <span class="relative z-10 flex items-center justify-center">
                     <i class="fab fa-microsoft mr-2"></i>
-                    Entra-Benutzer
+                    <span>Entra-Benutzer</span>
                 </span>
             </button>
             <?php endif; ?>
@@ -535,12 +535,12 @@ ob_start();
                         </div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap" data-label="Benutzer">
-                        <div class="flex items-center">
-                            <div>
-                                <div class="text-sm font-semibold text-gray-900 dark:text-gray-100 flex items-center">
+                        <div class="flex items-center min-w-0">
+                            <div class="min-w-0">
+                                <div class="text-sm font-semibold text-gray-900 dark:text-gray-100 flex items-center flex-wrap gap-1 break-all">
                                     <?php echo htmlspecialchars($user['email']); ?>
                                     <?php if ($user['id'] == $_SESSION['user_id']): ?>
-                                    <span class="ml-2 px-2.5 py-0.5 text-xs bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-full font-bold shadow-sm">Du</span>
+                                    <span class="ml-1 px-2.5 py-0.5 text-xs bg-gradient-to-r from-blue-500 to-cyan-500 text-white rounded-full font-bold shadow-sm">Du</span>
                                     <?php endif; ?>
                                 </div>
                                 <div class="text-xs text-gray-500 dark:text-gray-400 font-mono mt-1">ID: <?php echo $user['id']; ?></div>
@@ -707,7 +707,7 @@ ob_start();
         </div>
         <div class="p-6">
             <!-- Search field -->
-            <div class="flex gap-3 mb-6">
+            <div class="flex flex-col sm:flex-row gap-3 mb-6">
                 <div class="flex-1 relative">
                     <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                         <i class="fas fa-search text-gray-400"></i>
@@ -722,7 +722,7 @@ ob_start();
                 <button
                     id="entraSearchBtn"
                     type="button"
-                    class="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 font-semibold shadow-md transition-all duration-200"
+                    class="w-full sm:w-auto min-h-[44px] px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 font-semibold shadow-md transition-all duration-200"
                 >
                     <i class="fas fa-search mr-2"></i>Suchen
                 </button>
@@ -771,11 +771,11 @@ ob_start();
                         </select>
                     </div>
                 </div>
-                <div class="flex gap-3">
-                    <button type="submit" name="import_entra_user" class="px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl hover:from-green-700 hover:to-emerald-700 font-semibold shadow-md transition-all duration-200">
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <button type="submit" name="import_entra_user" class="w-full sm:w-auto min-h-[44px] px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl hover:from-green-700 hover:to-emerald-700 font-semibold shadow-md transition-all duration-200">
                         <i class="fas fa-user-plus mr-2"></i>Hinzufügen
                     </button>
-                    <button type="button" id="cancelImport" class="px-6 py-3 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-xl hover:bg-gray-300 dark:hover:bg-gray-500 font-semibold transition-all duration-200">
+                    <button type="button" id="cancelImport" class="w-full sm:w-auto min-h-[44px] px-6 py-3 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-xl hover:bg-gray-300 dark:hover:bg-gray-500 font-semibold transition-all duration-200">
                         Abbrechen
                     </button>
                 </div>
@@ -1032,19 +1032,19 @@ document.addEventListener('DOMContentLoaded', function() {
                             ? '<span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300 ml-1">Gast</span>'
                             : '<span class="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 ml-1">Mitglied</span>';
                         return `
-                        <div class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-600 transition-all">
-                            <div class="flex items-center space-x-3">
-                                <div class="w-9 h-9 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-lg flex items-center justify-center">
+                        <div class="flex flex-wrap items-center justify-between gap-2 p-3 bg-gray-50 dark:bg-gray-700 rounded-xl border border-gray-200 dark:border-gray-600 hover:border-blue-300 dark:hover:border-blue-600 transition-all">
+                            <div class="flex items-center space-x-3 min-w-0 flex-1">
+                                <div class="w-9 h-9 flex-shrink-0 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-lg flex items-center justify-center">
                                     <i class="fab fa-microsoft text-white text-sm"></i>
                                 </div>
-                                <div>
-                                    <div class="font-semibold text-gray-900 dark:text-gray-100 text-sm">${escapeHtml(u.displayName || '(kein Name)')}${typeBadge}</div>
-                                    <div class="text-xs text-gray-500 dark:text-gray-400">${escapeHtml(u.mail || '(keine E-Mail)')}</div>
-                                    <div class="text-xs text-gray-400 dark:text-gray-500 font-mono">${escapeHtml(u.id)}</div>
+                                <div class="min-w-0">
+                                    <div class="font-semibold text-gray-900 dark:text-gray-100 text-sm break-words">${escapeHtml(u.displayName || '(kein Name)')}${typeBadge}</div>
+                                    <div class="text-xs text-gray-500 dark:text-gray-400 break-all">${escapeHtml(u.mail || '(keine E-Mail)')}</div>
+                                    <div class="text-xs text-gray-400 dark:text-gray-500 font-mono break-all">${escapeHtml(u.id)}</div>
                                 </div>
                             </div>
                             <button type="button"
-                                class="ml-4 px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors font-semibold"
+                                class="flex-shrink-0 min-h-[44px] px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors font-semibold"
                                 data-id="${escapeHtml(u.id)}"
                                 data-name="${escapeHtml(u.displayName || '')}"
                                 data-email="${escapeHtml(u.mail || '')}"
@@ -1266,6 +1266,15 @@ select:focus {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
+/* Tablet: reduce table cell padding to help the table fit better */
+@media (min-width: 641px) and (max-width: 1023px) {
+    #usersTable th,
+    #usersTable td {
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+}
+
 /* Responsive table: Mobile-Card layout */
 @media (max-width: 640px) {
     #usersTable thead {
@@ -1294,6 +1303,7 @@ select:focus {
         padding: 0.625rem 1rem;
         border-bottom: 1px solid #f3f4f6;
         white-space: normal;
+        min-width: 0;
     }
 
     #usersTable td:last-child {
@@ -1310,6 +1320,13 @@ select:focus {
         min-width: 7rem;
         flex-shrink: 0;
         padding-top: 0.2rem;
+    }
+
+    #usersTable td > div,
+    #usersTable td > span {
+        min-width: 0;
+        word-break: break-word;
+        overflow-wrap: break-word;
     }
 
     .dark #usersTable td,
