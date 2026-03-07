@@ -64,6 +64,14 @@ try {
         exit;
     }
 
+    // Reset users.avatar_path to NULL so the login callback will re-fetch the photo
+    // from Entra ID on the user's next login instead of keeping the (now deleted) custom file.
+    $userDb = Database::getUserDB();
+    $avatarStmt = $userDb->prepare("UPDATE users SET avatar_path = NULL WHERE id = ?");
+    if (!$avatarStmt->execute([$userId])) {
+        error_log('delete_avatar.php: Could not reset avatar_path for user ' . $userId);
+    }
+
     // Delete the old file from disk after the DB update succeeded.
     // Log a warning if the file cannot be removed (orphaned file) but still return success
     // because the desired state (no custom DB path) is already achieved.
