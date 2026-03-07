@@ -518,9 +518,6 @@ a:focus-visible {
             novalidate
             autocomplete="on"
         >
-            <!-- CSRF-safe: token injected at submit via reCAPTCHA -->
-            <input type="hidden" name="recaptcha_token" id="recaptcha_token" autocomplete="off">
-
             <div style="display:flex;flex-direction:column;gap:1.1rem;">
 
                 <!-- First / Last name -->
@@ -642,6 +639,10 @@ a:focus-visible {
                     </div>
                 </div>
 
+                <?php if (RECAPTCHA_SITE_KEY !== ''): ?>
+                <div class="g-recaptcha" data-sitekey="<?php echo htmlspecialchars(RECAPTCHA_SITE_KEY, ENT_QUOTES, 'UTF-8'); ?>"></div>
+                <?php endif; ?>
+
                 <!-- Submit -->
                 <button
                     type="submit"
@@ -670,9 +671,9 @@ a:focus-visible {
 </div><!-- /alumni-page-wrap -->
 
 <?php if (RECAPTCHA_SITE_KEY !== ''): ?>
-<!-- Google reCAPTCHA v3 – loaded async/defer for performance -->
+<!-- Google reCAPTCHA v2 – loaded async/defer for performance -->
 <script
-    src="https://www.google.com/recaptcha/api.js?render=<?php echo htmlspecialchars(RECAPTCHA_SITE_KEY, ENT_QUOTES, 'UTF-8'); ?>"
+    src="https://www.google.com/recaptcha/api.js"
     async
     defer
 ></script>
@@ -682,7 +683,7 @@ a:focus-visible {
 /* ================================================================
    Alumni Recovery – Form Handler
    - Strict CSP-friendly (no eval, no inline handlers)
-   - Token is always freshly minted at submit-time
+   - reCAPTCHA v2: token read synchronously at submit-time
    - No sensitive data logged to console
    ================================================================ */
 (function () {
@@ -790,6 +791,14 @@ a:focus-visible {
 
         setLoading(true);
 
+        var token = (SITE_KEY && typeof grecaptcha !== 'undefined') ? grecaptcha.getResponse() : '';
+
+        if (SITE_KEY && token === '') {
+            setLoading(false);
+            showError('Bitte bestätige, dass du kein Roboter bist.');
+            return;
+        }
+
         function doSubmit(token) {
             var payload = {
                 recaptcha_token:     token,
@@ -833,21 +842,7 @@ a:focus-visible {
             });
         }
 
-        if (SITE_KEY) {
-            grecaptcha.ready(function () {
-                grecaptcha.execute(SITE_KEY, { action: 'alumni_recovery' })
-                    .then(function (token) {
-                        document.getElementById('recaptcha_token').value = token;
-                        doSubmit(token);
-                    })
-                    .catch(function () {
-                        setLoading(false);
-                        showError('reCAPTCHA konnte nicht geladen werden. Bitte Seite neu laden.');
-                    });
-            });
-        } else {
-            doSubmit('');
-        }
+        doSubmit(token);
     });
 }());
 </script>
