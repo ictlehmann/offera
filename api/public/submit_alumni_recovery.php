@@ -9,7 +9,7 @@
  *  1. IP-based rate limiting  – max 3 requests per hour per IP (file-based)
  *  2. reCAPTCHA v2 validation – reject if success=false
  *  3. Input sanitization      – htmlspecialchars + email format validation
- *  4. DB storage              – AlumniAccessRequest::create() (status 'pending')
+ *  4. DB storage              – isolated PDO INSERT (status 'pending')
  *  5. Generic response        – always identical success message (no info leakage)
  */
 
@@ -50,49 +50,34 @@ function sendGenericSuccess(): void {
 /**
  * Return the client IP address to use for rate-limiting purposes.
  *
- * REMOTE_ADDR (the direct TCP peer) is always the primary source because it
- * cannot be forged by a remote attacker.  Forwarding headers such as
- * X-Forwarded-For are user-controlled and must NEVER be trusted blindly – an
- * attacker could supply an arbitrary value to impersonate a different IP and
- * bypass the rate limit.
+ * Checks proxy-forwarded headers in priority order so that the real client IP
+ * is used even when the application sits behind a reverse proxy:
+ *   1. HTTP_X_FORWARDED_FOR – leftmost (originating) entry of the header list
+ *   2. HTTP_CLIENT_IP       – set by some proxy configurations
+ *   3. REMOTE_ADDR          – direct TCP peer (final fallback)
  *
- * X-Forwarded-For is only honoured when REMOTE_ADDR exactly matches one of
- * the IP addresses listed in the TRUSTED_PROXIES constant (configured via the
- * TRUSTED_PROXIES environment variable).  This allows the system to sit behind
- * a known reverse proxy (e.g. Cloudflare) while still deriving the real client
- * IP from the header appended by that proxy.
- *
- * Each candidate extracted from X-Forwarded-For is validated with filter_var()
- * and private / reserved ranges are rejected so that internal proxy IPs in the
- * forwarding chain cannot shadow the actual client address.
+ * Each candidate from forwarded headers is validated with filter_var() and
+ * private / reserved IP ranges are rejected to prevent spoofing with internal
+ * addresses. REMOTE_ADDR is used as-is since it is the direct TCP peer.
  *
  * @return string A validated IP address string, or '0.0.0.0' as a safe fallback.
  */
 function getClientIp(): string {
-    $remoteAddr = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
-
-    // Only trust X-Forwarded-For when the direct TCP peer is a known proxy.
-    $trustedProxies = defined('TRUSTED_PROXIES') && is_array(TRUSTED_PROXIES) ? TRUSTED_PROXIES : [];
-
-    if (!empty($trustedProxies) && in_array($remoteAddr, $trustedProxies, true)) {
-        if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
-            // Header format: "client, proxy1, proxy2" – the leftmost entry is
-            // the original client IP as reported by the first trusted proxy.
-            foreach (explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']) as $part) {
-                $candidate = trim($part);
-                if (filter_var(
-                    $candidate,
-                    FILTER_VALIDATE_IP,
-                    FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
-                ) !== false) {
-                    return $candidate;
-                }
-            }
+    if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        $ip = trim(explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'])[0]);
+        if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) !== false) {
+            return $ip;
         }
     }
 
-    // Default: use the direct TCP peer address (cannot be spoofed).
-    return $remoteAddr;
+    if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+        $ip = trim($_SERVER['HTTP_CLIENT_IP']);
+        if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) !== false) {
+            return $ip;
+        }
+    }
+
+    return $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
 }
 
 // ── IP-based rate limiting (max 3 requests / hour) ────────────────────────────
@@ -307,15 +292,21 @@ if (AlumniAccessRequest::hasPendingRequest($newEmail)) {
     exit;
 }
 
-// ── Persist via AlumniAccessRequest model (status defaults to 'pending') ──────
+// ── Persist via isolated PDO INSERT (status defaults to 'pending') ────────────
 try {
-    AlumniAccessRequest::create([
-        'first_name'          => $firstName,
-        'last_name'           => $lastName,
-        'new_email'           => $newEmail,
-        'old_email'           => $oldEmail,
-        'graduation_semester' => $graduationSemester,
-        'study_program'       => $studyProgram,
+    $db   = Database::getContentDB();
+    $stmt = $db->prepare(
+        "INSERT INTO alumni_access_requests
+             (first_name, last_name, new_email, old_email, graduation_semester, study_program)
+         VALUES (:first_name, :last_name, :new_email, :old_email, :graduation_semester, :study_program)"
+    );
+    $stmt->execute([
+        ':first_name'          => $firstName,
+        ':last_name'           => $lastName,
+        ':new_email'           => $newEmail,
+        ':old_email'           => $oldEmail !== '' ? $oldEmail : null,
+        ':graduation_semester' => $graduationSemester,
+        ':study_program'       => $studyProgram,
     ]);
 } catch (Exception $e) {
     error_log('alumni_recovery: DB insert failed – ' . $e->getMessage());
