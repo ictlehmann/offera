@@ -618,7 +618,9 @@ if (!isset($currentUser)) {
                 // 3. Default profile image (no image shown in navbar – initials shown instead)
                 $_defaultImg = defined('DEFAULT_PROFILE_IMAGE') ? DEFAULT_PROFILE_IMAGE : 'assets/img/default_profil.png';
                 require_once __DIR__ . '/../models/User.php';
-                $_resolved = User::getProfilePictureUrl($currentUser['id']);
+                // Pass $currentUser as $userData to avoid a redundant DB query (Auth::user() already
+                // fetched entra_photo_path and azure_oid via SELECT *).
+                $_resolved = User::getProfilePictureUrl($currentUser['id'], $currentUser);
                 if ($_resolved !== $_defaultImg) {
                     $navProfileImageUrl = $_resolved;
                 }
