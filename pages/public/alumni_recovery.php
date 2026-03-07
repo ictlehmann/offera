@@ -445,6 +445,58 @@ a:focus-visible {
         transition-duration: 0.1ms !important;
     }
 }
+
+/* ── Wizard step transitions ──────────────────────────────── */
+.alumni-step {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Back button (secondary/ghost style) */
+.alumni-back-btn {
+    padding: 0.85rem 1.25rem;
+    min-height: 44px;
+    border-radius: 14px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: rgba(255, 255, 255, 0.55);
+    background: transparent;
+    border: 1.5px solid rgba(255, 255, 255, 0.12);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition:
+        border-color 0.2s ease,
+        color 0.2s ease,
+        background 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    flex-shrink: 0;
+}
+.alumni-back-btn:hover:not(:disabled) {
+    border-color: rgba(255, 255, 255, 0.28);
+    color: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.05);
+}
+.alumni-back-btn:active:not(:disabled) {
+    background: rgba(255, 255, 255, 0.08);
+}
+.alumni-back-btn:focus-visible {
+    outline: 3px solid rgba(0, 166, 81, 0.6);
+    outline-offset: 3px;
+}
+
+/* Button row for step 2 (back + submit side by side) */
+.alumni-btn-row {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+.alumni-btn-row .alumni-submit-btn {
+    flex: 1;
+}
 </style>
 
 <!-- Ambient background layers -->
@@ -526,8 +578,12 @@ a:focus-visible {
             novalidate
             autocomplete="on"
         >
-            <div style="display:flex;flex-direction:column;gap:1.1rem;">
-
+            <!-- ── STEP 1: Name + E-Mail ────────────────────── -->
+            <div
+                id="alumniStep1"
+                class="alumni-step"
+                style="display:flex;flex-direction:column;gap:1.1rem;"
+            >
                 <!-- First / Last name -->
                 <div class="alumni-grid-2">
                     <div class="alumni-field">
@@ -611,6 +667,24 @@ a:focus-visible {
                     </span>
                 </div>
 
+                <!-- Next button -->
+                <button
+                    type="button"
+                    id="nextBtn"
+                    class="alumni-submit-btn"
+                    aria-label="Weiter zu Schritt 2"
+                >
+                    <span>Weiter</span>
+                    <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                </button>
+            </div><!-- /alumniStep1 -->
+
+            <!-- ── STEP 2: Studium + reCAPTCHA + Absenden ───── -->
+            <div
+                id="alumniStep2"
+                class="alumni-step"
+                style="display:none;flex-direction:column;gap:1.1rem;opacity:0;transform:translateX(16px);"
+            >
                 <!-- Graduation semester / Study program -->
                 <div class="alumni-grid-2">
                     <div class="alumni-field">
@@ -655,16 +729,27 @@ a:focus-visible {
                 ></div>
                 <?php endif; ?>
 
-                <!-- Submit -->
-                <button
-                    type="submit"
-                    id="submitBtn"
-                    class="alumni-submit-btn"
-                    aria-label="Anfrage absenden"
-                >
-                    <i class="fas fa-paper-plane" aria-hidden="true"></i>
-                    <span id="submitBtnLabel">Anfrage absenden</span>
-                </button>
+                <!-- Button row: Back + Submit -->
+                <div class="alumni-btn-row">
+                    <button
+                        type="button"
+                        id="backBtn"
+                        class="alumni-back-btn"
+                        aria-label="Zurück zu Schritt 1"
+                    >
+                        <i class="fas fa-arrow-left" aria-hidden="true"></i>
+                        <span>Zurück</span>
+                    </button>
+                    <button
+                        type="submit"
+                        id="submitBtn"
+                        class="alumni-submit-btn"
+                        aria-label="Anfrage absenden"
+                    >
+                        <i class="fas fa-paper-plane" aria-hidden="true"></i>
+                        <span id="submitBtnLabel">Anfrage absenden</span>
+                    </button>
+                </div>
 
                 <?php if (RECAPTCHA_SITE_KEY !== ''): ?>
                 <p class="alumni-recaptcha-note">
@@ -675,8 +760,8 @@ a:focus-visible {
                     von Google.
                 </p>
                 <?php endif; ?>
+            </div><!-- /alumniStep2 -->
 
-            </div><!-- /fields -->
         </form>
 
     </div><!-- /alumni-card -->
@@ -689,8 +774,9 @@ a:focus-visible {
 
 <script>
 /* ================================================================
-   Alumni Recovery – Form Handler
+   Alumni Recovery – Wizard Form Handler (2-Schritt-Prozess)
    - Strict CSP-friendly (no eval, no inline handlers)
+   - Step 1: Name + E-Mail → Step 2: Studium + reCAPTCHA + Submit
    - reCAPTCHA v2: token read synchronously at submit-time
    - No sensitive data logged to console
    ================================================================ */
@@ -700,6 +786,10 @@ a:focus-visible {
     var SITE_KEY = <?php echo json_encode(RECAPTCHA_SITE_KEY ?: ''); ?>;
 
     var form      = document.getElementById('alumniRecoveryForm');
+    var step1     = document.getElementById('alumniStep1');
+    var step2     = document.getElementById('alumniStep2');
+    var nextBtn   = document.getElementById('nextBtn');
+    var backBtn   = document.getElementById('backBtn');
     var btn       = document.getElementById('submitBtn');
     var btnLabel  = document.getElementById('submitBtnLabel');
     var successEl = document.getElementById('alumniSuccessMessage');
@@ -709,21 +799,28 @@ a:focus-visible {
 
     if (!form || !btn) return;
 
-    /* ── Ripple effect on button ──────────────────────────────── */
-    btn.addEventListener('pointerdown', function (e) {
-        var rect   = btn.getBoundingClientRect();
-        var size   = Math.max(rect.width, rect.height) * 2;
-        var ripple = document.createElement('span');
-        ripple.className = 'ripple';
-        ripple.style.cssText =
-            'width:' + size + 'px;height:' + size + 'px;' +
-            'left:' + (e.clientX - rect.left - size / 2) + 'px;' +
-            'top:'  + (e.clientY - rect.top  - size / 2) + 'px;';
-        btn.appendChild(ripple);
-        ripple.addEventListener('animationend', function () { ripple.remove(); });
-    });
+    /* ── Ripple effect helper ─────────────────────────────────── */
+    function addRipple(button) {
+        button.addEventListener('pointerdown', function (e) {
+            var rect   = button.getBoundingClientRect();
+            var size   = Math.max(rect.width, rect.height) * 2;
+            var ripple = document.createElement('span');
+            ripple.className = 'ripple';
+            ripple.style.cssText =
+                'width:' + size + 'px;height:' + size + 'px;' +
+                'left:' + (e.clientX - rect.left - size / 2) + 'px;' +
+                'top:'  + (e.clientY - rect.top  - size / 2) + 'px;';
+            button.appendChild(ripple);
+            ripple.addEventListener('animationend', function () { ripple.remove(); });
+        });
+    }
+    if (nextBtn) addRipple(nextBtn);
+    addRipple(btn);
 
-    /* ── Helpers ─────────────────────────────────────────────── */
+    /* ── Shared e-mail validation regex ─────────────────────── */
+    var EMAIL_RE = /^[^\s@]{1,64}@[^\s@]{1,255}\.[^\s@]{2,}$/;
+
+    /* ── Error helpers ───────────────────────────────────────── */
     function showError(msg) {
         clearErrors();
         var li = document.createElement('li');
@@ -738,52 +835,107 @@ a:focus-visible {
         errorBox.classList.remove('is-visible');
     }
 
+    /* ── Step dot helper ─────────────────────────────────────── */
+    function setDot(index, active) {
+        if (stepDots[index]) {
+            stepDots[index].classList.toggle('active', active);
+        }
+    }
+
+    /* ── Wizard transition helpers ───────────────────────────── */
+    function transitionOut(el, toLeft) {
+        el.style.opacity   = '0';
+        el.style.transform = toLeft ? 'translateX(-16px)' : 'translateX(16px)';
+    }
+
+    function transitionIn(el, fromRight) {
+        el.style.display        = 'flex';
+        el.style.flexDirection  = 'column';
+        el.style.opacity        = '0';
+        el.style.transform      = fromRight ? 'translateX(16px)' : 'translateX(-16px)';
+        void el.offsetWidth;    /* force reflow */
+        el.style.opacity        = '1';
+        el.style.transform      = 'translateX(0)';
+    }
+
+    /* ── Step 1 validation ───────────────────────────────────── */
+    function validateStep1() {
+        var fn = document.getElementById('first_name').value.trim();
+        var ln = document.getElementById('last_name').value.trim();
+        var ne = document.getElementById('new_email').value.trim();
+
+        if (!fn || !ln)           return 'Bitte Vor- und Nachnamen eingeben.';
+        if (!ne)                  return 'Bitte eine neue E-Mail-Adresse eingeben.';
+        if (!EMAIL_RE.test(ne))   return 'Die neue E-Mail-Adresse hat ein ungültiges Format.';
+        var oe = document.getElementById('old_email').value.trim();
+        if (oe && !EMAIL_RE.test(oe)) return 'Die alte E-Mail-Adresse hat ein ungültiges Format.';
+        return null;
+    }
+
+    /* ── Step 2 validation ───────────────────────────────────── */
+    function validateStep2() {
+        var gs = document.getElementById('graduation_semester').value.trim();
+        var sp = document.getElementById('study_program').value.trim();
+
+        if (!gs) return 'Bitte Abschlusssemester eingeben.';
+        if (!sp) return 'Bitte Studiengang eingeben.';
+        return null;
+    }
+
+    /* ── Navigate to step 2 ──────────────────────────────────── */
+    if (nextBtn) {
+        nextBtn.addEventListener('click', function () {
+            var err = validateStep1();
+            if (err) { showError(err); return; }
+            clearErrors();
+
+            transitionOut(step1, true);
+            setTimeout(function () {
+                step1.style.display = 'none';
+                transitionIn(step2, true);
+                setDot(1, true);
+            }, 300);
+        });
+    }
+
+    /* ── Navigate back to step 1 ─────────────────────────────── */
+    if (backBtn) {
+        backBtn.addEventListener('click', function () {
+            clearErrors();
+            transitionOut(step2, false);
+            setTimeout(function () {
+                step2.style.display = 'none';
+                transitionIn(step1, false);
+                setDot(1, false);
+            }, 300);
+        });
+    }
+
+    /* ── Loading state ───────────────────────────────────────── */
     function setLoading(loading) {
         btn.disabled = loading;
         if (loading) {
             btnLabel.textContent = 'Wird gesendet …';
             btn.querySelector('i').className = 'fas fa-spinner fa-spin';
-            /* progress dots */
-            if (stepDots.length >= 2) stepDots[1].classList.add('active');
         } else {
             btnLabel.textContent = 'Anfrage absenden';
             btn.querySelector('i').className = 'fas fa-paper-plane';
-            if (stepDots.length >= 2) stepDots[1].classList.remove('active');
         }
     }
 
+    /* ── Show success (Step 3) ───────────────────────────────── */
     function showSuccess() {
-        form.style.opacity   = '0';
-        form.style.transform = 'translateY(-8px)';
+        form.style.opacity    = '0';
+        form.style.transform  = 'translateY(-8px)';
         form.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
         setTimeout(function () {
             form.style.display = 'none';
+            errorBox.classList.remove('is-visible');
             successEl.classList.add('is-visible');
-            /* final dot */
-            if (stepDots.length >= 3) {
-                stepDots[1].classList.add('active');
-                stepDots[2].classList.add('active');
-            }
+            /* activate remaining dots */
+            setDot(1, true);
+            setDot(2, true);
         }, 300);
-    }
-
-    /* ── Client-side validation (security layer 1 of 2; server validates too) */
-    function validateForm() {
-        var fn  = document.getElementById('first_name').value.trim();
-        var ln  = document.getElementById('last_name').value.trim();
-        var ne  = document.getElementById('new_email').value.trim();
-        var gs  = document.getElementById('graduation_semester').value.trim();
-        var sp  = document.getElementById('study_program').value.trim();
-        var emailRe = /^[^\s@]{1,64}@[^\s@]{1,255}\.[^\s@]{2,}$/;
-
-        if (!fn || !ln)   return 'Bitte Vor- und Nachnamen eingeben.';
-        if (!ne)           return 'Bitte eine neue E-Mail-Adresse eingeben.';
-        if (!emailRe.test(ne)) return 'Die neue E-Mail-Adresse hat ein ungültiges Format.';
-        var oe = document.getElementById('old_email').value.trim();
-        if (oe && !emailRe.test(oe)) return 'Die alte E-Mail-Adresse hat ein ungültiges Format.';
-        if (!gs) return 'Bitte Abschlusssemester eingeben.';
-        if (!sp) return 'Bitte Studiengang eingeben.';
-        return null;
     }
 
     /* ── Submit handler ──────────────────────────────────────── */
@@ -791,7 +943,7 @@ a:focus-visible {
         e.preventDefault();
         clearErrors();
 
-        var validationError = validateForm();
+        var validationError = validateStep2();
         if (validationError) {
             showError(validationError);
             return;
