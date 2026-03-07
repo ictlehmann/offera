@@ -506,12 +506,12 @@ ob_start();
 
 <div class="mb-8">
     <div class="flex flex-col md:flex-row md:items-center md:justify-between">
-        <div>
+        <div class="min-w-0">
             <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-100 mb-2">
                 <i class="fas fa-user text-purple-600 mr-2"></i>
                 Mein Profil
             </h1>
-            <p class="text-gray-600 dark:text-gray-300">Verwalte deine Kontoinformationen und Sicherheitseinstellungen</p>
+            <p class="text-gray-600 dark:text-gray-300 break-words hyphens-auto">Verwalte deine Kontoinformationen und Sicherheitseinstellungen</p>
         </div>
     </div>
 </div>
@@ -531,12 +531,12 @@ ob_start();
 <!-- Microsoft Entra Notice -->
 <div class="mb-6 p-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
     <div class="flex items-start">
-        <i class="fas fa-info-circle text-blue-600 dark:text-blue-400 text-2xl mr-4 mt-1"></i>
-        <div>
-            <h3 class="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-2">
+        <i class="fas fa-info-circle text-blue-600 dark:text-blue-400 text-2xl mr-4 mt-1 shrink-0"></i>
+        <div class="min-w-0">
+            <h3 class="text-lg sm:text-xl font-semibold text-blue-900 dark:text-blue-100 mb-2">
                 Zentral verwaltetes Profil
             </h3>
-            <p class="text-blue-800 dark:text-blue-200">
+            <p class="text-blue-800 dark:text-blue-200 break-words hyphens-auto">
                 Ihr Profil wird zentral über Microsoft Entra verwaltet. Für Änderungen wenden Sie sich bitte an IT@business-consulting.com. Vielen Dank.
             </p>
         </div>
@@ -668,7 +668,7 @@ ob_start();
                 <i class="fas fa-user-edit text-purple-600 mr-2"></i>
                 Profilangaben
             </h2>
-            <p class="text-gray-600 dark:text-gray-300 mb-6">
+            <p class="text-gray-600 dark:text-gray-300 mb-6 break-words hyphens-auto">
                 Aktualisiere deine persönlichen Informationen und Kontaktdaten
             </p>
             
@@ -843,7 +843,7 @@ ob_start();
                     <!-- Fields for Students: Candidates, Members, Board, and Heads -->
                     <!-- Student View: Show Studium -->
                     <div class="md:col-span-2">
-                        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-3 border-b border-gray-300 dark:border-gray-600 pb-2">
+                        <h3 class="text-lg sm:text-xl font-semibold text-gray-800 dark:text-gray-100 mb-3 border-b border-gray-300 dark:border-gray-600 pb-2">
                             Studium
                         </h3>
                     </div>
@@ -895,7 +895,7 @@ ob_start();
                     <!-- Fields for Alumni and Honorary Members -->
                     <!-- Alumni View: Show Absolviertes Studium -->
                     <div class="md:col-span-2">
-                        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-3 border-b border-gray-300 dark:border-gray-600 pb-2">
+                        <h3 class="text-lg sm:text-xl font-semibold text-gray-800 dark:text-gray-100 mb-3 border-b border-gray-300 dark:border-gray-600 pb-2">
                             Absolviertes Studium
                         </h3>
                     </div>
@@ -945,7 +945,7 @@ ob_start();
                     </div>
                     
                     <div class="md:col-span-2">
-                        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-3 border-b border-gray-300 dark:border-gray-600 pb-2 mt-4">
+                        <h3 class="text-lg sm:text-xl font-semibold text-gray-800 dark:text-gray-100 mb-3 border-b border-gray-300 dark:border-gray-600 pb-2 mt-4">
                             Berufliche Informationen
                         </h3>
                     </div>
@@ -1112,7 +1112,7 @@ ob_start();
             <!-- QR Code Setup -->
             <div class="max-w-md mx-auto">
                 <div class="text-center mb-6">
-                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-2">2FA einrichten</h3>
+                    <h3 class="text-lg sm:text-xl font-semibold text-gray-800 dark:text-gray-100 mb-2">2FA einrichten</h3>
                     <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">
                         Scanne den QR-Code mit deiner Authenticator-App und gib den generierten Code ein
                     </p>
@@ -1215,17 +1215,17 @@ ob_start();
         <button type="button" onclick="showSupportModal('2fa_reset')"
            class="flex items-center p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-lg hover:bg-yellow-100 dark:hover:bg-yellow-900/40 transition text-left w-full">
             <i class="fas fa-shield-alt text-yellow-600 dark:text-yellow-400 text-2xl mr-4 shrink-0"></i>
-            <div>
-                <span class="block font-semibold text-gray-800 dark:text-gray-100">2FA zurücksetzen</span>
-                <span class="block text-sm text-gray-600 dark:text-gray-400">Anfrage per E-Mail senden</span>
+            <div class="min-w-0">
+                <span class="block font-semibold text-gray-800 dark:text-gray-100 break-words hyphens-auto">2FA zurücksetzen</span>
+                <span class="block text-sm text-gray-600 dark:text-gray-400 break-words hyphens-auto">Anfrage per E-Mail senden</span>
             </div>
         </button>
         <button type="button" onclick="showSupportModal('bug')"
            class="flex items-center p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/40 transition text-left w-full">
             <i class="fas fa-bug text-red-600 dark:text-red-400 text-2xl mr-4 shrink-0"></i>
-            <div>
-                <span class="block font-semibold text-gray-800 dark:text-gray-100">Bug melden</span>
-                <span class="block text-sm text-gray-600 dark:text-gray-400">Fehler per E-Mail melden</span>
+            <div class="min-w-0">
+                <span class="block font-semibold text-gray-800 dark:text-gray-100 break-words hyphens-auto">Bug melden</span>
+                <span class="block text-sm text-gray-600 dark:text-gray-400 break-words hyphens-auto">Fehler per E-Mail melden</span>
             </div>
         </button>
     </div>
@@ -1236,7 +1236,7 @@ ob_start();
     <div class="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-lg max-h-[85vh] flex flex-col overflow-hidden">
         <div class="p-6 overflow-y-auto flex-1">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-bold dark:text-white">
+                <h3 class="text-lg sm:text-xl font-bold dark:text-white">
                     <i class="fas fa-headset text-blue-600 mr-2"></i>Hilfe
                 </h3>
                 <button type="button" onclick="hideSupportModal()" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
@@ -1280,7 +1280,7 @@ ob_start();
 <div id="cropperModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
     <div class="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-lg max-h-[85vh] flex flex-col overflow-hidden">
         <div class="p-6 overflow-y-auto flex-1">
-            <h3 class="text-lg font-bold mb-4 dark:text-white">Profilbild zuschneiden</h3>
+            <h3 class="text-lg sm:text-xl font-bold mb-4 dark:text-white">Profilbild zuschneiden</h3>
             <div class="w-full max-h-96 mb-4 overflow-hidden flex justify-center">
                 <img id="cropperImage" class="max-w-full">
             </div>
