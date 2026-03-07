@@ -349,21 +349,24 @@ ob_start();
     <!-- ── Visual Category Tab Strip ─────────────────────────────────────────── -->
     <?php if (!empty($availableCategories)): ?>
     <style>
-    .cat-tab { display:inline-flex; align-items:center; gap:8px; padding:10px 18px; border-radius:14px; font-size:.875rem; font-weight:700; cursor:pointer; transition:all .2s ease; white-space:nowrap; border:2px solid transparent; }
-    .cat-tab-all { background:#111827; color:#fff; box-shadow:0 2px 12px rgba(0,0,0,.18); }
+    .cat-tab { display:inline-flex; align-items:center; gap:8px; padding:10px 18px; border-radius:14px; font-size:.875rem; font-weight:700; cursor:pointer; transition:all .3s cubic-bezier(0.4,0,0.2,1); white-space:nowrap; border:2px solid transparent; }
+    .cat-tab-all { background:#2563eb; color:#fff; box-shadow:0 4px 6px -1px rgba(0,0,0,.1),0 2px 4px -2px rgba(0,0,0,.1); }
     .cat-tab-all.cat-tab-inactive { background:#f3f4f6; color:#374151; border-color:#e5e7eb; box-shadow:none; }
+    .cat-tab-all.cat-tab-inactive:hover { background:#dbeafe; color:#1e40af; border-color:#93c5fd; transform:translateY(-2px); box-shadow:0 3px 10px rgba(0,0,0,.1); }
     .dark .cat-tab-all.cat-tab-inactive { background:#374151; color:#d1d5db; border-color:#4b5563; }
-    .dark .cat-tab-all { background:#f9fafb; color:#111827; }
+    .dark .cat-tab-all.cat-tab-inactive:hover { background:rgba(37,99,235,.18); color:#93c5fd; border-color:#3b82f6; }
+    .dark .cat-tab-all { background:#1d4ed8; color:#fff; }
     .cat-tab-item { background:#fff; color:#4b5563; border-color:#e5e7eb; box-shadow:0 1px 3px rgba(0,0,0,.06); }
     .dark .cat-tab-item { background:#1f2937; color:#d1d5db; border-color:#374151; }
-    .cat-tab-item:hover { box-shadow:0 3px 10px rgba(0,0,0,.12); transform:translateY(-1px); }
+    .cat-tab-item:hover { background:#dbeafe; color:#1e40af; border-color:#93c5fd; box-shadow:0 3px 10px rgba(0,0,0,.12); transform:translateY(-2px); }
+    .dark .cat-tab-item:hover { background:rgba(37,99,235,.18); color:#93c5fd; border-color:#3b82f6; }
     .cat-tab-item.cat-tab-active { color:#fff; border-color:transparent; box-shadow:0 4px 14px rgba(0,0,0,.2); transform:translateY(-1px); }
     .cat-count-badge { font-size:0.875rem; font-weight:700; padding:2px 7px; border-radius:999px; background:rgba(0,0,0,.12); }
     .cat-tab-item.cat-tab-active .cat-count-badge { background:rgba(255,255,255,.25); }
     </style>
     <div class="mb-5 flex items-center gap-2 overflow-x-auto pb-1" id="shop-cat-tabs" aria-label="Kategorien">
         <button type="button" data-tab-cat="all"
-                class="cat-tab cat-tab-all flex-shrink-0">
+                class="cat-tab cat-tab-all flex-shrink-0 transition-all duration-300 ease-in-out">
             <i class="fas fa-border-all text-sm"></i>
             <span>Alle</span>
             <span class="cat-count-badge"><?php echo count($products); ?></span>
@@ -373,7 +376,7 @@ ob_start();
             $count = count(array_filter($products, fn($p) => ($p['category'] ?? '') === $cat));
         ?>
         <button type="button" data-tab-cat="<?php echo htmlspecialchars($cat); ?>"
-                class="cat-tab cat-tab-item flex-shrink-0"
+                class="cat-tab cat-tab-item flex-shrink-0 transition-all duration-300 ease-in-out"
                 style="--cat-from:<?php echo $catCfg['from']; ?>;--cat-to:<?php echo $catCfg['to']; ?>">
             <i class="fas <?php echo $catCfg['icon']; ?> text-sm" style="color:<?php echo $catCfg['from']; ?>"></i>
             <span><?php echo htmlspecialchars($cat); ?></span>
