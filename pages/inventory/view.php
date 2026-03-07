@@ -232,16 +232,8 @@ ob_start();
                 <button onclick="openCheckoutModal()" class="inline-flex items-center px-8 py-4 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl hover:from-green-700 hover:to-green-800 transition-all transform hover:scale-105 font-bold shadow-lg text-lg" aria-haspopup="dialog">
                     <i class="fas fa-hand-holding-box mr-3" aria-hidden="true"></i>Entnehmen / Ausleihen
                 </button>
-                <button type="button" onclick="window.location.reload()" class="inline-flex items-center px-4 py-4 bg-blue-500 hover:bg-blue-600 text-white rounded-xl transition-all transform hover:scale-105 shadow-lg font-semibold" title="Ansicht aktualisieren" aria-label="Aktualisieren">
-                    <i class="fas fa-rotate-right" aria-hidden="true"></i>
-                </button>
             </div>
             <?php else: ?>
-            <div class="mb-8">
-                <button type="button" onclick="window.location.reload()" class="inline-flex items-center px-4 py-4 bg-blue-500 hover:bg-blue-600 text-white rounded-xl transition-all transform hover:scale-105 shadow-lg font-semibold" title="Ansicht aktualisieren" aria-label="Aktualisieren">
-                    <i class="fas fa-rotate-right" aria-hidden="true"></i>
-                </button>
-            </div>
             <?php endif; ?>
 
             <!-- Image -->

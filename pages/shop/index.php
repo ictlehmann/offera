@@ -982,10 +982,6 @@ ob_start();
                     <i class="fas fa-arrow-left mr-2"></i>Weiter einkaufen
                 </a>
                 <div class="flex gap-3">
-                    <button type="submit" form="cart-form"
-                            class="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-all duration-300 font-medium active:scale-95">
-                        <i class="fas fa-sync mr-2"></i>Aktualisieren
-                    </button>
                     <a href="<?php echo asset('pages/shop/index.php?action=checkout'); ?>"
                        class="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-300 font-semibold shadow-lg hover:shadow-xl no-underline active:scale-95">
                         <i class="fas fa-credit-card mr-2"></i>Zur Kasse
