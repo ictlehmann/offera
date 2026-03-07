@@ -497,6 +497,14 @@ a:focus-visible {
                 Wir haben deine Anfrage erhalten und melden uns so bald wie möglich
                 an deine neue E-Mail-Adresse.
             </p>
+            <a
+                href="<?php echo htmlspecialchars(url('pages/auth/login.php'), ENT_QUOTES, 'UTF-8'); ?>"
+                class="alumni-submit-btn"
+                style="margin-top:1.25rem;text-decoration:none;"
+            >
+                <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                <span>Zur Anmeldung</span>
+            </a>
         </div>
 
         <!-- ── ERROR BOX ──────────────────────────────────────── -->

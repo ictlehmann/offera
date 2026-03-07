@@ -217,19 +217,24 @@ function verifyRecaptcha(string $token, string $secretKey, string $remoteIp): ?b
     return ($result['success'] === true);
 }
 
-$recaptchaToken        = trim($data['recaptcha_token'] ?? '');
-$recaptchaVerification = verifyRecaptcha($recaptchaToken, RECAPTCHA_SECRET_KEY, $clientIp);
+// Only run reCAPTCHA validation when the secret key is configured.
+// If RECAPTCHA_SECRET_KEY is empty the feature is intentionally disabled
+// (e.g. local/dev environment) and submissions are accepted without a token.
+if (!empty(RECAPTCHA_SECRET_KEY)) {
+    $recaptchaToken        = trim($data['recaptcha_token'] ?? '');
+    $recaptchaVerification = verifyRecaptcha($recaptchaToken, RECAPTCHA_SECRET_KEY, $clientIp);
 
-if ($recaptchaVerification === null) {
-    http_response_code(503);
-    echo json_encode(['success' => false, 'message' => 'Die Überprüfung konnte momentan nicht abgeschlossen werden. Bitte versuche es in wenigen Minuten erneut.']);
-    exit;
-}
+    if ($recaptchaVerification === null) {
+        http_response_code(503);
+        echo json_encode(['success' => false, 'message' => 'Die Überprüfung konnte momentan nicht abgeschlossen werden. Bitte versuche es in wenigen Minuten erneut.']);
+        exit;
+    }
 
-if (empty($recaptchaVerification) || $recaptchaVerification !== true) {
-    http_response_code(403);
-    echo json_encode(['success' => false, 'message' => 'reCAPTCHA ungültig. Bitte Haken erneut setzen.']);
-    exit;
+    if (empty($recaptchaVerification) || $recaptchaVerification !== true) {
+        http_response_code(403);
+        echo json_encode(['success' => false, 'message' => 'reCAPTCHA ungültig. Bitte Haken erneut setzen.']);
+        exit;
+    }
 }
 
 // ── Input sanitization & validation ──────────────────────────────────────────
