@@ -105,8 +105,10 @@ try {
         $user = Auth::user();
         $userId = $user['id'];
         $userRole = $user['role'] ?? '';
-        // Generate a cryptographically secure random filename to prevent collisions and filename guessing
-        $filename = bin2hex(random_bytes(16)) . '.' . $ext;
+        // Generate a filename with the custom_ prefix so the login script knows this is a
+        // manually uploaded photo and must never be overwritten by the Entra ID sync.
+        // Use cryptographically secure random bytes to keep filenames unguessable.
+        $filename = 'custom_' . bin2hex(random_bytes(16)) . '.' . $ext;
         $uploadPath = $uploadDir . $filename;
 
         if (!copy($tmpFile, $uploadPath)) {
@@ -135,6 +137,14 @@ try {
         }
         if (!$updateSuccess) {
             throw new RuntimeException('Datenbankfehler beim Aktualisieren des Profilbildes');
+        }
+
+        // Also update users.avatar_path so the Entra ID sync in the login callback
+        // recognises the custom_ prefix and never overwrites this manually uploaded photo.
+        $userDb = Database::getUserDB();
+        $avatarStmt = $userDb->prepare("UPDATE users SET avatar_path = ? WHERE id = ?");
+        if (!$avatarStmt->execute([$relativePath, $userId])) {
+            throw new RuntimeException('Datenbankfehler beim Aktualisieren des Avatar-Pfades');
         }
 
         echo json_encode(['success' => true, 'image_path' => $relativePath]);
