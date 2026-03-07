@@ -15,6 +15,7 @@ SET time_zone = "+00:00";
 -- NOTE: For existing databases, run:
 --   ALTER TABLE users ADD COLUMN has_seen_onboarding BOOLEAN NOT NULL DEFAULT 0 COMMENT 'Whether user has seen the onboarding modal';
 --   ALTER TABLE users ADD COLUMN entra_photo_path VARCHAR(500) DEFAULT NULL COMMENT 'Cached profile photo path fetched from Microsoft Entra ID';
+--   ALTER TABLE users ADD COLUMN avatar_path VARCHAR(500) DEFAULT NULL COMMENT 'Active profile photo path; NULL = default avatar, custom_* = manually uploaded, uploads/profile_photos/entra_* = synced from Entra ID';
 --   ALTER TABLE users ADD COLUMN is_onboarded BOOLEAN NOT NULL DEFAULT 0 COMMENT 'Whether user has completed the mandatory first-login onboarding workflow';
 --   ALTER TABLE users ADD COLUMN session_token VARCHAR(255) DEFAULT NULL COMMENT 'Random token for single-session enforcement; regenerated on every login';
 --   ALTER TABLE users ADD COLUMN last_profile_update DATETIME DEFAULT NULL COMMENT 'Timestamp when the user last saved their profile; used to trigger yearly reminder emails';
@@ -44,6 +45,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `company` VARCHAR(255) DEFAULT NULL COMMENT 'Company name from Microsoft Entra ID',
   `entra_roles` TEXT DEFAULT NULL COMMENT 'JSON array of Microsoft Entra role names for display',
   `entra_photo_path` VARCHAR(500) DEFAULT NULL COMMENT 'Cached profile photo path fetched from Microsoft Entra ID',
+  `avatar_path` VARCHAR(500) DEFAULT NULL COMMENT 'Active profile photo path; NULL = default avatar, custom_* = manually uploaded, uploads/profile_photos/entra_* = synced from Entra ID',
   `profile_complete` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'Flag to track if user has completed initial profile setup',
   `has_seen_onboarding` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'Whether user has seen the onboarding welcome modal',
   `is_onboarded` BOOLEAN NOT NULL DEFAULT 0 COMMENT 'Whether user has completed the mandatory first-login onboarding workflow',
