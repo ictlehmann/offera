@@ -417,13 +417,17 @@ try {
 
         /* MEGA COOL LOGO ANIMATION */
         .logo-container {
-            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             margin-bottom: 50px;
             position: relative;
         }
 
         .logo-wrapper {
-            display: inline-block;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             position: relative;
             -webkit-animation: logoFloat 6s ease-in-out infinite;
             animation: logoFloat 6s ease-in-out infinite;
