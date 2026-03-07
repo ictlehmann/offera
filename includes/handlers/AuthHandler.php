@@ -623,6 +623,11 @@ class AuthHandler {
             $lastName = formatEntraName($lastName);
         }
         
+        // Track whether the user was already known when this function was called.
+        // If $existingUser was null here, syncEntraData was NOT called by callback.php,
+        // so this function must handle the Entra photo sync itself.
+        $wasExistingOnEntry = ($existingUser !== null);
+
         // Look up user in database: if not already found by azure_oid, fall back to email
         $db = Database::getUserDB();
         if (!$existingUser) {
@@ -720,9 +725,15 @@ class AuthHandler {
                 // Store Entra roles in session for display
                 $_SESSION['entra_roles'] = $azureRoles;
 
-                // Sync profile photo for new users (existing users are handled in syncEntraData).
-                // Also re-sync for existing users when no manual upload is present.
-                if (!$existingUser) {
+                // Sync profile photo for users that were not already known to callback.php.
+                // - Truly new users: $wasExistingOnEntry is false and $existingUser is still null
+                // - Users found via email fallback inside this function: $wasExistingOnEntry is false
+                //   but $existingUser is now set. syncEntraData was NOT called for these users in
+                //   callback.php (it only runs when $existingUser was truthy there), so we must
+                //   perform the photo sync here.
+                // - Users already found by azure_oid or email in callback.php: $wasExistingOnEntry is
+                //   true, so syncEntraData already handled their photo sync – skip here.
+                if (!$wasExistingOnEntry) {
                     try {
                         require_once __DIR__ . '/../models/User.php';
                         $contentDb   = Database::getContentDB();
@@ -738,7 +749,7 @@ class AuthHandler {
                             }
                         }
                     } catch (Exception $e) {
-                        error_log('[completeMicrosoftLogin] Photo sync for new user failed: ' . $e->getMessage());
+                        error_log('[completeMicrosoftLogin] Photo sync failed: ' . $e->getMessage());
                     }
                 }
             }

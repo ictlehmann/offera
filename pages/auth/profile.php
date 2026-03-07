@@ -497,7 +497,18 @@ $isProfileComplete = $completionPercent === 100;
 // --- End profile completion ---
 
 $title = 'Profil - IBC Intranet';
-$profile_image = asset(User::getProfilePictureUrl($user['id']));
+// Pass $user as $userData to avoid a redundant DB query – Auth::user() already fetched
+// entra_photo_path and azure_oid via SELECT *.
+$profile_image = asset(User::getProfilePictureUrl($user['id'], $user));
+
+// Determine the current photo source so the UI can inform the user and offer the
+// appropriate action buttons.
+// $profile['image_path'] = manually uploaded photo from alumni_profiles table
+// $user['entra_photo_path'] = Microsoft/Entra ID cached photo from users table
+// Both are checked using resolveImagePath() to ensure the file actually exists on disk.
+$hasManualUpload = !empty($profile['image_path']) && resolveImagePath($profile['image_path']) !== null;
+$hasEntraPhoto   = !empty($user['entra_photo_path']) && resolveImagePath($user['entra_photo_path']) !== null;
+$photoSource = $hasManualUpload ? 'manual' : ($hasEntraPhoto ? 'entra' : 'default');
 ob_start();
 ?>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" rel="stylesheet">
@@ -832,7 +843,29 @@ ob_start();
                                     <i class="fas fa-camera text-white text-xl"></i>
                                 </div>
                             </label>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 text-center">Klicke auf das Bild zum Ändern<br>JPG, PNG, GIF oder WEBP (Max. 5MB)</p>
+                            <?php if ($photoSource === 'manual'): ?>
+                                <?php $_removeAvatarBtnClass = 'text-xs text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 underline min-h-[44px] px-2'; ?>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 text-center">
+                                    <i class="fas fa-upload text-gray-400 mr-1"></i>Eigenes Foto hochgeladen<br>
+                                    <span class="text-gray-400">Klicke auf das Bild zum Ändern</span>
+                                </p>
+                                <?php if (!empty($user['azure_oid'])): ?>
+                                    <button type="button" id="removeAvatarBtn" class="<?= $_removeAvatarBtnClass ?>">
+                                        <i class="fas fa-trash-alt mr-1"></i>Foto entfernen und Microsoft-Foto verwenden
+                                    </button>
+                                <?php else: ?>
+                                    <button type="button" id="removeAvatarBtn" class="<?= $_removeAvatarBtnClass ?>">
+                                        <i class="fas fa-trash-alt mr-1"></i>Foto entfernen
+                                    </button>
+                                <?php endif; ?>
+                            <?php elseif ($photoSource === 'entra'): ?>
+                                <p class="text-xs text-blue-600 dark:text-blue-400 text-center">
+                                    <i class="fab fa-microsoft mr-1"></i>Microsoft-Foto wird verwendet
+                                </p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 text-center">Klicke auf das Bild zum Ändern<br>JPG, PNG, GIF oder WEBP (Max. 5MB)</p>
+                            <?php else: ?>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 text-center">Klicke auf das Bild zum Ändern<br>JPG, PNG, GIF oder WEBP (Max. 5MB)</p>
+                            <?php endif; ?>
                         </div>
                         <input type="file" id="avatarInput" accept="image/*" class="hidden">
                         <!-- Hidden field that carries the cropped base64 image to the server -->
@@ -1458,6 +1491,33 @@ document.addEventListener('DOMContentLoaded', function() {
             closeModal();
         }
     });
+
+    // "Foto entfernen" – clears the manually uploaded photo and reverts to Entra/default
+    const removeAvatarBtn = document.getElementById('removeAvatarBtn');
+    if (removeAvatarBtn) {
+        removeAvatarBtn.addEventListener('click', function () {
+            if (!confirm('Eigenes Profilbild wirklich entfernen?')) return;
+            removeAvatarBtn.disabled = true;
+            fetch('<?php echo asset('api/delete_avatar.php'); ?>', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ csrf_token: <?php echo json_encode(CSRFHandler::getToken()); ?> }),
+            })
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+                if (data.success) {
+                    window.location.reload();
+                } else {
+                    alert('Fehler: ' + (data.message || 'Unbekannter Fehler'));
+                    removeAvatarBtn.disabled = false;
+                }
+            })
+            .catch(function () {
+                alert('Netzwerkfehler. Bitte versuche es erneut.');
+                removeAvatarBtn.disabled = false;
+            });
+        });
+    }
 }());
 </script>
 
