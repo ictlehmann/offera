@@ -992,25 +992,36 @@ ob_start();
                     ><?php echo htmlspecialchars($profile['about_me'] ?? ''); ?></textarea>
                 </div>
                 
-                <!-- Skills - Full Width (Tag Input) -->
+                <!-- Skills - Full Width -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        <i class="fas fa-tags text-teal-600 mr-1"></i>
                         Fähigkeiten / Skills
                     </label>
-                    <!-- Tag display area -->
-                    <div id="skills-tag-container" class="flex flex-wrap gap-2 p-2 min-h-[44px] bg-white border border-gray-300 dark:bg-gray-800 dark:border-gray-600 rounded-lg cursor-text" onclick="document.getElementById('skills-input').focus()">
-                        <!-- Tags are inserted here by JS -->
-                        <input
-                            type="text"
-                            id="skills-input"
-                            class="flex-1 min-w-[120px] outline-none bg-transparent text-gray-900 dark:text-white text-sm py-0.5"
-                            placeholder="Fähigkeit eingeben und Enter drücken..."
-                            autocomplete="off"
-                        >
+                    <?php
+                    $skillsPreview = !empty($profile['skills']) ? array_values(array_filter(array_map('trim', explode(',', $profile['skills'])))) : [];
+                    if (!empty($skillsPreview)):
+                    ?>
+                    <div class="flex flex-wrap gap-2 mb-3">
+                        <?php foreach ($skillsPreview as $skill): ?>
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-teal-100 text-teal-800 dark:bg-teal-900/40 dark:text-teal-300 border border-teal-200 dark:border-teal-700">
+                            <?php echo htmlspecialchars($skill, ENT_QUOTES, 'UTF-8'); ?>
+                        </span>
+                        <?php endforeach; ?>
                     </div>
-                    <!-- Hidden field for form submission -->
-                    <input type="hidden" name="skills" id="skills-hidden" value="<?php echo htmlspecialchars($profile['skills'] ?? ''); ?>" maxlength="500">
-                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Drücke <kbd class="px-1 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-xs">Enter</kbd> oder <kbd class="px-1 py-0.5 bg-gray-100 dark:bg-gray-700 rounded text-xs">,</kbd> um eine Fähigkeit hinzuzufügen. Klicke auf <i class="fas fa-times text-xs"></i> zum Entfernen. Fähigkeiten sind in der Mitgliedersuche auffindbar.</p>
+                    <?php endif; ?>
+                    <input
+                        type="text"
+                        name="skills"
+                        id="skills"
+                        value="<?php echo htmlspecialchars($profile['skills'] ?? ''); ?>"
+                        maxlength="500"
+                        placeholder="z.B. PHP, JavaScript, Design"
+                        class="w-full px-4 py-2 bg-white border border-gray-300 text-gray-900 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-800 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500 rounded-lg"
+                    >
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        <i class="fas fa-info-circle mr-1"></i>Trenne deine Fähigkeiten mit einem Komma. Fähigkeiten sind in der Mitgliedersuche auffindbar.
+                    </p>
                 </div>
                 
                 <!-- CV Upload - Full Width -->
@@ -1348,91 +1359,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
-</script>
-
-<script>
-// Skills tag input UI
-(function() {
-    const container = document.getElementById('skills-tag-container');
-    const input = document.getElementById('skills-input');
-    const hidden = document.getElementById('skills-hidden');
-    if (!container || !input || !hidden) return;
-
-    let tags = hidden.value
-        ? hidden.value.split(',').map(s => s.trim()).filter(Boolean)
-        : [];
-
-    function renderTags() {
-        // Remove all existing tag elements (keep the input)
-        Array.from(container.querySelectorAll('.skills-tag')).forEach(el => el.remove());
-        // Insert tags before the input
-        tags.forEach(function(tag) {
-            const span = document.createElement('span');
-            span.className = 'skills-tag inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-teal-100 text-teal-800 dark:bg-teal-900/40 dark:text-teal-300 border border-teal-200 dark:border-teal-700';
-            span.textContent = tag;
-            const btn = document.createElement('button');
-            btn.type = 'button';
-            btn.className = 'ml-1 text-teal-600 dark:text-teal-400 hover:text-red-500 focus:outline-none';
-            btn.innerHTML = '<i class="fas fa-times text-xs"></i>';
-            btn.setAttribute('aria-label', 'Entfernen');
-            btn.addEventListener('click', function() {
-                const pos = tags.indexOf(tag);
-                if (pos !== -1) { tags.splice(pos, 1); }
-                renderTags();
-                syncHidden();
-            });
-            span.appendChild(btn);
-            container.insertBefore(span, input);
-        });
-        // Update placeholder visibility
-        input.placeholder = tags.length > 0 ? '' : 'Fähigkeit eingeben und Enter drücken...';
-    }
-
-    function syncHidden() {
-        hidden.value = tags.join(', ');
-    }
-
-    function addTag(value) {
-        const trimmed = value.trim().replace(/,/g, '');
-        if (!trimmed) return;
-        // Check length limit (combined)
-        const combined = [...tags, trimmed].join(', ');
-        if (combined.length > 500) return;
-        if (!tags.includes(trimmed)) {
-            tags.push(trimmed);
-            renderTags();
-            syncHidden();
-        }
-        input.value = '';
-    }
-
-    input.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter' || e.key === ',') {
-            e.preventDefault();
-            addTag(input.value);
-        } else if (e.key === 'Backspace' && input.value === '' && tags.length > 0) {
-            tags.pop();
-            renderTags();
-            syncHidden();
-        }
-    });
-
-    input.addEventListener('blur', function() {
-        if (input.value.trim()) {
-            addTag(input.value);
-        }
-    });
-
-    // Paste support: split by commas
-    input.addEventListener('paste', function(e) {
-        e.preventDefault();
-        const pasted = (e.clipboardData || window.clipboardData).getData('text');
-        pasted.split(',').forEach(function(s) { addTag(s); });
-    });
-
-    // Initialize with existing tags
-    renderTags();
-}());
 </script>
 
 <script>
